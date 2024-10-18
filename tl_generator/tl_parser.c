@@ -1,4 +1,5 @@
 #include "tl_parser.h"
+#include "strtok_foreach.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +7,8 @@
 struct arg_t {
 	char *name;
 	char *type;
-	int flag;
+	int flagn;
+	int flagb;
 };
 
 void print_method(const struct method_t *m)
@@ -21,7 +23,8 @@ void print_method(const struct method_t *m)
 		printf("\t\t{\n");	
 		printf("\t\t\tname: %s\n", m->args[i].name);	
 		printf("\t\t\ttype: %s\n", m->args[i].type);	
-		printf("\t\t\tflag: %d\n", m->args[i].flag);	
+		printf("\t\t\tflagn: %d\n", m->args[i].flagn);	
+		printf("\t\t\tflagb: %d\n", m->args[i].flagb);	
 		printf("\t\t}\n");	
 	}
 	printf("\t]\n");
@@ -29,10 +32,11 @@ void print_method(const struct method_t *m)
 }
 
 static int parse_method_args(
+		struct method_t *m,
 		struct arg_t *t,
 		char *buf)
 {
-	t->flag = -1;
+	t->flagn = 0;
 	if (strcmp(buf, "{X:Type}") == 0){
 		t->type = strtok(buf, "{:");
 		t->name = strtok(NULL, ":}");
@@ -40,13 +44,19 @@ static int parse_method_args(
 	}
 
 	t->name = strtok(buf, ":");
+	if (strstr(t->name, "flags") && 
+			strlen(t->name) < 7)
+		m->nflags++;
+
 	char *ftype = strtok(NULL, ":"); 
 	
 	char *flag = strtok(ftype, "?");
 	char *type = strtok(NULL, "?");
 	if (type){
-		// get flag number
-		sscanf(flag, "flags.%d", &t->flag);
+		// get flags
+		t->flagn = 1;
+		if (sscanf(flag, "flags.%d", &t->flagb) < 1)
+			sscanf(flag, "flags%d.%d", &t->flagn, &t->flagb);
 	} else
 		type = ftype;
 
@@ -56,52 +66,49 @@ static int parse_method_args(
 
 static int parse_method_id_and_args(
 		struct method_t *m,
-		char *buf, int hasFlags)
+		char *buf, int idx)
 {
-	int i;
-	char *arg = NULL;
-	for (arg = strtok(buf, " "), i=0;
-			 arg;
-			 arg = strtok(NULL, " "), i++) 
+	strtok_foreach(buf, " ", arg)
 	{
-		if (i==0 && !hasFlags)
+		if (idx == 1){
 			sscanf(arg, "%x", &m->id);
-		else
-			parse_method_args(
-					(struct arg_t *)(&m->args[m->argc++]), 
-					arg);
+			idx++;
+			continue;
+		}
+
+		parse_method_args(
+				m,
+				(struct arg_t *)(&m->args[m->argc++]), 
+				strdup(arg));
 	}
 	return 0;
 }
 
 static int parse_method(struct method_t *m, char *buf)
 {
-	// get method name
-	char *methodName = strtok(buf, "#");
-	if (!methodName)
-		return 0;
-	m->name = methodName;
-
 	// get method id and flargs
-	char *idAndFlags = strtok(NULL, "#");
-	if (!idAndFlags)
-		return 0;
+	int idx = 0;
+	strtok_foreach(buf, "#", str)
+	{
+		// check method name
+		if (idx == 0){
+			m->name = strdup(str);
+			idx++;
+			continue;
+		}
 
-	// check vector declaration
-	if (strstr(idAndFlags, "{t:Type}")){
-		char *arg = strtok(idAndFlags, " ");
-		sscanf(arg, "%x", &m->id);
-		m->ret = strtok(NULL, "{t:}");
-		return 0;
+		// check vector declaration
+		if (strstr(str, "{t:Type}")){
+			char *arg = strtok(str, " ");
+			sscanf(arg, "%x", &m->id);
+			m->ret = strtok(NULL, "{t:}");
+			return 0;
+		}
+		
+		// get args
+		parse_method_id_and_args(m, str, idx);
+		idx++;
 	}
-	
-	// get args
-	char *args = strtok(NULL, "#");
-	if (args){
-		parse_method_id_and_args(m, idAndFlags, 0);
-		parse_method_id_and_args(m, args, 1);
-	} else
-		parse_method_id_and_args(m, idAndFlags, 0);
 
 	return 0;
 }
@@ -124,10 +131,10 @@ static int parse_schema(
 			const char *error))
 {
 	int i;
-	char buf[BUFSIZ], *a;
-	for(a = fgets(buf, BUFSIZ, fp), i=1;
+	char buf[BUFSIZ*2], *a;
+	for(a = fgets(buf, BUFSIZ*2, fp), i=1;
 			a;
-			a = fgets(buf, BUFSIZ, fp), i++)
+			a = fgets(buf, BUFSIZ*2, fp), i++)
 	{
 		// skip empty lines
 		if (!*buf || *buf == ' ' || *buf == '\n')
@@ -153,7 +160,7 @@ static int parse_schema(
 		err = parse_method_return(&m, ret);
 		err = parse_method(&m, method);
 		
-		// drop simple types
+		//	drop simple types
 		if (strrchr(m.name, '?'))
 			continue;
 		if (m.id == 0)

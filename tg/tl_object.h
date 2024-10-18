@@ -4,12 +4,17 @@
 #include "../mtx/include/buf.h"
 
 typedef struct tl_object_ {
-	buf_t  __value;
-	ui32_t __id;
-	tl_type_t __type;
+	ui32_t id;
+	buf_t  value;
+	tl_type_t type;
 	char name[64];
-	param_t params[32];
-	int nparams;
+	struct tl_object_ **objs;
+	int nobjs;
+	int nflags;
+	int flag_num;
+	int flag_bit;
 } tlo_t;
+
+void tl_object_free(tlo_t *obj);
 
 #endif /* ifndef TL_OBJECT_H_ */

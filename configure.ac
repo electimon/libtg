@@ -1,6 +1,8 @@
 AC_INIT(libtg, 1.0, [https://github.com/igkuzm/libtg])
 AM_INIT_AUTOMAKE
 
+AM_CONFIG_HEADER(config.h)
+
 AC_PROG_CC
 AC_PROG_CXX
 

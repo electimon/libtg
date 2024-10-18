@@ -4,8 +4,9 @@ struct method_t {
 	char *name;
 	int  id;
 	char *ret;
-	struct {char *name; char *type; int flag;} args[32];
+	struct {char *name; char *type; int flagn; int flagb;} args[64];
 	int argc;
+	int nflags;
 };
 
 int tl_parse(
