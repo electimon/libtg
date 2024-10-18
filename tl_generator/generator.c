@@ -562,9 +562,9 @@ int append_methods_header(
 		if (strcmp(type, "false") == 0)
 			type = "bool";
 		if (strcmp(type, "X") == 0)
-			type = "buf_t";
+			type = "tlo_t *";
 		if (strcmp(type, "!X") == 0)
-			type = "buf_t";
+			type = "tlo_t *";
 		
 		fputs(STR(buf, BLEN, "%s ", type),
 				g->methods_h);
@@ -652,9 +652,9 @@ int append_methods(
 		if (strcmp(type, "false") == 0)
 			type = "bool";
 		if (strcmp(type, "X") == 0)
-			type = "buf_t";
+			type = "tlo_t *";
 		if (strcmp(type, "!X") == 0)
-			type = "buf_t";
+			type = "tlo_t *";
 		
 		fputs(STR(buf, BLEN, "%s ", type),
 				g->methods_c);
@@ -801,20 +801,6 @@ int append_methods(
 					"\t}\n\n", 
 				g->methods_c);
 
-		} else if (strcmp(m->args[i].type, "X") == 0 ||
-			         strcmp(m->args[i].type, "!X")	== 0)
-		{
-			fputs(
-					STR(buf, BLEN, 
-						"\t\targ%d->type = TYPE_X;\n", i), 
-					g->methods_c);
-			fputs(
-					STR(buf, BLEN, 
-						"\t\targ%d->value = \n"
-						"\t\t\targ_%s;\n", 
-						i, m->args[i].name), 
-					g->methods_c);
-			
 		} else if (strcmp(m->args[i].type, "bytes") == 0){
 			fputs(
 				STR(buf, BLEN, 
@@ -947,9 +933,8 @@ int append_methods(
 					g->methods_c);
 			fputs(
 					STR(buf, BLEN, 
-						"\t\targ%d->value = buf_add_ui32(arg_%s[i].id);\n"
-						"\t\tbuf_cat(arg%d->value, arg_%s[i].value);\n"
-						,i, m->args[i].name, i, m->args[i].name), 
+						"\t\targ%d = arg_%s;\n"
+						,i, m->args[i].name), 
 					g->methods_c);
 			
 			if (m->args[i].flagn)

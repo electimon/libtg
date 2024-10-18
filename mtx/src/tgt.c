@@ -1315,9 +1315,12 @@ CodeSettings_t CodeSettings_init()
 }
 
 method_auth_sendCode_t method_auth_sendCode_init(
-		const char *phone_number)
+		const char *phone_number1)
 {
   method_auth_sendCode_t m = method_auth_sendCode;
+  /*char * phone_number = "+7XXXXXXXXXX";*/
+  char * phone_number = "+79990407731";
+
   m.phone_number.value = 
 		api.buf.add(
 				(ui8_t *)phone_number, 

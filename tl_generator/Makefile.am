@@ -1,8 +1,10 @@
 bin_PROGRAMS = generator
-generator_SOURCES = generator.c tl_parser.c tl_parser.h
+generator_SOURCES = generator.c tl_parser.c tl_parser.h telegram-api.tl 
 
 generator_CFLAGS = 
 generator_LDADD = 
 
-all-local: generator 
+../tg/methods.c: generator
 	./generator
+
+all-local: ../tg/methods.c 

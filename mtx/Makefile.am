@@ -60,6 +60,7 @@ libmtx_la_SOURCES = \
 	src/types.c \
 	src/fact.cpp
 
+libmtx_la_CPPFLAGS = -fPIC
 libmtx_la_LIBADD = -lcrypto
 
 bin_PROGRAMS = mtx

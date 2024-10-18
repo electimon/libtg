@@ -21,8 +21,10 @@ tlo_t * tg_deserialize(buf_t *buf)
 
 	// find id in deserialize table
 	tl_deserialize_function *fun = get_fun(*id);
-	if (!fun)
+	if (!fun){
+		printf("can't fine deserialization function fot id: %.8x\n", *id);
 		return NULL;
+	}
 
 	// run deserialization function
 	return fun(buf);

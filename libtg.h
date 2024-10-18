@@ -1,6 +1,8 @@
 #ifndef SYMBOL
 #define SYMBOL
 
+#include  "tg/methods.h"
+
 // TL object
 typedef struct tl_object_ tlo_t;
 
@@ -8,13 +10,12 @@ typedef struct tl_object_ tlo_t;
 typedef struct tg_ tg_t;
 
 /* create new libtg structure */
-tg_t * tg_new(const char *apiId, const char apiHash);
+tg_t * tg_new();
 
 /* free libtg structure and free memory */
 void tg_free(tg_t *tg);
 
 /* send TL object to server and callback answer */
-int tg_send(tg_t *tg, tlo_t *object, void *userdata,
-		int (*callback)(void *userdata, tlo_t *answer, const char *error));
+tlo_t * tg_send(tg_t *tg, tlo_t *object);
 
 #endif /* ifndef SYMBOL */

@@ -8,7 +8,7 @@ buf_t tg_serialize(tlo_t *obj)
 	memset(&buf, 0, sizeof(buf_t));
 	
 	// set id
-	buf_add_ui32(obj->id);
+	buf = buf_add_ui32(obj->id);
 
 	int i;
 	// collect flags
@@ -28,29 +28,35 @@ buf_t tg_serialize(tlo_t *obj)
 			if ((flags[flagn] & flagb) != flagb)
 				continue;
 		}
-		
+	
 		switch (obj->objs[i]->type) {
-			case TYPE_INT: case TYPE_LONG: case TYPE_X:
+			case TYPE_X:
 				{
-					buf_cat(buf, obj->objs[i]->value);
+					buf = buf_cat(buf, tg_serialize(obj->objs[i]));
+					break;	
+				}
+			case TYPE_INT: case TYPE_LONG:
+				{
+					buf = buf_cat(buf, obj->objs[i]->value);
 					break;	
 				}
 			case TYPE_BYTES:
 				{
-					buf_cat(buf, obj->objs[i]->value);
+					/*buf = buf_cat(buf, obj->objs[i]->value);*/
+					break;
 				}
 			case TYPE_VECTOR:
 				{
-					buf_t b = buf_add_ui32(id_Vector);
-					buf_cat(buf, b);
-					buf_cat(buf, obj->objs[i]->value);
+					/*buf_t b = buf_add_ui32(id_Vector);*/
+					/*buf = buf_cat(buf, b);*/
+					/*buf = buf_cat(buf, tg_serialize(obj->objs[i]));*/
 					break;
 				}
 			case TYPE_STRING:
 				{
 					buf_t b = 
 						sel_serialize_string(obj->objs[i]->value);
-					buf_cat(buf, b);
+					buf = buf_cat(buf, b);
 
 					break;
 				}

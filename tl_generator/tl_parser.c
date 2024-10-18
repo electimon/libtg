@@ -37,11 +37,11 @@ static int parse_method_args(
 		char *buf)
 {
 	t->flagn = 0;
-	if (strcmp(buf, "{X:Type}") == 0){
-		t->type = strtok(buf, "{:");
-		t->name = strtok(NULL, ":}");
-		return 0;
-	}
+	/*if (strcmp(buf, "{X:Type}") == 0){*/
+		/*t->type = strtok(buf, "{:");*/
+		/*t->name = strtok(NULL, ":}");*/
+		/*return 0;*/
+	/*}*/
 
 	t->name = strtok(buf, ":");
 	if (strstr(t->name, "flags") && 
@@ -75,6 +75,9 @@ static int parse_method_id_and_args(
 			idx++;
 			continue;
 		}
+	
+		if (strcmp(arg, "{X:Type}") == 0)
+			continue;
 
 		parse_method_args(
 				m,
