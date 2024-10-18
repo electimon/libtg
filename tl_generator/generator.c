@@ -801,6 +801,20 @@ int append_methods(
 					"\t}\n\n", 
 				g->methods_c);
 
+		} else if (strcmp(m->args[i].type, "X") == 0 ||
+			         strcmp(m->args[i].type, "!X")	== 0)
+		{
+			fputs(
+					STR(buf, BLEN, 
+						"\t\targ%d->type = TYPE_X;\n", i), 
+					g->methods_c);
+			fputs(
+					STR(buf, BLEN, 
+						"\t\targ%d->value = \n"
+						"\t\t\targ_%s;\n", 
+						i, m->args[i].name), 
+					g->methods_c);
+			
 		} else if (strcmp(m->args[i].type, "bytes") == 0){
 			fputs(
 				STR(buf, BLEN, 
