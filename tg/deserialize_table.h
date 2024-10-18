@@ -2039,7 +2039,7 @@
 	TL_DESERIALIZE(0xbe1e85ba, tl_deserialize_fragment_getCollectibleInfo) \
 
 
-typedef void tl_deserialize_function(buf_t*,void*,void(*cb)(void*,param_t*,const char*));
+typedef tlo_t * tl_deserialize_function(buf_t*);
 
 
 #define TL_DESERIALIZE(id, name) \
@@ -2048,8 +2048,8 @@ TL_DESERIALIZES
 #undef TL_DESERIALIZE
 
 
-struct tl_deserialize {int id; tl_deserialize_function *fun;};
-struct tl_deserialize tl_deserialize_table[] = 
+struct tl_deserialize {unsigned int id; tl_deserialize_function *fun;};
+static struct tl_deserialize tl_deserialize_table[] = 
 {
 #define TL_DESERIALIZE(id, name) \
 {id, name},

@@ -1,0 +1,132 @@
+[
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/aes.c -o build/aes.o",
+    "file": "build/aes.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/app.c -o build/app.o",
+    "file": "build/app.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/buf.c -o build/buf.o",
+    "file": "build/buf.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/cmn.c -o build/cmn.o",
+    "file": "build/cmn.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/crc.c -o build/crc.o",
+    "file": "build/crc.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/cry.c -o build/cry.o",
+    "file": "build/cry.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/enl.c -o build/enl.o",
+    "file": "build/enl.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/hsh.c -o build/hsh.o",
+    "file": "build/hsh.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/log.c -o build/log.o",
+    "file": "build/log.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/main.c -o build/main.o",
+    "file": "build/main.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/rfc.c -o build/rfc.o",
+    "file": "build/rfc.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/scl.c -o build/scl.o",
+    "file": "build/scl.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/sel.c -o build/sel.o",
+    "file": "build/sel.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/sha1.c -o build/sha1.o",
+    "file": "build/sha1.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/sil.c -o build/sil.o",
+    "file": "build/sil.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/std.c -o build/std.o",
+    "file": "build/std.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/stk.c -o build/stk.o",
+    "file": "build/stk.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/tgt.c -o build/tgt.o",
+    "file": "build/tgt.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/tml.c -o build/tml.o",
+    "file": "build/tml.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/trl.c -o build/trl.o",
+    "file": "build/trl.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/types.c -o build/types.o",
+    "file": "build/types.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/api.c -o build/api.o",
+    "file": "build/api.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/hdl.c -o build/hdl.o",
+    "file": "build/hdl.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/net.c -o build/net.o",
+    "file": "build/net.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/rsa.c -o build/rsa.o",
+    "file": "build/rsa.o"
+  },
+  {
+    "directory": ".",
+    "command": "clang -c -Wall -O3 -std=c99 -I/home/kuzmich/include -I/home/kuzmich/src/mtx/include  -c src/srl.c -o build/srl.o",
+    "file": "build/srl.o"
+  }
+]

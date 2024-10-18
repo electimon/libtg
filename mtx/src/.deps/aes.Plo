@@ -1,0 +1,21 @@
+src/aes.lo: src/aes.c src/../include/aes.h /usr/include/openssl/aes.h \
+  /usr/include/openssl/macros.h /usr/include/openssl/opensslconf.h \
+  /usr/include/openssl/configuration.h /usr/include/openssl/opensslv.h \
+  /home/kuzmich/.local/share/vim-lsp-settings/servers/clangd/lib/clang/15.0.0/include/stddef.h \
+  /home/kuzmich/.local/share/vim-lsp-settings/servers/clangd/lib/clang/15.0.0/include/__stddef_max_align_t.h
+
+src/../include/aes.h:
+
+/usr/include/openssl/aes.h:
+
+/usr/include/openssl/macros.h:
+
+/usr/include/openssl/opensslconf.h:
+
+/usr/include/openssl/configuration.h:
+
+/usr/include/openssl/opensslv.h:
+
+/home/kuzmich/.local/share/vim-lsp-settings/servers/clangd/lib/clang/15.0.0/include/stddef.h:
+
+/home/kuzmich/.local/share/vim-lsp-settings/servers/clangd/lib/clang/15.0.0/include/__stddef_max_align_t.h:
