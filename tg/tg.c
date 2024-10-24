@@ -170,8 +170,5 @@ tlo_t * tg_send(tg_t *tg, tlo_t *object)
 	buf_t a = parse_answer(s1r);
 	printf("Answer:\n");
 	buf_dump(a);
-	//FILE *fp = fopen("/home/kuzmich/ttt", "w");
-	//fwrite(a.data, a.size, 1, fp);
-	//fclose(fp);
 	return tg_deserialize(&a);
 }

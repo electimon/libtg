@@ -44,6 +44,9 @@ int main(int argc, char *argv[])
 				185, initConnection);
 
 	tlo_t *sentCode = tg_send(tg, invokeWithLayer); 
+	printf("SENT CODE:\n");
+	printf("\ttype: %.8x (%s)\n", sentCode->objs[1]->id, sentCode->objs[1]->name);
+	printf("\tphone_code_hash: %s\n", sentCode->objs[2]->value.data);
 	
 	return 0;
 }
