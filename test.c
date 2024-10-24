@@ -29,17 +29,21 @@ int main(int argc, char *argv[])
 	tlo_t *initConnection = 
 		tl_initConnection(
 				24646404, 
-				"librg", 
+				"telegramtui", 
 				"185", 
 				"1.0", 
 				"ru", 
-				"ru", 
+				"telegramtui", 
 				"ru", 
 				NULL, 
 				NULL, 
 				sendCode);
 
-	tg_send(tg, initConnection); 
+	tlo_t *invokeWithLayer = 
+		tl_invokeWithLayer(
+				185, initConnection);
+
+	tlo_t *sentCode = tg_send(tg, invokeWithLayer); 
 	
 	return 0;
 }

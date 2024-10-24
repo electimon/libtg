@@ -151,6 +151,11 @@ int append_deserialize_table(
 		 	g->deserialize_table_c);
 
 	fputs(STR(buf, BLEN,
+				"printf(\"deserialize obj with id: %.8x\\n\");\n",
+				m->id),
+		 	g->deserialize_table_c);
+	
+	fputs(STR(buf, BLEN,
 				"\tint nobjs = %d;\n",
 				m->argc),
 		 	g->deserialize_table_c);
@@ -191,9 +196,16 @@ int append_deserialize_table(
 		if (m->args[i].type == NULL && 
 				strstr(m->args[i].name, "flags"))
 		{
-			fputs(
-		 "\tflag = *(ui32_t *)(buf->data);\n"
-				"\t*buf = buf_add(buf->data + 4, buf->size - 4);\n"
+			fputs(STR(buf, BLEN,
+				"\tflag = *(ui32_t *)(buf->data);\n"
+				"\t{\n"
+				"\t\ttlo_t *param = NEW(tlo_t, return NULL);\n"
+		    "\t\tobj->objs[%d] = param;\n"
+				"\t\tparam->value = buf_add(buf->data, 4);\n"
+				"\t\tparam->type = TYPE_FLAG;\n"
+				"\t\t*buf = buf_add(buf->data + 4, buf->size - 4);\n"
+				"\t}\n"
+				,i)
 				, g->deserialize_table_c);
 
 		} else if (m->args[i].type == NULL){
@@ -314,6 +326,8 @@ int append_deserialize_table(
 						"\t\tparam->value = sel_deserialize_string(*buf);\n"
 						"\t\tparam->type = TYPE_STRING;\n"
 						"\t\tint size = param->value.size + 4;\n"
+						"\t\tif (param->value.size <= 253)\n"
+						"\t\t\tsize = param->value.size + 2;\n"
 						"\t\t*buf = buf_add(buf->data + size, buf->size - size);\n"
 						, g->deserialize_table_c);
 
@@ -377,8 +391,6 @@ int append_deserialize_table(
 					"\t\tobj->objs[%d] = param;\n"
 					,i)
 					, g->deserialize_table_c);
-
-
 				}
 			}
 			
@@ -668,7 +680,8 @@ int append_methods(
 	fputs("{\n", g->methods_c);
 	
 	// handle method
-	fputs("\ttlo_t * obj = NEW(tlo_t, return NULL);\n",
+	fputs("\ttlo_t * obj = NEW(tlo_t, return NULL);\n"
+				   "\tobj->type = TYPE_X;\n",
 			g->methods_c);
 
 	// set id
@@ -698,20 +711,7 @@ int append_methods(
 		fputs(STR(buf, BLEN,
 					"\n\t//parse argument %s\n", m->args[i].type)
 				,g->methods_c);
-		fputs(STR(buf, BLEN,
-					"\ttlo_t *arg%d = NEW(tlo_t, return NULL);\n" 
-					"\tobj->objs[%d] = arg%d;\n" 
-					,i,i,i)
-				,g->methods_c);
-
-		if (m->args[i].flagn)
-			fputs(
-					STR(buf, BLEN, 
-						"\targ%d->flag_num = %d;\n" 
-						"\targ%d->flag_bit = %d;\n", 
-						i, m->args[i].flagn, i, m->args[i].flagb), 
-					g->methods_c);
-
+		
 		// flags
 		char *p;
 		if (m->args[i].type == NULL && 
@@ -719,27 +719,41 @@ int append_methods(
 		{
 			// handle flags
 			fputs(STR(buf, BLEN,
-					"\tflags[nflags++] = %d;\n", i)
+					"\tobj->objs[%d] = NEW(tlo_t, return NULL);\n" 
+					,i)
+				,g->methods_c);
+
+			fputs(STR(buf, BLEN,
+					"\tflags[nflags++] = %d;\n"
+					"\tobj->objs[%d]->type = TYPE_FLAG;\n"
+					, i, i)
 				,g->methods_c);
 
 		} else if (m->args[i].type == NULL){
-			fputs(
-					STR(buf, BLEN, 
-						"\targ%d->type = TYPE_INT;\n", i), 
-					g->methods_c);
+			/*fputs(*/
+					/*STR(buf, BLEN, */
+						/*"\tobj->objs[%d]->type = TYPE_INT;\n", i), */
+					/*g->methods_c);*/
 		} else if 
 			(strcmp(m->args[i].type, "int")  == 0 ||
 			 strcmp(m->args[i].type, "bool") == 0 ||
 			 strcmp(m->args[i].type, "true") == 0)
 		{
+
+			fputs(STR(buf, BLEN,
+					"\tobj->objs[%d] = NEW(tlo_t, return NULL);\n" 
+						"\tobj->objs[%d]->flag_num = %d;\n" 
+						"\tobj->objs[%d]->flag_bit = %d;\n" 
+					,i, i, m->args[i].flagn, i, m->args[i].flagb) 
+				,g->methods_c);
 			fputs(
 					STR(buf, BLEN, 
-						"\targ%d->type = TYPE_INT;\n", i), 
+						"\tobj->objs[%d]->type = TYPE_INT;\n", i), 
 					g->methods_c);
 			fputs(
 					STR(buf, BLEN, 
-						"\targ%d->value = \n"
-						"\t\tbuf_add_ui64(arg_%s);\n", 
+						"\tobj->objs[%d]->value = \n"
+						"\t\tbuf_add_ui32(arg_%s);\n", 
 						i, m->args[i].name), 
 					g->methods_c);
 	
@@ -753,15 +767,22 @@ int append_methods(
 		} else if 
 			(strcmp(m->args[i].type, "long")   == 0 ||
 			 strcmp(m->args[i].type, "double") == 0)
-			{
+		{
+
+			fputs(STR(buf, BLEN,
+					"\tobj->objs[%d] = NEW(tlo_t, return NULL);\n" 
+						"\tobj->objs[%d]->flag_num = %d;\n" 
+						"\tobj->objs[%d]->flag_bit = %d;\n" 
+					,i, i, m->args[i].flagn, i, m->args[i].flagb) 
+				,g->methods_c);
 			fputs(
 					STR(buf, BLEN, 
-						"\targ%d->type = TYPE_LONG;\n", i), 
+						"\tobj->objs[%d]->type = TYPE_LONG;\n", i), 
 					g->methods_c);
 			fputs(
 					STR(buf, BLEN, 
-						"\targ%d->value = \n"
-						"\t\tbuf_add_ui32(arg_%s);\n", 
+						"\tobj->objs[%d]->value = \n"
+						"\t\tbuf_add_ui64(arg_%s);\n", 
 						i, m->args[i].name), 
 					g->methods_c);
 			
@@ -779,13 +800,19 @@ int append_methods(
 					m->args[i].name), 
 				g->methods_c);
 
+			fputs(STR(buf, BLEN,
+					"\t\tobj->objs[%d] = NEW(tlo_t, return NULL);\n" 
+					"\t\tobj->objs[%d]->flag_num = %d;\n" 
+					"\t\tobj->objs[%d]->flag_bit = %d;\n" 
+					,i, i, m->args[i].flagn, i, m->args[i].flagb) 
+				,g->methods_c);
 			fputs(
 					STR(buf, BLEN, 
-						"\t\targ%d->type = TYPE_STRING;\n", i), 
+						"\t\tobj->objs[%d]->type = TYPE_STRING;\n", i), 
 					g->methods_c);
 			fputs(
 					STR(buf, BLEN, 
-						"\t\targ%d->value = \n"
+						"\t\tobj->objs[%d]->value = \n"
 						"\t\t\tbuf_add((ui8_t *)arg_%s, strlen(arg_%s));\n", 
 						i, m->args[i].name, m->args[i].name), 
 					g->methods_c);
@@ -808,13 +835,19 @@ int append_methods(
 					m->args[i].name), 
 				g->methods_c);
 
+			fputs(STR(buf, BLEN,
+					"\t\tobj->objs[%d] = NEW(tlo_t, return NULL);\n" 
+						"\t\tobj->objs[%d]->flag_num = %d;\n" 
+						"\t\tobj->objs[%d]->flag_bit = %d;\n" 
+					,i, i, m->args[i].flagn, i, m->args[i].flagb) 
+				,g->methods_c);
 			fputs(
 					STR(buf, BLEN, 
-						"\t\targ%d->type = TYPE_BYTES;\n", i), 
+						"\t\tobj->objs[%d]->type = TYPE_BYTES;\n", i), 
 					g->methods_c);
 			fputs(
 					STR(buf, BLEN, 
-						"\t\targ%d->value = \n"
+						"\t\tobj->objs[%d]->value = \n"
 						"\t\t\tbuf_add((ui8_t *)arg_%s, len_arg_%s);\n", 
 						i, m->args[i].name, m->args[i].name), 
 					g->methods_c);
@@ -837,9 +870,16 @@ int append_methods(
 			char * type = 
 				strndup(p, strstr(p, ">") - p);
 			
+			fputs(STR(buf, BLEN,
+					"\tobj->objs[%d] = NEW(tlo_t, return NULL);\n" 
+						"\tobj->objs[%d]->flag_num = %d;\n" 
+						"\tobj->objs[%d]->flag_bit = %d;\n" 
+					,i, i, m->args[i].flagn, i, m->args[i].flagb) 
+				,g->methods_c);
+
 			fputs(
 					STR(buf, BLEN, 
-						"\targ%d->type = TYPE_VECTOR;\n", i), 
+						"\tobj->objs[%d]->type = TYPE_VECTOR;\n", i), 
 					g->methods_c);
 			
 			fputs(
@@ -856,7 +896,7 @@ int append_methods(
 						"\t\t\tint len = *(int *)(arg_%s[i]);\n"
 						"\t\t\tui8_t *p = &(arg_%s[i][4]);\n"
 						"\t\t\tbuf_t b = buf_add(p, len);\n"
-						"\t\t\tbuf_cat(arg%d->value, b);\n"
+						"\t\t\tbuf_cat(obj->objs[%d]->value, b);\n"
 						"\t\t}\n",
 						m->args[i].name, m->args[i].name, m->args[i].name, i), 
 					g->methods_c);
@@ -868,7 +908,7 @@ int append_methods(
 						"\t\tfor(i=0; i<len_arg_%s; ++i){\n"
 						"\t\t\tint len = strlen(arg_%s[i]);\n"
 						"\t\t\tbuf_t b = buf_add((ui8_t *)arg_%s[i], len);\n"
-						"\t\t\tbuf_cat(arg%d->value, b);\n"
+						"\t\t\tbuf_cat(obj->objs[%d]->value, b);\n"
 						"\t\t}\n",
 						m->args[i].name, m->args[i].name, m->args[i].name, i), 
 					g->methods_c);
@@ -881,7 +921,7 @@ int append_methods(
 					STR(buf, BLEN, 
 						"\t\tfor(i=0; i<len_arg_%s; ++i){\n"
 						"\t\t\tbuf_t b = buf_add_ui32(arg_%s[i]);\n"
-						"\t\t\tbuf_cat(arg%d->value, b);\n"
+						"\t\t\tbuf_cat(obj->objs[%d]->value, b);\n"
 						"\t\t}\n",
 						m->args[i].name, m->args[i].name, i), 
 					g->methods_c);
@@ -893,7 +933,7 @@ int append_methods(
 					STR(buf, BLEN, 
 						"\t\tfor(i=0; i<len_arg_%s; ++i){\n"
 						"\t\t\tbuf_t b = buf_add_ui64(arg_%s[i]);\n"
-						"\t\t\tbuf_cat(arg%d->value, b);\n"
+						"\t\t\tbuf_cat(obj->objs[%d]->value, b);\n"
 						"\t\t}\n",
 						m->args[i].name, m->args[i].name, i), 
 					g->methods_c);
@@ -901,8 +941,8 @@ int append_methods(
 				fputs(
 					STR(buf, BLEN, 
 						"\t\tfor(i=0; i<len_arg_%s; ++i){\n"
-						"\t\t\targ%d->value = buf_add_ui32(arg_%s[i]->id);\n"
-						"\t\t\tbuf_cat(arg%d->value, arg_%s[i]->value);\n"
+						"\t\t\tobj->objs[%d]->value = buf_add_ui32(arg_%s[i]->id);\n"
+						"\t\t\tbuf_cat(obj->objs[%d]->value, arg_%s[i]->value);\n"
 						"\t\t}\n",
 						m->args[i].name, i,  m->args[i].name, i, m->args[i].name), 
 					g->methods_c);
@@ -926,17 +966,14 @@ int append_methods(
 					"\tif (arg_%s){\n", 
 					m->args[i].name), 
 				g->methods_c);
-
 			fputs(
 					STR(buf, BLEN, 
-						"\t\targ%d->type = TYPE_X;\n", i), 
+						"\t\tobj->objs[%d] = arg_%s;\n"
+						"\tobj->objs[%d]->flag_num = %d;\n" 
+						"\tobj->objs[%d]->flag_bit = %d;\n" 
+						,i, m->args[i].name, i, 
+						m->args[i].flagn, i, m->args[i].flagb), 
 					g->methods_c);
-			fputs(
-					STR(buf, BLEN, 
-						"\t\targ%d = arg_%s;\n"
-						,i, m->args[i].name), 
-					g->methods_c);
-			
 			if (m->args[i].flagn)
 				fputs(
 					STR(buf, BLEN, 
@@ -949,6 +986,7 @@ int append_methods(
 				g->methods_c);
 
 		}
+
 	}
 	// write flags
 	if (m->nflags)
@@ -957,8 +995,9 @@ int append_methods(
 		fputs(
 				STR(buf, BLEN, 
 					"\tint flag%d = flags[%d];\n" 
-					"\tobj->objs[flag%d]->value = buf_add_ui32(flagsv[%d]);\n", 
-					i, i, i, i), 
+					"\tobj->objs[flag%d]->value = buf_add_ui32(flagsv[%d]);\n" 
+					"\tobj->objs[flag%d]->type = TYPE_FLAG;\n", 
+					i, i, i, i, i), 
 				g->methods_c);
 	}
 

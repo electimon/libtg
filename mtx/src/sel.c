@@ -7,6 +7,7 @@
 //
 
 #include "../include/api.h"
+#include "../include/buf.h"
 
 sel_t sel_init(trl_t trl)
 {
@@ -162,11 +163,13 @@ param_t sel_deserialize_param(param_t p)
 
 buf_t sel_deserialize_string(buf_t b)
 {
+	buf_dump(b);
   buf_t s;
   buf_t byte = api.buf.add(b.data, 4);
   int offset = byte.data[0];
 
-  if (byte.data[0] <= 253 && !b.data[1 + offset] && !b.data[2 + offset] && !b.data[3 + offset]) {
+  /*if (byte.data[0] <= 253 && !b.data[1 + offset] && !b.data[2 + offset] && !b.data[3 + offset]) {*/
+  if (byte.data[0] <= 253) {
     ui32_t size = byte.data[0];
     s = api.buf.add(b.data + 1, size);
   } else if (byte.data[0] >= 254) {
