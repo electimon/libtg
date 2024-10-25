@@ -684,6 +684,11 @@ int append_methods(
 				   "\tobj->type = TYPE_X;\n",
 			g->methods_c);
 
+	fputs(STR(buf, BLEN,
+					"\tstrcpy(obj->name, \"%s\");\n" 
+					,m->name)
+				,g->methods_c);
+
 	// set id
 	fputs(STR(buf, BLEN, "\tint i;\n\tobj->id = 0x%.8x;\n", m->id),
 			g->methods_c);
@@ -731,6 +736,11 @@ int append_methods(
 					, i, i)
 				,g->methods_c);
 
+			fputs(STR(buf, BLEN,
+					"\tstrcpy(obj->objs[%d]->name, \"%s\");\n" 
+					,i, m->args[i].name)
+				,g->methods_c);
+
 		} else if (m->args[i].type == NULL){
 			/*fputs(*/
 					/*STR(buf, BLEN, */
@@ -758,7 +768,12 @@ int append_methods(
 						"\t\tbuf_add_ui32(arg_%s);\n", 
 						i, m->args[i].name), 
 					g->methods_c);
-	
+
+			fputs(STR(buf, BLEN,
+					"\tstrcpy(obj->objs[%d]->name, \"%s\");\n" 
+					,i, m->args[i].name)
+				,g->methods_c);
+
 			if (m->args[i].flagn)
 				fputs(
 					STR(buf, BLEN, 
@@ -788,6 +803,11 @@ int append_methods(
 						i, m->args[i].name), 
 					g->methods_c);
 			
+			fputs(STR(buf, BLEN,
+					"\tstrcpy(obj->objs[%d]->name, \"%s\");\n" 
+					,i, m->args[i].name)
+				,g->methods_c);
+
 			if (m->args[i].flagn)
 				fputs(
 					STR(buf, BLEN, 
@@ -819,6 +839,11 @@ int append_methods(
 						i, m->args[i].name, m->args[i].name), 
 					g->methods_c);
 			
+			fputs(STR(buf, BLEN,
+					"\t\tstrcpy(obj->objs[%d]->name, \"%s\");\n" 
+					,i, m->args[i].name)
+				,g->methods_c);
+
 			if (m->args[i].flagn)
 				fputs(
 					STR(buf, BLEN, 
@@ -854,6 +879,11 @@ int append_methods(
 						i, m->args[i].name, m->args[i].name), 
 					g->methods_c);
 			
+			fputs(STR(buf, BLEN,
+					"\t\tstrcpy(obj->objs[%d]->name, \"%s\");\n" 
+					,i, m->args[i].name)
+				,g->methods_c);
+
 			if (m->args[i].flagn)
 				fputs(
 					STR(buf, BLEN, 
@@ -884,6 +914,11 @@ int append_methods(
 						"\tobj->objs[%d]->type = TYPE_VECTOR;\n", i), 
 					g->methods_c);
 			
+			fputs(STR(buf, BLEN,
+					"\tstrcpy(obj->objs[%d]->name, \"%s\");\n" 
+					,i, m->args[i].name)
+				,g->methods_c);
+
 			fputs(
 				STR(buf, BLEN, 
 					"\tif (arg_%s){\n", 
@@ -971,11 +1006,17 @@ int append_methods(
 			fputs(
 					STR(buf, BLEN, 
 						"\t\tobj->objs[%d] = arg_%s;\n"
-						"\tobj->objs[%d]->flag_num = %d;\n" 
-						"\tobj->objs[%d]->flag_bit = %d;\n" 
+						"\t\tobj->objs[%d]->flag_num = %d;\n" 
+						"\t\tobj->objs[%d]->flag_bit = %d;\n" 
 						,i, m->args[i].name, i, 
 						m->args[i].flagn, i, m->args[i].flagb), 
 					g->methods_c);
+
+			fputs(STR(buf, BLEN,
+					"\tstrcpy(obj->objs[%d]->name, \"%s\");\n" 
+					,i, m->args[i].name)
+				,g->methods_c);
+
 			if (m->args[i].flagn)
 				fputs(
 					STR(buf, BLEN, 
