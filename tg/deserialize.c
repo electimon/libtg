@@ -18,6 +18,8 @@ static tl_deserialize_function *get_fun(unsigned int id){
 tlo_t * tg_deserialize(buf_t *buf)
 {
 	ui32_t *id = (ui32_t *)(buf->data);
+	if (!*id)
+		return NULL;
 
 	// find id in deserialize table
 	tl_deserialize_function *fun = get_fun(*id);

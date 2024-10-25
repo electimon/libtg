@@ -694,7 +694,9 @@ int append_methods(
 					"\tint flags[%d]; int nflags = 0; //flags position\n ", m->nflags),
 				g->methods_c);
 		fputs(STR(buf, BLEN, 
-					"\tint flagsv[%d]; //flags values\n ", m->nflags),
+					"\tint flagsv[%d]; //flags values\n"
+					"\tfor (i=0;i<%d;++i) flagsv[i]=0;\n "
+					, m->nflags, m->nflags),
 				g->methods_c);
 	}
 

@@ -7,6 +7,7 @@
 #include "deserialize.h"
 #include "../mtx/include/net.h"
 #include <stdio.h>
+#include <string.h>
 
 struct tg_ {
 	app_t app;
@@ -112,7 +113,9 @@ buf_t parse_answer(buf_t a)
 					printf("rpc_error_message: %s\n", 
 							c.error_message.value.data);
 					
-					break;
+					buf_t buf = {};
+					memset(&buf, 0, sizeof(buf));
+					return buf;
 				}
 				default: break;
 			}
@@ -150,8 +153,10 @@ tlo_t * tg_send(tg_t *tg, tlo_t *object)
 {
 	api.srl.ping();
 	buf_t s = tg_serialize(object);
-	/*api.buf.dump(s);*/
-  buf_t s1 = api.hdl.header(s, API);
+	printf("Serialized:\n");
+	api.buf.dump(s);
+
+	buf_t s1 = api.hdl.header(s, API);
   /*api.buf.dump(s1);*/
   buf_t e = api.enl.encrypt(s1, API);
   /*api.buf.dump(e);*/
@@ -170,5 +175,10 @@ tlo_t * tg_send(tg_t *tg, tlo_t *object)
 	buf_t a = parse_answer(s1r);
 	printf("Answer:\n");
 	buf_dump(a);
+	
+	// acknowledge message
+	//api.srl.msgsAck(*a.data);
+
+	// deserialize message
 	return tg_deserialize(&a);
 }

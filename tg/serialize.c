@@ -23,21 +23,24 @@ buf_t tg_serialize(tlo_t *obj)
 	int flags[32], nflags = 0;
 	for (i = 0; i < obj->nobjs; ++i) {
 		if (obj->objs[i] && obj->objs[i]->type == TYPE_FLAG)
-			flags[nflags++] = i;
+			flags[nflags++] = *(int*)((obj->objs[i]->value.data));
 	}
 	nflags = 0;
 
+	int flag = 0;
 	// append params
 	for (i = 0; i < obj->nobjs; ++i) {
+		
 		// skip NULL obj
 		if (obj->objs[i] == NULL)
 			continue;
+
 		// check if has flag
 		int flagn = obj->objs[i]->flag_num;
 		if (flagn){
 			// skip value if flag 0
 			if (flag_is_set(
-						flags[flagn],
+						flag,
 					 	obj->objs[i]->flag_bit)
 					)
 				continue;
@@ -48,7 +51,8 @@ buf_t tg_serialize(tlo_t *obj)
 			case TYPE_FLAG:
 				{
 					//printf("FLAG!!!\n");
-					buf_t b = buf_add_ui32(flags[nflags++]);
+					flag = *(int*)((obj->objs[i]->value.data));
+					buf_t b = buf_add_ui32(flag);
 					buf = buf_cat(buf, b);
 					break;
 				}
