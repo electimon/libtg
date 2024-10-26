@@ -60,6 +60,10 @@ libmtx_la_SOURCES = \
 	src/types.c \
 	src/fact.cpp
 
+if MACOS
+libmtx_la_SOURCES += darwin-posix-rt/clock_gettime.c
+endif
+
 libmtx_la_CPPFLAGS = -fPIC
 libmtx_la_LIBADD = -lcrypto
 

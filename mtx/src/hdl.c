@@ -11,6 +11,10 @@
 #include <assert.h>
 #include <time.h>
 
+#ifdef __APPLE__
+#include "darwin-posix-rt/darwin-posix-rt.h"
+#endif
+
 extern hdl_t hdl;
 
 buf_t hdl_header(buf_t b, msg_t t)
@@ -156,16 +160,19 @@ long long precise_time;
 long long precise_time_rdtsc;
 static __inline__ unsigned long long rdtsc(void)
 {
-#ifdef __ARM_ARCH_ISA_A64
-	uint64_t cntvct;
-  __asm__ __volatile__("mrs %0, cntvct_el0; " : "=r"(cntvct) :: "memory");
-  return cntvct;
-#else
-  unsigned hi, lo;
-  __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
+//#ifdef __ARM_ARCH_ISA_A64
+	//uint64_t cntvct;
+  //__asm__ __volatile__("mrs %0, cntvct_el0; " : "=r"(cntvct) :: "memory");
+  //return cntvct;
+//#else
+  //unsigned hi, lo;
+  //__asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
 
-  return ((unsigned long long)lo) | (((unsigned long long)hi) << 32);
-#endif
+  //return ((unsigned long long)lo) | (((unsigned long long)hi) << 32);
+//#endif
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return 1000000000ULL * ts.tv_sec * ts.tv_nsec;
 }
 
 double get_utime(int clock_id)

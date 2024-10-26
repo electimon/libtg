@@ -238,7 +238,8 @@ const std::vector<T> & get_primes(const T & b, T2 & pi)
     pi = T2(std::upper_bound(primes.begin(), primes.end(), b) - primes.begin());
   } else {
     if (counted_b == 0) {
-      primes.push_back(2);
+			primes.push_back(2);
+			//primes.insert(primes.end(), 2);
       counted_b = 2;
     }
 
@@ -261,7 +262,8 @@ const std::vector<T> & get_primes(const T & b, T2 & pi)
         }
       }
       if (cur_is_prime) {
-        primes.push_back(cur);
+				primes.push_back(cur);
+				//primes.insert(primes.end(), cur);
       }
     }
 
@@ -613,7 +615,8 @@ T pollard_monte_carlo(T n, unsigned m = 100)
   static T m_max;
 
   if (primes.empty()) {
-    primes.push_back(3);
+		primes.push_back(3);
+		//primes.insert(primes.end(), 3);
   }
 
   if (m_max < m) {
@@ -636,7 +639,8 @@ T pollard_monte_carlo(T n, unsigned m = 100)
       }
 
       if (is_prime) {
-        primes.push_back(prime);
+				primes.push_back(prime);
+				//primes.insert(primes.end(), prime);
       }
     }
   }

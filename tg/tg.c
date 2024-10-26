@@ -177,7 +177,7 @@ tlo_t * tg_send(tg_t *tg, tlo_t *object)
 	buf_dump(a);
 	
 	// acknowledge message
-	//api.srl.msgsAck(*a.data);
+	//api.srl.msgsAck(*a.data + 4);
 
 	// deserialize message
 	return tg_deserialize(&a);
