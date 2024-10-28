@@ -1,6 +1,3 @@
 lib_LTLIBRARIES = libtg.la
-
-libtg_la_SOURCES = serialize.c deserialize.c \
-									 deserialize_table.c methods.c tg.c 
-
-libtg_la_LIBADD = -lcrypto ../mtx/.libs/libmtx.a
+libtg_la_SOURCES = tg.c 
+libtg_la_LIBADD = -lcrypto ../tl/.libs/libtl.a ../mtx/.libs/libmtx.a -lsqlite3

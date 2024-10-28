@@ -1,22 +1,44 @@
 #include "../libtg.h"
-#include "types.h"
-#include "tl_object.h"
+#include "../tl/tl.h"
 #include "../mtx/include/api.h"
-#include "../tg/alloc.h"
-#include "serialize.h"
-#include "deserialize.h"
+#include "../tl/alloc.h"
 #include "../mtx/include/net.h"
 #include <stdio.h>
 #include <string.h>
+#include <sqlite3.h>
 
 struct tg_ {
 	app_t app;
+	int apiId;
+	char apiHash[32];
+	sqlite3 *db;
 };
 
-tg_t *tg_new(){
+tg_t *tg_new(const char *database_path,
+		int apiId, const char apiHash[32])
+{
+	if (!database_path)
+		return NULL;
+
+	// allocate struct
 	tg_t *tg = NEW(tg_t, return NULL);	
-	tg->app = api.app.open();
+	
+	// connect to SQL
+	int err = sqlite3_open_v2(
+			database_path, &tg->db, 
+			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 
+			NULL);
+	if (err){
+		api.log.error((char *)sqlite3_errmsg(tg->db));
+		return NULL;
+	}
+
+	// set apiId and apiHash
+	tg->apiId = apiId;
+	memcpy(tg->apiHash, apiHash, 32);
   
+	// start mtproto
+	tg->app = api.app.open();
 	api.log.info(".. new session");
   shared_rc.ssid = api.buf.rand(8);
 	api.srl.ping();
@@ -24,9 +46,19 @@ tg_t *tg_new(){
 	return tg;
 }
 
-void tg_free(tg_t *tg)
+void tg_close(tg_t *tg)
 {
-
+	// close Telegram
+	
+	// close mtproto
+  net_t n = shared_rc_get_net();
+  api.net.close(n);
+	
+	// close database
+	sqlite3_close(tg->db);
+	
+	// free
+	free(tg);
 }
 
 buf_t parse_answer(buf_t a)
@@ -149,12 +181,11 @@ buf_t parse_answer(buf_t a)
 }
 
 
-tlo_t * tg_send(tg_t *tg, tlo_t *object)
+tl_t * tg_send(tg_t *tg, buf_t s)
 {
 	api.srl.ping();
-	buf_t s = tg_serialize(object);
-	printf("Serialized:\n");
-	api.buf.dump(s);
+	printf("Send:\n");
+	buf_dump(s);
 
 	buf_t s1 = api.hdl.header(s, API);
   /*api.buf.dump(s1);*/
@@ -180,5 +211,5 @@ tlo_t * tg_send(tg_t *tg, tlo_t *object)
 	//api.srl.msgsAck(*a.data + 4);
 
 	// deserialize message
-	return tg_deserialize(&a);
+	return tl_deserialize(&a);
 }

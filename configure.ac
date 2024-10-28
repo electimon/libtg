@@ -43,6 +43,7 @@ AC_CONFIG_FILES([
 Makefile
 tl_generator/Makefile
 mtx/Makefile
+tl/Makefile
 tg/Makefile
 ])
 
