@@ -259,7 +259,7 @@ buf_t sel_deserialize_vector(param_t p)
   buf_t b = p.value;
   ui32_t id = api.buf.get_ui32(b);
 
-  if (id != id_Vector) {
+  if (id != _id_Vector) {
     api.log.error("this is not vector id");
   }
 
@@ -280,7 +280,7 @@ buf_t sel_deserialize_vector(param_t p)
   for (uint32_t i = 0; i < q; ++i) {
     switch (p.id)
     {
-      case id_resPQ:
+      case _id_resPQ:
       {
         p_[i].type = TYPE_LONG;
         p_[i].value = b;
@@ -289,7 +289,7 @@ buf_t sel_deserialize_vector(param_t p)
 
         break;
       }
-      case id_msg_container:
+      case _id_msg_container:
       {
         p_[i].type = TYPE_MESSAGE;
         p_[i].value = b;

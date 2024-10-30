@@ -96,6 +96,9 @@ static int parse_method(struct method_t *m, char *buf)
 		// check method name
 		if (idx == 0){
 			m->name = strdup(str);
+			// remove '//' from name
+			if(m->name[0] == '/')
+				m->name += 2;
 			idx++;
 			continue;
 		}

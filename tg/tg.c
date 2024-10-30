@@ -1,21 +1,15 @@
 #include "../libtg.h"
-#include "../tl/tl.h"
+#include "tg.h"
 #include "../mtx/include/api.h"
 #include "../tl/alloc.h"
 #include "../mtx/include/net.h"
+#include "../mtx/include/srl.h"
+#include "../mtx/include/app.h"
 #include <stdio.h>
 #include <string.h>
-#include <sqlite3.h>
-
-struct tg_ {
-	app_t app;
-	int apiId;
-	char apiHash[32];
-	sqlite3 *db;
-};
 
 tg_t *tg_new(const char *database_path,
-		int apiId, const char apiHash[32])
+		int apiId, const char *apiHash)
 {
 	if (!database_path)
 		return NULL;
@@ -35,13 +29,7 @@ tg_t *tg_new(const char *database_path,
 
 	// set apiId and apiHash
 	tg->apiId = apiId;
-	memcpy(tg->apiHash, apiHash, 32);
-  
-	// start mtproto
-	tg->app = api.app.open();
-	api.log.info(".. new session");
-  shared_rc.ssid = api.buf.rand(8);
-	api.srl.ping();
+	strncpy(tg->apiHash, apiHash, 33);
 
 	return tg;
 }
@@ -70,6 +58,19 @@ buf_t parse_answer(buf_t a)
   //api.buf.dump(s);
   printf("current id: %.8x\n", id);
   switch (id) {
+		case id_msg_container:
+		{
+			tl_msg_container_t *msg_container =
+				(tl_msg_container_t *)tl_deserialize(&a);
+			
+			if (msg_container->_id == id_msg_container){
+				int i;
+				for (i = 0; i < msg_container->messages_len; ++i) {
+					printf("MSG: %s\n", msg_container->messages_[i].body);
+				}
+			}
+			break;
+		}
     case id_pong:
     {
       ctor_Pong_t c;
@@ -181,7 +182,7 @@ buf_t parse_answer(buf_t a)
 }
 
 
-tl_t * tg_send(tg_t *tg, buf_t s)
+buf_t tg_send(tg_t *tg, buf_t s)
 {
 	api.srl.ping();
 	printf("Send:\n");
@@ -209,7 +210,6 @@ tl_t * tg_send(tg_t *tg, buf_t s)
 	
 	// acknowledge message
 	//api.srl.msgsAck(*a.data + 4);
-
-	// deserialize message
-	return tl_deserialize(&a);
+	
+	return a;
 }

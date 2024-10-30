@@ -6,7 +6,7 @@
 buf_t serialize_bytes(
 		ui8_t *bytes, size_t size)
 {
-	buf_t s;
+	buf_t s = {};
 	memset(&s, 0, sizeof(buf_t));
 	if (size <= 253){
 		s = api.buf.add((ui8_t *)&size, 1);

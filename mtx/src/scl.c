@@ -15,7 +15,7 @@
 
 extern scl_t scl_open()
 {
-  api.net.open(ip_, port_);
+  api.net.open(_ip, _port);
   api.srl.init();
   api.log.info(">> auth");
   api.srl.auth();
@@ -41,20 +41,27 @@ extern void scl_run()
 
 	/*api.srl.sendCode();*/
 
-	char phone_number[128];
-	api.log.info("enter phone number (+7XXXXXXXXXX)");
-	scanf("%s",phone_number);
+	//char phone_number[128];
+	//api.log.info("enter phone number (+7XXXXXXXXXX)");
+	//scanf("%s",phone_number);
 	
 	method_auth_sendCode_t sendCode = 
-		method_auth_sendCode_init(phone_number);
+		method_auth_sendCode_init("9996623333");
 	buf_t sendCode_buf = 
 		SERIALIZE_METHOD(method_auth_sendCode, sendCode);
+	
+	printf("sendCode:\n");
+	api.buf.dump(sendCode_buf);
 
 	method_initConnection_t initConnection =
 		method_initConnection_init(sendCode_buf);
 	buf_t initConnection_buf = 
 		SERIALIZE_METHOD(method_initConnection, initConnection);
 
+	printf("initConnection:\n");
+	api.buf.dump(initConnection_buf);
+
+	return;
 	abstract_t a = 
 		api.srl.invokeWithLayer(185, initConnection_buf);
 	//abstract_t a = api.srl.initConnection(sendCode_buf);

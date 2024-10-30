@@ -10,15 +10,15 @@
 #define mtx_setup_h
 
 #define product             "mtx"
-#define version_            "0.1"
+#define _version             "0.1"
 
-//#define ip_                 "149.154.167.40"
-#define ip_                 "149.154.167.50"
-#define port_               443
+/*#define _ip                 "149.154.167.40"*/
+#define _ip                 "149.154.167.50"
+#define _port               443
 
-#define api_id_             24646404
-#define api_hash_           "818803c99651e8b777c54998e6ded6a0"
-#define lang_code_          "ru"
+#define _api_id             24646404
+#define _api_hash           "818803c99651e8b777c54998e6ded6a0"
+#define _lang_code          "ru"
 
 #define public_key          "pub.pkcs"
 
@@ -36,19 +36,19 @@ enum settings_tgt
 
 enum settings_id_codes
 {
-  id_resPQ                  = 0x05162463,
-  id_Vector                 = 0x1cb5c415,
-  id_Server_DH_Params_ok    = 0xd0e8075c,
-  id_server_DH_inner_data   = 0xb5890dba,
-  id_dh_gen_ok              = 0x3bcbf734,
-  id_msg_container          = 0x73f1f8dc,
-  id_new_session_created    = 0x9ec20908,
-  id_pong                   = 0x347773c5,
-  id_bad_msg_notification   = 0xa7eff811,
-  id_msgs_ack               = 0x62d6b459,
-  id_rpc_result             = 0xf35c6d01,
-	id_rpc_error              = 0x2144ca19,
-	id_auth_sentCode          = 0x5e002502,
+  _id_resPQ                  = 0x05162463,
+  _id_Vector                 = 0x1cb5c415,
+  _id_Server_DH_Params_ok    = 0xd0e8075c,
+  _id_server_DH_inner_data   = 0xb5890dba,
+  _id_dh_gen_ok              = 0x3bcbf734,
+  _id_msg_container          = 0x73f1f8dc,
+  _id_new_session_created    = 0x9ec20908,
+  _id_pong                   = 0x347773c5,
+  _id_bad_msg_notification   = 0xa7eff811,
+  _id_msgs_ack               = 0x62d6b459,
+  _id_rpc_result             = 0xf35c6d01,
+	_id_rpc_error              = 0x2144ca19,
+	/*id_auth_sentCode          = 0x5e002502,*/
 };
 
 #endif

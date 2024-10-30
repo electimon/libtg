@@ -1281,7 +1281,7 @@ method_ping_t method_ping_drive(method_ping_t m)
     api.log.error("unexpected ping id");
   }
 
-  if (id_new_session_created == t.ctor_NewSession.id__) {
+  if (_id_new_session_created == t.ctor_NewSession.id__) {
     api.log.info(".. new session created");
 		//buf_t msg_id = shared_rc_get_last_msg_id();
 		//method_msgs_ack_t m = api.tml->methods->msgs_ack.init(msg_id);
@@ -1319,17 +1319,17 @@ method_auth_sendCode_t method_auth_sendCode_init(
 {
   method_auth_sendCode_t m = method_auth_sendCode;
   /*char * phone_number = "+7XXXXXXXXXX";*/
-  char * phone_number = "+79990407731";
+  //char * phone_number = "+79990407731";
 
   m.phone_number.value = 
 		api.buf.add(
-				(ui8_t *)phone_number, 
-				(ui32_t)strlen(phone_number));
+				(ui8_t *)phone_number1, 
+				(ui32_t)strlen(phone_number1));
 	ui32_t sms_type = 0;
 	m.sms_type.value = api.buf.add_ui32(sms_type);
-  m.api_id.value = api.buf.add_ui32(api_id_);
-  m.api_hash.value = api.buf.add((ui8_t *)api_hash_, 32);
-	m.lang_code.value = api.buf.add((ui8_t *)lang_code_, 2);
+  m.api_id.value = api.buf.add_ui32(_api_id);
+  m.api_hash.value = api.buf.add((ui8_t *)_api_hash, 32);
+	m.lang_code.value = api.buf.add((ui8_t *)_lang_code, 2);
 
 	CodeSettings_t settings = CodeSettings_init();
 	m.settings.value = 
@@ -1433,7 +1433,7 @@ method_initConnection_t method_initConnection_init(
  
  	m.flags.value = api.buf.add_ui32(0);
  
- 	m.api_id.value = api.buf.add_ui32(api_id_);
+ 	m.api_id.value = api.buf.add_ui32(_api_id);
 
 	char * device_model = "linux console";
   m.device_model.value = 

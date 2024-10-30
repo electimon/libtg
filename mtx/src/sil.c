@@ -173,7 +173,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
   //api.buf.dump(s);
   printf("current id: %.8x\n", id);
   switch (id) {
-    case id_resPQ:
+    case _id_resPQ:
     {
       t.ctor_ResPQ.id__ = id;
       t.ctor_ResPQ.type__ = RFC;
@@ -200,7 +200,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 
       break;
     }
-    case id_Server_DH_Params_ok:
+    case _id_Server_DH_Params_ok:
     {
       ctor_Server_DH_Params_ok_t c;
       c.id__ = id;
@@ -223,7 +223,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 
       break;
     }
-    case id_server_DH_inner_data:
+    case _id_server_DH_inner_data:
     {
       ctor_Server_DH_inner_data_t c;
       c.id__ = id;
@@ -263,7 +263,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 
       break;
     }
-    case id_dh_gen_ok:
+    case _id_dh_gen_ok:
     {
       ctor_Set_client_DH_params_answer_ok_t c;
       c.id__ = id;
@@ -286,7 +286,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 
       break;
     }
-    case id_msg_container:
+    case _id_msg_container:
     {
       //api.buf.dump(s);
       ctor_MessageContainer_t c;
@@ -295,7 +295,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
       p.value = s;
       p.type = TYPE_VECTOR_MESSAGE;
       buf_t content = api.buf.add(p.value.data, p.value.size); // hack
-      p.value = api.buf.add_ui32(id_Vector); // hack
+      p.value = api.buf.add_ui32(_id_Vector); // hack
       p.value = api.buf.cat(p.value, content);
       p = api.sel.deserialize_param(p);
       buf_t b;
@@ -311,7 +311,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 
       break;
     }
-    case id_new_session_created:
+    case _id_new_session_created:
     {
       ctor_NewSession_t c;
       c.id__ = id;
@@ -334,7 +334,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 
       break;
     }
-    case id_pong:
+    case _id_pong:
     {
       ctor_Pong_t c;
       c.id__ = id;
@@ -352,7 +352,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 
       break;
     }
-		case id_msgs_ack:
+		case _id_msgs_ack:
     {
 /* A server usually acknowledges the receipt of a message
  * from a client (normally, an RPC query) using an RPC
@@ -394,7 +394,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 
       break;
     }
-		case id_rpc_result:
+		case _id_rpc_result:
 		{
 			ui64_t msg_id = *(ui64_t *)(s.data);
       printf("rpc_result msg_id: %.16lx, ", msg_id);
@@ -402,7 +402,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
       printf("object_id: %.8x\n", *object_id);
 			
 			switch (*object_id) {
-				case id_rpc_error:
+				case _id_rpc_error:
 				{
 					//RPC Error
 					ctor_rpc_error_t c;
@@ -426,38 +426,38 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 					
 					break;
 				}
-				case id_auth_sentCode:
-				{
-					ctor_auth_SentCode_t c;
-					c.id__ = *object_id;
-					c.type__ = RFC;
+				//case id_auth_sentCode:
+				//{
+					//ctor_auth_SentCode_t c;
+					//c.id__ = *object_id;
+					//c.type__ = RFC;
 					
-					s = api.buf.add(s.data + 12, s.size - 12);
-					int *flags = (int *)(s.data);
-					printf("sentCode flags: b%.32b\n", *flags);
+					//s = api.buf.add(s.data + 12, s.size - 12);
+					//int *flags = (int *)(s.data);
+					//printf("sentCode flags: b%.32b\n", *flags);
 
-					s = api.buf.add(s.data + 4, s.size - 4);
-					int *type = (int *)(s.data);
-					printf("sentCode type: %.8x\n", *type);
-					if (*type == 0x3dbb5986 ||
-							*type == 0xc000bba2 ||
-							*type == 0x5353e5a7 )
-					{
-						s = api.buf.add(s.data + 4, s.size - 4);
-						int *lenght = (int *)(s.data);
-						printf("sentCode length: %d\n", *lenght);
+					//s = api.buf.add(s.data + 4, s.size - 4);
+					//int *type = (int *)(s.data);
+					//printf("sentCode type: %.8x\n", *type);
+					//if (*type == 0x3dbb5986 ||
+							//*type == 0xc000bba2 ||
+							//*type == 0x5353e5a7 )
+					//{
+						//s = api.buf.add(s.data + 4, s.size - 4);
+						//int *lenght = (int *)(s.data);
+						//printf("sentCode length: %d\n", *lenght);
 
-						s = api.buf.add(s.data + 4, s.size - 4);
-						p.value = s;
-						p.type = TYPE_STRING;
-						c.phone_code_hash = 
-							api.sel.deserialize_param(p);
+						//s = api.buf.add(s.data + 4, s.size - 4);
+						//p.value = s;
+						//p.type = TYPE_STRING;
+						//c.phone_code_hash = 
+							//api.sel.deserialize_param(p);
 						
-						printf("sntCode hash: %s\n", 
-							c.phone_code_hash.value);
-					}
+						//printf("sntCode hash: %s\n", 
+							//c.phone_code_hash.value);
+					//}
 
-					t.msg_id = msg_id;	
+					//t.msg_id = msg_id;	
 					
 					// acknolage
 					/*buf_t msg = {};*/
@@ -488,14 +488,14 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 					////api.buf.dump(c.ping_id.value);
 					//t.ctor_Pong = c;
 
-					t.ctor_auth_SentCode = c;
-					break;
-				}	
+					//t.ctor_auth_SentCode = c;
+					//break;
+				//}	
 				default: break;
 			}
 			break;
 		}
-    case id_bad_msg_notification:
+    case _id_bad_msg_notification:
     {
       printf("current id: %.8x\n", id);
 			long *id = s.data;
