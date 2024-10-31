@@ -93,7 +93,7 @@ int database_init(tg_t *tg, const char *database_path)
 	return 0;
 }
 
-buf_t auth_key_id_from_database(tg_t *tg)
+buf_t auth_key_from_database(tg_t *tg)
 {
 	char sql[] ="SELECT auth_key_id FROM auth WHERE id = 0;";
 	buf_t auth_key;
@@ -176,14 +176,14 @@ int auth_token_to_database(
 	return tg_sqlite3_exec(tg, sql);
 }
 
-int auth_key_id_to_database(
-		tg_t *tg, buf_t auth_key_id)
+int auth_key_to_database(
+		tg_t *tg, buf_t auth_key)
 {
 	char sql[BUFSIZ] =
 			"CREATE TABLE IF NOT EXISTS auth (id INT); "
-			"ALTER TABLE \'auth\' ADD COLUMN \'auth_key_id\' BLOB; "
-			"INSERT INTO \'auth\' (\'auth_key_id\') "
-			"SELECT \'auth_key_id\' "
+			"ALTER TABLE \'auth\' ADD COLUMN \'auth_key\' BLOB; "
+			"INSERT INTO \'auth\' (\'auth_key\') "
+			"SELECT \'auth_key\' "
 			"WHERE NOT EXISTS (SELECT 1 FROM auth); ";
 	
 	int res = sqlite3_open(tg_database_path, &tg->db);
@@ -200,7 +200,7 @@ int auth_key_id_to_database(
 	}	
 			
 	strcpy(sql, 
-			"UPDATE \'auth\' SET \'auth_key_id\' = (?), id = 0; ");
+			"UPDATE \'auth\' SET \'auth_key\' = (?), id = 0; ");
 	
 	sqlite3_stmt *stmt;
 	res = sqlite3_prepare_v2(tg->db, sql, -1, &stmt, NULL);
@@ -210,7 +210,7 @@ int auth_key_id_to_database(
 		return 1;
 	}	
 
-	res = sqlite3_bind_blob(stmt, 1, auth_key_id.data, auth_key_id.size, SQLITE_TRANSIENT);
+	res = sqlite3_bind_blob(stmt, 1, auth_key.data, auth_key.size, SQLITE_TRANSIENT);
 	if (res != SQLITE_OK) {
 		perror(sqlite3_errmsg(tg->db));		
 	}	
