@@ -2,16 +2,14 @@
 
 int tg_connect(
 		tg_t *tg,
-		const char *phone_number,
 		void *userdata,
 		char * (*callback)(
 			void *userdata,
 			TG_AUTH auth,
-			tl_user_t *user))
+			const tl_t *tl))
 {
 	// try to load auth_key_id from database
-	ui64_t auth_key_id = 
-		auth_key_id_from_database(tg, phone_number);
+	ui64_t auth_key_id = auth_key_id_from_database(tg);
 
 	if (auth_key_id){
 		api.app.open();
@@ -22,9 +20,24 @@ int tg_connect(
 		// check if authorized
 		InputUser iuser = tl_inputUserSelf();
 		buf_t getUsers = tl_users_getUsers(&iuser, 1);	
-		buf_t answer = tg_send(tg, getUsers); 
+		buf_t answer = tl_send(getUsers); 
 		printf("ANSWER ID: %.8x\n", id_from_tl_buf(answer));
 	}
+
+	// try to get phone_number
+	char * phone_number = phone_number_from_database(tg);
+	if (!phone_number){
+		if (callback){
+			phone_number = 
+					callback(userdata, TG_AUTH_PHONE_NUMBER, NULL);
+		if (!phone_number)
+			return 1;
+		}
+		// save to database
+		phone_number_to_database(tg, phone_number);
+	}
+
+	return 0;
 
 	// if not authorized start authorization
 	// get tokens from database 
@@ -78,9 +91,9 @@ int tg_connect(
 
 	buf_t invokeWithLayer = 
 		tl_invokeWithLayer(
-				185, &initConnection);
+				API_LAYER, &initConnection);
 
-	buf_t answer = tg_send(tg, invokeWithLayer); 
+	buf_t answer = tl_send(invokeWithLayer); 
 	if (!answer.size)
 		return 1;
 	/*printf("ANSWER: %.8x\n", id_from_tl_buf(answer));*/
@@ -92,7 +105,7 @@ int tg_connect(
 				// handle sent code
 				if (callback){
 					char *code = 
-						callback(userdata, TG_AUTH_SENDCODE, NULL);
+						callback(userdata, TG_AUTH_SENDCODE, tl);
 					if (code){
 						buf_t signIn = 
 							tl_auth_signIn(
@@ -101,7 +114,7 @@ int tg_connect(
 									code, 
 									NULL);
 						buf_t answer = 
-							tg_send(tg, signIn); 
+							tl_send(signIn); 
 						tl_t *tl = tl_deserialize(&answer);
 						/*free(code);*/
 					}
@@ -114,5 +127,6 @@ int tg_connect(
 			break;
 	}
 
+	//free(phone_number);
 	return 0;
 }

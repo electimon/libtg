@@ -11,7 +11,10 @@ struct tg_ {
 	sqlite3 *db;
 };
 
-ui64_t auth_key_id_from_database(
+ui64_t auth_key_id_from_database(tg_t *tg);
+char * phone_number_from_database(tg_t *tg);
+
+int phone_number_to_database(
 		tg_t *tg, const char *phone_number);
 
 #endif /* ifndef TG_H_ */

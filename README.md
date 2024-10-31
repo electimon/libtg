@@ -1,77 +1,44 @@
 # C99 API for Telegram
 
 ```c
-char phone[32];
-	printf("enter phone number (+7XXXXXXXXXX): \n");
-	scanf("%s", phone);
-	printf("phone number: %s\n", phone);
+char * callback(
+    void *userdata,
+    TG_AUTH auth,
+    tl_t *tl)
+{
+    switch (auth) {
+        case TG_AUTH_PHONE_NUMBER:
+            // ask user for phone number 
+            // return phone_number; 
+            break;
+        case TG_AUTH_SENDCODE:
+            // ask user for phone code 
+            // return phone_code; 
+            break;
+        case TG_AUTH_PASSWORD_NEEDED:
+            // ask user for password 
+            // return password; 
+            break;
+        case TG_AUTH_ERROR:
+            // handle error (returned in %tl)
+            break; 
+        case TG_AUTH_SUCCESS:
+            // You are logged in! (current user in %tl)
+            break; 
+        default:
+            break;
+    }
+    return NULL;
+}
 
-	tg_t *tg = tg_new();
+int main(int argc, char *argv[])
+{
+    tg_t *tg = tg_new("test.db", API_ID, API_HASH);
 
-	tlo_t *codeSettings = tl_codeSettings(
-			false,
-		 	false,
-		 	false,
-		 	false,
-		 	false, 
-			false,
-		 	NULL,
-		 	0,
-		 	NULL,
-		 	NULL);
+    tg_connect(tg, NULL, callback);
+    
+    tg_close(tg);
 
-	tlo_t *sendCode = 
-		tl_auth_sendCode(
-				phone, 
-				24646404, 
-				"818803c99651e8b777c54998e6ded6a0", 
-				codeSettings);
-
-	tlo_t *initConnection = 
-		tl_initConnection(
-				24646404, 
-				"telegramtui", 
-				"185", 
-				"1.0", 
-				"ru", 
-				"telegramtui", 
-				"ru", 
-				NULL, 
-				NULL, 
-				sendCode);
-
-	tlo_t *invokeWithLayer = 
-		tl_invokeWithLayer(
-				185, initConnection);
-
-	tlo_t *sentCode = tg_send(tg, invokeWithLayer); 
-	if (!sentCode)
-		return 1;
-
-	printf("SENT CODE:\n");
-	printf("\ttype: %.8x (%s)\n", sentCode->objs[1]->id, sentCode->objs[1]->name);
-	printf("\tphone_code_hash: %s\n", sentCode->objs[2]->value.data);
-
-	int code;
-	printf("enter code: \n");
-	scanf("%d", &code);
-	printf("code: %d\n", code);
-	char phone_code[32];
-	sprintf(phone_code, "%d", code);
-
-	tlo_t *signIn = tl_auth_signIn(
-			phone, 
-			(char *)(sentCode->objs[2]->value.data), 
-			phone_code, 
-			NULL);  
-	
-	tlo_t *authorization = tg_send(tg, signIn); 
-	if (!authorization)
-		return 1;
-
-	printf("AUTHORIZATION:\n");
-	buf_dump(authorization->value);
-
-
-
+    return 0;
+}
 ```

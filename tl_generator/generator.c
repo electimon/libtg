@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#define API_LAYER "185"
 #define BLEN 1024 
 
 #define STR(buf, len, ...) \
 	({snprintf(buf, len-1, __VA_ARGS__); buf[len-1]=0; buf;})
 
+#define API_LAYER_H "../tl/api_layer.h"
 #define ID_H "../tl/id.h"
 #define METHODS_H "../tl/methods.h"
 #define METHODS_C "../tl/methods.c"
@@ -1195,6 +1197,13 @@ static int cb(
 int main(int argc, char *argv[])
 {
 	generator_t g;
+
+	FILE *api_layer = fopen(API_LAYER_H, "w");
+	if (!api_layer)
+		return 1;
+	fputs("#ifndef API_LAYER\n#define API_LAYER " 
+			      API_LAYER "\n#endif", api_layer);
+	fclose(api_layer);
 	
 	if (open_names_header(&g))return 1;
 	if (open_methods_header(&g))return 1;

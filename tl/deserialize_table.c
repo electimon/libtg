@@ -27,7 +27,6 @@ tl_t * tl_deserialize_resPQ(buf_t *buf){
 	}
 	// parse arg server_public_key_fingerprints (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->server_public_key_fingerprints_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->server_public_key_fingerprints_ = (long *)MALLOC(obj->server_public_key_fingerprints_len * sizeof(long), return NULL);
@@ -416,7 +415,6 @@ tl_t * tl_deserialize_future_salts(buf_t *buf){
 	}
 	// parse arg salts (vector<future_salt>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->salts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->salts_ = (tl_t **)MALLOC(obj->salts_len * sizeof(tl_t *), return NULL);
@@ -502,9 +500,7 @@ tl_t * tl_deserialize_msg_container(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg messages (vector<%Message>)
 	{
-		//*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
-		printf("LEN: %d\n", obj->messages_len);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (mtp_message_t *)MALLOC(obj->messages_len * sizeof(mtp_message_t), return NULL);
 		int i;
@@ -547,7 +543,6 @@ tl_t * tl_deserialize_msgs_ack(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg msg_ids (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->msg_ids_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->msg_ids_ = (long *)MALLOC(obj->msg_ids_len * sizeof(long), return NULL);
@@ -618,7 +613,6 @@ tl_t * tl_deserialize_msg_resend_req(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg msg_ids (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->msg_ids_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->msg_ids_ = (long *)MALLOC(obj->msg_ids_len * sizeof(long), return NULL);
@@ -638,7 +632,6 @@ tl_t * tl_deserialize_msgs_state_req(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg msg_ids (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->msg_ids_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->msg_ids_ = (long *)MALLOC(obj->msg_ids_len * sizeof(long), return NULL);
@@ -676,7 +669,6 @@ tl_t * tl_deserialize_msgs_all_info(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg msg_ids (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->msg_ids_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->msg_ids_ = (long *)MALLOC(obj->msg_ids_len * sizeof(long), return NULL);
@@ -1046,7 +1038,6 @@ tl_t * tl_deserialize_accessPointRule(buf_t *buf){
 	}
 	// parse arg ips (vector<IpPort>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->ips_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->ips_ = (tl_t **)MALLOC(obj->ips_len * sizeof(tl_t *), return NULL);
@@ -1075,7 +1066,6 @@ tl_t * tl_deserialize_help_configSimple(buf_t *buf){
 	}
 	// parse arg rules (vector<AccessPointRule>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->rules_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->rules_ = (tl_t **)MALLOC(obj->rules_len * sizeof(tl_t *), return NULL);
@@ -1472,7 +1462,6 @@ tl_t * tl_deserialize_inputMediaUploadedPhoto(buf_t *buf){
 	// parse arg stickers (Vector<InputDocument>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stickers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stickers_ = (tl_t **)MALLOC(obj->stickers_len * sizeof(tl_t *), return NULL);
@@ -1595,7 +1584,6 @@ tl_t * tl_deserialize_inputMediaUploadedDocument(buf_t *buf){
 	}
 	// parse arg attributes (Vector<DocumentAttribute>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->attributes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->attributes_ = (tl_t **)MALLOC(obj->attributes_len * sizeof(tl_t *), return NULL);
@@ -1607,7 +1595,6 @@ tl_t * tl_deserialize_inputMediaUploadedDocument(buf_t *buf){
 	// parse arg stickers (Vector<InputDocument>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stickers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stickers_ = (tl_t **)MALLOC(obj->stickers_len * sizeof(tl_t *), return NULL);
@@ -1868,7 +1855,6 @@ tl_t * tl_deserialize_inputMediaPoll(buf_t *buf){
 	// parse arg correct_answers (Vector<bytes>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->correct_answers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->correct_answers_ = (buf_t *)MALLOC(obj->correct_answers_len * sizeof(buf_t), return NULL);
@@ -1886,7 +1872,6 @@ tl_t * tl_deserialize_inputMediaPoll(buf_t *buf){
 	// parse arg solution_entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->solution_entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->solution_entities_ = (tl_t **)MALLOC(obj->solution_entities_len * sizeof(tl_t *), return NULL);
@@ -1974,7 +1959,6 @@ tl_t * tl_deserialize_inputMediaPaidMedia(buf_t *buf){
 	}
 	// parse arg extended_media (Vector<InputMedia>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->extended_media_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->extended_media_ = (tl_t **)MALLOC(obj->extended_media_len * sizeof(tl_t *), return NULL);
@@ -2672,7 +2656,6 @@ tl_t * tl_deserialize_user(buf_t *buf){
 	// parse arg restriction_reason (Vector<RestrictionReason>)
 	if ((flag1 & (1 << 18)) == (1 << 18))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->restriction_reason_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->restriction_reason_ = (tl_t **)MALLOC(obj->restriction_reason_len * sizeof(tl_t *), return NULL);
@@ -2701,7 +2684,6 @@ tl_t * tl_deserialize_user(buf_t *buf){
 	// parse arg usernames (Vector<Username>)
 	if ((flag2 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->usernames_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->usernames_ = (tl_t **)MALLOC(obj->usernames_len * sizeof(tl_t *), return NULL);
@@ -3142,7 +3124,6 @@ tl_t * tl_deserialize_channel(buf_t *buf){
 	// parse arg restriction_reason (Vector<RestrictionReason>)
 	if ((flag1 & (1 << 9)) == (1 << 9))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->restriction_reason_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->restriction_reason_ = (tl_t **)MALLOC(obj->restriction_reason_len * sizeof(tl_t *), return NULL);
@@ -3175,7 +3156,6 @@ tl_t * tl_deserialize_channel(buf_t *buf){
 	// parse arg usernames (Vector<Username>)
 	if ((flag2 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->usernames_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->usernames_ = (tl_t **)MALLOC(obj->usernames_len * sizeof(tl_t *), return NULL);
@@ -3316,7 +3296,6 @@ tl_t * tl_deserialize_chatFull(buf_t *buf){
 	// parse arg bot_info (Vector<BotInfo>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->bot_info_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->bot_info_ = (tl_t **)MALLOC(obj->bot_info_len * sizeof(tl_t *), return NULL);
@@ -3368,7 +3347,6 @@ tl_t * tl_deserialize_chatFull(buf_t *buf){
 	// parse arg recent_requesters (Vector<long>)
 	if ((flag1 & (1 << 17)) == (1 << 17))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->recent_requesters_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->recent_requesters_ = (long *)MALLOC(obj->recent_requesters_len * sizeof(long), return NULL);
@@ -3568,7 +3546,6 @@ tl_t * tl_deserialize_channelFull(buf_t *buf){
 	}
 	// parse arg bot_info (Vector<BotInfo>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->bot_info_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->bot_info_ = (tl_t **)MALLOC(obj->bot_info_len * sizeof(tl_t *), return NULL);
@@ -3660,7 +3637,6 @@ tl_t * tl_deserialize_channelFull(buf_t *buf){
 	// parse arg pending_suggestions (Vector<string>)
 	if ((flag1 & (1 << 25)) == (1 << 25))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->pending_suggestions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->pending_suggestions_ = (char **)MALLOC(obj->pending_suggestions_len * sizeof(char *), return NULL);
@@ -3690,7 +3666,6 @@ tl_t * tl_deserialize_channelFull(buf_t *buf){
 	// parse arg recent_requesters (Vector<long>)
 	if ((flag1 & (1 << 28)) == (1 << 28))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->recent_requesters_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->recent_requesters_ = (long *)MALLOC(obj->recent_requesters_len * sizeof(long), return NULL);
@@ -3838,7 +3813,6 @@ tl_t * tl_deserialize_chatParticipants(buf_t *buf){
 	}
 	// parse arg participants (Vector<ChatParticipant>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->participants_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->participants_ = (tl_t **)MALLOC(obj->participants_len * sizeof(tl_t *), return NULL);
@@ -4056,7 +4030,6 @@ tl_t * tl_deserialize_message(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 7)) == (1 << 7))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -4108,7 +4081,6 @@ tl_t * tl_deserialize_message(buf_t *buf){
 	// parse arg restriction_reason (Vector<RestrictionReason>)
 	if ((flag1 & (1 << 22)) == (1 << 22))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->restriction_reason_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->restriction_reason_ = (tl_t **)MALLOC(obj->restriction_reason_len * sizeof(tl_t *), return NULL);
@@ -4347,7 +4319,6 @@ tl_t * tl_deserialize_messageMediaDocument(buf_t *buf){
 	// parse arg alt_documents (Vector<Document>)
 	if ((flag1 & (1 << 5)) == (1 << 5))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->alt_documents_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->alt_documents_ = (tl_t **)MALLOC(obj->alt_documents_len * sizeof(tl_t *), return NULL);
@@ -4627,7 +4598,6 @@ tl_t * tl_deserialize_messageMediaGiveaway(buf_t *buf){
 	}
 	// parse arg channels (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->channels_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->channels_ = (long *)MALLOC(obj->channels_len * sizeof(long), return NULL);
@@ -4640,7 +4610,6 @@ tl_t * tl_deserialize_messageMediaGiveaway(buf_t *buf){
 	// parse arg countries_iso2 (Vector<string>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->countries_iso2_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->countries_iso2_ = (char **)MALLOC(obj->countries_iso2_len * sizeof(char *), return NULL);
@@ -4727,7 +4696,6 @@ tl_t * tl_deserialize_messageMediaGiveawayResults(buf_t *buf){
 	}
 	// parse arg winners (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->winners_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->winners_ = (long *)MALLOC(obj->winners_len * sizeof(long), return NULL);
@@ -4775,7 +4743,6 @@ tl_t * tl_deserialize_messageMediaPaidMedia(buf_t *buf){
 	}
 	// parse arg extended_media (Vector<MessageExtendedMedia>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->extended_media_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->extended_media_ = (tl_t **)MALLOC(obj->extended_media_len * sizeof(tl_t *), return NULL);
@@ -4807,7 +4774,6 @@ tl_t * tl_deserialize_messageActionChatCreate(buf_t *buf){
 	}
 	// parse arg users (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (long *)MALLOC(obj->users_len * sizeof(long), return NULL);
@@ -4860,7 +4826,6 @@ tl_t * tl_deserialize_messageActionChatAddUser(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg users (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (long *)MALLOC(obj->users_len * sizeof(long), return NULL);
@@ -5156,7 +5121,6 @@ tl_t * tl_deserialize_messageActionSecureValuesSentMe(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg values (Vector<SecureValue>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->values_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->values_ = (tl_t **)MALLOC(obj->values_len * sizeof(tl_t *), return NULL);
@@ -5179,7 +5143,6 @@ tl_t * tl_deserialize_messageActionSecureValuesSent(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg types (Vector<SecureValueType>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->types_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->types_ = (tl_t **)MALLOC(obj->types_len * sizeof(tl_t *), return NULL);
@@ -5252,7 +5215,6 @@ tl_t * tl_deserialize_messageActionInviteToGroupCall(buf_t *buf){
 	}
 	// parse arg users (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (long *)MALLOC(obj->users_len * sizeof(long), return NULL);
@@ -5478,7 +5440,6 @@ tl_t * tl_deserialize_messageActionRequestedPeer(buf_t *buf){
 	}
 	// parse arg peers (Vector<Peer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -5643,7 +5604,6 @@ tl_t * tl_deserialize_messageActionRequestedPeerSentMe(buf_t *buf){
 	}
 	// parse arg peers (Vector<RequestedPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -5991,7 +5951,6 @@ tl_t * tl_deserialize_photo(buf_t *buf){
 	}
 	// parse arg sizes (Vector<PhotoSize>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sizes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sizes_ = (tl_t **)MALLOC(obj->sizes_len * sizeof(tl_t *), return NULL);
@@ -6003,7 +5962,6 @@ tl_t * tl_deserialize_photo(buf_t *buf){
 	// parse arg video_sizes (Vector<VideoSize>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->video_sizes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->video_sizes_ = (tl_t **)MALLOC(obj->video_sizes_len * sizeof(tl_t *), return NULL);
@@ -6127,7 +6085,6 @@ tl_t * tl_deserialize_photoSizeProgressive(buf_t *buf){
 	}
 	// parse arg sizes (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sizes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sizes_ = (int *)MALLOC(obj->sizes_len * sizeof(int), return NULL);
@@ -6907,7 +6864,6 @@ tl_t * tl_deserialize_userFull(buf_t *buf){
 	// parse arg premium_gifts (Vector<PremiumGiftOption>)
 	if ((flag1 & (1 << 19)) == (1 << 19))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->premium_gifts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->premium_gifts_ = (tl_t **)MALLOC(obj->premium_gifts_len * sizeof(tl_t *), return NULL);
@@ -7044,7 +7000,6 @@ tl_t * tl_deserialize_contacts_contacts(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg contacts (Vector<Contact>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->contacts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->contacts_ = (tl_t **)MALLOC(obj->contacts_len * sizeof(tl_t *), return NULL);
@@ -7060,7 +7015,6 @@ tl_t * tl_deserialize_contacts_contacts(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7079,7 +7033,6 @@ tl_t * tl_deserialize_contacts_importedContacts(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg imported (Vector<ImportedContact>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->imported_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->imported_ = (tl_t **)MALLOC(obj->imported_len * sizeof(tl_t *), return NULL);
@@ -7090,7 +7043,6 @@ tl_t * tl_deserialize_contacts_importedContacts(buf_t *buf){
 	}
 	// parse arg popular_invites (Vector<PopularContact>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->popular_invites_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->popular_invites_ = (tl_t **)MALLOC(obj->popular_invites_len * sizeof(tl_t *), return NULL);
@@ -7101,7 +7053,6 @@ tl_t * tl_deserialize_contacts_importedContacts(buf_t *buf){
 	}
 	// parse arg retry_contacts (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->retry_contacts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->retry_contacts_ = (long *)MALLOC(obj->retry_contacts_len * sizeof(long), return NULL);
@@ -7113,7 +7064,6 @@ tl_t * tl_deserialize_contacts_importedContacts(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7132,7 +7082,6 @@ tl_t * tl_deserialize_contacts_blocked(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg blocked (Vector<PeerBlocked>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->blocked_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->blocked_ = (tl_t **)MALLOC(obj->blocked_len * sizeof(tl_t *), return NULL);
@@ -7143,7 +7092,6 @@ tl_t * tl_deserialize_contacts_blocked(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7154,7 +7102,6 @@ tl_t * tl_deserialize_contacts_blocked(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7178,7 +7125,6 @@ tl_t * tl_deserialize_contacts_blockedSlice(buf_t *buf){
 	}
 	// parse arg blocked (Vector<PeerBlocked>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->blocked_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->blocked_ = (tl_t **)MALLOC(obj->blocked_len * sizeof(tl_t *), return NULL);
@@ -7189,7 +7135,6 @@ tl_t * tl_deserialize_contacts_blockedSlice(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7200,7 +7145,6 @@ tl_t * tl_deserialize_contacts_blockedSlice(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7219,7 +7163,6 @@ tl_t * tl_deserialize_messages_dialogs(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg dialogs (Vector<Dialog>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->dialogs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->dialogs_ = (tl_t **)MALLOC(obj->dialogs_len * sizeof(tl_t *), return NULL);
@@ -7230,7 +7173,6 @@ tl_t * tl_deserialize_messages_dialogs(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -7241,7 +7183,6 @@ tl_t * tl_deserialize_messages_dialogs(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7252,7 +7193,6 @@ tl_t * tl_deserialize_messages_dialogs(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7276,7 +7216,6 @@ tl_t * tl_deserialize_messages_dialogsSlice(buf_t *buf){
 	}
 	// parse arg dialogs (Vector<Dialog>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->dialogs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->dialogs_ = (tl_t **)MALLOC(obj->dialogs_len * sizeof(tl_t *), return NULL);
@@ -7287,7 +7226,6 @@ tl_t * tl_deserialize_messages_dialogsSlice(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -7298,7 +7236,6 @@ tl_t * tl_deserialize_messages_dialogsSlice(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7309,7 +7246,6 @@ tl_t * tl_deserialize_messages_dialogsSlice(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7341,7 +7277,6 @@ tl_t * tl_deserialize_messages_messages(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -7352,7 +7287,6 @@ tl_t * tl_deserialize_messages_messages(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7363,7 +7297,6 @@ tl_t * tl_deserialize_messages_messages(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7407,7 +7340,6 @@ tl_t * tl_deserialize_messages_messagesSlice(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -7418,7 +7350,6 @@ tl_t * tl_deserialize_messages_messagesSlice(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7429,7 +7360,6 @@ tl_t * tl_deserialize_messages_messagesSlice(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7472,7 +7402,6 @@ tl_t * tl_deserialize_messages_channelMessages(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -7483,7 +7412,6 @@ tl_t * tl_deserialize_messages_channelMessages(buf_t *buf){
 	}
 	// parse arg topics (Vector<ForumTopic>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->topics_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->topics_ = (tl_t **)MALLOC(obj->topics_len * sizeof(tl_t *), return NULL);
@@ -7494,7 +7422,6 @@ tl_t * tl_deserialize_messages_channelMessages(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7505,7 +7432,6 @@ tl_t * tl_deserialize_messages_channelMessages(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7537,7 +7463,6 @@ tl_t * tl_deserialize_messages_chats(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7561,7 +7486,6 @@ tl_t * tl_deserialize_messages_chatsSlice(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7584,7 +7508,6 @@ tl_t * tl_deserialize_messages_chatFull(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -7595,7 +7518,6 @@ tl_t * tl_deserialize_messages_chatFull(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -7821,7 +7743,6 @@ tl_t * tl_deserialize_updateDeleteMessages(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -7933,7 +7854,6 @@ tl_t * tl_deserialize_updateUserName(buf_t *buf){
 	}
 	// parse arg usernames (Vector<Username>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->usernames_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->usernames_ = (tl_t **)MALLOC(obj->usernames_len * sizeof(tl_t *), return NULL);
@@ -8117,7 +8037,6 @@ tl_t * tl_deserialize_updateDcOptions(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg dc_options (Vector<DcOption>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->dc_options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->dc_options_ = (tl_t **)MALLOC(obj->dc_options_len * sizeof(tl_t *), return NULL);
@@ -8185,7 +8104,6 @@ tl_t * tl_deserialize_updateServiceNotification(buf_t *buf){
 	}
 	// parse arg entities (Vector<MessageEntity>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -8208,7 +8126,6 @@ tl_t * tl_deserialize_updatePrivacy(buf_t *buf){
 	}
 	// parse arg rules (Vector<PrivacyRule>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->rules_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->rules_ = (tl_t **)MALLOC(obj->rules_len * sizeof(tl_t *), return NULL);
@@ -8338,7 +8255,6 @@ tl_t * tl_deserialize_updateReadMessagesContents(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -8473,7 +8389,6 @@ tl_t * tl_deserialize_updateDeleteChannelMessages(buf_t *buf){
 	}
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -8578,7 +8493,6 @@ tl_t * tl_deserialize_updateStickerSetsOrder(buf_t *buf){
 	}
 	// parse arg order (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (long *)MALLOC(obj->order_len * sizeof(long), return NULL);
@@ -8973,7 +8887,6 @@ tl_t * tl_deserialize_updatePinnedDialogs(buf_t *buf){
 	// parse arg order (Vector<DialogPeer>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (tl_t **)MALLOC(obj->order_len * sizeof(tl_t *), return NULL);
@@ -9157,7 +9070,6 @@ tl_t * tl_deserialize_updateChannelReadMessagesContents(buf_t *buf){
 	}
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -9269,7 +9181,6 @@ tl_t * tl_deserialize_updateFolderPeers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg folder_peers (Vector<FolderPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->folder_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->folder_peers_ = (tl_t **)MALLOC(obj->folder_peers_len * sizeof(tl_t *), return NULL);
@@ -9314,7 +9225,6 @@ tl_t * tl_deserialize_updatePeerLocated(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg peers (Vector<PeerLocated>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -9349,7 +9259,6 @@ tl_t * tl_deserialize_updateDeleteScheduledMessages(buf_t *buf){
 	}
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -9415,7 +9324,6 @@ tl_t * tl_deserialize_updateMessagePollVote(buf_t *buf){
 	}
 	// parse arg options (Vector<bytes>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->options_ = (buf_t *)MALLOC(obj->options_len * sizeof(buf_t), return NULL);
@@ -9460,7 +9368,6 @@ tl_t * tl_deserialize_updateDialogFilterOrder(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg order (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (int *)MALLOC(obj->order_len * sizeof(int), return NULL);
@@ -9656,7 +9563,6 @@ tl_t * tl_deserialize_updatePinnedMessages(buf_t *buf){
 	}
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -9699,7 +9605,6 @@ tl_t * tl_deserialize_updatePinnedChannelMessages(buf_t *buf){
 	}
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -9746,7 +9651,6 @@ tl_t * tl_deserialize_updateGroupCallParticipants(buf_t *buf){
 	}
 	// parse arg participants (Vector<GroupCallParticipant>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->participants_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->participants_ = (tl_t **)MALLOC(obj->participants_len * sizeof(tl_t *), return NULL);
@@ -9971,7 +9875,6 @@ tl_t * tl_deserialize_updateBotCommands(buf_t *buf){
 	}
 	// parse arg commands (Vector<BotCommand>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->commands_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->commands_ = (tl_t **)MALLOC(obj->commands_len * sizeof(tl_t *), return NULL);
@@ -9999,7 +9902,6 @@ tl_t * tl_deserialize_updatePendingJoinRequests(buf_t *buf){
 	}
 	// parse arg recent_requesters (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->recent_requesters_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->recent_requesters_ = (long *)MALLOC(obj->recent_requesters_len * sizeof(long), return NULL);
@@ -10242,7 +10144,6 @@ tl_t * tl_deserialize_updateMessageExtendedMedia(buf_t *buf){
 	}
 	// parse arg extended_media (Vector<MessageExtendedMedia>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->extended_media_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->extended_media_ = (tl_t **)MALLOC(obj->extended_media_len * sizeof(tl_t *), return NULL);
@@ -10296,7 +10197,6 @@ tl_t * tl_deserialize_updateChannelPinnedTopics(buf_t *buf){
 	// parse arg order (Vector<int>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (int *)MALLOC(obj->order_len * sizeof(int), return NULL);
@@ -10502,7 +10402,6 @@ tl_t * tl_deserialize_updateBotMessageReaction(buf_t *buf){
 	}
 	// parse arg old_reactions (Vector<Reaction>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->old_reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->old_reactions_ = (tl_t **)MALLOC(obj->old_reactions_len * sizeof(tl_t *), return NULL);
@@ -10513,7 +10412,6 @@ tl_t * tl_deserialize_updateBotMessageReaction(buf_t *buf){
 	}
 	// parse arg new_reactions (Vector<Reaction>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->new_reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->new_reactions_ = (tl_t **)MALLOC(obj->new_reactions_len * sizeof(tl_t *), return NULL);
@@ -10551,7 +10449,6 @@ tl_t * tl_deserialize_updateBotMessageReactions(buf_t *buf){
 	}
 	// parse arg reactions (Vector<ReactionCount>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->reactions_ = (tl_t **)MALLOC(obj->reactions_len * sizeof(tl_t *), return NULL);
@@ -10599,7 +10496,6 @@ tl_t * tl_deserialize_updatePinnedSavedDialogs(buf_t *buf){
 	// parse arg order (Vector<DialogPeer>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (tl_t **)MALLOC(obj->order_len * sizeof(tl_t *), return NULL);
@@ -10639,7 +10535,6 @@ tl_t * tl_deserialize_updateQuickReplies(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg quick_replies (Vector<QuickReply>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->quick_replies_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->quick_replies_ = (tl_t **)MALLOC(obj->quick_replies_len * sizeof(tl_t *), return NULL);
@@ -10700,7 +10595,6 @@ tl_t * tl_deserialize_updateDeleteQuickReplyMessages(buf_t *buf){
 	}
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -10806,7 +10700,6 @@ tl_t * tl_deserialize_updateBotDeleteBusinessMessage(buf_t *buf){
 	}
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -11028,7 +10921,6 @@ tl_t * tl_deserialize_updates_difference(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg new_messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->new_messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->new_messages_ = (tl_t **)MALLOC(obj->new_messages_len * sizeof(tl_t *), return NULL);
@@ -11039,7 +10931,6 @@ tl_t * tl_deserialize_updates_difference(buf_t *buf){
 	}
 	// parse arg new_encrypted_messages (Vector<EncryptedMessage>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->new_encrypted_messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->new_encrypted_messages_ = (tl_t **)MALLOC(obj->new_encrypted_messages_len * sizeof(tl_t *), return NULL);
@@ -11050,7 +10941,6 @@ tl_t * tl_deserialize_updates_difference(buf_t *buf){
 	}
 	// parse arg other_updates (Vector<Update>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->other_updates_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->other_updates_ = (tl_t **)MALLOC(obj->other_updates_len * sizeof(tl_t *), return NULL);
@@ -11061,7 +10951,6 @@ tl_t * tl_deserialize_updates_difference(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -11072,7 +10961,6 @@ tl_t * tl_deserialize_updates_difference(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -11095,7 +10983,6 @@ tl_t * tl_deserialize_updates_differenceSlice(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg new_messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->new_messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->new_messages_ = (tl_t **)MALLOC(obj->new_messages_len * sizeof(tl_t *), return NULL);
@@ -11106,7 +10993,6 @@ tl_t * tl_deserialize_updates_differenceSlice(buf_t *buf){
 	}
 	// parse arg new_encrypted_messages (Vector<EncryptedMessage>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->new_encrypted_messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->new_encrypted_messages_ = (tl_t **)MALLOC(obj->new_encrypted_messages_len * sizeof(tl_t *), return NULL);
@@ -11117,7 +11003,6 @@ tl_t * tl_deserialize_updates_differenceSlice(buf_t *buf){
 	}
 	// parse arg other_updates (Vector<Update>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->other_updates_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->other_updates_ = (tl_t **)MALLOC(obj->other_updates_len * sizeof(tl_t *), return NULL);
@@ -11128,7 +11013,6 @@ tl_t * tl_deserialize_updates_differenceSlice(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -11139,7 +11023,6 @@ tl_t * tl_deserialize_updates_differenceSlice(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -11253,7 +11136,6 @@ tl_t * tl_deserialize_updateShortMessage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 7)) == (1 << 7))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -11353,7 +11235,6 @@ tl_t * tl_deserialize_updateShortChatMessage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 7)) == (1 << 7))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -11395,7 +11276,6 @@ tl_t * tl_deserialize_updatesCombined(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg updates (Vector<Update>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->updates_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->updates_ = (tl_t **)MALLOC(obj->updates_len * sizeof(tl_t *), return NULL);
@@ -11406,7 +11286,6 @@ tl_t * tl_deserialize_updatesCombined(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -11417,7 +11296,6 @@ tl_t * tl_deserialize_updatesCombined(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -11451,7 +11329,6 @@ tl_t * tl_deserialize_updates(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg updates (Vector<Update>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->updates_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->updates_ = (tl_t **)MALLOC(obj->updates_len * sizeof(tl_t *), return NULL);
@@ -11462,7 +11339,6 @@ tl_t * tl_deserialize_updates(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -11473,7 +11349,6 @@ tl_t * tl_deserialize_updates(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -11536,7 +11411,6 @@ tl_t * tl_deserialize_updateShortSentMessage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 7)) == (1 << 7))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -11561,7 +11435,6 @@ tl_t * tl_deserialize_photos_photos(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg photos (Vector<Photo>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->photos_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->photos_ = (tl_t **)MALLOC(obj->photos_len * sizeof(tl_t *), return NULL);
@@ -11572,7 +11445,6 @@ tl_t * tl_deserialize_photos_photos(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -11596,7 +11468,6 @@ tl_t * tl_deserialize_photos_photosSlice(buf_t *buf){
 	}
 	// parse arg photos (Vector<Photo>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->photos_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->photos_ = (tl_t **)MALLOC(obj->photos_len * sizeof(tl_t *), return NULL);
@@ -11607,7 +11478,6 @@ tl_t * tl_deserialize_photos_photosSlice(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -11630,7 +11500,6 @@ tl_t * tl_deserialize_photos_photo(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -11687,7 +11556,6 @@ tl_t * tl_deserialize_upload_fileCdnRedirect(buf_t *buf){
 	}
 	// parse arg file_hashes (Vector<FileHash>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->file_hashes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->file_hashes_ = (tl_t **)MALLOC(obj->file_hashes_len * sizeof(tl_t *), return NULL);
@@ -11814,7 +11682,6 @@ tl_t * tl_deserialize_config(buf_t *buf){
 	}
 	// parse arg dc_options (Vector<DcOption>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->dc_options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->dc_options_ = (tl_t **)MALLOC(obj->dc_options_len * sizeof(tl_t *), return NULL);
@@ -12074,7 +11941,6 @@ tl_t * tl_deserialize_help_appUpdate(buf_t *buf){
 	}
 	// parse arg entities (Vector<MessageEntity>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -12623,7 +12489,6 @@ tl_t * tl_deserialize_document(buf_t *buf){
 	// parse arg thumbs (Vector<PhotoSize>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->thumbs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->thumbs_ = (tl_t **)MALLOC(obj->thumbs_len * sizeof(tl_t *), return NULL);
@@ -12635,7 +12500,6 @@ tl_t * tl_deserialize_document(buf_t *buf){
 	// parse arg video_thumbs (Vector<VideoSize>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->video_thumbs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->video_thumbs_ = (tl_t **)MALLOC(obj->video_thumbs_len * sizeof(tl_t *), return NULL);
@@ -12651,7 +12515,6 @@ tl_t * tl_deserialize_document(buf_t *buf){
 	}
 	// parse arg attributes (Vector<DocumentAttribute>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->attributes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->attributes_ = (tl_t **)MALLOC(obj->attributes_len * sizeof(tl_t *), return NULL);
@@ -12933,7 +12796,6 @@ tl_t * tl_deserialize_contacts_found(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg my_results (Vector<Peer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->my_results_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->my_results_ = (tl_t **)MALLOC(obj->my_results_len * sizeof(tl_t *), return NULL);
@@ -12944,7 +12806,6 @@ tl_t * tl_deserialize_contacts_found(buf_t *buf){
 	}
 	// parse arg results (Vector<Peer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->results_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->results_ = (tl_t **)MALLOC(obj->results_len * sizeof(tl_t *), return NULL);
@@ -12955,7 +12816,6 @@ tl_t * tl_deserialize_contacts_found(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -12966,7 +12826,6 @@ tl_t * tl_deserialize_contacts_found(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -13177,7 +13036,6 @@ tl_t * tl_deserialize_inputPrivacyValueAllowUsers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg users (Vector<InputUser>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -13212,7 +13070,6 @@ tl_t * tl_deserialize_inputPrivacyValueDisallowUsers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg users (Vector<InputUser>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -13231,7 +13088,6 @@ tl_t * tl_deserialize_inputPrivacyValueAllowChatParticipants(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg chats (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (long *)MALLOC(obj->chats_len * sizeof(long), return NULL);
@@ -13251,7 +13107,6 @@ tl_t * tl_deserialize_inputPrivacyValueDisallowChatParticipants(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg chats (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (long *)MALLOC(obj->chats_len * sizeof(long), return NULL);
@@ -13303,7 +13158,6 @@ tl_t * tl_deserialize_privacyValueAllowUsers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg users (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (long *)MALLOC(obj->users_len * sizeof(long), return NULL);
@@ -13339,7 +13193,6 @@ tl_t * tl_deserialize_privacyValueDisallowUsers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg users (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (long *)MALLOC(obj->users_len * sizeof(long), return NULL);
@@ -13359,7 +13212,6 @@ tl_t * tl_deserialize_privacyValueAllowChatParticipants(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg chats (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (long *)MALLOC(obj->chats_len * sizeof(long), return NULL);
@@ -13379,7 +13231,6 @@ tl_t * tl_deserialize_privacyValueDisallowChatParticipants(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg chats (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (long *)MALLOC(obj->chats_len * sizeof(long), return NULL);
@@ -13415,7 +13266,6 @@ tl_t * tl_deserialize_account_privacyRules(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg rules (Vector<PrivacyRule>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->rules_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->rules_ = (tl_t **)MALLOC(obj->rules_len * sizeof(tl_t *), return NULL);
@@ -13426,7 +13276,6 @@ tl_t * tl_deserialize_account_privacyRules(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -13437,7 +13286,6 @@ tl_t * tl_deserialize_account_privacyRules(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -13686,7 +13534,6 @@ tl_t * tl_deserialize_messages_stickers(buf_t *buf){
 	}
 	// parse arg stickers (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stickers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stickers_ = (tl_t **)MALLOC(obj->stickers_len * sizeof(tl_t *), return NULL);
@@ -13710,7 +13557,6 @@ tl_t * tl_deserialize_stickerPack(buf_t *buf){
 	}
 	// parse arg documents (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->documents_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->documents_ = (long *)MALLOC(obj->documents_len * sizeof(long), return NULL);
@@ -13743,7 +13589,6 @@ tl_t * tl_deserialize_messages_allStickers(buf_t *buf){
 	}
 	// parse arg sets (Vector<StickerSet>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sets_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sets_ = (tl_t **)MALLOC(obj->sets_len * sizeof(tl_t *), return NULL);
@@ -13933,7 +13778,6 @@ tl_t * tl_deserialize_webPage(buf_t *buf){
 	// parse arg attributes (Vector<WebPageAttribute>)
 	if ((flag1 & (1 << 12)) == (1 << 12))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->attributes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->attributes_ = (tl_t **)MALLOC(obj->attributes_len * sizeof(tl_t *), return NULL);
@@ -14075,7 +13919,6 @@ tl_t * tl_deserialize_account_authorizations(buf_t *buf){
 	}
 	// parse arg authorizations (Vector<Authorization>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->authorizations_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->authorizations_ = (tl_t **)MALLOC(obj->authorizations_len * sizeof(tl_t *), return NULL);
@@ -14440,7 +14283,6 @@ tl_t * tl_deserialize_chatInvite(buf_t *buf){
 	// parse arg participants (Vector<User>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->participants_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->participants_ = (tl_t **)MALLOC(obj->participants_len * sizeof(tl_t *), return NULL);
@@ -14665,7 +14507,6 @@ tl_t * tl_deserialize_stickerSet(buf_t *buf){
 	// parse arg thumbs (Vector<PhotoSize>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->thumbs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->thumbs_ = (tl_t **)MALLOC(obj->thumbs_len * sizeof(tl_t *), return NULL);
@@ -14716,7 +14557,6 @@ tl_t * tl_deserialize_messages_stickerSet(buf_t *buf){
 	}
 	// parse arg packs (Vector<StickerPack>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->packs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->packs_ = (tl_t **)MALLOC(obj->packs_len * sizeof(tl_t *), return NULL);
@@ -14727,7 +14567,6 @@ tl_t * tl_deserialize_messages_stickerSet(buf_t *buf){
 	}
 	// parse arg keywords (Vector<StickerKeyword>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->keywords_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->keywords_ = (tl_t **)MALLOC(obj->keywords_len * sizeof(tl_t *), return NULL);
@@ -14738,7 +14577,6 @@ tl_t * tl_deserialize_messages_stickerSet(buf_t *buf){
 	}
 	// parse arg documents (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->documents_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->documents_ = (tl_t **)MALLOC(obj->documents_len * sizeof(tl_t *), return NULL);
@@ -14814,7 +14652,6 @@ tl_t * tl_deserialize_botInfo(buf_t *buf){
 	// parse arg commands (Vector<BotCommand>)
 	if ((flag1 & (1 << 2)) == (1 << 2))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->commands_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->commands_ = (tl_t **)MALLOC(obj->commands_len * sizeof(tl_t *), return NULL);
@@ -14945,7 +14782,6 @@ tl_t * tl_deserialize_keyboardButtonSwitchInline(buf_t *buf){
 	// parse arg peer_types (Vector<InlineQueryPeerType>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peer_types_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peer_types_ = (tl_t **)MALLOC(obj->peer_types_len * sizeof(tl_t *), return NULL);
@@ -15240,7 +15076,6 @@ tl_t * tl_deserialize_keyboardButtonRow(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg buttons (Vector<KeyboardButton>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->buttons_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->buttons_ = (tl_t **)MALLOC(obj->buttons_len * sizeof(tl_t *), return NULL);
@@ -15325,7 +15160,6 @@ tl_t * tl_deserialize_replyKeyboardMarkup(buf_t *buf){
 	}
 	// parse arg rows (Vector<KeyboardButtonRow>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->rows_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->rows_ = (tl_t **)MALLOC(obj->rows_len * sizeof(tl_t *), return NULL);
@@ -15350,7 +15184,6 @@ tl_t * tl_deserialize_replyInlineMarkup(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg rows (Vector<KeyboardButtonRow>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->rows_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->rows_ = (tl_t **)MALLOC(obj->rows_len * sizeof(tl_t *), return NULL);
@@ -15831,7 +15664,6 @@ tl_t * tl_deserialize_contacts_resolvedPeer(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -15842,7 +15674,6 @@ tl_t * tl_deserialize_contacts_resolvedPeer(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -15924,7 +15755,6 @@ tl_t * tl_deserialize_updates_channelDifferenceTooLong(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -15935,7 +15765,6 @@ tl_t * tl_deserialize_updates_channelDifferenceTooLong(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -15946,7 +15775,6 @@ tl_t * tl_deserialize_updates_channelDifferenceTooLong(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -15984,7 +15812,6 @@ tl_t * tl_deserialize_updates_channelDifference(buf_t *buf){
 	}
 	// parse arg new_messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->new_messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->new_messages_ = (tl_t **)MALLOC(obj->new_messages_len * sizeof(tl_t *), return NULL);
@@ -15995,7 +15822,6 @@ tl_t * tl_deserialize_updates_channelDifference(buf_t *buf){
 	}
 	// parse arg other_updates (Vector<Update>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->other_updates_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->other_updates_ = (tl_t **)MALLOC(obj->other_updates_len * sizeof(tl_t *), return NULL);
@@ -16006,7 +15832,6 @@ tl_t * tl_deserialize_updates_channelDifference(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -16017,7 +15842,6 @@ tl_t * tl_deserialize_updates_channelDifference(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -16052,7 +15876,6 @@ tl_t * tl_deserialize_channelMessagesFilter(buf_t *buf){
 	}
 	// parse arg ranges (Vector<MessageRange>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->ranges_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->ranges_ = (tl_t **)MALLOC(obj->ranges_len * sizeof(tl_t *), return NULL);
@@ -16363,7 +16186,6 @@ tl_t * tl_deserialize_channels_channelParticipants(buf_t *buf){
 	}
 	// parse arg participants (Vector<ChannelParticipant>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->participants_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->participants_ = (tl_t **)MALLOC(obj->participants_len * sizeof(tl_t *), return NULL);
@@ -16374,7 +16196,6 @@ tl_t * tl_deserialize_channels_channelParticipants(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -16385,7 +16206,6 @@ tl_t * tl_deserialize_channels_channelParticipants(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -16416,7 +16236,6 @@ tl_t * tl_deserialize_channels_channelParticipant(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -16427,7 +16246,6 @@ tl_t * tl_deserialize_channels_channelParticipant(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -16463,7 +16281,6 @@ tl_t * tl_deserialize_help_termsOfService(buf_t *buf){
 	}
 	// parse arg entities (Vector<MessageEntity>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -16501,7 +16318,6 @@ tl_t * tl_deserialize_messages_savedGifs(buf_t *buf){
 	}
 	// parse arg gifs (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->gifs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->gifs_ = (tl_t **)MALLOC(obj->gifs_len * sizeof(tl_t *), return NULL);
@@ -16534,7 +16350,6 @@ tl_t * tl_deserialize_inputBotInlineMessageMediaAuto(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -16577,7 +16392,6 @@ tl_t * tl_deserialize_inputBotInlineMessageText(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -16813,7 +16627,6 @@ tl_t * tl_deserialize_inputBotInlineMessageMediaWebPage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -16998,7 +16811,6 @@ tl_t * tl_deserialize_botInlineMessageMediaAuto(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -17041,7 +16853,6 @@ tl_t * tl_deserialize_botInlineMessageText(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -17269,7 +17080,6 @@ tl_t * tl_deserialize_botInlineMessageMediaWebPage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -17427,7 +17237,6 @@ tl_t * tl_deserialize_messages_botResults(buf_t *buf){
 	}
 	// parse arg results (Vector<BotInlineResult>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->results_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->results_ = (tl_t **)MALLOC(obj->results_len * sizeof(tl_t *), return NULL);
@@ -17443,7 +17252,6 @@ tl_t * tl_deserialize_messages_botResults(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -17961,7 +17769,6 @@ tl_t * tl_deserialize_messages_peerDialogs(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg dialogs (Vector<Dialog>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->dialogs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->dialogs_ = (tl_t **)MALLOC(obj->dialogs_len * sizeof(tl_t *), return NULL);
@@ -17972,7 +17779,6 @@ tl_t * tl_deserialize_messages_peerDialogs(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -17983,7 +17789,6 @@ tl_t * tl_deserialize_messages_peerDialogs(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -17994,7 +17799,6 @@ tl_t * tl_deserialize_messages_peerDialogs(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -18115,7 +17919,6 @@ tl_t * tl_deserialize_topPeerCategoryPeers(buf_t *buf){
 	}
 	// parse arg peers (Vector<TopPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -18142,7 +17945,6 @@ tl_t * tl_deserialize_contacts_topPeers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg categories (Vector<TopPeerCategoryPeers>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->categories_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->categories_ = (tl_t **)MALLOC(obj->categories_len * sizeof(tl_t *), return NULL);
@@ -18153,7 +17955,6 @@ tl_t * tl_deserialize_contacts_topPeers(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -18164,7 +17965,6 @@ tl_t * tl_deserialize_contacts_topPeers(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -18232,7 +18032,6 @@ tl_t * tl_deserialize_draftMessage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -18298,7 +18097,6 @@ tl_t * tl_deserialize_messages_featuredStickers(buf_t *buf){
 	}
 	// parse arg sets (Vector<StickerSetCovered>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sets_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sets_ = (tl_t **)MALLOC(obj->sets_len * sizeof(tl_t *), return NULL);
@@ -18309,7 +18107,6 @@ tl_t * tl_deserialize_messages_featuredStickers(buf_t *buf){
 	}
 	// parse arg unread (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->unread_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->unread_ = (long *)MALLOC(obj->unread_len * sizeof(long), return NULL);
@@ -18342,7 +18139,6 @@ tl_t * tl_deserialize_messages_recentStickers(buf_t *buf){
 	}
 	// parse arg packs (Vector<StickerPack>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->packs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->packs_ = (tl_t **)MALLOC(obj->packs_len * sizeof(tl_t *), return NULL);
@@ -18353,7 +18149,6 @@ tl_t * tl_deserialize_messages_recentStickers(buf_t *buf){
 	}
 	// parse arg stickers (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stickers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stickers_ = (tl_t **)MALLOC(obj->stickers_len * sizeof(tl_t *), return NULL);
@@ -18364,7 +18159,6 @@ tl_t * tl_deserialize_messages_recentStickers(buf_t *buf){
 	}
 	// parse arg dates (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->dates_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->dates_ = (int *)MALLOC(obj->dates_len * sizeof(int), return NULL);
@@ -18389,7 +18183,6 @@ tl_t * tl_deserialize_messages_archivedStickers(buf_t *buf){
 	}
 	// parse arg sets (Vector<StickerSetCovered>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sets_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sets_ = (tl_t **)MALLOC(obj->sets_len * sizeof(tl_t *), return NULL);
@@ -18416,7 +18209,6 @@ tl_t * tl_deserialize_messages_stickerSetInstallResultArchive(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg sets (Vector<StickerSetCovered>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sets_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sets_ = (tl_t **)MALLOC(obj->sets_len * sizeof(tl_t *), return NULL);
@@ -18455,7 +18247,6 @@ tl_t * tl_deserialize_stickerSetMultiCovered(buf_t *buf){
 	}
 	// parse arg covers (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->covers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->covers_ = (tl_t **)MALLOC(obj->covers_len * sizeof(tl_t *), return NULL);
@@ -18478,7 +18269,6 @@ tl_t * tl_deserialize_stickerSetFullCovered(buf_t *buf){
 	}
 	// parse arg packs (Vector<StickerPack>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->packs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->packs_ = (tl_t **)MALLOC(obj->packs_len * sizeof(tl_t *), return NULL);
@@ -18489,7 +18279,6 @@ tl_t * tl_deserialize_stickerSetFullCovered(buf_t *buf){
 	}
 	// parse arg keywords (Vector<StickerKeyword>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->keywords_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->keywords_ = (tl_t **)MALLOC(obj->keywords_len * sizeof(tl_t *), return NULL);
@@ -18500,7 +18289,6 @@ tl_t * tl_deserialize_stickerSetFullCovered(buf_t *buf){
 	}
 	// parse arg documents (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->documents_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->documents_ = (tl_t **)MALLOC(obj->documents_len * sizeof(tl_t *), return NULL);
@@ -18686,7 +18474,6 @@ tl_t * tl_deserialize_messages_highScores(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg scores (Vector<HighScore>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->scores_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->scores_ = (tl_t **)MALLOC(obj->scores_len * sizeof(tl_t *), return NULL);
@@ -18697,7 +18484,6 @@ tl_t * tl_deserialize_messages_highScores(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -18836,7 +18622,6 @@ tl_t * tl_deserialize_textConcat(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg texts (Vector<RichText>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->texts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->texts_ = (tl_t **)MALLOC(obj->texts_len * sizeof(tl_t *), return NULL);
@@ -19083,7 +18868,6 @@ tl_t * tl_deserialize_pageBlockList(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg items (Vector<PageListItem>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->items_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->items_ = (tl_t **)MALLOC(obj->items_len * sizeof(tl_t *), return NULL);
@@ -19288,7 +19072,6 @@ tl_t * tl_deserialize_pageBlockEmbedPost(buf_t *buf){
 	}
 	// parse arg blocks (Vector<PageBlock>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->blocks_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->blocks_ = (tl_t **)MALLOC(obj->blocks_len * sizeof(tl_t *), return NULL);
@@ -19311,7 +19094,6 @@ tl_t * tl_deserialize_pageBlockCollage(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg items (Vector<PageBlock>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->items_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->items_ = (tl_t **)MALLOC(obj->items_len * sizeof(tl_t *), return NULL);
@@ -19334,7 +19116,6 @@ tl_t * tl_deserialize_pageBlockSlideshow(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg items (Vector<PageBlock>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->items_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->items_ = (tl_t **)MALLOC(obj->items_len * sizeof(tl_t *), return NULL);
@@ -19415,7 +19196,6 @@ tl_t * tl_deserialize_pageBlockTable(buf_t *buf){
 	}
 	// parse arg rows (Vector<PageTableRow>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->rows_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->rows_ = (tl_t **)MALLOC(obj->rows_len * sizeof(tl_t *), return NULL);
@@ -19434,7 +19214,6 @@ tl_t * tl_deserialize_pageBlockOrderedList(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg items (Vector<PageListOrderedItem>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->items_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->items_ = (tl_t **)MALLOC(obj->items_len * sizeof(tl_t *), return NULL);
@@ -19461,7 +19240,6 @@ tl_t * tl_deserialize_pageBlockDetails(buf_t *buf){
 	}
 	// parse arg blocks (Vector<PageBlock>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->blocks_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->blocks_ = (tl_t **)MALLOC(obj->blocks_len * sizeof(tl_t *), return NULL);
@@ -19488,7 +19266,6 @@ tl_t * tl_deserialize_pageBlockRelatedArticles(buf_t *buf){
 	}
 	// parse arg articles (Vector<PageRelatedArticle>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->articles_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->articles_ = (tl_t **)MALLOC(obj->articles_len * sizeof(tl_t *), return NULL);
@@ -19654,7 +19431,6 @@ tl_t * tl_deserialize_invoice(buf_t *buf){
 	}
 	// parse arg prices (Vector<LabeledPrice>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->prices_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->prices_ = (tl_t **)MALLOC(obj->prices_len * sizeof(tl_t *), return NULL);
@@ -19672,7 +19448,6 @@ tl_t * tl_deserialize_invoice(buf_t *buf){
 	// parse arg suggested_tip_amounts (Vector<long>)
 	if ((flag1 & (1 << 8)) == (1 << 8))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->suggested_tip_amounts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->suggested_tip_amounts_ = (long *)MALLOC(obj->suggested_tip_amounts_len * sizeof(long), return NULL);
@@ -19826,7 +19601,6 @@ tl_t * tl_deserialize_webDocument(buf_t *buf){
 	}
 	// parse arg attributes (Vector<DocumentAttribute>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->attributes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->attributes_ = (tl_t **)MALLOC(obj->attributes_len * sizeof(tl_t *), return NULL);
@@ -19860,7 +19634,6 @@ tl_t * tl_deserialize_webDocumentNoProxy(buf_t *buf){
 	}
 	// parse arg attributes (Vector<DocumentAttribute>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->attributes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->attributes_ = (tl_t **)MALLOC(obj->attributes_len * sizeof(tl_t *), return NULL);
@@ -19894,7 +19667,6 @@ tl_t * tl_deserialize_inputWebDocument(buf_t *buf){
 	}
 	// parse arg attributes (Vector<DocumentAttribute>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->attributes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->attributes_ = (tl_t **)MALLOC(obj->attributes_len * sizeof(tl_t *), return NULL);
@@ -20096,7 +19868,6 @@ tl_t * tl_deserialize_payments_paymentForm(buf_t *buf){
 	// parse arg additional_methods (Vector<PaymentFormMethod>)
 	if ((flag1 & (1 << 6)) == (1 << 6))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->additional_methods_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->additional_methods_ = (tl_t **)MALLOC(obj->additional_methods_len * sizeof(tl_t *), return NULL);
@@ -20113,7 +19884,6 @@ tl_t * tl_deserialize_payments_paymentForm(buf_t *buf){
 	// parse arg saved_credentials (Vector<PaymentSavedCredentials>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->saved_credentials_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->saved_credentials_ = (tl_t **)MALLOC(obj->saved_credentials_len * sizeof(tl_t *), return NULL);
@@ -20124,7 +19894,6 @@ tl_t * tl_deserialize_payments_paymentForm(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -20175,7 +19944,6 @@ tl_t * tl_deserialize_payments_paymentFormStars(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -20221,7 +19989,6 @@ tl_t * tl_deserialize_payments_validatedRequestedInfo(buf_t *buf){
 	// parse arg shipping_options (Vector<ShippingOption>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->shipping_options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->shipping_options_ = (tl_t **)MALLOC(obj->shipping_options_len * sizeof(tl_t *), return NULL);
@@ -20333,7 +20100,6 @@ tl_t * tl_deserialize_payments_paymentReceipt(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -20399,7 +20165,6 @@ tl_t * tl_deserialize_payments_paymentReceiptStars(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -20527,7 +20292,6 @@ tl_t * tl_deserialize_shippingOption(buf_t *buf){
 	}
 	// parse arg prices (Vector<LabeledPrice>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->prices_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->prices_ = (tl_t **)MALLOC(obj->prices_len * sizeof(tl_t *), return NULL);
@@ -20808,7 +20572,6 @@ tl_t * tl_deserialize_phoneCall(buf_t *buf){
 	}
 	// parse arg connections (Vector<PhoneConnection>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->connections_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->connections_ = (tl_t **)MALLOC(obj->connections_len * sizeof(tl_t *), return NULL);
@@ -20993,7 +20756,6 @@ tl_t * tl_deserialize_phoneCallProtocol(buf_t *buf){
 	}
 	// parse arg library_versions (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->library_versions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->library_versions_ = (char **)MALLOC(obj->library_versions_len * sizeof(char *), return NULL);
@@ -21017,7 +20779,6 @@ tl_t * tl_deserialize_phone_phoneCall(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -21078,7 +20839,6 @@ tl_t * tl_deserialize_cdnConfig(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg public_keys (Vector<CdnPublicKey>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->public_keys_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->public_keys_ = (tl_t **)MALLOC(obj->public_keys_len * sizeof(tl_t *), return NULL);
@@ -21194,7 +20954,6 @@ tl_t * tl_deserialize_langPackDifference(buf_t *buf){
 	}
 	// parse arg strings (Vector<LangPackString>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->strings_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->strings_ = (tl_t **)MALLOC(obj->strings_len * sizeof(tl_t *), return NULL);
@@ -21789,7 +21548,6 @@ tl_t * tl_deserialize_channelAdminLogEventActionChangeUsernames(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg prev_value (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->prev_value_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->prev_value_ = (char **)MALLOC(obj->prev_value_len * sizeof(char *), return NULL);
@@ -21801,7 +21559,6 @@ tl_t * tl_deserialize_channelAdminLogEventActionChangeUsernames(buf_t *buf){
 	}
 	// parse arg new_value (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->new_value_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->new_value_ = (char **)MALLOC(obj->new_value_len * sizeof(char *), return NULL);
@@ -22041,7 +21798,6 @@ tl_t * tl_deserialize_channels_adminLogResults(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg events (Vector<ChannelAdminLogEvent>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->events_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->events_ = (tl_t **)MALLOC(obj->events_len * sizeof(tl_t *), return NULL);
@@ -22052,7 +21808,6 @@ tl_t * tl_deserialize_channels_adminLogResults(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -22063,7 +21818,6 @@ tl_t * tl_deserialize_channels_adminLogResults(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -22219,7 +21973,6 @@ tl_t * tl_deserialize_messages_favedStickers(buf_t *buf){
 	}
 	// parse arg packs (Vector<StickerPack>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->packs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->packs_ = (tl_t **)MALLOC(obj->packs_len * sizeof(tl_t *), return NULL);
@@ -22230,7 +21983,6 @@ tl_t * tl_deserialize_messages_favedStickers(buf_t *buf){
 	}
 	// parse arg stickers (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stickers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stickers_ = (tl_t **)MALLOC(obj->stickers_len * sizeof(tl_t *), return NULL);
@@ -22332,7 +22084,6 @@ tl_t * tl_deserialize_help_recentMeUrls(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg urls (Vector<RecentMeUrl>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->urls_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->urls_ = (tl_t **)MALLOC(obj->urls_len * sizeof(tl_t *), return NULL);
@@ -22343,7 +22094,6 @@ tl_t * tl_deserialize_help_recentMeUrls(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -22354,7 +22104,6 @@ tl_t * tl_deserialize_help_recentMeUrls(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -22391,7 +22140,6 @@ tl_t * tl_deserialize_inputSingleMedia(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -22463,7 +22211,6 @@ tl_t * tl_deserialize_account_webAuthorizations(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg authorizations (Vector<WebAuthorization>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->authorizations_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->authorizations_ = (tl_t **)MALLOC(obj->authorizations_len * sizeof(tl_t *), return NULL);
@@ -22474,7 +22221,6 @@ tl_t * tl_deserialize_account_webAuthorizations(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -22608,7 +22354,6 @@ tl_t * tl_deserialize_messages_foundStickerSets(buf_t *buf){
 	}
 	// parse arg sets (Vector<StickerSetCovered>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sets_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sets_ = (tl_t **)MALLOC(obj->sets_len * sizeof(tl_t *), return NULL);
@@ -22973,7 +22718,6 @@ tl_t * tl_deserialize_secureValue(buf_t *buf){
 	// parse arg translation (Vector<SecureFile>)
 	if ((flag1 & (1 << 6)) == (1 << 6))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->translation_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->translation_ = (tl_t **)MALLOC(obj->translation_len * sizeof(tl_t *), return NULL);
@@ -22985,7 +22729,6 @@ tl_t * tl_deserialize_secureValue(buf_t *buf){
 	// parse arg files (Vector<SecureFile>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->files_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->files_ = (tl_t **)MALLOC(obj->files_len * sizeof(tl_t *), return NULL);
@@ -23041,7 +22784,6 @@ tl_t * tl_deserialize_inputSecureValue(buf_t *buf){
 	// parse arg translation (Vector<InputSecureFile>)
 	if ((flag1 & (1 << 6)) == (1 << 6))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->translation_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->translation_ = (tl_t **)MALLOC(obj->translation_len * sizeof(tl_t *), return NULL);
@@ -23053,7 +22795,6 @@ tl_t * tl_deserialize_inputSecureValue(buf_t *buf){
 	// parse arg files (Vector<InputSecureFile>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->files_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->files_ = (tl_t **)MALLOC(obj->files_len * sizeof(tl_t *), return NULL);
@@ -23207,7 +22948,6 @@ tl_t * tl_deserialize_secureValueErrorFiles(buf_t *buf){
 	}
 	// parse arg file_hash (Vector<bytes>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->file_hash_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->file_hash_ = (buf_t *)MALLOC(obj->file_hash_len * sizeof(buf_t), return NULL);
@@ -23277,7 +23017,6 @@ tl_t * tl_deserialize_secureValueErrorTranslationFiles(buf_t *buf){
 	}
 	// parse arg file_hash (Vector<bytes>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->file_hash_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->file_hash_ = (buf_t *)MALLOC(obj->file_hash_len * sizeof(buf_t), return NULL);
@@ -23324,7 +23063,6 @@ tl_t * tl_deserialize_account_authorizationForm(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg required_types (Vector<SecureRequiredType>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->required_types_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->required_types_ = (tl_t **)MALLOC(obj->required_types_len * sizeof(tl_t *), return NULL);
@@ -23335,7 +23073,6 @@ tl_t * tl_deserialize_account_authorizationForm(buf_t *buf){
 	}
 	// parse arg values (Vector<SecureValue>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->values_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->values_ = (tl_t **)MALLOC(obj->values_len * sizeof(tl_t *), return NULL);
@@ -23346,7 +23083,6 @@ tl_t * tl_deserialize_account_authorizationForm(buf_t *buf){
 	}
 	// parse arg errors (Vector<SecureValueError>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->errors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->errors_ = (tl_t **)MALLOC(obj->errors_len * sizeof(tl_t *), return NULL);
@@ -23357,7 +23093,6 @@ tl_t * tl_deserialize_account_authorizationForm(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -23422,7 +23157,6 @@ tl_t * tl_deserialize_help_deepLinkInfo(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -23627,7 +23361,6 @@ tl_t * tl_deserialize_secureRequiredTypeOneOf(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg types (Vector<SecureRequiredType>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->types_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->types_ = (tl_t **)MALLOC(obj->types_len * sizeof(tl_t *), return NULL);
@@ -23761,7 +23494,6 @@ tl_t * tl_deserialize_jsonArray(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg value (Vector<JSONValue>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->value_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->value_ = (tl_t **)MALLOC(obj->value_len * sizeof(tl_t *), return NULL);
@@ -23780,7 +23512,6 @@ tl_t * tl_deserialize_jsonObject(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg value (Vector<JSONObjectValue>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->value_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->value_ = (tl_t **)MALLOC(obj->value_len * sizeof(tl_t *), return NULL);
@@ -23852,7 +23583,6 @@ tl_t * tl_deserialize_pageTableRow(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg cells (Vector<PageTableCell>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->cells_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->cells_ = (tl_t **)MALLOC(obj->cells_len * sizeof(tl_t *), return NULL);
@@ -23899,7 +23629,6 @@ tl_t * tl_deserialize_pageListItemBlocks(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg blocks (Vector<PageBlock>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->blocks_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->blocks_ = (tl_t **)MALLOC(obj->blocks_len * sizeof(tl_t *), return NULL);
@@ -23940,7 +23669,6 @@ tl_t * tl_deserialize_pageListOrderedItemBlocks(buf_t *buf){
 	}
 	// parse arg blocks (Vector<PageBlock>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->blocks_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->blocks_ = (tl_t **)MALLOC(obj->blocks_len * sizeof(tl_t *), return NULL);
@@ -24033,7 +23761,6 @@ tl_t * tl_deserialize_page(buf_t *buf){
 	}
 	// parse arg blocks (Vector<PageBlock>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->blocks_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->blocks_ = (tl_t **)MALLOC(obj->blocks_len * sizeof(tl_t *), return NULL);
@@ -24044,7 +23771,6 @@ tl_t * tl_deserialize_page(buf_t *buf){
 	}
 	// parse arg photos (Vector<Photo>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->photos_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->photos_ = (tl_t **)MALLOC(obj->photos_len * sizeof(tl_t *), return NULL);
@@ -24055,7 +23781,6 @@ tl_t * tl_deserialize_page(buf_t *buf){
 	}
 	// parse arg documents (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->documents_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->documents_ = (tl_t **)MALLOC(obj->documents_len * sizeof(tl_t *), return NULL);
@@ -24106,7 +23831,6 @@ tl_t * tl_deserialize_help_userInfo(buf_t *buf){
 	}
 	// parse arg entities (Vector<MessageEntity>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -24183,7 +23907,6 @@ tl_t * tl_deserialize_poll(buf_t *buf){
 	}
 	// parse arg answers (Vector<PollAnswer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->answers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->answers_ = (tl_t **)MALLOC(obj->answers_len * sizeof(tl_t *), return NULL);
@@ -24253,7 +23976,6 @@ tl_t * tl_deserialize_pollResults(buf_t *buf){
 	// parse arg results (Vector<PollAnswerVoters>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->results_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->results_ = (tl_t **)MALLOC(obj->results_len * sizeof(tl_t *), return NULL);
@@ -24271,7 +23993,6 @@ tl_t * tl_deserialize_pollResults(buf_t *buf){
 	// parse arg recent_voters (Vector<Peer>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->recent_voters_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->recent_voters_ = (tl_t **)MALLOC(obj->recent_voters_len * sizeof(tl_t *), return NULL);
@@ -24289,7 +24010,6 @@ tl_t * tl_deserialize_pollResults(buf_t *buf){
 	// parse arg solution_entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->solution_entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->solution_entities_ = (tl_t **)MALLOC(obj->solution_entities_len * sizeof(tl_t *), return NULL);
@@ -24593,7 +24313,6 @@ tl_t * tl_deserialize_account_wallPapers(buf_t *buf){
 	}
 	// parse arg wallpapers (Vector<WallPaper>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->wallpapers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->wallpapers_ = (tl_t **)MALLOC(obj->wallpapers_len * sizeof(tl_t *), return NULL);
@@ -24646,7 +24365,6 @@ tl_t * tl_deserialize_codeSettings(buf_t *buf){
 	// parse arg logout_tokens (Vector<bytes>)
 	if ((flag1 & (1 << 6)) == (1 << 6))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->logout_tokens_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->logout_tokens_ = (buf_t *)MALLOC(obj->logout_tokens_len * sizeof(buf_t), return NULL);
@@ -24830,7 +24548,6 @@ tl_t * tl_deserialize_emojiKeyword(buf_t *buf){
 	}
 	// parse arg emoticons (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->emoticons_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->emoticons_ = (char **)MALLOC(obj->emoticons_len * sizeof(char *), return NULL);
@@ -24855,7 +24572,6 @@ tl_t * tl_deserialize_emojiKeywordDeleted(buf_t *buf){
 	}
 	// parse arg emoticons (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->emoticons_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->emoticons_ = (char **)MALLOC(obj->emoticons_len * sizeof(char *), return NULL);
@@ -24890,7 +24606,6 @@ tl_t * tl_deserialize_emojiKeywordsDifference(buf_t *buf){
 	}
 	// parse arg keywords (Vector<EmojiKeyword>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->keywords_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->keywords_ = (tl_t **)MALLOC(obj->keywords_len * sizeof(tl_t *), return NULL);
@@ -25239,7 +24954,6 @@ tl_t * tl_deserialize_theme(buf_t *buf){
 	// parse arg settings (Vector<ThemeSettings>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->settings_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->settings_ = (tl_t **)MALLOC(obj->settings_len * sizeof(tl_t *), return NULL);
@@ -25283,7 +24997,6 @@ tl_t * tl_deserialize_account_themes(buf_t *buf){
 	}
 	// parse arg themes (Vector<Theme>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->themes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->themes_ = (tl_t **)MALLOC(obj->themes_len * sizeof(tl_t *), return NULL);
@@ -25369,7 +25082,6 @@ tl_t * tl_deserialize_messages_inactiveChats(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg dates (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->dates_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->dates_ = (int *)MALLOC(obj->dates_len * sizeof(int), return NULL);
@@ -25381,7 +25093,6 @@ tl_t * tl_deserialize_messages_inactiveChats(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -25392,7 +25103,6 @@ tl_t * tl_deserialize_messages_inactiveChats(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -25475,7 +25185,6 @@ tl_t * tl_deserialize_inputThemeSettings(buf_t *buf){
 	// parse arg message_colors (Vector<int>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->message_colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->message_colors_ = (int *)MALLOC(obj->message_colors_len * sizeof(int), return NULL);
@@ -25529,7 +25238,6 @@ tl_t * tl_deserialize_themeSettings(buf_t *buf){
 	// parse arg message_colors (Vector<int>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->message_colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->message_colors_ = (int *)MALLOC(obj->message_colors_len * sizeof(int), return NULL);
@@ -25558,7 +25266,6 @@ tl_t * tl_deserialize_webPageAttributeTheme(buf_t *buf){
 	// parse arg documents (Vector<Document>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->documents_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->documents_ = (tl_t **)MALLOC(obj->documents_len * sizeof(tl_t *), return NULL);
@@ -25620,7 +25327,6 @@ tl_t * tl_deserialize_webPageAttributeStickerSet(buf_t *buf){
 	}
 	// parse arg stickers (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stickers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stickers_ = (tl_t **)MALLOC(obj->stickers_len * sizeof(tl_t *), return NULL);
@@ -25647,7 +25353,6 @@ tl_t * tl_deserialize_messages_votesList(buf_t *buf){
 	}
 	// parse arg votes (Vector<MessagePeerVote>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->votes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->votes_ = (tl_t **)MALLOC(obj->votes_len * sizeof(tl_t *), return NULL);
@@ -25658,7 +25363,6 @@ tl_t * tl_deserialize_messages_votesList(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -25669,7 +25373,6 @@ tl_t * tl_deserialize_messages_votesList(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -25717,7 +25420,6 @@ tl_t * tl_deserialize_payments_bankCardData(buf_t *buf){
 	}
 	// parse arg open_urls (Vector<BankCardOpenUrl>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->open_urls_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->open_urls_ = (tl_t **)MALLOC(obj->open_urls_len * sizeof(tl_t *), return NULL);
@@ -25801,7 +25503,6 @@ tl_t * tl_deserialize_dialogFilter(buf_t *buf){
 	}
 	// parse arg pinned_peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->pinned_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->pinned_peers_ = (tl_t **)MALLOC(obj->pinned_peers_len * sizeof(tl_t *), return NULL);
@@ -25812,7 +25513,6 @@ tl_t * tl_deserialize_dialogFilter(buf_t *buf){
 	}
 	// parse arg include_peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->include_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->include_peers_ = (tl_t **)MALLOC(obj->include_peers_len * sizeof(tl_t *), return NULL);
@@ -25823,7 +25523,6 @@ tl_t * tl_deserialize_dialogFilter(buf_t *buf){
 	}
 	// parse arg exclude_peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->exclude_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->exclude_peers_ = (tl_t **)MALLOC(obj->exclude_peers_len * sizeof(tl_t *), return NULL);
@@ -25880,7 +25579,6 @@ tl_t * tl_deserialize_dialogFilterChatlist(buf_t *buf){
 	}
 	// parse arg pinned_peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->pinned_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->pinned_peers_ = (tl_t **)MALLOC(obj->pinned_peers_len * sizeof(tl_t *), return NULL);
@@ -25891,7 +25589,6 @@ tl_t * tl_deserialize_dialogFilterChatlist(buf_t *buf){
 	}
 	// parse arg include_peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->include_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->include_peers_ = (tl_t **)MALLOC(obj->include_peers_len * sizeof(tl_t *), return NULL);
@@ -26112,7 +25809,6 @@ tl_t * tl_deserialize_stats_broadcastStats(buf_t *buf){
 	}
 	// parse arg recent_posts_interactions (Vector<PostInteractionCounters>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->recent_posts_interactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->recent_posts_interactions_ = (tl_t **)MALLOC(obj->recent_posts_interactions_len * sizeof(tl_t *), return NULL);
@@ -26161,7 +25857,6 @@ tl_t * tl_deserialize_help_promoData(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -26172,7 +25867,6 @@ tl_t * tl_deserialize_help_promoData(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -26245,7 +25939,6 @@ tl_t * tl_deserialize_videoSizeEmojiMarkup(buf_t *buf){
 	}
 	// parse arg background_colors (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->background_colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->background_colors_ = (int *)MALLOC(obj->background_colors_len * sizeof(int), return NULL);
@@ -26274,7 +25967,6 @@ tl_t * tl_deserialize_videoSizeStickerMarkup(buf_t *buf){
 	}
 	// parse arg background_colors (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->background_colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->background_colors_ = (int *)MALLOC(obj->background_colors_len * sizeof(int), return NULL);
@@ -26415,7 +26107,6 @@ tl_t * tl_deserialize_stats_megagroupStats(buf_t *buf){
 	}
 	// parse arg top_posters (Vector<StatsGroupTopPoster>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->top_posters_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->top_posters_ = (tl_t **)MALLOC(obj->top_posters_len * sizeof(tl_t *), return NULL);
@@ -26426,7 +26117,6 @@ tl_t * tl_deserialize_stats_megagroupStats(buf_t *buf){
 	}
 	// parse arg top_admins (Vector<StatsGroupTopAdmin>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->top_admins_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->top_admins_ = (tl_t **)MALLOC(obj->top_admins_len * sizeof(tl_t *), return NULL);
@@ -26437,7 +26127,6 @@ tl_t * tl_deserialize_stats_megagroupStats(buf_t *buf){
 	}
 	// parse arg top_inviters (Vector<StatsGroupTopInviter>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->top_inviters_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->top_inviters_ = (tl_t **)MALLOC(obj->top_inviters_len * sizeof(tl_t *), return NULL);
@@ -26448,7 +26137,6 @@ tl_t * tl_deserialize_stats_megagroupStats(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -26512,7 +26200,6 @@ tl_t * tl_deserialize_help_countryCode(buf_t *buf){
 	// parse arg prefixes (Vector<string>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->prefixes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->prefixes_ = (char **)MALLOC(obj->prefixes_len * sizeof(char *), return NULL);
@@ -26525,7 +26212,6 @@ tl_t * tl_deserialize_help_countryCode(buf_t *buf){
 	// parse arg patterns (Vector<string>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->patterns_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->patterns_ = (char **)MALLOC(obj->patterns_len * sizeof(char *), return NULL);
@@ -26569,7 +26255,6 @@ tl_t * tl_deserialize_help_country(buf_t *buf){
 	}
 	// parse arg country_codes (Vector<help_CountryCode>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->country_codes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->country_codes_ = (tl_t **)MALLOC(obj->country_codes_len * sizeof(tl_t *), return NULL);
@@ -26596,7 +26281,6 @@ tl_t * tl_deserialize_help_countriesList(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg countries (Vector<help_Country>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->countries_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->countries_ = (tl_t **)MALLOC(obj->countries_len * sizeof(tl_t *), return NULL);
@@ -26648,7 +26332,6 @@ tl_t * tl_deserialize_messages_messageViews(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg views (Vector<MessageViews>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->views_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->views_ = (tl_t **)MALLOC(obj->views_len * sizeof(tl_t *), return NULL);
@@ -26659,7 +26342,6 @@ tl_t * tl_deserialize_messages_messageViews(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -26670,7 +26352,6 @@ tl_t * tl_deserialize_messages_messageViews(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -26692,7 +26373,6 @@ tl_t * tl_deserialize_messages_discussionMessage(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -26726,7 +26406,6 @@ tl_t * tl_deserialize_messages_discussionMessage(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -26737,7 +26416,6 @@ tl_t * tl_deserialize_messages_discussionMessage(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -26808,7 +26486,6 @@ tl_t * tl_deserialize_messageReplyHeader(buf_t *buf){
 	// parse arg quote_entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 7)) == (1 << 7))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->quote_entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->quote_entities_ = (tl_t **)MALLOC(obj->quote_entities_len * sizeof(tl_t *), return NULL);
@@ -26869,7 +26546,6 @@ tl_t * tl_deserialize_messageReplies(buf_t *buf){
 	// parse arg recent_repliers (Vector<Peer>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->recent_repliers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->recent_repliers_ = (tl_t **)MALLOC(obj->recent_repliers_len * sizeof(tl_t *), return NULL);
@@ -27199,7 +26875,6 @@ tl_t * tl_deserialize_phone_groupCall(buf_t *buf){
 	}
 	// parse arg participants (Vector<GroupCallParticipant>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->participants_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->participants_ = (tl_t **)MALLOC(obj->participants_len * sizeof(tl_t *), return NULL);
@@ -27215,7 +26890,6 @@ tl_t * tl_deserialize_phone_groupCall(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -27226,7 +26900,6 @@ tl_t * tl_deserialize_phone_groupCall(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -27250,7 +26923,6 @@ tl_t * tl_deserialize_phone_groupParticipants(buf_t *buf){
 	}
 	// parse arg participants (Vector<GroupCallParticipant>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->participants_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->participants_ = (tl_t **)MALLOC(obj->participants_len * sizeof(tl_t *), return NULL);
@@ -27266,7 +26938,6 @@ tl_t * tl_deserialize_phone_groupParticipants(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -27277,7 +26948,6 @@ tl_t * tl_deserialize_phone_groupParticipants(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -27404,7 +27074,6 @@ tl_t * tl_deserialize_messages_affectedFoundMessages(buf_t *buf){
 	}
 	// parse arg messages (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (int *)MALLOC(obj->messages_len * sizeof(int), return NULL);
@@ -27472,7 +27141,6 @@ tl_t * tl_deserialize_messages_exportedChatInvites(buf_t *buf){
 	}
 	// parse arg invites (Vector<ExportedChatInvite>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->invites_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->invites_ = (tl_t **)MALLOC(obj->invites_len * sizeof(tl_t *), return NULL);
@@ -27483,7 +27151,6 @@ tl_t * tl_deserialize_messages_exportedChatInvites(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -27506,7 +27173,6 @@ tl_t * tl_deserialize_messages_exportedChatInvite(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -27533,7 +27199,6 @@ tl_t * tl_deserialize_messages_exportedChatInviteReplaced(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -27557,7 +27222,6 @@ tl_t * tl_deserialize_messages_chatInviteImporters(buf_t *buf){
 	}
 	// parse arg importers (Vector<ChatInviteImporter>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->importers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->importers_ = (tl_t **)MALLOC(obj->importers_len * sizeof(tl_t *), return NULL);
@@ -27568,7 +27232,6 @@ tl_t * tl_deserialize_messages_chatInviteImporters(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -27610,7 +27273,6 @@ tl_t * tl_deserialize_messages_chatAdminsWithInvites(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg admins (Vector<ChatAdminWithInvites>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->admins_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->admins_ = (tl_t **)MALLOC(obj->admins_len * sizeof(tl_t *), return NULL);
@@ -27621,7 +27283,6 @@ tl_t * tl_deserialize_messages_chatAdminsWithInvites(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -27653,7 +27314,6 @@ tl_t * tl_deserialize_phone_joinAsPeers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg peers (Vector<Peer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -27664,7 +27324,6 @@ tl_t * tl_deserialize_phone_joinAsPeers(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -27675,7 +27334,6 @@ tl_t * tl_deserialize_phone_joinAsPeers(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -27712,7 +27370,6 @@ tl_t * tl_deserialize_groupCallParticipantVideoSourceGroup(buf_t *buf){
 	}
 	// parse arg sources (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sources_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sources_ = (int *)MALLOC(obj->sources_len * sizeof(int), return NULL);
@@ -27745,7 +27402,6 @@ tl_t * tl_deserialize_groupCallParticipantVideo(buf_t *buf){
 	}
 	// parse arg source_groups (Vector<GroupCallParticipantVideoSourceGroup>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->source_groups_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->source_groups_ = (tl_t **)MALLOC(obj->source_groups_len * sizeof(tl_t *), return NULL);
@@ -27922,7 +27578,6 @@ tl_t * tl_deserialize_sponsoredMessage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -27982,7 +27637,6 @@ tl_t * tl_deserialize_messages_sponsoredMessages(buf_t *buf){
 	}
 	// parse arg messages (Vector<SponsoredMessage>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -27993,7 +27647,6 @@ tl_t * tl_deserialize_messages_sponsoredMessages(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -28004,7 +27657,6 @@ tl_t * tl_deserialize_messages_sponsoredMessages(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -28088,7 +27740,6 @@ tl_t * tl_deserialize_messages_searchResultsCalendar(buf_t *buf){
 	}
 	// parse arg periods (Vector<SearchResultsCalendarPeriod>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->periods_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->periods_ = (tl_t **)MALLOC(obj->periods_len * sizeof(tl_t *), return NULL);
@@ -28099,7 +27750,6 @@ tl_t * tl_deserialize_messages_searchResultsCalendar(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -28110,7 +27760,6 @@ tl_t * tl_deserialize_messages_searchResultsCalendar(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -28121,7 +27770,6 @@ tl_t * tl_deserialize_messages_searchResultsCalendar(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -28168,7 +27816,6 @@ tl_t * tl_deserialize_messages_searchResultsPositions(buf_t *buf){
 	}
 	// parse arg positions (Vector<SearchResultsPosition>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->positions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->positions_ = (tl_t **)MALLOC(obj->positions_len * sizeof(tl_t *), return NULL);
@@ -28187,7 +27834,6 @@ tl_t * tl_deserialize_channels_sendAsPeers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg peers (Vector<SendAsPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -28198,7 +27844,6 @@ tl_t * tl_deserialize_channels_sendAsPeers(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -28209,7 +27854,6 @@ tl_t * tl_deserialize_channels_sendAsPeers(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -28232,7 +27876,6 @@ tl_t * tl_deserialize_users_userFull(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -28243,7 +27886,6 @@ tl_t * tl_deserialize_users_userFull(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -28266,7 +27908,6 @@ tl_t * tl_deserialize_messages_peerSettings(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -28277,7 +27918,6 @@ tl_t * tl_deserialize_messages_peerSettings(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -28356,7 +27996,6 @@ tl_t * tl_deserialize_messageReactions(buf_t *buf){
 	}
 	// parse arg results (Vector<ReactionCount>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->results_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->results_ = (tl_t **)MALLOC(obj->results_len * sizeof(tl_t *), return NULL);
@@ -28368,7 +28007,6 @@ tl_t * tl_deserialize_messageReactions(buf_t *buf){
 	// parse arg recent_reactions (Vector<MessagePeerReaction>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->recent_reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->recent_reactions_ = (tl_t **)MALLOC(obj->recent_reactions_len * sizeof(tl_t *), return NULL);
@@ -28380,7 +28018,6 @@ tl_t * tl_deserialize_messageReactions(buf_t *buf){
 	// parse arg top_reactors (Vector<MessageReactor>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->top_reactors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->top_reactors_ = (tl_t **)MALLOC(obj->top_reactors_len * sizeof(tl_t *), return NULL);
@@ -28407,7 +28044,6 @@ tl_t * tl_deserialize_messages_messageReactionsList(buf_t *buf){
 	}
 	// parse arg reactions (Vector<MessagePeerReaction>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->reactions_ = (tl_t **)MALLOC(obj->reactions_len * sizeof(tl_t *), return NULL);
@@ -28418,7 +28054,6 @@ tl_t * tl_deserialize_messages_messageReactionsList(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -28429,7 +28064,6 @@ tl_t * tl_deserialize_messages_messageReactionsList(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -28528,7 +28162,6 @@ tl_t * tl_deserialize_messages_availableReactions(buf_t *buf){
 	}
 	// parse arg reactions (Vector<AvailableReaction>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->reactions_ = (tl_t **)MALLOC(obj->reactions_len * sizeof(tl_t *), return NULL);
@@ -28609,7 +28242,6 @@ tl_t * tl_deserialize_phone_groupCallStreamChannels(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg channels (Vector<GroupCallStreamChannel>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->channels_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->channels_ = (tl_t **)MALLOC(obj->channels_len * sizeof(tl_t *), return NULL);
@@ -28677,7 +28309,6 @@ tl_t * tl_deserialize_attachMenuBotIcon(buf_t *buf){
 	// parse arg colors (Vector<AttachMenuBotIconColor>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->colors_ = (tl_t **)MALLOC(obj->colors_len * sizeof(tl_t *), return NULL);
@@ -28740,7 +28371,6 @@ tl_t * tl_deserialize_attachMenuBot(buf_t *buf){
 	// parse arg peer_types (Vector<AttachMenuPeerType>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peer_types_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peer_types_ = (tl_t **)MALLOC(obj->peer_types_len * sizeof(tl_t *), return NULL);
@@ -28751,7 +28381,6 @@ tl_t * tl_deserialize_attachMenuBot(buf_t *buf){
 	}
 	// parse arg icons (Vector<AttachMenuBotIcon>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->icons_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->icons_ = (tl_t **)MALLOC(obj->icons_len * sizeof(tl_t *), return NULL);
@@ -28783,7 +28412,6 @@ tl_t * tl_deserialize_attachMenuBots(buf_t *buf){
 	}
 	// parse arg bots (Vector<AttachMenuBot>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->bots_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->bots_ = (tl_t **)MALLOC(obj->bots_len * sizeof(tl_t *), return NULL);
@@ -28794,7 +28422,6 @@ tl_t * tl_deserialize_attachMenuBots(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -28817,7 +28444,6 @@ tl_t * tl_deserialize_attachMenuBotsBot(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -28926,7 +28552,6 @@ tl_t * tl_deserialize_account_savedRingtones(buf_t *buf){
 	}
 	// parse arg ringtones (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->ringtones_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->ringtones_ = (tl_t **)MALLOC(obj->ringtones_len * sizeof(tl_t *), return NULL);
@@ -29209,7 +28834,6 @@ tl_t * tl_deserialize_help_premiumPromo(buf_t *buf){
 	}
 	// parse arg status_entities (Vector<MessageEntity>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->status_entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->status_entities_ = (tl_t **)MALLOC(obj->status_entities_len * sizeof(tl_t *), return NULL);
@@ -29220,7 +28844,6 @@ tl_t * tl_deserialize_help_premiumPromo(buf_t *buf){
 	}
 	// parse arg video_sections (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->video_sections_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->video_sections_ = (char **)MALLOC(obj->video_sections_len * sizeof(char *), return NULL);
@@ -29232,7 +28855,6 @@ tl_t * tl_deserialize_help_premiumPromo(buf_t *buf){
 	}
 	// parse arg videos (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->videos_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->videos_ = (tl_t **)MALLOC(obj->videos_len * sizeof(tl_t *), return NULL);
@@ -29243,7 +28865,6 @@ tl_t * tl_deserialize_help_premiumPromo(buf_t *buf){
 	}
 	// parse arg period_options (Vector<PremiumSubscriptionOption>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->period_options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->period_options_ = (tl_t **)MALLOC(obj->period_options_len * sizeof(tl_t *), return NULL);
@@ -29254,7 +28875,6 @@ tl_t * tl_deserialize_help_premiumPromo(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -29319,7 +28939,6 @@ tl_t * tl_deserialize_inputStorePaymentPremiumGiftCode(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg users (Vector<InputUser>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -29371,7 +28990,6 @@ tl_t * tl_deserialize_inputStorePaymentPremiumGiveaway(buf_t *buf){
 	// parse arg additional_peers (Vector<InputPeer>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->additional_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->additional_peers_ = (tl_t **)MALLOC(obj->additional_peers_len * sizeof(tl_t *), return NULL);
@@ -29383,7 +29001,6 @@ tl_t * tl_deserialize_inputStorePaymentPremiumGiveaway(buf_t *buf){
 	// parse arg countries_iso2 (Vector<string>)
 	if ((flag1 & (1 << 2)) == (1 << 2))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->countries_iso2_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->countries_iso2_ = (char **)MALLOC(obj->countries_iso2_len * sizeof(char *), return NULL);
@@ -29502,7 +29119,6 @@ tl_t * tl_deserialize_inputStorePaymentStarsGiveaway(buf_t *buf){
 	// parse arg additional_peers (Vector<InputPeer>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->additional_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->additional_peers_ = (tl_t **)MALLOC(obj->additional_peers_len * sizeof(tl_t *), return NULL);
@@ -29514,7 +29130,6 @@ tl_t * tl_deserialize_inputStorePaymentStarsGiveaway(buf_t *buf){
 	// parse arg countries_iso2 (Vector<string>)
 	if ((flag1 & (1 << 2)) == (1 << 2))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->countries_iso2_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->countries_iso2_ = (char **)MALLOC(obj->countries_iso2_len * sizeof(char *), return NULL);
@@ -29672,7 +29287,6 @@ tl_t * tl_deserialize_account_emojiStatuses(buf_t *buf){
 	}
 	// parse arg statuses (Vector<EmojiStatus>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->statuses_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->statuses_ = (tl_t **)MALLOC(obj->statuses_len * sizeof(tl_t *), return NULL);
@@ -29757,7 +29371,6 @@ tl_t * tl_deserialize_chatReactionsSome(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg reactions (Vector<Reaction>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->reactions_ = (tl_t **)MALLOC(obj->reactions_len * sizeof(tl_t *), return NULL);
@@ -29789,7 +29402,6 @@ tl_t * tl_deserialize_messages_reactions(buf_t *buf){
 	}
 	// parse arg reactions (Vector<Reaction>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->reactions_ = (tl_t **)MALLOC(obj->reactions_len * sizeof(tl_t *), return NULL);
@@ -30035,7 +29647,6 @@ tl_t * tl_deserialize_stickerKeyword(buf_t *buf){
 	}
 	// parse arg keyword (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->keyword_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->keyword_ = (char **)MALLOC(obj->keyword_len * sizeof(char *), return NULL);
@@ -30212,7 +29823,6 @@ tl_t * tl_deserialize_messages_forumTopics(buf_t *buf){
 	}
 	// parse arg topics (Vector<ForumTopic>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->topics_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->topics_ = (tl_t **)MALLOC(obj->topics_len * sizeof(tl_t *), return NULL);
@@ -30223,7 +29833,6 @@ tl_t * tl_deserialize_messages_forumTopics(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -30234,7 +29843,6 @@ tl_t * tl_deserialize_messages_forumTopics(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -30245,7 +29853,6 @@ tl_t * tl_deserialize_messages_forumTopics(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -30406,7 +30013,6 @@ tl_t * tl_deserialize_emojiList(buf_t *buf){
 	}
 	// parse arg document_id (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->document_id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->document_id_ = (long *)MALLOC(obj->document_id_len * sizeof(long), return NULL);
@@ -30436,7 +30042,6 @@ tl_t * tl_deserialize_emojiGroup(buf_t *buf){
 	}
 	// parse arg emoticons (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->emoticons_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->emoticons_ = (char **)MALLOC(obj->emoticons_len * sizeof(char *), return NULL);
@@ -30466,7 +30071,6 @@ tl_t * tl_deserialize_emojiGroupGreeting(buf_t *buf){
 	}
 	// parse arg emoticons (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->emoticons_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->emoticons_ = (char **)MALLOC(obj->emoticons_len * sizeof(char *), return NULL);
@@ -30517,7 +30121,6 @@ tl_t * tl_deserialize_messages_emojiGroups(buf_t *buf){
 	}
 	// parse arg groups (Vector<EmojiGroup>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->groups_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->groups_ = (tl_t **)MALLOC(obj->groups_len * sizeof(tl_t *), return NULL);
@@ -30541,7 +30144,6 @@ tl_t * tl_deserialize_textWithEntities(buf_t *buf){
 	}
 	// parse arg entities (Vector<MessageEntity>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -30560,7 +30162,6 @@ tl_t * tl_deserialize_messages_translateResult(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg result (Vector<TextWithEntities>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->result_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->result_ = (tl_t **)MALLOC(obj->result_len * sizeof(tl_t *), return NULL);
@@ -30634,7 +30235,6 @@ tl_t * tl_deserialize_account_autoSaveSettings(buf_t *buf){
 	}
 	// parse arg exceptions (Vector<AutoSaveException>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->exceptions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->exceptions_ = (tl_t **)MALLOC(obj->exceptions_len * sizeof(tl_t *), return NULL);
@@ -30645,7 +30245,6 @@ tl_t * tl_deserialize_account_autoSaveSettings(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -30656,7 +30255,6 @@ tl_t * tl_deserialize_account_autoSaveSettings(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -30885,7 +30483,6 @@ tl_t * tl_deserialize_exportedChatlistInvite(buf_t *buf){
 	}
 	// parse arg peers (Vector<Peer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -30920,7 +30517,6 @@ tl_t * tl_deserialize_chatlists_exportedInvites(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg invites (Vector<ExportedChatlistInvite>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->invites_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->invites_ = (tl_t **)MALLOC(obj->invites_len * sizeof(tl_t *), return NULL);
@@ -30931,7 +30527,6 @@ tl_t * tl_deserialize_chatlists_exportedInvites(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -30942,7 +30537,6 @@ tl_t * tl_deserialize_chatlists_exportedInvites(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -30966,7 +30560,6 @@ tl_t * tl_deserialize_chatlists_chatlistInviteAlready(buf_t *buf){
 	}
 	// parse arg missing_peers (Vector<Peer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->missing_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->missing_peers_ = (tl_t **)MALLOC(obj->missing_peers_len * sizeof(tl_t *), return NULL);
@@ -30977,7 +30570,6 @@ tl_t * tl_deserialize_chatlists_chatlistInviteAlready(buf_t *buf){
 	}
 	// parse arg already_peers (Vector<Peer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->already_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->already_peers_ = (tl_t **)MALLOC(obj->already_peers_len * sizeof(tl_t *), return NULL);
@@ -30988,7 +30580,6 @@ tl_t * tl_deserialize_chatlists_chatlistInviteAlready(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -30999,7 +30590,6 @@ tl_t * tl_deserialize_chatlists_chatlistInviteAlready(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -31032,7 +30622,6 @@ tl_t * tl_deserialize_chatlists_chatlistInvite(buf_t *buf){
 	}
 	// parse arg peers (Vector<Peer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -31043,7 +30632,6 @@ tl_t * tl_deserialize_chatlists_chatlistInvite(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -31054,7 +30642,6 @@ tl_t * tl_deserialize_chatlists_chatlistInvite(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -31073,7 +30660,6 @@ tl_t * tl_deserialize_chatlists_chatlistUpdates(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg missing_peers (Vector<Peer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->missing_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->missing_peers_ = (tl_t **)MALLOC(obj->missing_peers_len * sizeof(tl_t *), return NULL);
@@ -31084,7 +30670,6 @@ tl_t * tl_deserialize_chatlists_chatlistUpdates(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -31095,7 +30680,6 @@ tl_t * tl_deserialize_chatlists_chatlistUpdates(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -31179,7 +30763,6 @@ tl_t * tl_deserialize_messagePeerVoteMultiple(buf_t *buf){
 	}
 	// parse arg options (Vector<bytes>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->options_ = (buf_t *)MALLOC(obj->options_len * sizeof(buf_t), return NULL);
@@ -31223,7 +30806,6 @@ tl_t * tl_deserialize_storyViews(buf_t *buf){
 	// parse arg reactions (Vector<ReactionCount>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->reactions_ = (tl_t **)MALLOC(obj->reactions_len * sizeof(tl_t *), return NULL);
@@ -31241,7 +30823,6 @@ tl_t * tl_deserialize_storyViews(buf_t *buf){
 	// parse arg recent_viewers (Vector<long>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->recent_viewers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->recent_viewers_ = (long *)MALLOC(obj->recent_viewers_len * sizeof(long), return NULL);
@@ -31385,7 +30966,6 @@ tl_t * tl_deserialize_storyItem(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -31401,7 +30981,6 @@ tl_t * tl_deserialize_storyItem(buf_t *buf){
 	// parse arg media_areas (Vector<MediaArea>)
 	if ((flag1 & (1 << 14)) == (1 << 14))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->media_areas_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->media_areas_ = (tl_t **)MALLOC(obj->media_areas_len * sizeof(tl_t *), return NULL);
@@ -31413,7 +30992,6 @@ tl_t * tl_deserialize_storyItem(buf_t *buf){
 	// parse arg privacy (Vector<PrivacyRule>)
 	if ((flag1 & (1 << 2)) == (1 << 2))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->privacy_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->privacy_ = (tl_t **)MALLOC(obj->privacy_len * sizeof(tl_t *), return NULL);
@@ -31480,7 +31058,6 @@ tl_t * tl_deserialize_stories_allStories(buf_t *buf){
 	}
 	// parse arg peer_stories (Vector<PeerStories>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peer_stories_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peer_stories_ = (tl_t **)MALLOC(obj->peer_stories_len * sizeof(tl_t *), return NULL);
@@ -31491,7 +31068,6 @@ tl_t * tl_deserialize_stories_allStories(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -31502,7 +31078,6 @@ tl_t * tl_deserialize_stories_allStories(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -31533,7 +31108,6 @@ tl_t * tl_deserialize_stories_stories(buf_t *buf){
 	}
 	// parse arg stories (Vector<StoryItem>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stories_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stories_ = (tl_t **)MALLOC(obj->stories_len * sizeof(tl_t *), return NULL);
@@ -31545,7 +31119,6 @@ tl_t * tl_deserialize_stories_stories(buf_t *buf){
 	// parse arg pinned_to_top (Vector<int>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->pinned_to_top_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->pinned_to_top_ = (int *)MALLOC(obj->pinned_to_top_len * sizeof(int), return NULL);
@@ -31557,7 +31130,6 @@ tl_t * tl_deserialize_stories_stories(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -31568,7 +31140,6 @@ tl_t * tl_deserialize_stories_stories(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -31700,7 +31271,6 @@ tl_t * tl_deserialize_stories_storyViewsList(buf_t *buf){
 	}
 	// parse arg views (Vector<StoryView>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->views_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->views_ = (tl_t **)MALLOC(obj->views_len * sizeof(tl_t *), return NULL);
@@ -31711,7 +31281,6 @@ tl_t * tl_deserialize_stories_storyViewsList(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -31722,7 +31291,6 @@ tl_t * tl_deserialize_stories_storyViewsList(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -31747,7 +31315,6 @@ tl_t * tl_deserialize_stories_storyViews(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg views (Vector<StoryViews>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->views_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->views_ = (tl_t **)MALLOC(obj->views_len * sizeof(tl_t *), return NULL);
@@ -31758,7 +31325,6 @@ tl_t * tl_deserialize_stories_storyViews(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -31803,7 +31369,6 @@ tl_t * tl_deserialize_inputReplyToMessage(buf_t *buf){
 	// parse arg quote_entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->quote_entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->quote_entities_ = (tl_t **)MALLOC(obj->quote_entities_len * sizeof(tl_t *), return NULL);
@@ -32139,7 +31704,6 @@ tl_t * tl_deserialize_peerStories(buf_t *buf){
 	}
 	// parse arg stories (Vector<StoryItem>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stories_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stories_ = (tl_t **)MALLOC(obj->stories_len * sizeof(tl_t *), return NULL);
@@ -32162,7 +31726,6 @@ tl_t * tl_deserialize_stories_peerStories(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -32173,7 +31736,6 @@ tl_t * tl_deserialize_stories_peerStories(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -32196,7 +31758,6 @@ tl_t * tl_deserialize_messages_webPage(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -32207,7 +31768,6 @@ tl_t * tl_deserialize_messages_webPage(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -32310,7 +31870,6 @@ tl_t * tl_deserialize_payments_checkedGiftCode(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -32321,7 +31880,6 @@ tl_t * tl_deserialize_payments_checkedGiftCode(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -32578,7 +32136,6 @@ tl_t * tl_deserialize_premium_boostsList(buf_t *buf){
 	}
 	// parse arg boosts (Vector<Boost>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->boosts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->boosts_ = (tl_t **)MALLOC(obj->boosts_len * sizeof(tl_t *), return NULL);
@@ -32595,7 +32152,6 @@ tl_t * tl_deserialize_premium_boostsList(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -32651,7 +32207,6 @@ tl_t * tl_deserialize_premium_myBoosts(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg my_boosts (Vector<MyBoost>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->my_boosts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->my_boosts_ = (tl_t **)MALLOC(obj->my_boosts_len * sizeof(tl_t *), return NULL);
@@ -32662,7 +32217,6 @@ tl_t * tl_deserialize_premium_myBoosts(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -32673,7 +32227,6 @@ tl_t * tl_deserialize_premium_myBoosts(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -32738,7 +32291,6 @@ tl_t * tl_deserialize_premium_boostsStatus(buf_t *buf){
 	// parse arg prepaid_giveaways (Vector<PrepaidGiveaway>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->prepaid_giveaways_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->prepaid_giveaways_ = (tl_t **)MALLOC(obj->prepaid_giveaways_len * sizeof(tl_t *), return NULL);
@@ -32750,7 +32302,6 @@ tl_t * tl_deserialize_premium_boostsStatus(buf_t *buf){
 	// parse arg my_boost_slots (Vector<int>)
 	if ((flag1 & (1 << 2)) == (1 << 2))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->my_boost_slots_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->my_boost_slots_ = (int *)MALLOC(obj->my_boost_slots_len * sizeof(int), return NULL);
@@ -32911,7 +32462,6 @@ tl_t * tl_deserialize_stats_publicForwards(buf_t *buf){
 	}
 	// parse arg forwards (Vector<PublicForward>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->forwards_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->forwards_ = (tl_t **)MALLOC(obj->forwards_len * sizeof(tl_t *), return NULL);
@@ -32928,7 +32478,6 @@ tl_t * tl_deserialize_stats_publicForwards(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -32939,7 +32488,6 @@ tl_t * tl_deserialize_stats_publicForwards(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -32981,7 +32529,6 @@ tl_t * tl_deserialize_help_peerColorSet(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg colors (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->colors_ = (int *)MALLOC(obj->colors_len * sizeof(int), return NULL);
@@ -33001,7 +32548,6 @@ tl_t * tl_deserialize_help_peerColorProfileSet(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg palette_colors (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->palette_colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->palette_colors_ = (int *)MALLOC(obj->palette_colors_len * sizeof(int), return NULL);
@@ -33013,7 +32559,6 @@ tl_t * tl_deserialize_help_peerColorProfileSet(buf_t *buf){
 	}
 	// parse arg bg_colors (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->bg_colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->bg_colors_ = (int *)MALLOC(obj->bg_colors_len * sizeof(int), return NULL);
@@ -33025,7 +32570,6 @@ tl_t * tl_deserialize_help_peerColorProfileSet(buf_t *buf){
 	}
 	// parse arg story_colors (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->story_colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->story_colors_ = (int *)MALLOC(obj->story_colors_len * sizeof(int), return NULL);
@@ -33101,7 +32645,6 @@ tl_t * tl_deserialize_help_peerColors(buf_t *buf){
 	}
 	// parse arg colors (Vector<help_PeerColorOption>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->colors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->colors_ = (tl_t **)MALLOC(obj->colors_len * sizeof(tl_t *), return NULL);
@@ -33177,7 +32720,6 @@ tl_t * tl_deserialize_stories_storyReactionsList(buf_t *buf){
 	}
 	// parse arg reactions (Vector<StoryReaction>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->reactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->reactions_ = (tl_t **)MALLOC(obj->reactions_len * sizeof(tl_t *), return NULL);
@@ -33188,7 +32730,6 @@ tl_t * tl_deserialize_stories_storyReactionsList(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -33199,7 +32740,6 @@ tl_t * tl_deserialize_stories_storyReactionsList(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -33249,7 +32789,6 @@ tl_t * tl_deserialize_messages_savedDialogs(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg dialogs (Vector<SavedDialog>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->dialogs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->dialogs_ = (tl_t **)MALLOC(obj->dialogs_len * sizeof(tl_t *), return NULL);
@@ -33260,7 +32799,6 @@ tl_t * tl_deserialize_messages_savedDialogs(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -33271,7 +32809,6 @@ tl_t * tl_deserialize_messages_savedDialogs(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -33282,7 +32819,6 @@ tl_t * tl_deserialize_messages_savedDialogs(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -33306,7 +32842,6 @@ tl_t * tl_deserialize_messages_savedDialogsSlice(buf_t *buf){
 	}
 	// parse arg dialogs (Vector<SavedDialog>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->dialogs_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->dialogs_ = (tl_t **)MALLOC(obj->dialogs_len * sizeof(tl_t *), return NULL);
@@ -33317,7 +32852,6 @@ tl_t * tl_deserialize_messages_savedDialogsSlice(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -33328,7 +32862,6 @@ tl_t * tl_deserialize_messages_savedDialogsSlice(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -33339,7 +32872,6 @@ tl_t * tl_deserialize_messages_savedDialogsSlice(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -33405,7 +32937,6 @@ tl_t * tl_deserialize_messages_savedReactionTags(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg tags (Vector<SavedReactionTag>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->tags_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->tags_ = (tl_t **)MALLOC(obj->tags_len * sizeof(tl_t *), return NULL);
@@ -33566,7 +33097,6 @@ tl_t * tl_deserialize_businessWorkHours(buf_t *buf){
 	}
 	// parse arg weekly_open (Vector<BusinessWeeklyOpen>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->weekly_open_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->weekly_open_ = (tl_t **)MALLOC(obj->weekly_open_len * sizeof(tl_t *), return NULL);
@@ -33635,7 +33165,6 @@ tl_t * tl_deserialize_inputBusinessRecipients(buf_t *buf){
 	// parse arg users (Vector<InputUser>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -33683,7 +33212,6 @@ tl_t * tl_deserialize_businessRecipients(buf_t *buf){
 	// parse arg users (Vector<long>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (long *)MALLOC(obj->users_len * sizeof(long), return NULL);
@@ -33870,7 +33398,6 @@ tl_t * tl_deserialize_help_timezonesList(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg timezones (Vector<Timezone>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->timezones_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->timezones_ = (tl_t **)MALLOC(obj->timezones_len * sizeof(tl_t *), return NULL);
@@ -33948,7 +33475,6 @@ tl_t * tl_deserialize_messages_quickReplies(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg quick_replies (Vector<QuickReply>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->quick_replies_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->quick_replies_ = (tl_t **)MALLOC(obj->quick_replies_len * sizeof(tl_t *), return NULL);
@@ -33959,7 +33485,6 @@ tl_t * tl_deserialize_messages_quickReplies(buf_t *buf){
 	}
 	// parse arg messages (Vector<Message>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->messages_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->messages_ = (tl_t **)MALLOC(obj->messages_len * sizeof(tl_t *), return NULL);
@@ -33970,7 +33495,6 @@ tl_t * tl_deserialize_messages_quickReplies(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -33981,7 +33505,6 @@ tl_t * tl_deserialize_messages_quickReplies(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -34033,7 +33556,6 @@ tl_t * tl_deserialize_account_connectedBots(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg connected_bots (Vector<ConnectedBot>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->connected_bots_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->connected_bots_ = (tl_t **)MALLOC(obj->connected_bots_len * sizeof(tl_t *), return NULL);
@@ -34044,7 +33566,6 @@ tl_t * tl_deserialize_account_connectedBots(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -34071,7 +33592,6 @@ tl_t * tl_deserialize_messages_dialogFilters(buf_t *buf){
 	}
 	// parse arg filters (Vector<DialogFilter>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->filters_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->filters_ = (tl_t **)MALLOC(obj->filters_len * sizeof(tl_t *), return NULL);
@@ -34215,7 +33735,6 @@ tl_t * tl_deserialize_messages_myStickers(buf_t *buf){
 	}
 	// parse arg sets (Vector<StickerSetCovered>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sets_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sets_ = (tl_t **)MALLOC(obj->sets_len * sizeof(tl_t *), return NULL);
@@ -34327,7 +33846,6 @@ tl_t * tl_deserialize_inputBusinessBotRecipients(buf_t *buf){
 	// parse arg users (Vector<InputUser>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -34339,7 +33857,6 @@ tl_t * tl_deserialize_inputBusinessBotRecipients(buf_t *buf){
 	// parse arg exclude_users (Vector<InputUser>)
 	if ((flag1 & (1 << 6)) == (1 << 6))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->exclude_users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->exclude_users_ = (tl_t **)MALLOC(obj->exclude_users_len * sizeof(tl_t *), return NULL);
@@ -34387,7 +33904,6 @@ tl_t * tl_deserialize_businessBotRecipients(buf_t *buf){
 	// parse arg users (Vector<long>)
 	if ((flag1 & (1 << 4)) == (1 << 4))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (long *)MALLOC(obj->users_len * sizeof(long), return NULL);
@@ -34400,7 +33916,6 @@ tl_t * tl_deserialize_businessBotRecipients(buf_t *buf){
 	// parse arg exclude_users (Vector<long>)
 	if ((flag1 & (1 << 6)) == (1 << 6))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->exclude_users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->exclude_users_ = (long *)MALLOC(obj->exclude_users_len * sizeof(long), return NULL);
@@ -34437,7 +33952,6 @@ tl_t * tl_deserialize_contacts_contactBirthdays(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg contacts (Vector<ContactBirthday>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->contacts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->contacts_ = (tl_t **)MALLOC(obj->contacts_len * sizeof(tl_t *), return NULL);
@@ -34448,7 +33962,6 @@ tl_t * tl_deserialize_contacts_contactBirthdays(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -34497,7 +34010,6 @@ tl_t * tl_deserialize_messages_invitedUsers(buf_t *buf){
 	}
 	// parse arg missing_invitees (Vector<MissingInvitee>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->missing_invitees_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->missing_invitees_ = (tl_t **)MALLOC(obj->missing_invitees_len * sizeof(tl_t *), return NULL);
@@ -34525,7 +34037,6 @@ tl_t * tl_deserialize_inputBusinessChatLink(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -34564,7 +34075,6 @@ tl_t * tl_deserialize_businessChatLink(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -34594,7 +34104,6 @@ tl_t * tl_deserialize_account_businessChatLinks(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg links (Vector<BusinessChatLink>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->links_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->links_ = (tl_t **)MALLOC(obj->links_len * sizeof(tl_t *), return NULL);
@@ -34605,7 +34114,6 @@ tl_t * tl_deserialize_account_businessChatLinks(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -34616,7 +34124,6 @@ tl_t * tl_deserialize_account_businessChatLinks(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -34648,7 +34155,6 @@ tl_t * tl_deserialize_account_resolvedBusinessChatLinks(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -34659,7 +34165,6 @@ tl_t * tl_deserialize_account_resolvedBusinessChatLinks(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -34670,7 +34175,6 @@ tl_t * tl_deserialize_account_resolvedBusinessChatLinks(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -34810,7 +34314,6 @@ tl_t * tl_deserialize_channels_sponsoredMessageReportResultChooseOption(buf_t *b
 	}
 	// parse arg options (Vector<SponsoredMessageReportOption>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->options_ = (tl_t **)MALLOC(obj->options_len * sizeof(tl_t *), return NULL);
@@ -34982,7 +34485,6 @@ tl_t * tl_deserialize_stats_broadcastRevenueTransactions(buf_t *buf){
 	}
 	// parse arg transactions (Vector<BroadcastRevenueTransaction>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->transactions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->transactions_ = (tl_t **)MALLOC(obj->transactions_len * sizeof(tl_t *), return NULL);
@@ -35133,7 +34635,6 @@ tl_t * tl_deserialize_messages_availableEffects(buf_t *buf){
 	}
 	// parse arg effects (Vector<AvailableEffect>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->effects_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->effects_ = (tl_t **)MALLOC(obj->effects_len * sizeof(tl_t *), return NULL);
@@ -35144,7 +34645,6 @@ tl_t * tl_deserialize_messages_availableEffects(buf_t *buf){
 	}
 	// parse arg documents (Vector<Document>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->documents_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->documents_ = (tl_t **)MALLOC(obj->documents_len * sizeof(tl_t *), return NULL);
@@ -35380,7 +34880,6 @@ tl_t * tl_deserialize_starsTransaction(buf_t *buf){
 	// parse arg extended_media (Vector<MessageMedia>)
 	if ((flag1 & (1 << 9)) == (1 << 9))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->extended_media_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->extended_media_ = (tl_t **)MALLOC(obj->extended_media_len * sizeof(tl_t *), return NULL);
@@ -35425,7 +34924,6 @@ tl_t * tl_deserialize_payments_starsStatus(buf_t *buf){
 	// parse arg subscriptions (Vector<StarsSubscription>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->subscriptions_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->subscriptions_ = (tl_t **)MALLOC(obj->subscriptions_len * sizeof(tl_t *), return NULL);
@@ -35449,7 +34947,6 @@ tl_t * tl_deserialize_payments_starsStatus(buf_t *buf){
 	// parse arg history (Vector<StarsTransaction>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->history_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->history_ = (tl_t **)MALLOC(obj->history_len * sizeof(tl_t *), return NULL);
@@ -35466,7 +34963,6 @@ tl_t * tl_deserialize_payments_starsStatus(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -35477,7 +34973,6 @@ tl_t * tl_deserialize_payments_starsStatus(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -35520,7 +35015,6 @@ tl_t * tl_deserialize_stories_foundStories(buf_t *buf){
 	}
 	// parse arg stories (Vector<FoundStory>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stories_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stories_ = (tl_t **)MALLOC(obj->stories_len * sizeof(tl_t *), return NULL);
@@ -35537,7 +35031,6 @@ tl_t * tl_deserialize_stories_foundStories(buf_t *buf){
 	}
 	// parse arg chats (Vector<Chat>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->chats_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->chats_ = (tl_t **)MALLOC(obj->chats_len * sizeof(tl_t *), return NULL);
@@ -35548,7 +35041,6 @@ tl_t * tl_deserialize_stories_foundStories(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -35752,7 +35244,6 @@ tl_t * tl_deserialize_bots_popularAppBots(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -35788,7 +35279,6 @@ tl_t * tl_deserialize_bots_previewInfo(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg media (Vector<BotPreviewMedia>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->media_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->media_ = (tl_t **)MALLOC(obj->media_len * sizeof(tl_t *), return NULL);
@@ -35799,7 +35289,6 @@ tl_t * tl_deserialize_bots_previewInfo(buf_t *buf){
 	}
 	// parse arg lang_codes (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->lang_codes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->lang_codes_ = (char **)MALLOC(obj->lang_codes_len * sizeof(char *), return NULL);
@@ -35962,7 +35451,6 @@ tl_t * tl_deserialize_starsGiveawayOption(buf_t *buf){
 	}
 	// parse arg winners (Vector<StarsGiveawayWinnersOption>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->winners_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->winners_ = (tl_t **)MALLOC(obj->winners_len * sizeof(tl_t *), return NULL);
@@ -36067,7 +35555,6 @@ tl_t * tl_deserialize_payments_starGifts(buf_t *buf){
 	}
 	// parse arg gifts (Vector<StarGift>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->gifts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->gifts_ = (tl_t **)MALLOC(obj->gifts_len * sizeof(tl_t *), return NULL);
@@ -36147,7 +35634,6 @@ tl_t * tl_deserialize_payments_userStarGifts(buf_t *buf){
 	}
 	// parse arg gifts (Vector<UserStarGift>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->gifts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->gifts_ = (tl_t **)MALLOC(obj->gifts_len * sizeof(tl_t *), return NULL);
@@ -36164,7 +35650,6 @@ tl_t * tl_deserialize_payments_userStarGifts(buf_t *buf){
 	}
 	// parse arg users (Vector<User>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -36205,7 +35690,6 @@ tl_t * tl_deserialize_reportResultChooseOption(buf_t *buf){
 	}
 	// parse arg options (Vector<MessageReportOption>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->options_ = (tl_t **)MALLOC(obj->options_len * sizeof(tl_t *), return NULL);
@@ -36269,7 +35753,6 @@ tl_t * tl_deserialize_invokeAfterMsgs(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg msg_ids (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->msg_ids_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->msg_ids_ = (long *)MALLOC(obj->msg_ids_len * sizeof(long), return NULL);
@@ -36758,7 +36241,6 @@ tl_t * tl_deserialize_auth_dropTempAuthKeys(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg except_auth_keys (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->except_auth_keys_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->except_auth_keys_ = (long *)MALLOC(obj->except_auth_keys_len * sizeof(long), return NULL);
@@ -36788,7 +36270,6 @@ tl_t * tl_deserialize_auth_exportLoginToken(buf_t *buf){
 	}
 	// parse arg except_ids (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->except_ids_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->except_ids_ = (long *)MALLOC(obj->except_ids_len * sizeof(long), return NULL);
@@ -36974,7 +36455,6 @@ tl_t * tl_deserialize_account_registerDevice(buf_t *buf){
 	}
 	// parse arg other_uids (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->other_uids_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->other_uids_ = (long *)MALLOC(obj->other_uids_len * sizeof(long), return NULL);
@@ -37004,7 +36484,6 @@ tl_t * tl_deserialize_account_unregisterDevice(buf_t *buf){
 	}
 	// parse arg other_uids (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->other_uids_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->other_uids_ = (long *)MALLOC(obj->other_uids_len * sizeof(long), return NULL);
@@ -37177,7 +36656,6 @@ tl_t * tl_deserialize_account_setPrivacy(buf_t *buf){
 	}
 	// parse arg rules (Vector<InputPrivacyRule>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->rules_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->rules_ = (tl_t **)MALLOC(obj->rules_len * sizeof(tl_t *), return NULL);
@@ -37436,7 +36914,6 @@ tl_t * tl_deserialize_account_getSecureValue(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg types (Vector<SecureValueType>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->types_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->types_ = (tl_t **)MALLOC(obj->types_len * sizeof(tl_t *), return NULL);
@@ -37472,7 +36949,6 @@ tl_t * tl_deserialize_account_deleteSecureValue(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg types (Vector<SecureValueType>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->types_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->types_ = (tl_t **)MALLOC(obj->types_len * sizeof(tl_t *), return NULL);
@@ -37529,7 +37005,6 @@ tl_t * tl_deserialize_account_acceptAuthorization(buf_t *buf){
 	}
 	// parse arg value_hashes (Vector<SecureValueHash>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->value_hashes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->value_hashes_ = (tl_t **)MALLOC(obj->value_hashes_len * sizeof(tl_t *), return NULL);
@@ -37930,7 +37405,6 @@ tl_t * tl_deserialize_account_createTheme(buf_t *buf){
 	// parse arg settings (Vector<InputThemeSettings>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->settings_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->settings_ = (tl_t **)MALLOC(obj->settings_len * sizeof(tl_t *), return NULL);
@@ -37979,7 +37453,6 @@ tl_t * tl_deserialize_account_updateTheme(buf_t *buf){
 	// parse arg settings (Vector<InputThemeSettings>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->settings_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->settings_ = (tl_t **)MALLOC(obj->settings_len * sizeof(tl_t *), return NULL);
@@ -38105,7 +37578,6 @@ tl_t * tl_deserialize_account_getMultiWallPapers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg wallpapers (Vector<InputWallPaper>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->wallpapers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->wallpapers_ = (tl_t **)MALLOC(obj->wallpapers_len * sizeof(tl_t *), return NULL);
@@ -38339,7 +37811,6 @@ tl_t * tl_deserialize_account_reorderUsernames(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg order (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (char **)MALLOC(obj->order_len * sizeof(char *), return NULL);
@@ -38453,7 +37924,6 @@ tl_t * tl_deserialize_account_invalidateSignInCodes(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg codes (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->codes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->codes_ = (char **)MALLOC(obj->codes_len * sizeof(char *), return NULL);
@@ -38827,7 +38297,6 @@ tl_t * tl_deserialize_users_getUsers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<InputUser>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -38862,7 +38331,6 @@ tl_t * tl_deserialize_users_setSecureValueErrors(buf_t *buf){
 	}
 	// parse arg errors (Vector<SecureValueError>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->errors_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->errors_ = (tl_t **)MALLOC(obj->errors_len * sizeof(tl_t *), return NULL);
@@ -38881,7 +38349,6 @@ tl_t * tl_deserialize_users_getIsPremiumRequiredToContact(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<InputUser>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -38934,7 +38401,6 @@ tl_t * tl_deserialize_contacts_importContacts(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg contacts (Vector<InputContact>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->contacts_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->contacts_ = (tl_t **)MALLOC(obj->contacts_len * sizeof(tl_t *), return NULL);
@@ -38953,7 +38419,6 @@ tl_t * tl_deserialize_contacts_deleteContacts(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<InputUser>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -38972,7 +38437,6 @@ tl_t * tl_deserialize_contacts_deleteByPhones(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg phones (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->phones_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->phones_ = (char **)MALLOC(obj->phones_len * sizeof(char *), return NULL);
@@ -39342,7 +38806,6 @@ tl_t * tl_deserialize_contacts_editCloseFriends(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (long *)MALLOC(obj->id_len * sizeof(long), return NULL);
@@ -39370,7 +38833,6 @@ tl_t * tl_deserialize_contacts_setBlocked(buf_t *buf){
 	}
 	// parse arg id (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -39402,7 +38864,6 @@ tl_t * tl_deserialize_messages_getMessages(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<InputMessage>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -39537,7 +38998,6 @@ tl_t * tl_deserialize_messages_search(buf_t *buf){
 	// parse arg saved_reaction (Vector<Reaction>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->saved_reaction_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->saved_reaction_ = (tl_t **)MALLOC(obj->saved_reaction_len * sizeof(tl_t *), return NULL);
@@ -39673,7 +39133,6 @@ tl_t * tl_deserialize_messages_deleteMessages(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -39794,7 +39253,6 @@ tl_t * tl_deserialize_messages_sendMessage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -39897,7 +39355,6 @@ tl_t * tl_deserialize_messages_sendMedia(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -39975,7 +39432,6 @@ tl_t * tl_deserialize_messages_forwardMessages(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -39987,7 +39443,6 @@ tl_t * tl_deserialize_messages_forwardMessages(buf_t *buf){
 	}
 	// parse arg random_id (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->random_id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->random_id_ = (long *)MALLOC(obj->random_id_len * sizeof(long), return NULL);
@@ -40061,7 +39516,6 @@ tl_t * tl_deserialize_messages_report(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -40090,7 +39544,6 @@ tl_t * tl_deserialize_messages_getChats(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (long *)MALLOC(obj->id_len * sizeof(long), return NULL);
@@ -40208,7 +39661,6 @@ tl_t * tl_deserialize_messages_createChat(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg users (Vector<InputUser>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -40460,7 +39912,6 @@ tl_t * tl_deserialize_messages_readMessageContents(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -40520,7 +39971,6 @@ tl_t * tl_deserialize_messages_getWebPagePreview(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -40688,7 +40138,6 @@ tl_t * tl_deserialize_messages_getMessagesViews(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -40819,7 +40268,6 @@ tl_t * tl_deserialize_messages_reorderStickerSets(buf_t *buf){
 	}
 	// parse arg order (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (long *)MALLOC(obj->order_len * sizeof(long), return NULL);
@@ -40942,7 +40390,6 @@ tl_t * tl_deserialize_messages_setInlineBotResults(buf_t *buf){
 	}
 	// parse arg results (Vector<InputBotInlineResult>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->results_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->results_ = (tl_t **)MALLOC(obj->results_len * sizeof(tl_t *), return NULL);
@@ -41109,7 +40556,6 @@ tl_t * tl_deserialize_messages_editMessage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -41174,7 +40620,6 @@ tl_t * tl_deserialize_messages_editInlineBotMessage(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -41266,7 +40711,6 @@ tl_t * tl_deserialize_messages_getPeerDialogs(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg peers (Vector<InputDialogPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -41313,7 +40757,6 @@ tl_t * tl_deserialize_messages_saveDraft(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -41364,7 +40807,6 @@ tl_t * tl_deserialize_messages_readFeaturedStickers(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (long *)MALLOC(obj->id_len * sizeof(long), return NULL);
@@ -41684,7 +41126,6 @@ tl_t * tl_deserialize_messages_reorderPinnedDialogs(buf_t *buf){
 	}
 	// parse arg order (Vector<InputDialogPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (tl_t **)MALLOC(obj->order_len * sizeof(tl_t *), return NULL);
@@ -41731,7 +41172,6 @@ tl_t * tl_deserialize_messages_setBotShippingResults(buf_t *buf){
 	// parse arg shipping_options (Vector<ShippingOption>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->shipping_options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->shipping_options_ = (tl_t **)MALLOC(obj->shipping_options_len * sizeof(tl_t *), return NULL);
@@ -41983,7 +41423,6 @@ tl_t * tl_deserialize_messages_sendMultiMedia(buf_t *buf){
 	}
 	// parse arg multi_media (Vector<InputSingleMedia>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->multi_media_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->multi_media_ = (tl_t **)MALLOC(obj->multi_media_len * sizeof(tl_t *), return NULL);
@@ -42154,7 +41593,6 @@ tl_t * tl_deserialize_messages_sendVote(buf_t *buf){
 	}
 	// parse arg options (Vector<bytes>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->options_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->options_ = (buf_t *)MALLOC(obj->options_len * sizeof(buf_t), return NULL);
@@ -42266,7 +41704,6 @@ tl_t * tl_deserialize_messages_getEmojiKeywordsLanguages(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg lang_codes (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->lang_codes_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->lang_codes_ = (char **)MALLOC(obj->lang_codes_len * sizeof(char *), return NULL);
@@ -42317,7 +41754,6 @@ tl_t * tl_deserialize_messages_getSearchCounters(buf_t *buf){
 	}
 	// parse arg filters (Vector<MessagesFilter>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->filters_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->filters_ = (tl_t **)MALLOC(obj->filters_len * sizeof(tl_t *), return NULL);
@@ -42442,7 +41878,6 @@ tl_t * tl_deserialize_messages_getScheduledMessages(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -42466,7 +41901,6 @@ tl_t * tl_deserialize_messages_sendScheduledMessages(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -42490,7 +41924,6 @@ tl_t * tl_deserialize_messages_deleteScheduledMessages(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -42564,7 +41997,6 @@ tl_t * tl_deserialize_messages_toggleStickerSets(buf_t *buf){
 	}
 	// parse arg stickersets (Vector<InputStickerSet>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stickersets_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stickersets_ = (tl_t **)MALLOC(obj->stickersets_len * sizeof(tl_t *), return NULL);
@@ -42620,7 +42052,6 @@ tl_t * tl_deserialize_messages_updateDialogFiltersOrder(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg order (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (int *)MALLOC(obj->order_len * sizeof(int), return NULL);
@@ -43319,7 +42750,6 @@ tl_t * tl_deserialize_messages_sendReaction(buf_t *buf){
 	// parse arg reaction (Vector<Reaction>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->reaction_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->reaction_ = (tl_t **)MALLOC(obj->reaction_len * sizeof(tl_t *), return NULL);
@@ -43342,7 +42772,6 @@ tl_t * tl_deserialize_messages_getMessagesReactions(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -43462,7 +42891,6 @@ tl_t * tl_deserialize_messages_translateText(buf_t *buf){
 	// parse arg id (Vector<int>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -43475,7 +42903,6 @@ tl_t * tl_deserialize_messages_translateText(buf_t *buf){
 	// parse arg text (Vector<TextWithEntities>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->text_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->text_ = (tl_t **)MALLOC(obj->text_len * sizeof(tl_t *), return NULL);
@@ -43881,7 +43308,6 @@ tl_t * tl_deserialize_messages_getCustomEmojiDocuments(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg document_id (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->document_id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->document_id_ = (long *)MALLOC(obj->document_id_len * sizeof(long), return NULL);
@@ -43996,7 +43422,6 @@ tl_t * tl_deserialize_messages_getExtendedMedia(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -44051,7 +43476,6 @@ tl_t * tl_deserialize_messages_sendBotRequestedPeer(buf_t *buf){
 	}
 	// parse arg requested_peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->requested_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->requested_peers_ = (tl_t **)MALLOC(obj->requested_peers_len * sizeof(tl_t *), return NULL);
@@ -44431,7 +43855,6 @@ tl_t * tl_deserialize_messages_reorderPinnedSavedDialogs(buf_t *buf){
 	}
 	// parse arg order (Vector<InputDialogPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (tl_t **)MALLOC(obj->order_len * sizeof(tl_t *), return NULL);
@@ -44535,7 +43958,6 @@ tl_t * tl_deserialize_messages_reorderQuickReplies(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg order (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (int *)MALLOC(obj->order_len * sizeof(int), return NULL);
@@ -44608,7 +44030,6 @@ tl_t * tl_deserialize_messages_getQuickReplyMessages(buf_t *buf){
 	// parse arg id (Vector<int>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -44642,7 +44063,6 @@ tl_t * tl_deserialize_messages_sendQuickReplyMessages(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -44654,7 +44074,6 @@ tl_t * tl_deserialize_messages_sendQuickReplyMessages(buf_t *buf){
 	}
 	// parse arg random_id (Vector<long>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->random_id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->random_id_ = (long *)MALLOC(obj->random_id_len * sizeof(long), return NULL);
@@ -44679,7 +44098,6 @@ tl_t * tl_deserialize_messages_deleteQuickReplyMessages(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -44797,7 +44215,6 @@ tl_t * tl_deserialize_messages_getFactCheck(buf_t *buf){
 	}
 	// parse arg msg_id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->msg_id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->msg_id_ = (int *)MALLOC(obj->msg_id_len * sizeof(int), return NULL);
@@ -45074,7 +44491,6 @@ tl_t * tl_deserialize_photos_deletePhotos(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<InputPhoto>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -45474,7 +44890,6 @@ tl_t * tl_deserialize_help_saveAppLog(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg events (Vector<InputAppEvent>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->events_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->events_ = (tl_t **)MALLOC(obj->events_len * sizeof(tl_t *), return NULL);
@@ -45535,7 +44950,6 @@ tl_t * tl_deserialize_help_editUserInfo(buf_t *buf){
 	}
 	// parse arg entities (Vector<MessageEntity>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -45677,7 +45091,6 @@ tl_t * tl_deserialize_channels_deleteMessages(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -45705,7 +45118,6 @@ tl_t * tl_deserialize_channels_reportSpam(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -45729,7 +45141,6 @@ tl_t * tl_deserialize_channels_getMessages(buf_t *buf){
 	}
 	// parse arg id (Vector<InputMessage>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -45795,7 +45206,6 @@ tl_t * tl_deserialize_channels_getChannels(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<InputChannel>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -46004,7 +45414,6 @@ tl_t * tl_deserialize_channels_inviteToChannel(buf_t *buf){
 	}
 	// parse arg users (Vector<InputUser>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -46154,7 +45563,6 @@ tl_t * tl_deserialize_channels_getAdminLog(buf_t *buf){
 	// parse arg admins (Vector<InputUser>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->admins_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->admins_ = (tl_t **)MALLOC(obj->admins_len * sizeof(tl_t *), return NULL);
@@ -46208,7 +45616,6 @@ tl_t * tl_deserialize_channels_readMessageContents(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -46476,7 +45883,6 @@ tl_t * tl_deserialize_channels_reorderUsernames(buf_t *buf){
 	}
 	// parse arg order (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (char **)MALLOC(obj->order_len * sizeof(char *), return NULL);
@@ -46632,7 +46038,6 @@ tl_t * tl_deserialize_channels_getForumTopicsByID(buf_t *buf){
 	}
 	// parse arg topics (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->topics_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->topics_ = (int *)MALLOC(obj->topics_len * sizeof(int), return NULL);
@@ -46744,7 +46149,6 @@ tl_t * tl_deserialize_channels_reorderPinnedForumTopics(buf_t *buf){
 	}
 	// parse arg order (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (int *)MALLOC(obj->order_len * sizeof(int), return NULL);
@@ -47066,7 +46470,6 @@ tl_t * tl_deserialize_bots_setBotCommands(buf_t *buf){
 	}
 	// parse arg commands (Vector<BotCommand>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->commands_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->commands_ = (tl_t **)MALLOC(obj->commands_len * sizeof(tl_t *), return NULL);
@@ -47235,7 +46638,6 @@ tl_t * tl_deserialize_bots_reorderUsernames(buf_t *buf){
 	}
 	// parse arg order (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (char **)MALLOC(obj->order_len * sizeof(char *), return NULL);
@@ -47394,7 +46796,6 @@ tl_t * tl_deserialize_bots_deletePreviewMedia(buf_t *buf){
 	}
 	// parse arg media (Vector<InputMedia>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->media_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->media_ = (tl_t **)MALLOC(obj->media_len * sizeof(tl_t *), return NULL);
@@ -47422,7 +46823,6 @@ tl_t * tl_deserialize_bots_reorderPreviewMedias(buf_t *buf){
 	}
 	// parse arg order (Vector<InputMedia>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->order_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->order_ = (tl_t **)MALLOC(obj->order_len * sizeof(tl_t *), return NULL);
@@ -47908,7 +47308,6 @@ tl_t * tl_deserialize_payments_getStarsTransactionsByID(buf_t *buf){
 	}
 	// parse arg id (Vector<InputStarsTransaction>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -48132,7 +47531,6 @@ tl_t * tl_deserialize_stickers_createStickerSet(buf_t *buf){
 	}
 	// parse arg stickers (Vector<InputStickerSetItem>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->stickers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->stickers_ = (tl_t **)MALLOC(obj->stickers_len * sizeof(tl_t *), return NULL);
@@ -48622,7 +48020,6 @@ tl_t * tl_deserialize_phone_inviteToGroupCall(buf_t *buf){
 	}
 	// parse arg users (Vector<InputUser>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->users_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->users_ = (tl_t **)MALLOC(obj->users_len * sizeof(tl_t *), return NULL);
@@ -48699,7 +48096,6 @@ tl_t * tl_deserialize_phone_getGroupParticipants(buf_t *buf){
 	}
 	// parse arg ids (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->ids_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->ids_ = (tl_t **)MALLOC(obj->ids_len * sizeof(tl_t *), return NULL);
@@ -48710,7 +48106,6 @@ tl_t * tl_deserialize_phone_getGroupParticipants(buf_t *buf){
 	}
 	// parse arg sources (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sources_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sources_ = (int *)MALLOC(obj->sources_len * sizeof(int), return NULL);
@@ -48744,7 +48139,6 @@ tl_t * tl_deserialize_phone_checkGroupCall(buf_t *buf){
 	}
 	// parse arg sources (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->sources_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->sources_ = (int *)MALLOC(obj->sources_len * sizeof(int), return NULL);
@@ -49043,7 +48437,6 @@ tl_t * tl_deserialize_langpack_getStrings(buf_t *buf){
 	}
 	// parse arg keys (Vector<string>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->keys_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->keys_ = (char **)MALLOC(obj->keys_len * sizeof(char *), return NULL);
@@ -49117,7 +48510,6 @@ tl_t * tl_deserialize_folders_editPeerFolders(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg folder_peers (Vector<InputFolderPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->folder_peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->folder_peers_ = (tl_t **)MALLOC(obj->folder_peers_len * sizeof(tl_t *), return NULL);
@@ -49369,7 +48761,6 @@ tl_t * tl_deserialize_chatlists_exportChatlistInvite(buf_t *buf){
 	}
 	// parse arg peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -49424,7 +48815,6 @@ tl_t * tl_deserialize_chatlists_editExportedInvite(buf_t *buf){
 	// parse arg peers (Vector<InputPeer>)
 	if ((flag1 & (1 << 2)) == (1 << 2))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -49473,7 +48863,6 @@ tl_t * tl_deserialize_chatlists_joinChatlistInvite(buf_t *buf){
 	}
 	// parse arg peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -49508,7 +48897,6 @@ tl_t * tl_deserialize_chatlists_joinChatlistUpdates(buf_t *buf){
 	}
 	// parse arg peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -49555,7 +48943,6 @@ tl_t * tl_deserialize_chatlists_leaveChatlist(buf_t *buf){
 	}
 	// parse arg peers (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->peers_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->peers_ = (tl_t **)MALLOC(obj->peers_len * sizeof(tl_t *), return NULL);
@@ -49613,7 +49000,6 @@ tl_t * tl_deserialize_stories_sendStory(buf_t *buf){
 	// parse arg media_areas (Vector<MediaArea>)
 	if ((flag1 & (1 << 5)) == (1 << 5))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->media_areas_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->media_areas_ = (tl_t **)MALLOC(obj->media_areas_len * sizeof(tl_t *), return NULL);
@@ -49631,7 +49017,6 @@ tl_t * tl_deserialize_stories_sendStory(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -49642,7 +49027,6 @@ tl_t * tl_deserialize_stories_sendStory(buf_t *buf){
 	}
 	// parse arg privacy_rules (Vector<InputPrivacyRule>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->privacy_rules_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->privacy_rules_ = (tl_t **)MALLOC(obj->privacy_rules_len * sizeof(tl_t *), return NULL);
@@ -49701,7 +49085,6 @@ tl_t * tl_deserialize_stories_editStory(buf_t *buf){
 	// parse arg media_areas (Vector<MediaArea>)
 	if ((flag1 & (1 << 3)) == (1 << 3))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->media_areas_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->media_areas_ = (tl_t **)MALLOC(obj->media_areas_len * sizeof(tl_t *), return NULL);
@@ -49719,7 +49102,6 @@ tl_t * tl_deserialize_stories_editStory(buf_t *buf){
 	// parse arg entities (Vector<MessageEntity>)
 	if ((flag1 & (1 << 1)) == (1 << 1))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->entities_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->entities_ = (tl_t **)MALLOC(obj->entities_len * sizeof(tl_t *), return NULL);
@@ -49731,7 +49113,6 @@ tl_t * tl_deserialize_stories_editStory(buf_t *buf){
 	// parse arg privacy_rules (Vector<InputPrivacyRule>)
 	if ((flag1 & (1 << 2)) == (1 << 2))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->privacy_rules_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->privacy_rules_ = (tl_t **)MALLOC(obj->privacy_rules_len * sizeof(tl_t *), return NULL);
@@ -49754,7 +49135,6 @@ tl_t * tl_deserialize_stories_deleteStories(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -49778,7 +49158,6 @@ tl_t * tl_deserialize_stories_togglePinned(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -49877,7 +49256,6 @@ tl_t * tl_deserialize_stories_getStoriesByID(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -49930,7 +49308,6 @@ tl_t * tl_deserialize_stories_incrementStoryViews(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -50005,7 +49382,6 @@ tl_t * tl_deserialize_stories_getStoriesViews(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -50046,7 +49422,6 @@ tl_t * tl_deserialize_stories_report(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -50145,7 +49520,6 @@ tl_t * tl_deserialize_stories_getPeerMaxIDs(buf_t *buf){
 	*buf = buf_add(buf->data + 4, buf->size - 4);
 	// parse arg id (Vector<InputPeer>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (tl_t **)MALLOC(obj->id_len * sizeof(tl_t *), return NULL);
@@ -50233,7 +49607,6 @@ tl_t * tl_deserialize_stories_togglePinnedToTop(buf_t *buf){
 	}
 	// parse arg id (Vector<int>)
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->id_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->id_ = (int *)MALLOC(obj->id_len * sizeof(int), return NULL);
@@ -50327,7 +49700,6 @@ tl_t * tl_deserialize_premium_applyBoost(buf_t *buf){
 	// parse arg slots (Vector<int>)
 	if ((flag1 & (1 << 0)) == (1 << 0))
 	{
-		*buf = buf_add(buf->data + 4, buf->size - 4); // skip vertor definition
 		obj->slots_len = *(int *)(buf->data);
 		*buf = buf_add(buf->data + 4, buf->size - 4);
 		obj->slots_ = (int *)MALLOC(obj->slots_len * sizeof(int), return NULL);
