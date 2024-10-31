@@ -1,4 +1,7 @@
 #include "tg.h"
+#include "strtok_foreach.h"
+#include <stdio.h>
+#include <string.h>
 
 int tg_connect(
 		tg_t *tg,
@@ -9,12 +12,12 @@ int tg_connect(
 			const tl_t *tl))
 {
 	// try to load auth_key_id from database
-	ui64_t auth_key_id = auth_key_id_from_database(tg);
+	buf_t auth_key_id = auth_key_id_from_database(tg);
 
-	if (auth_key_id){
+	if (auth_key_id.size){
 		api.app.open();
 		api.log.info(".. new session");
-	  shared_rc.ssid = api.buf.rand(8);
+		shared_rc.ssid = api.buf.rand(8);
 		api.srl.ping();
 		
 		// check if authorized
@@ -36,11 +39,18 @@ int tg_connect(
 		// save to database
 		phone_number_to_database(tg, phone_number);
 	}
-
-	return 0;
+	printf("phone_number: %s\n", phone_number);
 
 	// if not authorized start authorization
 	// get tokens from database 
+	buf_t tokens[20]; int tokens_len = 0;
+	char *auth_tokens = auth_tokens_from_database(tg);
+	if (auth_tokens){
+		strtok_foreach(auth_tokens, ";", token){
+			tokens[tokens_len++] = 
+				buf_add((ui8_t*)token, strlen(token)); 
+		}
+	}
 	
 	// authorize with new key
   api.app.open();
@@ -55,8 +65,8 @@ int tg_connect(
 		 	false,
 		 	false, 
 			false,
-		 	NULL,
-		 	0,
+		 	auth_tokens ? tokens : NULL,
+		 	tokens_len,
 		 	NULL,
 		 	NULL);
 
@@ -115,8 +125,32 @@ int tg_connect(
 									NULL);
 						buf_t answer = 
 							tl_send(signIn); 
+						printf("ANSWER: %.8x\n", 
+								id_from_tl_buf(answer));
 						tl_t *tl = tl_deserialize(&answer);
 						/*free(code);*/
+						switch (tl->_id) {
+							case id_auth_authorization:
+								{
+									if (((tl_auth_authorization_t *)tl)->future_auth_token_.size > 0){
+										char auth_token[BUFSIZ];
+										strncpy(
+											auth_token,
+											((char *)((tl_auth_authorization_t *)tl)->future_auth_token_.data),
+											((tl_auth_authorization_t *)tl)->future_auth_token_.size);
+										auth_token_to_database(tg, auth_token);
+									}
+									// save auth_key_id 
+									auth_key_id_to_database(tg, shared_rc_get_key());
+									if (callback)
+										callback(userdata, TG_AUTH_SUCCESS, tl);
+									return 0;
+								}
+								break;
+							
+							default:
+								break;
+						}
 					}
 				}
 				/*tl_auth_sentCode_free((tl_auth_sentCode_t *)tl);*/

@@ -11,10 +11,17 @@ struct tg_ {
 	sqlite3 *db;
 };
 
-ui64_t auth_key_id_from_database(tg_t *tg);
+int database_init(tg_t *tg, const char *database_path);
+buf_t auth_key_id_from_database(tg_t *tg);
 char * phone_number_from_database(tg_t *tg);
+char * auth_tokens_from_database(tg_t *tg);
 
 int phone_number_to_database(
 		tg_t *tg, const char *phone_number);
 
+int auth_token_to_database(
+		tg_t *tg, const char *auth_token);
+
+int auth_key_id_to_database(
+		tg_t *tg, buf_t auth_key_id);
 #endif /* ifndef TG_H_ */

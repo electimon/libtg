@@ -1,10 +1,7 @@
 # C99 API for Telegram
 
 ```c
-char * callback(
-    void *userdata,
-    TG_AUTH auth,
-    tl_t *tl)
+char * callback(void *userdata, TG_AUTH auth, tl_t *tl)
 {
     switch (auth) {
         case TG_AUTH_PHONE_NUMBER:
@@ -20,7 +17,7 @@ char * callback(
             // return password; 
             break;
         case TG_AUTH_ERROR:
-            // handle error (returned in %tl)
+            // handle error (error in %tl)
             break; 
         case TG_AUTH_SUCCESS:
             // You are logged in! (current user in %tl)

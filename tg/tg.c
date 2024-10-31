@@ -18,17 +18,9 @@ tg_t *tg_new(const char *database_path,
 	tg_t *tg = NEW(tg_t, return NULL);	
 	
 	// connect to SQL
-	int err = sqlite3_open_v2(
-			database_path, &tg->db, 
-			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 
-			NULL);
-	if (err){
-		api.log.error((char *)sqlite3_errmsg(tg->db));
+	if (database_init(tg, database_path))
 		return NULL;
-	}
-	char sql[BUFSIZ] = "CREATE TABLE IF NOT EXISTS auth (id INT); ";
-	sqlite3_exec(tg->db, sql, NULL, NULL, NULL);
-
+	
 	// set apiId and apiHash
 	tg->apiId = apiId;
 	strncpy(tg->apiHash, apiHash, 33);
