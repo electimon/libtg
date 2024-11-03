@@ -64,9 +64,10 @@ if MACOS
 libmtx_la_SOURCES += darwin-posix-rt/clock_gettime.c
 endif
 
-libmtx_la_CFLAGS = -fPIC -DPIC
-libmtx_la_CPPFLAGS = -fPIC -DPIC
+libmtx_la_CFLAGS = -fPIC
+libmtx_la_CPPFLAGS = -fPIC
 libmtx_la_LIBADD = -lcrypto
+libmtx_la_LDFLAGS = -Wl,-w
 
 
 bin_PROGRAMS = mtx
