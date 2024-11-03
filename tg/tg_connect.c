@@ -2,6 +2,7 @@
 #include "strtok_foreach.h"
 #include <stdio.h>
 #include <string.h>
+#include "../mtx/include/net.h"
 
 int tg_connect(
 		tg_t *tg,
@@ -12,19 +13,28 @@ int tg_connect(
 			const tl_t *tl))
 {
 	// try to load auth_key_id from database
-	buf_t auth_key_id = auth_key_id_from_database(tg);
+	buf_t auth_key = auth_key_from_database(tg);
 
-	if (auth_key_id.size){
-		api.app.open();
-		api.log.info(".. new session");
+	if (auth_key.size){
+		printf("Have auth_key\n");
+		reset_shared_rc();
+		net_open(_ip, _port);
+		shared_rc.key = buf_add(auth_key.data, auth_key.size);
+		api.srl.init();
+		/*api.log.info(".. new session");*/
 		shared_rc.ssid = api.buf.rand(8);
-		api.srl.ping();
+		//buf_t get_salt = tl_get_future_salts(1);
+		
+		//buf_t nonce = buf_rand(16);
+		buf_t get_salt = tl_get_future_salts(1);
+		tl_send_tl_message(get_salt, RFC);
 		
 		// check if authorized
-		InputUser iuser = tl_inputUserSelf();
-		buf_t getUsers = tl_users_getUsers(&iuser, 1);	
-		buf_t answer = tl_send(getUsers); 
-		printf("ANSWER ID: %.8x\n", id_from_tl_buf(answer));
+		//InputUser iuser = tl_inputUserSelf();
+		//buf_t getUsers = tl_users_getUsers(&iuser, 1);	
+		//buf_t answer = tl_send(getUsers); 
+		//printf("ANSWER ID: %.8x\n", id_from_tl_buf(answer));
+		return 0;
 	}
 
 	// try to get phone_number
@@ -112,6 +122,8 @@ int tg_connect(
 	switch (tl->_id) {
 		case id_auth_sentCode:
 			{
+				tl_auth_sentCode_t *tls = 
+					(tl_auth_sentCode_t*) tl;
 				// handle sent code
 				if (callback){
 					char *code = 
@@ -120,7 +132,7 @@ int tg_connect(
 						buf_t signIn = 
 							tl_auth_signIn(
 									phone_number, 
-									((tl_auth_sentCode_t *)tl)->phone_code_hash_, 
+									tls->phone_code_hash_, 
 									code, 
 									NULL);
 						buf_t answer = 
@@ -132,18 +144,26 @@ int tg_connect(
 						switch (tl->_id) {
 							case id_auth_authorization:
 								{
-									if (((tl_auth_authorization_t *)tl)->future_auth_token_.size > 0){
+									tl_auth_authorization_t *tla =
+											(tl_auth_authorization_t *)tl;
+									if (tla->setup_password_required_){
+										if (callback)
+											callback(userdata, TG_AUTH_PASSWORD_NEEDED, tl);
+										return 1;
+									}
+									if (tla->future_auth_token_.size > 0){
 										char auth_token[BUFSIZ];
 										strncpy(
 											auth_token,
-											((char *)((tl_auth_authorization_t *)tl)->future_auth_token_.data),
-											((tl_auth_authorization_t *)tl)->future_auth_token_.size);
+											((char *)tla->future_auth_token_.data),
+											tla->future_auth_token_.size);
 										auth_token_to_database(tg, auth_token);
 									}
 									// save auth_key_id 
-									auth_key_id_to_database(tg, shared_rc_get_key());
+									auth_key_to_database(
+											tg, shared_rc_get_key(), phone_number);
 									if (callback)
-										callback(userdata, TG_AUTH_SUCCESS, tl);
+										callback(userdata, TG_AUTH_SUCCESS, tla->user_);
 									return 0;
 								}
 								break;

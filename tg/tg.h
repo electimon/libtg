@@ -23,5 +23,5 @@ int auth_token_to_database(
 		tg_t *tg, const char *auth_token);
 
 int auth_key_to_database(
-		tg_t *tg, buf_t auth_key);
+		tg_t *tg, buf_t auth_key, const char *phone_number);
 #endif /* ifndef TG_H_ */

@@ -122,28 +122,27 @@ buf_t parse_answer(buf_t a)
   return a;
 }
 
-
-buf_t tl_send(buf_t s)
+buf_t tl_send_tl_message(buf_t s, msg_t mtype)
 {
-	api.srl.ping();
 	printf("Send:\n");
 	buf_dump(s);
 
-	buf_t s1 = api.hdl.header(s, API);
-  /*api.buf.dump(s1);*/
-  buf_t e = api.enl.encrypt(s1, API);
-  /*api.buf.dump(e);*/
+	buf_t s1 = api.hdl.header(s, mtype);
+	api.buf.dump(s1);
+  buf_t e = api.enl.encrypt(s1, mtype);
+	api.buf.dump(e);
   buf_t t = api.trl.transport(e);
-  /*api.buf.dump(t);*/
+	//api.buf.dump(t);
   buf_t nr = api.net.drive(t, SEND_RECEIVE);
-	/*api.buf.dump(nr);*/
+	//api.buf.dump(nr);
       
 	buf_t tr = api.trl.detransport(nr);
   /*api.buf.dump(tr);*/
-	buf_t d = api.enl.decrypt(tr, API);
+	buf_t d = api.enl.decrypt(tr, mtype);
   /*api.buf.dump(d);*/
-  buf_t s1r = api.hdl.deheader(d, API);
-  /*api.buf.dump(s1r);*/
+  buf_t s1r = api.hdl.deheader(d, mtype);
+	printf("Answer:\n");
+	api.buf.dump(s1r);
 
 	buf_t a = parse_answer(s1r);
 	printf("Answer:\n");
@@ -153,4 +152,10 @@ buf_t tl_send(buf_t s)
 	//api.srl.msgsAck(*a.data + 4);
 	
 	return a;
+}
+
+buf_t tl_send(buf_t s)
+{
+	api.srl.ping();
+	return tl_send_tl_message(s, API);
 }
