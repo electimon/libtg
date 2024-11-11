@@ -8,6 +8,7 @@
 #define _POSIX_C_SOURCE 199309L
 #include "../include/api.h"
 #include "../include/hdl.h"
+#include "../include/buf.h"
 #include <assert.h>
 #include <time.h>
 
@@ -89,6 +90,8 @@ buf_t hdl_deheader(buf_t b, msg_t t)
     case API:
     {
       // remove salt
+			ui64_t salt = buf_get_ui64(b);
+      shared_rc.salt = buf_add_ui64(salt);
       d = api.buf.add(b.data + 8, b.size - 8);
       // remove session_id
       d = api.buf.add(d.data + 8, d.size - 8);

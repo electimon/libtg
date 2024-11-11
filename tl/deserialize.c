@@ -1,6 +1,8 @@
 #include "tl.h"
+#include "names.h"
 #include "deserialize_table.h"
 #include "../mtx/include/api.h"
+#include <stdio.h>
 #include <string.h>
 
 ui32_t deserialize_ui32(buf_t *b){
@@ -85,6 +87,9 @@ tl_t * tl_deserialize(buf_t *buf)
 	if (!fun){
 		printf("can't find deserialization"
 				" function for id: %.8x\n", *id);
+		printf("dump:\n");
+		buf_dump(*buf);
+
 		return NULL;
 	}
 
@@ -113,8 +118,10 @@ mtp_message_t deserialize_mtp_message(buf_t *b){
 	*b = buf_add(b->data + 4, b->size - 4);
 	printf("mtp_message bytes: %d\n", msg.bytes);
 
-	strncpy(msg.body, (char *)b->data, msg.bytes);
-	printf("mtp_message body: %s\n", msg.body);
+	msg.body = buf_add(b->data, msg.bytes);
 	*b = buf_add(b->data + msg.bytes, b->size - msg.bytes);
+	printf("mtp_message body: %s (%.x)\n",
+			TL_NAME_FROM_ID(id_from_tl_buf(msg.body)),
+			id_from_tl_buf(msg.body));
 	return msg;
 }

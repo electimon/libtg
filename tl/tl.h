@@ -12,8 +12,9 @@ typedef struct mtp_message_ {
 	long msg_id;
 	int seqno;
 	int bytes;
-	char body[BUFSIZ];
+	buf_t body;
 } mtp_message_t; 
 
-buf_t tl_send_tl_message(buf_t s, msg_t mtype);
+tl_t * tl_send_tl_message(buf_t s, msg_t mtype);
+buf_t tl_salt_new();
 #endif /* ifndef TL_H_ */

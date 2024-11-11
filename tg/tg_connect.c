@@ -3,6 +3,32 @@
 #include <stdio.h>
 #include <string.h>
 #include "../mtx/include/net.h"
+#include <byteswap.h>
+
+static buf_t init(tg_t *tg, buf_t query)
+{
+	buf_t initConnection = 
+		tl_initConnection(
+				tg->apiId,
+				"libtg", 
+				"1.0", 
+				"1.0", 
+				"ru", 
+				"LibTg", 
+				"ru", 
+				NULL, 
+				NULL, 
+				&query);
+	
+	printf("initConnection:\n");
+	buf_dump(initConnection);
+
+	buf_t invokeWithLayer = 
+		tl_invokeWithLayer(
+				API_LAYER, &initConnection);
+	
+	return invokeWithLayer;
+}
 
 int tg_connect(
 		tg_t *tg,
@@ -16,29 +42,43 @@ int tg_connect(
 	buf_t auth_key = auth_key_from_database(tg);
 
 	if (auth_key.size){
-		printf("Have auth_key\n");
+		printf("Have auth_key with len: %d\n", auth_key.size);
 		reset_shared_rc();
 		net_open(_ip, _port);
-		shared_rc.key = buf_add(auth_key.data, auth_key.size);
-		api.srl.init();
-		/*api.log.info(".. new session");*/
+		shared_rc.salt = buf_rand(8);
+		shared_rc.key = auth_key;
+		shared_rc.seqnh = -1;
+		api.log.info(".. new session");
 		shared_rc.ssid = api.buf.rand(8);
-		//buf_t get_salt = tl_get_future_salts(1);
-		
-		//buf_t nonce = buf_rand(16);
-		buf_t get_salt = tl_get_future_salts(1);
-		tl_send_tl_message(get_salt, RFC);
-		
 		// check if authorized
-		//InputUser iuser = tl_inputUserSelf();
-		//buf_t getUsers = tl_users_getUsers(&iuser, 1);	
-		//buf_t answer = tl_send(getUsers); 
-		//printf("ANSWER ID: %.8x\n", id_from_tl_buf(answer));
-		return 0;
+		InputUser iuser = tl_inputUserSelf();
+		buf_t getUsers = tl_users_getFullUser(&iuser);	
+		tl_t *tl = tl_send(init(tg, getUsers)); 
+		
+		if (tl && tl->_id == id_rpc_result){
+			/*buf_t buf = buf_add_ui32(id_userFull);*/
+			/*buf = buf_cat(buf, ((tl_rpc_result_t *)tl)->result_);*/
+			/*if (callback)*/
+				/*callback(userdata, TG_AUTH_SUCCESS, tl_deserialize(&buf));*/
+			return 0;
+		}
+		
+		if (tl && tl->_id == id_user){
+			if (callback)
+				callback(userdata, TG_AUTH_SUCCESS, tl);
+			return 0;
+		}
+
+		// on error
+		if (callback)
+			callback(userdata, TG_AUTH_ERROR, tl);
+		
+		return 1;
 	}
 
 	// try to get phone_number
-	char * phone_number = phone_number_from_database(tg);
+	char * phone_number = NULL;
+	//char * phone_number = phone_number_from_database(tg);
 	if (!phone_number){
 		if (callback){
 			phone_number = 
@@ -93,32 +133,11 @@ int tg_connect(
 	printf("sendCode:\n");
 	buf_dump(sendCode);
 
-	buf_t initConnection = 
-		tl_initConnection(
-				tg->apiId,
-				"libtg", 
-				"1.0", 
-				"1.0", 
-				"ru", 
-				"LibTg", 
-				"ru", 
-				NULL, 
-				NULL, 
-				&sendCode);
-	
-	printf("initConnection:\n");
-	buf_dump(initConnection);
-
-	buf_t invokeWithLayer = 
-		tl_invokeWithLayer(
-				API_LAYER, &initConnection);
-
-	buf_t answer = tl_send(invokeWithLayer); 
-	if (!answer.size)
+	tl_t *tl = tl_send(init(tg, sendCode)); 
+	if (!tl)
 		return 1;
 	/*printf("ANSWER: %.8x\n", id_from_tl_buf(answer));*/
 	
-	tl_t *tl = tl_deserialize(&answer);
 	switch (tl->_id) {
 		case id_auth_sentCode:
 			{
@@ -132,14 +151,11 @@ int tg_connect(
 						buf_t signIn = 
 							tl_auth_signIn(
 									phone_number, 
-									tls->phone_code_hash_, 
+									string_from_buf(tls->phone_code_hash_), 
 									code, 
 									NULL);
-						buf_t answer = 
+						tl_t *tl = 
 							tl_send(signIn); 
-						printf("ANSWER: %.8x\n", 
-								id_from_tl_buf(answer));
-						tl_t *tl = tl_deserialize(&answer);
 						/*free(code);*/
 						switch (tl->_id) {
 							case id_auth_authorization:
