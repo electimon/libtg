@@ -1,10 +1,17 @@
 AC_INIT(libtg, 1.0, [https://github.com/igkuzm/libtg])
 AM_INIT_AUTOMAKE
 
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADER(config.h)
 
 AC_PROG_CC
 AC_PROG_CXX
+
+AC_ARG_WITH([test],
+						[AS_HELP_STRING([--with-test],
+														[enable test (default=no)])],
+						[enable_test=$withval],
+						[enable_test=no])
+AM_CONDITIONAL([MAKE_TEST], [test x$enable_test = xyes])
 
 AC_CANONICAL_HOST
 case "${host_os}" in

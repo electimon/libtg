@@ -1,5 +1,7 @@
 #define TELEGRAM_LAYER 185
 
+#undef MAKE_TEST
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
