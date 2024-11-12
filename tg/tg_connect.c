@@ -20,9 +20,6 @@ static buf_t init(tg_t *tg, buf_t query)
 				NULL, 
 				&query);
 	
-	printf("initConnection:\n");
-	buf_dump(initConnection);
-
 	buf_t invokeWithLayer = 
 		tl_invokeWithLayer(
 				API_LAYER, &initConnection);
@@ -50,30 +47,22 @@ int tg_connect(
 		shared_rc.seqnh = -1;
 		api.log.info(".. new session");
 		shared_rc.ssid = api.buf.rand(8);
+		
 		// check if authorized
 		InputUser iuser = tl_inputUserSelf();
-		buf_t getUsers = tl_users_getFullUser(&iuser);	
-		tl_t *tl = tl_send(init(tg, getUsers)); 
+		buf_t getUsers = 
+			tl_users_getUsers(&iuser, 1);	
+		tl_t *tl = 
+			tl_send(init(tg, getUsers)); 
 		
-		if (tl && tl->_id == id_rpc_result){
-			/*buf_t buf = buf_add_ui32(id_userFull);*/
-			/*buf = buf_cat(buf, ((tl_rpc_result_t *)tl)->result_);*/
-			/*if (callback)*/
-				/*callback(userdata, TG_AUTH_SUCCESS, tl_deserialize(&buf));*/
-			return 0;
+		if (tl && tl->_id == id_vector){
+			tl_t *user = tl_deserialize(&((tl_vector_t *)tl)->data_);
+			if (user && user->_id == id_user){
+				if (callback)
+					callback(userdata, TG_AUTH_SUCCESS, user);
+				return 0;
+			}
 		}
-		
-		if (tl && tl->_id == id_user){
-			if (callback)
-				callback(userdata, TG_AUTH_SUCCESS, tl);
-			return 0;
-		}
-
-		// on error
-		if (callback)
-			callback(userdata, TG_AUTH_ERROR, tl);
-		
-		return 1;
 	}
 
 	// try to get phone_number
@@ -120,8 +109,8 @@ int tg_connect(
 		 	NULL,
 		 	NULL);
 
-	printf("codeSettings:\n");
-	buf_dump(codeSettings);
+	//printf("codeSettings:\n");
+	//buf_dump(codeSettings);
 
 	buf_t sendCode = 
 		tl_auth_sendCode(
@@ -130,13 +119,16 @@ int tg_connect(
 				tg->apiHash, 
 				&codeSettings);
 	
-	printf("sendCode:\n");
-	buf_dump(sendCode);
+	//printf("sendCode:\n");
+	//buf_dump(sendCode);
 
-	tl_t *tl = tl_send(init(tg, sendCode)); 
-	if (!tl)
+	tl_t *tl = 
+		tl_send(init(tg, sendCode)); 
+	if (!tl){
+		if (callback)
+			callback(userdata, TG_AUTH_ERROR, NULL);	
 		return 1;
-	/*printf("ANSWER: %.8x\n", id_from_tl_buf(answer));*/
+	}
 	
 	switch (tl->_id) {
 		case id_auth_sentCode:

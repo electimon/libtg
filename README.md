@@ -10,6 +10,7 @@ char * callback(void *userdata, TG_AUTH auth, tl_t *tl)
             break;
         case TG_AUTH_SENDCODE:
             // ask user for phone code 
+            // tl is auth.sentCode
             // return phone_code; 
             break;
         case TG_AUTH_PASSWORD_NEEDED:
@@ -17,7 +18,7 @@ char * callback(void *userdata, TG_AUTH auth, tl_t *tl)
             // return password; 
             break;
         case TG_AUTH_ERROR:
-            // handle error (error in %tl)
+            // handle error (error in %tl or NULL)
             break; 
         case TG_AUTH_SUCCESS:
             // You are logged in! (current user in %tl)

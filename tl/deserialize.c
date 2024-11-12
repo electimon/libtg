@@ -108,20 +108,20 @@ mtp_message_t deserialize_mtp_message(buf_t *b){
 	
 	msg.msg_id = buf_get_ui64(*b);
 	*b = buf_add(b->data + 8, b->size - 8);
-	printf("mtp_message msg_id: %0.16lx\n", msg.msg_id);
+	//printf("mtp_message msg_id: %0.16lx\n", msg.msg_id);
 
 	msg.seqno = buf_get_ui32(*b);
 	*b = buf_add(b->data + 4, b->size - 4);
-	printf("mtp_message seqno: %0.8x\n", msg.seqno);
+	//printf("mtp_message seqno: %0.8x\n", msg.seqno);
 
 	msg.bytes = buf_get_ui32(*b);
 	*b = buf_add(b->data + 4, b->size - 4);
-	printf("mtp_message bytes: %d\n", msg.bytes);
+	//printf("mtp_message bytes: %d\n", msg.bytes);
 
 	msg.body = buf_add(b->data, msg.bytes);
 	*b = buf_add(b->data + msg.bytes, b->size - msg.bytes);
-	printf("mtp_message body: %s (%.x)\n",
-			TL_NAME_FROM_ID(id_from_tl_buf(msg.body)),
-			id_from_tl_buf(msg.body));
+	//printf("mtp_message body: %s (%.x)\n",
+			//TL_NAME_FROM_ID(id_from_tl_buf(msg.body)),
+			//id_from_tl_buf(msg.body));
 	return msg;
 }

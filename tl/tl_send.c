@@ -6,7 +6,10 @@
 #include "../mtx/include/net.h"
 #include "../mtx/include/sil.h"
 #include "../mtx/include/sel.h"
+#include <stdio.h>
 #include <string.h>
+#include <zconf.h>
+#include "zlib.h"
 
 buf_t parse_answer(buf_t a)
 {
@@ -178,13 +181,11 @@ buf_t parse_answer(buf_t a)
   return a;
 }
 
-tl_t * tl_handle_serialized_message(buf_t msg)
+tl_t * tl_handle_serialized_message(buf_t msg);
+
+tl_t * tl_handle_deserialized_message(tl_t *tl)
 {
 	int i;
-	tl_t *tl = tl_deserialize(&msg);
-	if (!tl)
-		return NULL;
-
 	switch (tl->_id) {
 		case id_msg_container:
 			{
@@ -226,9 +227,45 @@ tl_t * tl_handle_serialized_message(buf_t msg)
 			{
 				tl_rpc_result_t *obj = 
 					(tl_rpc_result_t *)tl;
-				tl_t *result = tl_handle_serialized_message(obj->result_);
-				if (result)
+				tl_t *result = tl_handle_deserialized_message(obj->result_);
+				if (result){
 					tl = result;
+					// acknowlege
+					/* TODO:  <12-11-24, kuzmich> */
+				}
+				
+				if (result && result->_id == id_gzip_packed){
+					// handle gzip
+					tl_gzip_packed_t *obj =
+						(tl_gzip_packed_t *)result;
+
+					buf_dump(obj->packed_data_);
+
+					if (obj->packed_data_.size > max_buf_size){
+						// buffer overload
+						perror("buffer overload");
+						break;
+					}
+
+					buf_t buf;
+					unsigned long len = max_buf_size;
+					z_stream strm;
+					if (inflateInit2(&strm, 16 + MAX_WBITS) != Z_OK) break;
+					strm.avail_in = obj->packed_data_.size;
+					strm.next_in = obj->packed_data_.data;
+					strm.avail_out = len;
+					strm.next_out = buf.data;
+					int ret = inflate(&strm, Z_FINISH);
+					if (ret != Z_OK && ret != Z_STREAM_END){
+						printf("uncompress error: %d\n", ret);
+						break;	
+					}
+					printf("total_out: %ld\n", strm.total_out);
+					inflateEnd(&strm);
+					buf.size = strm.total_out;
+					
+					tl = tl_handle_serialized_message(buf);
+				}
 			}
 			break;
 		case id_bad_msg_notification:
@@ -246,11 +283,20 @@ tl_t * tl_handle_serialized_message(buf_t msg)
 	return tl;
 }
 
+tl_t * tl_handle_serialized_message(buf_t msg)
+{
+	tl_t *tl = tl_deserialize(&msg);
+	if (!tl)
+		return NULL;
+
+	return tl_handle_deserialized_message(tl);
+}
+
 tl_t * tl_send_tl_message(buf_t s, msg_t mtype)
 {
-	shared_rc.seqnh += 1;
-	printf("Send:\n");
-	buf_dump(s);
+	shared_rc.seqnh++;
+	//printf("Send:\n");
+	//buf_dump(s);
 
 	buf_t s1 = api.hdl.header(s, mtype);
 	//api.buf.dump(s1);
@@ -279,6 +325,5 @@ tl_t * tl_send_tl_message(buf_t s, msg_t mtype)
 
 tl_t * tl_send(buf_t s)
 {
-	//api.srl.ping();
 	return tl_send_tl_message(s, API);
 }

@@ -314,8 +314,8 @@ int append_deserialize_table(
 		 	g->deserialize_table_c);
 
 	fputs(STR(buf, BLEN,
-				"\tprintf(\"deserialize obj with id: %.8x\\n\");\n",
-				m->id),
+				"\tprintf(\"deserialize obj: %s (%.8x)\\n\");\n",
+				m->name, m->id),
 		 	g->deserialize_table_c);
 	
 	fputs(
@@ -327,6 +327,13 @@ int append_deserialize_table(
 	fputs(
 				"\tobj->_id = deserialize_ui32(buf);\n"
 				, g->deserialize_table_c);
+
+	if (strcmp(m->name, "vector") == 0){
+		fputs("\tobj->len_ = deserialize_ui32(buf);\n"
+				, g->deserialize_table_c);
+		fputs("\tobj->data_ = *buf;\n", 
+				g->deserialize_table_c);
+	}
 		
 	int i, nflag = 0;
 	for (i = 0; i < m->argc; ++i) {
@@ -607,6 +614,11 @@ int append_struct(
 	
 	fputs("\tui32_t _id;\n", g->struct_h);
 
+	if (strcmp(m->name, "vector") == 0){
+		fputs("\tui32_t len_;\n", g->struct_h);
+		fputs("\tbuf_t data_;\n", g->struct_h);
+	}
+
 	// args
 	for (i = 0; i < m->argc; ++i) {
 		// skip flags
@@ -819,6 +831,9 @@ int append_methods_header(
 		if (strcmp(type, "!X") == 0)
 			type = "X";
 		
+		if (strcmp(type, "Object") == 0)
+			type = "X";
+		
 		if (strcmp(type, "future_salt") == 0)
 			type = "FutureSalt";
 		
@@ -923,6 +938,9 @@ int append_methods(
 			type = "bool";
 		
 		if (strcmp(type, "!X") == 0)
+			type = "X";
+		
+		if (strcmp(type, "Object") == 0)
 			type = "X";
 		
 		if (strcmp(type, "future_salt") == 0)
