@@ -163,6 +163,30 @@ int tg_connect(
 
 					/*free(code);*/
 					switch (tl->_id) {
+						case id_rpc_error:
+							{
+								tl_rpc_error_t *error = 
+									(tl_rpc_error_t *)tl;
+								if (callback)
+									callback(userdata, TG_AUTH_ERROR, tl,
+											(char *)error->error_message_.data);
+
+								return 1;
+							}
+						case id_bad_msg_notification:
+							{
+								tl_bad_msg_notification_t *bmsgn = 
+									(tl_bad_msg_notification_t *)tl;
+								char err[BUFSIZ];
+								sprintf(err, 
+										"bad msg notification: %d", 
+										bmsgn->error_code_);
+								if (callback)
+									callback(userdata, TG_AUTH_ERROR, tl,
+											err);
+
+								return 1;
+							}
 						case id_auth_authorization:
 							{
 								tl_auth_authorization_t *auth =
