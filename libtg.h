@@ -29,6 +29,7 @@ int tg_connect(
 		char * (*callback)(
 			void *userdata,
 			TG_AUTH auth,
-			const tl_t *tl));         // deserialized tl object
+			const tl_t *tl,
+			const char *error));
 
 #endif /* ifndef SYMBOL */

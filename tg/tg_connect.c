@@ -33,7 +33,8 @@ int tg_connect(
 		char * (*callback)(
 			void *userdata,
 			TG_AUTH auth,
-			const tl_t *tl))
+			const tl_t *tl,
+			const char *error))
 {
 	// try to load auth_key_id from database
 	buf_t auth_key = auth_key_from_database(tg);
@@ -59,19 +60,18 @@ int tg_connect(
 			tl_t *user = tl_deserialize(&((tl_vector_t *)tl)->data_);
 			if (user && user->_id == id_user){
 				if (callback)
-					callback(userdata, TG_AUTH_SUCCESS, user);
+					callback(userdata, TG_AUTH_SUCCESS, user, NULL);
 				return 0;
 			}
 		}
 	}
 
 	// try to get phone_number
-	char * phone_number = NULL;
-	//char * phone_number = phone_number_from_database(tg);
+	char * phone_number = phone_number_from_database(tg);
 	if (!phone_number){
 		if (callback){
 			phone_number = 
-					callback(userdata, TG_AUTH_PHONE_NUMBER, NULL);
+					callback(userdata, TG_AUTH_PHONE_NUMBER, NULL, NULL);
 		if (!phone_number)
 			return 1;
 		}
@@ -126,7 +126,7 @@ int tg_connect(
 		tl_send(init(tg, sendCode)); 
 	if (!tl){
 		if (callback)
-			callback(userdata, TG_AUTH_ERROR, NULL);	
+			callback(userdata, TG_AUTH_ERROR, NULL, "can't deserialize tl_send");	
 		return 1;
 	}
 	
@@ -138,57 +138,74 @@ int tg_connect(
 				// handle sent code
 				if (callback){
 					char *code = 
-						callback(userdata, TG_AUTH_SENDCODE, tl);
-					if (code){
-						buf_t signIn = 
-							tl_auth_signIn(
-									phone_number, 
-									string_from_buf(tls->phone_code_hash_), 
-									code, 
-									NULL);
-						tl_t *tl = 
-							tl_send(signIn); 
-						/*free(code);*/
-						switch (tl->_id) {
-							case id_auth_authorization:
-								{
-									tl_auth_authorization_t *tla =
-											(tl_auth_authorization_t *)tl;
-									if (tla->setup_password_required_){
-										if (callback)
-											callback(userdata, TG_AUTH_PASSWORD_NEEDED, tl);
-										return 1;
-									}
-									if (tla->future_auth_token_.size > 0){
-										char auth_token[BUFSIZ];
-										strncpy(
-											auth_token,
-											((char *)tla->future_auth_token_.data),
-											tla->future_auth_token_.size);
-										auth_token_to_database(tg, auth_token);
-									}
-									// save auth_key_id 
-									auth_key_to_database(
-											tg, shared_rc_get_key(), phone_number);
-									if (callback)
-										callback(userdata, TG_AUTH_SUCCESS, tla->user_);
-									return 0;
-								}
-								break;
-							
-							default:
-								break;
-						}
+						callback(userdata, TG_AUTH_SENDCODE, tl, NULL);
+					if (!code){
+						if (callback)
+							callback(userdata, TG_AUTH_ERROR, NULL, 
+									"phone code is NULL");
+						return 1;
 					}
-				}
+					buf_t signIn = 
+						tl_auth_signIn(
+								phone_number, 
+								string_from_buf(
+									tls->phone_code_hash_), 
+								code, 
+								NULL);
+					tl_t *tl = 
+						tl_send(signIn); 
+					if (!tl){
+						if (callback)
+							callback(userdata, TG_AUTH_ERROR, NULL, 
+									"can't deserialize tl_send");	
+						return 1;
+					}
+
+					/*free(code);*/
+					switch (tl->_id) {
+						case id_auth_authorization:
+							{
+								tl_auth_authorization_t *auth =
+										(tl_auth_authorization_t *)tl;
+								if (auth->setup_password_required_){
+									if (callback)
+										callback(userdata, 
+												TG_AUTH_PASSWORD_NEEDED, tl, NULL);
+									return 1;
+								}
+								if (auth->future_auth_token_.size > 0){
+									char auth_token[BUFSIZ];
+									strncpy(
+										auth_token,
+										((char *)auth->future_auth_token_.data),
+										auth->future_auth_token_.size);
+									auth_token_to_database(tg, auth_token);
+								}
+								// save auth_key_id 
+								auth_key_to_database(
+										tg, shared_rc_get_key(),
+									 	phone_number);
+								if (callback)
+									callback(userdata, 
+											TG_AUTH_SUCCESS, auth->user_, NULL);
+								return 0;
+							}
+						
+						default:
+							break;
+					}
 				/*tl_auth_sentCode_free((tl_auth_sentCode_t *)tl);*/
+				}
 			}
-			break;
-		
 		default:
-			break;
-	}
+			{
+				if (callback)
+					callback(userdata, TG_AUTH_ERROR, tl, 
+							"unknown response");
+				break;
+			}
+		}
 
 	//free(phone_number);
-	return 0;
+	return 1;
 }

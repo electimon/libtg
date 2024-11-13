@@ -18,7 +18,8 @@
 char * callback(
 			void *userdata,
 			TG_AUTH auth,
-			const tl_t *tl)
+			const tl_t *tl, 
+			const char *error)
 {
 	switch (auth) {
 		case TG_AUTH_PHONE_NUMBER:
@@ -60,14 +61,8 @@ char * callback(
 			break;
 		case TG_AUTH_ERROR:
 			{
-				printf("error: ");
-				if (tl && tl->_id == id_bad_msg_notification){
-					printf("bad_msg_notification: %d\n", 
-							((tl_bad_msg_notification_t *)tl)->error_code_);
-				}
-				else {
-					printf("unknown...\n");
-				}
+				if (error)
+					printf("tg_connect error: %s\n", error);
 			}
 			break;
 
