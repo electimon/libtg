@@ -1,6 +1,5 @@
 #include "config.h"
 #include <stdio.h>
-#ifdef MAKE_TEST
 #include "libtg.h"
 #include "mtx/include/api.h"
 #include "mtx/include/buf.h"
@@ -97,16 +96,3 @@ int main(int argc, char *argv[])
 	tg_close(tg);
 	return 0;
 }
-#else
-int main(int argc, char *argv[])
-{
-	puts(
-		"Add a file called \"ipi_id.h\"\n"
-		"and place this code in that:\n\n"
-		"\t#define SETUP_API_ID(apiId) apiId = YOUR_API_ID;\n"
-		"\t#define SETUP_API_HASH(apiHash) apiHash = YOUR_API_HASH;\n"
-		);
-
-	return 0;
-}
-#endif
