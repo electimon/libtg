@@ -8,6 +8,7 @@ struct tg_ {
 	app_t app;
 	int apiId;
 	char apiHash[33];
+	char database_path[BUFSIZ];
 	sqlite3 *db;
 };
 

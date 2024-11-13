@@ -16,6 +16,9 @@ tg_t *tg_new(const char *database_path,
 
 	// allocate struct
 	tg_t *tg = NEW(tg_t, return NULL);	
+
+	strncpy(tg->database_path,
+		 	database_path, BUFSIZ-1);
 	
 	// connect to SQL
 	if (database_init(tg, database_path))

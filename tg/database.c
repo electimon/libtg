@@ -4,12 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char tg_database_path[BUFSIZ];
-
 static int tg_sqlite3_open(tg_t *tg) 
 {
 	int err = sqlite3_open(
-			tg_database_path, &tg->db);
+			tg->database_path, &tg->db);
 	if (err){
 		api.log.error((char *)sqlite3_errmsg(tg->db));
 		return 1;
@@ -77,11 +75,8 @@ static int tg_sqlite3_exec(
 
 int database_init(tg_t *tg, const char *database_path)
 {
-	strncpy(tg_database_path, database_path, BUFSIZ-1);
-	tg_database_path[BUFSIZ-1] = 0;
-
 	int err = sqlite3_open_v2(
-			tg_database_path, &tg->db, 
+			tg->database_path, &tg->db, 
 			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 
 			NULL);
 	if (err){
@@ -189,7 +184,7 @@ int auth_key_to_database(
 			"SELECT 0 "
 			"WHERE NOT EXISTS (SELECT 1 FROM auth_keys WHERE id = 0); ";
 	
-	int res = sqlite3_open(tg_database_path, &tg->db);
+	int res = sqlite3_open(tg->database_path, &tg->db);
 	if (res){
 		printf("%s\n", sqlite3_errmsg(tg->db));
 		return 1;
