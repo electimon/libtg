@@ -143,8 +143,7 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 	buf_t signIn = 
 		tl_auth_signIn(
 				phone_number, 
-				string_from_buf(
-					sentCode->phone_code_hash_), 
+				(char *)sentCode->phone_code_hash_.data, 
 				phone_code, 
 				NULL);
 	
