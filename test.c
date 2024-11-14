@@ -19,10 +19,10 @@ char * callback(
 			void *userdata,
 			TG_AUTH auth,
 			const tl_t *tl, 
-			const char *error)
+			const char *msg)
 {
 	switch (auth) {
-		case TG_AUTH_PHONE_NUMBER:
+		case TG_AUTH_PHONE_NUMBER_NEEDED:
 			{
 				char phone[32];
 				printf("enter phone number (+7XXXXXXXXXX): \n");
@@ -30,7 +30,7 @@ char * callback(
 				return strdup(phone);
 			}
 			break;
-		case TG_AUTH_SENDCODE:
+		case TG_AUTH_PHONE_CODE_NEEDED:
 			{
 				int code;
 				printf("enter code: \n");
@@ -61,8 +61,15 @@ char * callback(
 			break;
 		case TG_AUTH_ERROR:
 			{
-				if (error)
-					printf("tg_connect error: %s\n", error);
+				if (msg)
+					printf("tg_connect error: %s\n", msg);
+			}
+			break;
+		
+		case TG_AUTH_INFO:
+			{
+				if (msg)
+					printf("tg_connect info: %s\n", msg);
 			}
 			break;
 

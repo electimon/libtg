@@ -1,14 +1,14 @@
 # C99 API for Telegram
 
 ```c
-char * callback(void *userdata, TG_AUTH auth, tl_t *tl)
+char * callback(void *userdata, TG_AUTH auth, tl_t *tl, const char *msg)
 {
     switch (auth) {
-        case TG_AUTH_PHONE_NUMBER:
+        case TG_AUTH_PHONE_NUMBER_NEEDED:
             // ask user for phone number 
             // return phone_number; 
             break;
-        case TG_AUTH_SENDCODE:
+        case TG_AUTH_PHONE_CODE_NEEDED:
             // ask user for phone code 
             // tl is auth.sentCode
             // return phone_code; 
@@ -19,6 +19,10 @@ char * callback(void *userdata, TG_AUTH auth, tl_t *tl)
             break;
         case TG_AUTH_ERROR:
             // handle error (error in %tl or NULL)
+            fprintf(stderr, "ERROR: %s\n", msg);
+            break; 
+        case TG_AUTH_INFO:
+            printf("INFO: %s\n", msg);
             break; 
         case TG_AUTH_SUCCESS:
             // You are logged in! (current user in %tl)
