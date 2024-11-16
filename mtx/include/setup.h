@@ -9,6 +9,7 @@
 #ifndef mtx_setup_h
 #define mtx_setup_h
 
+#include <stdio.h>
 #define product             "mtx"
 #define _version             "0.1"
 
@@ -24,7 +25,8 @@
 
 enum settings_atomic_operations
 {
-  max_buf_size              = 1024,
+	//max_buf_size              = 800,
+	max_buf_size              = 2048,
 };
 
 enum settings_tgt

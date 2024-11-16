@@ -8,6 +8,7 @@
 
 #include "../include/api.h"
 #include "../include/net.h"
+#include "../include/buf.h"
 
 #include <string.h>
 #include <sys/types.h>

@@ -175,6 +175,9 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 				tg, shared_rc_get_key(),
 				phone_number);
 
+		// save settings
+		tg->rc = shared_rc;
+
 		return (tl_user_t *)auth->user_;
 	}
 

@@ -55,8 +55,8 @@ char * callback(
 				printf("Connected as ");
 				tl_user_t *user = (tl_user_t *)tl;
 				printf("%s (%s)!\n", 
-						string_from_buf(user->username_), 
-						string_from_buf(user->phone_));
+						(char *)user->username_.data, 
+						(char *)user->phone_.data);
 			}
 			break;
 		case TG_AUTH_ERROR:
@@ -80,6 +80,11 @@ char * callback(
 	return NULL;
 }
 
+static void on_err(void *d, tl_t *tl, const char *err)
+{
+	printf("ERR: %s\n", err);
+}
+
 int main(int argc, char *argv[])
 {
 	int apiId = 0;
@@ -94,6 +99,16 @@ int main(int argc, char *argv[])
 			apiHash);
 	
 	tg_connect(tg, NULL, callback);
+
+	tl_messages_dialogsSlice_t *md = 
+		tg_get_dialogs(tg, NULL, on_err);
+
+	if (md){
+		printf("dialogs: %d\n", md->dialogs_len);
+		printf("chats: %d\n", md->chats_len);
+		printf("users: %d\n", md->users_len);
+		printf("messages: %d\n", md->messages_len);
+	}
 
 	tg_close(tg);
 	return 0;

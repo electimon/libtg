@@ -9,7 +9,7 @@
 #include "deserialize.h"
 
 ui32_t id_from_tl_buf(buf_t tl_buf);
-const char * string_from_buf(buf_t string);
+#define BUF_TO_STR(__b) (char *)__b.data
 
 /* send TL object to server and return answer */
 tl_t *tl_send(buf_t tl_serialized_object);

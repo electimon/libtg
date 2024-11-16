@@ -10,6 +10,7 @@ struct tg_ {
 	char apiHash[33];
 	char database_path[BUFSIZ];
 	sqlite3 *db;
+	shared_rc_t rc;
 };
 
 int database_init(tg_t *tg, const char *database_path);

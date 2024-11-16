@@ -1,4 +1,3 @@
-//
 //  trl.c
 //  mtx
 //
@@ -47,9 +46,9 @@ buf_t trl_detransport(buf_t a)
   buf_t a_len = api.buf.add(a.data, 4);
   buf_t a_len_ = api.buf.add((ui8_t *)&a.size, 4);
 
-  if (!api.buf.cmp(a_len, a_len_)) {
-    api.log.error("trl_transport: len mismatch");
-  }
+	if (!api.buf.cmp(a_len, a_len_)) {
+		api.log.error("trl_transport: len mismatch");
+	}
 
   // check seq
   //buf_t a_seq = api.buf.add(a.data+4, 4);

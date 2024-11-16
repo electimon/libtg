@@ -343,6 +343,13 @@ int append_deserialize_table(
 				,m->args[i].name, m->args[i].type)
 				, g->deserialize_table_c);
 		
+		fputs(
+				STR(buf, BLEN,
+				"\tprintf(\"obj: %s: parse arg %s (%s)\\n\");\n"
+				,m->name, m->args[i].name, m->args[i].type)
+				, g->deserialize_table_c);
+		
+
 		// check if flag
 		void *p;
 		if (m->args[i].type == NULL && 
@@ -351,6 +358,11 @@ int append_deserialize_table(
 			fputs(STR(buf, BLEN,
 				"\tui32_t flag%d = deserialize_ui32(buf);\n"
 				, ++nflag)
+				, g->deserialize_table_c);
+
+			fputs(STR(buf, BLEN,
+				"\tprintf(\"flag value: %%.32b\\n\", flag%d);\n"
+				, nflag)
 				, g->deserialize_table_c);
 
 		} else if (m->args[i].type == NULL){
@@ -367,6 +379,15 @@ int append_deserialize_table(
 			fputs(
 					"\t{\n"
 					, g->deserialize_table_c);
+
+			if (m->args[i].flagn)
+				fputs(
+						STR(buf, BLEN,
+						"\t\tprintf(\"\\targ is in flag: %.32b\\n\");\n"
+						, (1 << m->args[i].flagb))
+						, g->deserialize_table_c);
+			else 
+				fputs("\t\tprintf(\"\\targ is mandatory\\n\");\n", g->deserialize_table_c);
 
 			// handle arguments
 			char *p;
@@ -447,14 +468,21 @@ int append_deserialize_table(
 					, g->deserialize_table_c);
 
 					fputs(STR(buf, BLEN,
-					  "\t\tif(obj->%s_len == id_vector)\n"
-					  "\t\t\tobj->%s_len = deserialize_ui32(buf); // skip vecrtor definition\n"
-					, m->args[i].name, m->args[i].name)
+					  "\t\tif(obj->%s_len != id_vector)\n"
+					  "\t\tprintf(\"ERR! id is not vector: %%.8x\\n\", obj->%s_len);\n"
+					  "\t\telse\n"
+					  "\t\t\tobj->%s_len = deserialize_ui32(buf); // skip vector definition\n"
+					, m->args[i].name, m->args[i].name, m->args[i].name)
 					, g->deserialize_table_c);
 					
 					fputs(STR(buf, BLEN,
-					  "\t\tif (obj->%s_len < 0) {perror(\"deserialize error\"); return NULL;}; // some error\n"
+					  "\t\tprintf(\"\\tvector len: %%d\\n\", obj->%s_len);\n"
 					, m->args[i].name)
+					, g->deserialize_table_c);
+
+					fputs(STR(buf, BLEN,
+					  "\t\tif (obj->%s_len < 0 || obj->%s_len > 100) {printf(\"vector len error\\n\"); return (tl_t*)obj;}; // some error\n"
+					, m->args[i].name, m->args[i].name)
 					, g->deserialize_table_c);
 
 					fputs(STR(buf, BLEN,
