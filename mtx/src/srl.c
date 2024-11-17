@@ -18,9 +18,13 @@ srl_t srl_init()
 srl_t srl_auth()
 {
   method_req_pq_t m = api.tml->methods->req_pq.init();
+	printf("req_pq init done\n");
   m = api.tml->methods->req_pq.drive(m);
+	printf("req_pq drive done\n");
   method_req_DH_params_t m1 = api.tml->methods->req_DH_params.init(m);
+	printf("req_DH_params init done\n");
   m1 = api.tml->methods->req_DH_params.drive(m1);
+	printf("req_DH_params drive done\n");
   method_set_client_DH_params_t m2 =
       api.tml->methods->set_client_DH_params.init(m, m1);
   m2 = api.tml->methods->set_client_DH_params.drive(m2);
@@ -38,6 +42,7 @@ srl_t srl_auth()
 buf_t srl_ping()
 {
   buf_t r = {};
+	buf_init(&r);
   method_ping_t m = api.tml->methods->ping.init();
   api.tml->methods->ping.drive(m);
 
@@ -88,6 +93,7 @@ abstract_t srl_invokeWithLayer(int layer, buf_t query,
 		void *userdata, method_callback_t *cb)
 {
   buf_t r = {};
+	buf_init(&r);
   method_invokeWithLayer_t m = 
 		api.tml->methods->invokeWithLayer.init(layer, query);
 	return api.tml->methods->invokeWithLayer.drive(m);

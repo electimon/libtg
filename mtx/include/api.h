@@ -21,7 +21,7 @@ typedef struct std_api_
 
 typedef struct net_api_
 {
-  METHOD(open, net_t, string_t ip, ui32_t port);
+  METHOD(open, net_t, _string_t ip, ui32_t port);
   METHOD(close, void, const net_t);
   METHOD(drive, buf_t, buf_t, stk_mode_t);
 } net_api_t;
@@ -50,8 +50,8 @@ typedef struct app_api_
 
 typedef struct log_api_
 {
-  void (*info)(string_t, ...);
-  void (*error)(string_t);
+  void (*info)(_string_t, ...);
+  void (*error)(_string_t);
   void (*debug)();
   void (*assert)();
   METHOD(hex, void, array_t, ui32_t);

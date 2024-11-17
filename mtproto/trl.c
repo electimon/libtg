@@ -1,32 +1,21 @@
-//  trl.c
-//  mtx
-//
-//  Created by Pavel Morozkin on 17.01.14.
-//  Copyright (c) 2014 Pavel Morozkin. All rights reserved.
-//
+#include "str.h"
+#include "alloc.h"
+#include <stdint.h>
+#include "../mtx/include/types.h"
 
-#include "../include/trl.h"
-#include "../include/api.h"
-#include "../include/buf.h"
-
-trl_t trl_init()
+struct str * trl_transport(struct str * buf)
 {
-  trl_t trl;
+	struct str *b = NEW(struct str, return NULL);
+	str_init(b);
 
-  return trl;
-}
-
-buf_t trl_transport(buf_t buf)
-{
-  buf_t b = {};
-	buf_init(&b);
   // add size
-  ui32_t len_ = buf.size + 12;
-  ui8_t * len_ptr = (ui8_t *)&len_;
+  uint32_t len_ = buf->len + 12;
+  uint8_t * len_ptr = (uint8_t *)&len_;
   buf_t len = api.buf.add(len_ptr, sizeof(buf.size));
   b = api.buf.cat(b, len);
-  // add seq
-  ui32_t seqn = shared_rc_get_seqn();
+  
+	// add seq
+  uint32_t seqn = shared_rc_get_seqn();
   buf_t seq = api.buf.add_ui32(seqn);
   b = api.buf.cat(b, seq);
   // add buf

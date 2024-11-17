@@ -11,6 +11,7 @@
 #include "../include/api.h"
 #include "../include/sil.h"
 #include "../include/sel.h"
+#include "../include/buf.h"
 
 #ifdef __GNUC__
 
@@ -948,7 +949,7 @@ method_msgs_ack_t method_msgs_ack =
 method_req_pq_t method_req_pq_init()
 {
   method_req_pq_t m = req_pq;
-  m.nonce.value = api.buf.rand(16);
+	m.nonce.value = api.buf.rand(16);
 
   return m;
 }
@@ -970,6 +971,7 @@ method_req_pq_drive(method_req_pq_t m)
 method_req_DH_params_t
 method_req_DH_params_init(method_req_pq_t m1)
 {
+	printf("%s ...", __func__);
   method_req_DH_params_t m =
 	 	method_req_DH_params;
   m.nonce = m1.nonce;
@@ -1001,6 +1003,7 @@ method_req_DH_params_init(method_req_pq_t m1)
   //api.buf.dump(h);
   buf_t dwh = api.buf.cat(h, d);
   buf_t pad = {};
+	buf_init(&pad);
   pad.size = 255 - dwh.size;
   dwh = api.buf.cat(dwh, pad);
   //api.buf.dump(dwh);
@@ -1009,6 +1012,7 @@ method_req_DH_params_init(method_req_pq_t m1)
   m.encrypted_data.type = TYPE_STRING;
   m.ctor_P_Q_inner_data = c;
 
+	printf("done\n");
   return m;
 }
 
@@ -1016,6 +1020,7 @@ method_req_DH_params_t
 method_req_DH_params_drive(
 		method_req_DH_params_t m)
 {
+	printf("%s ...", __func__);
   tg_api_type_system_t t = {};
   t.method_req_DH_params = m;
   abstract_t a = api.sil.abstract(t);
@@ -1024,6 +1029,7 @@ method_req_DH_params_drive(
   m.ctor_Server_DH_Params = 
 		api.sil.concrete(a).ctor_Server_DH_Params;
 
+	printf("done\n");
   return m;
 }
 
@@ -1046,6 +1052,7 @@ ctor_P_Q_inner_data_init(
   //api.buf.dump(m.server_nonce.value);
   //m.new_nonce.value = api.cmn.rand_array(32);
   buf_t rand_array = {};
+	buf_init(&rand_array);
   rand_array.size = 32;
   m.new_nonce.value = rand_array; // fucking hack
   //api.buf.dump(m.new_nonce.value);
@@ -1081,6 +1088,7 @@ ctor_Server_DH_inner_data_init(
 		m1.ctor_ResPQ.server_nonce.value;
   // tmp_aes_key := SHA1(new_nonce + server_nonce) + substr (SHA1(server_nonce + new_nonce), 0, 12);
   buf_t new_nonce_plus_server_nonce = {};
+	buf_init(&new_nonce_plus_server_nonce);
   new_nonce_plus_server_nonce = 
 		api.buf.cat(
 				new_nonce_plus_server_nonce,
@@ -1092,6 +1100,7 @@ ctor_Server_DH_inner_data_init(
   buf_t new_nonce_plus_server_nonce_hash =
 	 	api.hsh.sha1(new_nonce_plus_server_nonce);
   buf_t server_nonce_plus_new_nonce = {};
+	buf_init(&server_nonce_plus_new_nonce);
   server_nonce_plus_new_nonce = 
 		api.buf.cat(
 				server_nonce_plus_new_nonce,
@@ -1109,6 +1118,7 @@ ctor_Server_DH_inner_data_init(
 				server_nonce_plus_new_nonce_hash.
 				data, 12);
   buf_t tmp_aes_key = {};
+	buf_init(&tmp_aes_key);
   tmp_aes_key = 
 		api.buf.cat(tmp_aes_key,
 			 	new_nonce_plus_server_nonce_hash);
@@ -1210,6 +1220,7 @@ method_set_client_DH_params_init(method_req_pq_t m1, method_req_DH_params_t m2)
   pad_ = (16 - (pad_ % 16)) % 16;
   buf_t rand = api.buf.rand(pad_);
   buf_t data_with_hash = {};
+	buf_init(&data_with_hash);
   data_with_hash = api.buf.cat(data_with_hash, hash);
   data_with_hash = api.buf.cat(data_with_hash, data);
   data_with_hash = api.buf.cat(data_with_hash, rand);

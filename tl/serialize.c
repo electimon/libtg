@@ -7,13 +7,13 @@ buf_t serialize_bytes(
 		ui8_t *bytes, size_t size)
 {
 	buf_t s = {};
-	memset(&s, 0, sizeof(buf_t));
 	if (size <= 253){
 		s = api.buf.add((ui8_t *)&size, 1);
     buf_t b = buf_add(bytes, size);
     s = api.buf.cat(s, b);
     int pad = (4 - (s.size % 4)) % 4;
     buf_t p = {};
+		buf_init(&p);
     p.size = pad;
     s = api.buf.cat(s, p);
 	} else {
@@ -27,6 +27,7 @@ buf_t serialize_bytes(
 
     if (pad) {
       buf_t p = {};
+			buf_init(&p);
       p.size = pad;
       s = api.buf.cat(s, p);
     }

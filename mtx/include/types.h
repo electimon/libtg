@@ -21,14 +21,16 @@ typedef int32_t       i32_t;
 
 typedef uint8_t       ui8_t;
 
-typedef char      *   string_t;
+typedef char      *   _string_t;
 
 typedef ui8_t     *   array_t;
 
 typedef struct buf_
 {
-  ui8_t         data[max_buf_size];
+	//ui8_t         data[max_buf_size];
+  ui8_t         *data;
   ui32_t        size;
+  ui32_t        allo;
 } buf_t;
 
 typedef struct net_

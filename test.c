@@ -11,6 +11,7 @@
 #include "tl/alloc.h"
 #include "tl/libtl.h"
 #include "tl/names.h"
+#include <time.h>
 
 #include "api_id.h"
 
@@ -85,6 +86,22 @@ static void on_err(void *d, tl_t *tl, const char *err)
 	printf("ERR: %s\n", err);
 }
 
+static int md_callback(
+		void *data, 
+		tl_messages_dialogsSlice_t *dialogs, 
+		const char *err)
+{
+	printf("dialogs: %d\n", dialogs->dialogs_len);
+	printf("messages: %d\n", dialogs->messages_len);
+	printf("chats: %d\n", dialogs->chats_len);
+	tl_message_t *m = dialogs->messages_[0];
+	/*printf("MSG: %s\n", STRING_T_TO_STR(m->message_));*/
+	/*printf("message len: %d\n", m->message_);*/
+	printf("MSG: %s\n", m->message_.data);
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	int apiId = 0;
@@ -100,15 +117,8 @@ int main(int argc, char *argv[])
 	
 	tg_connect(tg, NULL, callback);
 
-	tl_messages_dialogsSlice_t *md = 
-		tg_get_dialogs(tg, NULL, on_err);
-
-	if (md){
-		printf("dialogs: %d\n", md->dialogs_len);
-		printf("chats: %d\n", md->chats_len);
-		printf("users: %d\n", md->users_len);
-		printf("messages: %d\n", md->messages_len);
-	}
+	tg_get_dialogs(tg, 0, 20, 
+			NULL, md_callback);
 
 	tg_close(tg);
 	return 0;

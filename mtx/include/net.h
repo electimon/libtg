@@ -11,7 +11,7 @@
 
 #include "types.h"
 
-extern net_t net_open(string_t ip, ui32_t port);
+extern net_t net_open(_string_t ip, ui32_t port);
 extern void net_close(net_t);
 extern void net_send(const buf_t buf);
 extern buf_t net_receive();

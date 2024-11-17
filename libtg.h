@@ -58,6 +58,8 @@ int tg_connect(
 			const char *msg));
 
 
-tl_messages_dialogsSlice_t * tg_get_dialogs(tg_t *tg, void *on_err_data,
-		void (*on_err)(void *on_err_data, tl_t *tl, const char *err));
+void tg_get_dialogs(tg_t *tg, int off_msg_id, int limit,
+		void *data,
+		int (*callback)(void *data, 
+			tl_messages_dialogsSlice_t *dialogs, const char *err));
 #endif /* ifndef SYMBOL */

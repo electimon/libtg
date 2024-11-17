@@ -21,9 +21,10 @@ ui32_t deserialize_ui64(buf_t *b){
 
 buf_t deserialize_bytes(buf_t *b)
 {
-	//buf_dump(*b);
+	/*buf_dump(*b);*/
   buf_t s;
-	//memset(&s, 0, sizeof(buf_t));
+	buf_init(&s);
+
   buf_t byte = buf_add(b->data, 4);
   int offset = 0;
   ui32_t len = 0;
@@ -61,6 +62,7 @@ buf_t deserialize_bytes(buf_t *b)
 		*b = buf_add(b->data + pad, b->size - pad);
 	}
 
+	/*printf("STRING: %s\n", s.data);*/
   return s;
 }
 

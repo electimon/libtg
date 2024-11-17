@@ -299,6 +299,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
       p.value = api.buf.cat(p.value, content);
       p = api.sel.deserialize_param(p);
       buf_t b;
+			buf_init(&b);
 
       for (int i = 0; i < 2; ++i) {
         //api.buf.dump(p.value);

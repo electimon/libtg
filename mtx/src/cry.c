@@ -9,10 +9,12 @@
 #include "../include/api.h"
 #include "../include/rsa.h"
 #include "../include/aes.h"
+#include "../include/buf.h"
 
 buf_t cry_rsa_e(buf_t b)
 {
   buf_t r = {};
+	buf_init(&r);
   r.size = 256;
 
   rsa(b.data, b.size, r.data, r.size);
@@ -23,6 +25,7 @@ buf_t cry_rsa_e(buf_t b)
 buf_t cry_aes_e(buf_t b, buf_t key, buf_t iv)
 {
   buf_t r = {};
+	buf_init(&r);
   int l = aes_e(b.data, r.data, b.size, key.data, iv.data);
 
   if (!l) {
@@ -37,6 +40,7 @@ buf_t cry_aes_e(buf_t b, buf_t key, buf_t iv)
 buf_t cry_aes_d(buf_t b, buf_t key, buf_t iv)
 {
   buf_t r = {};
+	buf_init(&r);
   int l = aes_d(b.data, r.data, b.size, key.data, iv.data);
 
   if (!l) {

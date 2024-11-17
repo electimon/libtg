@@ -11,8 +11,8 @@
 
 #include "types.h"
 
-extern void log_info(string_t string, ...);
-extern void log_error(string_t string);
+extern void log_info(_string_t string, ...);
+extern void log_error(_string_t string);
 extern void log_debug();
 extern void log_assert();
 extern void log_hex(array_t, ui32_t);

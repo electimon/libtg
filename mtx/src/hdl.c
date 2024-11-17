@@ -21,6 +21,7 @@ extern hdl_t hdl;
 buf_t hdl_header(buf_t b, msg_t t)
 {
   buf_t s = {};
+	buf_init(&s);
 
   switch (t) {
     case RFC:
@@ -68,6 +69,7 @@ buf_t hdl_header(buf_t b, msg_t t)
 buf_t hdl_deheader(buf_t b, msg_t t)
 {
   buf_t d;
+	buf_init(&d);
 
   switch (t) {
     case RFC:

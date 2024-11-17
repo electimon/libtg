@@ -11,9 +11,10 @@
 
 #include "types.h"
 
+extern void  buf_init(buf_t *buf);
 extern buf_t buf_add(ui8_t data[], ui32_t size);
 extern buf_t buf_cat(buf_t dest, buf_t src);
-extern void buf_dump(buf_t);
+extern void  buf_dump(buf_t);
 extern ui8_t buf_cmp(buf_t, buf_t);
 extern buf_t buf_swap(buf_t);
 extern buf_t buf_add_ui32(ui32_t);

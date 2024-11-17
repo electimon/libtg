@@ -10,8 +10,10 @@
 #include "../include/net.h"
 #include "../include/buf.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include "stdlib.h"
 
 #ifdef __GNUC__
 #include <sys/socket.h>
@@ -20,7 +22,7 @@
 #include <unistd.h>
 #include <strings.h>
 
-net_t net_open(const string_t ip, ui32_t port)
+net_t net_open(const _string_t ip, ui32_t port)
 {
   net_t net;
   ui32_t error_code = 0;
@@ -92,27 +94,33 @@ void net_close(net_t net)
 
 void net_send(const buf_t buf)
 {
+	printf("net send...");
   net_t net = shared_rc_get_net();
   i32_t n = (i32_t)send(net.sockfd, buf.data, buf.size, 0);
 
   if (n < 0) {
     api.log.error("ERROR writing to socket");
   }
+	printf("done\n");
 }
 
 buf_t net_receive()
 {
-  buf_t buf;
+	int MAX_RECEIVE_SIZE = BUFSIZ*32;
+	unsigned char *data = malloc(MAX_RECEIVE_SIZE);
+	printf("net receive...");
   net_t net = shared_rc_get_net();
-  i32_t n = (i32_t)recv(net.sockfd, buf.data, max_buf_size, 0);
+  i32_t n = (i32_t)recv(net.sockfd, data, MAX_RECEIVE_SIZE, 0);
 
   if (n < 0) {
     api.log.error("ERROR reading from socket");
   }
+  
+	buf_t b = buf_add(data, n);
+	free(data);
 
-  buf.size = n;
-
-  return buf;
+	printf("done\n");
+  return b;
 }
 
 #elif defined _MSC_VER /*WIN32*/
@@ -120,7 +128,7 @@ buf_t net_receive()
 #include <winsock.h>
 
 SOCKET s;
-net_t net_open(const string_t ip, ui32_t port)
+net_t net_open(const _string_t ip, ui32_t port)
 {
   net_t n = {};
   WSADATA wsa;
@@ -179,6 +187,7 @@ buf_t net_drive(const buf_t buf, stk_mode_t m)
 {
   net_send(buf);
   buf_t r = {};
+	buf_init(&r);
 
   switch (m) {
     case SEND_RECEIVE:

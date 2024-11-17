@@ -316,7 +316,7 @@ int append_deserialize_table(
 	fputs(STR(buf, BLEN,
 				"\tprintf(\"deserialize obj: %s (%.8x)\\n\");\n",
 				m->name, m->id),
-		 	g->deserialize_table_c);
+			 g->deserialize_table_c);
 	
 	fputs(
 			STR(buf, BLEN,
@@ -476,7 +476,7 @@ int append_deserialize_table(
 					, g->deserialize_table_c);
 					
 					fputs(STR(buf, BLEN,
-					  "\t\tprintf(\"\\tvector len: %%d\\n\", obj->%s_len);\n"
+						"\t\tprintf(\"\\tvector len: %%d\\n\", obj->%s_len);\n"
 					, m->args[i].name)
 					, g->deserialize_table_c);
 
@@ -690,7 +690,7 @@ int append_struct(
 			type = "buf_t";
 		
 		if (strcmp(type, "string") == 0)
-			type = "buf_t";
+			type = "string_t";
 		
 		if (strcmp(type, "true") == 0)
 			type = "bool";
@@ -738,6 +738,7 @@ int open_types_header(generator_t *g)
 	      "#include \"tl.h\"\n\n"
 	      "typedef buf_t int128;\n"
 	      "typedef buf_t int256;\n"
+	      "typedef buf_t string_t;\n"
 	    ,g->types_h);
 	
 	return 0;

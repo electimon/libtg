@@ -11,13 +11,13 @@
 #include "../include/types.h"
 #include "../include/setup.h"
 
-void log_info(string_t s, ...)
+void log_info(_string_t s, ...)
 {
   fprintf(stdout, product);
   fprintf(stdout, ": info: %s\n", s);
 }
 
-void log_error(string_t s)
+void log_error(_string_t s)
 {
   fprintf(stdout, product);
   fprintf(stdout, ": error: %s\n", s);

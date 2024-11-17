@@ -8,10 +8,12 @@
 
 #include "../include/api.h"
 #include "../include/enl.h"
+#include "../include/buf.h"
 
 buf_t enl_encrypt(buf_t b, msg_t t)
 {
   buf_t e = {};
+	buf_init(&e);
 
   switch (t) {
     case API:
@@ -27,6 +29,7 @@ buf_t enl_encrypt(buf_t b, msg_t t)
 
       if (pad_) {
         buf_t pad = {};
+				buf_init(&pad);
         pad.size = pad_;
         b = api.buf.cat(b, pad);
       }
@@ -40,6 +43,7 @@ buf_t enl_encrypt(buf_t b, msg_t t)
     case RFC:
     {
       buf_t key = {};
+			buf_init(&key);
 
       e = api.buf.add(key.data, 8);
       e = api.buf.cat(e, b);
@@ -60,6 +64,7 @@ buf_t enl_encrypt(buf_t b, msg_t t)
 buf_t enl_decrypt(buf_t m, msg_t t)
 {
   buf_t d;
+	buf_init(&d);
 
   switch (t) {
     case API:
@@ -98,6 +103,7 @@ buf_t enl_decrypt(buf_t m, msg_t t)
     case RFC:
     {
       buf_t key = {};
+			buf_init(&key);
       key.size = 8;
 
       buf_t d_key = api.buf.add(m.data, 8);
@@ -146,7 +152,9 @@ aes_params_t enl_get_params(buf_t auth_key, buf_t msg_key, get_params_mode_t m)
   }
 
   buf_t aes_key = {};
+	buf_init(&aes_key);
   buf_t aes_iv = {};
+	buf_init(&aes_iv);
   buf_t tmp = api.buf.add(msg_key.data, 16);
   tmp = api.buf.cat(tmp, api.buf.add(auth_key.data + x, 32));
   buf_t hash = api.hsh.sha1(tmp);

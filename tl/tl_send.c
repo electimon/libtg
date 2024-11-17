@@ -1,8 +1,8 @@
 #include "deserialize.h"
 #include "id.h"
+#include "libtl.h"
 #include "tl.h"
 #include "types.h"
-#include "struct.h"
 #include "../mtx/include/net.h"
 #include "../mtx/include/sil.h"
 #include "../mtx/include/sel.h"
@@ -10,6 +10,7 @@
 #include <string.h>
 #include <zconf.h>
 #include "zlib.h"
+#include <stdlib.h>
 
 tl_t * tl_handle_serialized_message(buf_t msg);
 
@@ -69,30 +70,10 @@ tl_t * tl_handle_deserialized_message(tl_t *tl)
 					tl_gzip_packed_t *obj =
 						(tl_gzip_packed_t *)result;
 
-					buf_dump(obj->packed_data_);
-
-					if (obj->packed_data_.size > max_buf_size){
-						// buffer overload
-						perror("buffer overload");
-						break;
-					}
-
 					buf_t buf;
-					z_stream strm;
-					if (inflateInit2(&strm, 16 + MAX_WBITS) != Z_OK) break;
-					strm.avail_in = obj->packed_data_.size;
-					strm.next_in = obj->packed_data_.data;
-					strm.avail_out = max_buf_size;
-					strm.next_out = buf.data;
-					int ret = inflate(&strm, Z_FINISH);
-					if (ret != Z_OK && ret != Z_STREAM_END){
-						printf("uncompress error: %d\n", ret);
-						break;	
-					}
-					printf("total_out: %ld\n", strm.total_out);
-					inflateEnd(&strm);
-					buf.size = strm.total_out;
-					
+					if (gunzip_buf(&buf, obj->packed_data_))
+						break;
+
 					tl = tl_handle_serialized_message(buf);
 				}
 			}
@@ -124,27 +105,36 @@ tl_t * tl_handle_serialized_message(buf_t msg)
 tl_t * tl_send_tl_message(buf_t s, msg_t mtype)
 {
 	shared_rc.seqnh++;
-	//printf("Send:\n");
-	//buf_dump(s);
+	printf("message:\n");
+	buf_dump(s);
 
 	buf_t s1 = api.hdl.header(s, mtype);
-	//api.buf.dump(s1);
-  buf_t e = api.enl.encrypt(s1, mtype);
-	//api.buf.dump(e);
-  buf_t t = api.trl.transport(e);
-	//api.buf.dump(t);
-  buf_t nr = api.net.drive(t, SEND_RECEIVE);
-	printf("NET RECEIVE:\n");
+	printf("+header:\n");
+	api.buf.dump(s1);
+  
+	buf_t e = api.enl.encrypt(s1, mtype);
+	printf("+crypt:\n");
+	api.buf.dump(e);
+  
+	buf_t t = api.trl.transport(e);
+	printf("+transport:\n");
+	api.buf.dump(t);
+  
+	buf_t nr = api.net.drive(t, SEND_RECEIVE);
+	printf("received:\n");
 	api.buf.dump(nr);
       
 	buf_t tr = api.trl.detransport(nr);
-	printf("DETRANSPORT:\n");
+	printf("-transport:\n");
 	api.buf.dump(tr);
+	
 	buf_t d = api.enl.decrypt(tr, mtype);
-  /*api.buf.dump(d);*/
-  buf_t s1r = api.hdl.deheader(d, mtype);
-	//printf("Answer:\n");
-	//api.buf.dump(s1r);
+	printf("-crypt:\n");
+	api.buf.dump(d);
+  
+	buf_t s1r = api.hdl.deheader(d, mtype);
+	printf("message:\n");
+	api.buf.dump(s1r);
 
 	tl_t *tl = tl_handle_serialized_message(s1r);
 	if (tl && tl->_id == id_bad_server_salt) // resend message

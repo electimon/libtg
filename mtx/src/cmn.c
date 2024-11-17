@@ -9,6 +9,7 @@
 #include "../include/fact.h"
 #include "../include/api.h"
 #include "../include/rsa.h"
+#include "../include/buf.h"
 
 void cmn_fact(ui64_t pq, ui32_t * p, ui32_t * q)
 {
@@ -22,6 +23,7 @@ buf_t cmn_pow_mod(buf_t g, buf_t e, buf_t m)
   }
 
   buf_t r;
+	buf_init(&r);
 
   int l = pow_mod(r.data, g.data, g.size, e.data, e.size, m.data, m.size);
 

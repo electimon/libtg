@@ -11,17 +11,38 @@
 #include "../include/types.h"
 #include "../include/api.h"
 
+void buf_init(buf_t *buf)
+{
+	buf->data = malloc(max_buf_size + 1); 
+	buf->allo = max_buf_size;
+	buf->size = 0;
+}
+
+void buf_realloc(buf_t *buf, ui32_t size)
+{
+	if (size > buf->allo){
+		void *ptr = realloc(buf->data, size);
+		if (ptr){
+			buf->data = ptr;
+			buf->allo = size;
+		}
+	}
+}
+
 buf_t buf_add(ui8_t data[], ui32_t size)
 {
-  if (size > max_buf_size) {
-    api.log.error("can't add to buffer");
+  buf_t b;
+	buf_init(&b);
+
+  if (size > b.allo) {
+		buf_realloc(&b, size + 1);
   }
 
-  buf_t b = {};
-
-  for (ui32_t i = 0; i < size; ++i) {
+	ui32_t i;
+  for (i = 0; i < size; ++i) {
     b.data[i] = data[i];
   }
+	b.data[i] = 0;
 
   b.size = size;
 
@@ -32,8 +53,8 @@ buf_t buf_cat(buf_t dest, buf_t src)
 {
   ui32_t s = dest.size + src.size;
 
-  if (s > max_buf_size) {
-    api.log.error("can't cat to buffer");
+  if (s > dest.allo) {
+		buf_realloc(&dest, s);
   }
 
   int offset = dest.size;
@@ -49,7 +70,7 @@ buf_t buf_cat(buf_t dest, buf_t src)
 
 void buf_dump(buf_t b)
 {
-  if (b.size > max_buf_size) {
+  if (b.size > b.allo) {
     api.log.error("Error: buf_dump: max size reached");
   } else if (!b.size) {
     api.log.error("Error: buf_dump: buffer is empty");
@@ -90,12 +111,12 @@ buf_t buf_swap(buf_t b)
 
 buf_t buf_add_ui32(ui32_t v)
 {
-  return api.buf.add((ui8_t *)&v, 4);
+  return buf_add((ui8_t *)&v, 4);
 }
 
 buf_t buf_add_ui64(ui64_t v)
 {
-  return api.buf.add((ui8_t *)&v, 8);
+  return buf_add((ui8_t *)&v, 8);
 }
 
 ui32_t buf_get_ui32(buf_t b)
@@ -111,6 +132,7 @@ ui64_t buf_get_ui64(buf_t b)
 buf_t buf_rand(ui32_t s)
 {
   buf_t b = {};
+	buf_init(&b);
 
   srand((unsigned int)time(NULL));
 
@@ -130,6 +152,7 @@ buf_t buf_xor(buf_t a, buf_t b)
   }
 
   buf_t r;
+	buf_init(&r);
 
   for (ui32_t i = 0; i < a.size; ++i) {
     r.data[i] = a.data[i] ^ b.data[i];

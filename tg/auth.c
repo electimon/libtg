@@ -18,10 +18,14 @@ static buf_t _init(tg_t *tg, buf_t query)
 				NULL, 
 				NULL, 
 				&query);
+	//printf("initConnection:\n");
+	//buf_dump(initConnection);
 	
 	buf_t invokeWithLayer = 
 		tl_invokeWithLayer(
 				API_LAYER, &initConnection);
+	//printf("invokeWithLayer:\n");
+	//buf_dump(invokeWithLayer);
 	
 	return invokeWithLayer;
 }
@@ -45,8 +49,14 @@ tg_is_authorized(tg_t *tg, void *on_err_data,
 		
 		// check if authorized
 		InputUser iuser = tl_inputUserSelf();
+		printf("iuser:\n");
+		buf_dump(iuser);
+		
 		buf_t getUsers = 
 			tl_users_getUsers(&iuser, 1);	
+		printf("getUsers:\n");
+		buf_dump(getUsers);
+		
 		tl_t *tl = 
 			tl_send(_init(tg, getUsers)); 
 		
