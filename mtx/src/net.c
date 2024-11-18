@@ -106,21 +106,36 @@ void net_send(const buf_t buf)
 
 buf_t net_receive()
 {
-	int MAX_RECEIVE_SIZE = BUFSIZ*32;
-	unsigned char *data = malloc(MAX_RECEIVE_SIZE);
-	printf("net receive...");
-  net_t net = shared_rc_get_net();
-  i32_t n = (i32_t)recv(net.sockfd, data, MAX_RECEIVE_SIZE, 0);
+	printf("net receive...\n");
+	net_t net = shared_rc_get_net();
+	buf_t buf;
+	buf_init(&buf);
+	unsigned long LEN = max_buf_size;
+	buf_t b;
+	b.size = LEN;	
+	do
+	{		
+			buf_init(&b);
+			b.size = recv(net.sockfd,
+				 	b.data, LEN, 0);
+			if (b.size == 0)
+			{
+				printf("received nothing\n");
+			}
+			else if (b.size > 0)
+			{
+				buf = buf_cat(buf, b);
+				printf("received %d bytes\n", b.size);
+			}
+			else /* < 0 */
+			{
+				fprintf(stderr, "socket error\n");
+			}
+			free(b.data);
+	} while (b.size == LEN);
 
-  if (n < 0) {
-    api.log.error("ERROR reading from socket");
-  }
-  
-	buf_t b = buf_add(data, n);
-	free(data);
-
-	printf("done\n");
-  return b;
+	printf("net receive ... done\n");
+  return buf;
 }
 
 #elif defined _MSC_VER /*WIN32*/

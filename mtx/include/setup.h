@@ -26,7 +26,7 @@
 enum settings_atomic_operations
 {
 	//max_buf_size              = 800,
-	max_buf_size              = 2048,
+	max_buf_size              = 1024,
 };
 
 enum settings_tgt

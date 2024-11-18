@@ -30,6 +30,7 @@ nobase_include_HEADERS = \
 	include/tgt.h \
 	include/tml.h \
 	include/trl.h \
+	include/sha256.h \
 	include/types.h
 
 libmtx_la_SOURCES = \
@@ -58,6 +59,7 @@ libmtx_la_SOURCES = \
 	src/tml.c \
 	src/trl.c \
 	src/types.c \
+	src/sha256.c \
 	src/fact.cpp
 
 if MACOS

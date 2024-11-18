@@ -14,6 +14,9 @@
 extern void  buf_init(buf_t *buf);
 extern buf_t buf_add(ui8_t data[], ui32_t size);
 extern buf_t buf_cat(buf_t dest, buf_t src);
+extern buf_t buf_cat_ui32(buf_t dest, ui32_t);
+extern buf_t buf_cat_ui64(buf_t dest, ui64_t);
+extern buf_t buf_cat_data(buf_t dest, ui8_t *data, ui32_t len);
 extern void  buf_dump(buf_t);
 extern ui8_t buf_cmp(buf_t, buf_t);
 extern buf_t buf_swap(buf_t);

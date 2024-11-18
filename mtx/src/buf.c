@@ -162,3 +162,25 @@ buf_t buf_xor(buf_t a, buf_t b)
   
   return r;
 }
+
+buf_t buf_cat_ui32(buf_t dest, ui32_t i)
+{
+	buf_t src = buf_add_ui32(i);
+	buf_t buf = buf_cat(dest, src);
+	free(src.data);
+	return buf; 
+}
+
+buf_t buf_cat_ui64(buf_t dest, ui64_t i){
+	buf_t src = buf_add_ui64(i);
+	buf_t buf = buf_cat(dest, src);
+	free(src.data);
+	return buf; 
+}
+
+buf_t buf_cat_data(buf_t dest, ui8_t *data, ui32_t len){
+	buf_t src = buf_add(data, len);
+	buf_t buf = buf_cat(dest, src);
+	free(src.data);
+	return buf; 
+}

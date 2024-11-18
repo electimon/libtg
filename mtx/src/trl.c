@@ -44,7 +44,17 @@ buf_t trl_detransport(buf_t a)
     api.log.error("trl_transport: received nothing");
   }
 
-  // check len
+  ui32_t err_ = 0xfffffe6c;
+	buf_t err = api.buf.add_ui32(err_);
+
+	if (a.size == 4 && api.buf.cmp(a, err)) {
+		api.log.error("trl_transport: 404");
+		buf_t buf;
+		buf_init(&buf);
+		return buf;
+	}
+
+	// check len
   buf_t a_len = api.buf.add(a.data, 4);
   buf_t a_len_ = api.buf.add((ui8_t *)&a.size, 4);
 
@@ -67,15 +77,9 @@ buf_t trl_detransport(buf_t a)
     api.log.error("trl_transport: crc mismatch");
   }
 
-  // remove
+	// remove
   a.size -= 12;
   a = api.buf.add(a.data + 8, a.size);
-  ui32_t err_ = 0xfffffe6c;
-  buf_t err = api.buf.add_ui32(err_);
-
-  if (a.size == 4 && api.buf.cmp(a, err)) {
-    api.log.error("trl_transport: 404");
-  }
-
-  return a;
+  
+	return a;
 }

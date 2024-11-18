@@ -24,7 +24,7 @@ void tg_get_dialogs(tg_t *tg, int off_msg_id, int limit,
 					time(NULL),
 					id, 
 					&inputPeer, 
-					2,
+					10,
 					hash);
 
 		/*buf_dump(getDialogs);*/
