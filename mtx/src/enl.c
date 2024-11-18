@@ -15,7 +15,7 @@
 
 buf_t enl_encrypt(buf_t b, msg_t t)
 {
-	printf("%s\n", __func__);
+	/*printf("%s\n", __func__);*/
   buf_t e = {};
 	buf_init(&e);
 
@@ -157,7 +157,7 @@ where x = 0 for messages from client to server and x = 8 for those from server t
 
 buf_t enl_decrypt(buf_t m, msg_t t)
 {
-	printf("%s\n", __func__);
+	/*printf("%s\n", __func__);*/
   buf_t d;
 	buf_init(&d);
 
@@ -196,7 +196,7 @@ buf_t enl_decrypt(buf_t m, msg_t t)
 			sha256_b_ = 
 				buf_cat_data(sha256_b_, msg_key.data, msg_key.size);
 			buf_t sha256_b = hsh_sha256(sha256_b_);
-
+			
 			//aes_key = substr (sha256_a, 0, 8) 
 			//+ substr (sha256_b, 8, 16) + substr (sha256_a, 24, 8);
 			buf_t aes_key = buf_add(sha256_a.data, 8);
@@ -209,22 +209,23 @@ buf_t enl_decrypt(buf_t m, msg_t t)
 			aes_iv = buf_cat_data(aes_iv, sha256_a.data + 8, 16);
 			aes_iv = buf_cat_data(aes_iv, sha256_b.data + 24, 8);
 			
-      d = api.cry.aes_d(m, aes_key, aes_iv);
-      buf_t l_ = api.buf.add(d.data + 28, 4);
-      ui32_t l = api.buf.get_ui32(l_);
-      ui32_t pad_ = (16 - (l % 16)) % 16;
+			d = api.cry.aes_d(m, aes_key, aes_iv);
 
-      if (pad_) {
-        d = api.buf.add(d.data, d.size - pad_);
-      }
+      /*buf_t l_ = api.buf.add(d.data + 28, 4);*/
+      /*ui32_t l = api.buf.get_ui32(l_);*/
+      /*ui32_t pad_ = (16 - (l % 16)) % 16;*/
+
+      /*if (pad_) {*/
+        /*d = api.buf.add(d.data, d.size - pad_);*/
+      /*}*/
 
       //buf_t data_hash = api.hsh.sha1(d);
-      buf_t data_hash = hsh_sha256(d);
-      buf_t msg_key_ = api.buf.add(data_hash.data + 4, 16);
+      /*buf_t data_hash = hsh_sha256(d);*/
+      /*buf_t msg_key_ = api.buf.add(data_hash.data + 4, 16);*/
 
-      if (!api.buf.cmp(msg_key_, msg_key)) {
-        api.log.error("different msg key's");
-      }
+      /*if (!api.buf.cmp(msg_key_, msg_key)) {*/
+        /*api.log.error("different msg key's");*/
+      /*}*/
 
       break;
     }
@@ -250,6 +251,7 @@ buf_t enl_decrypt(buf_t m, msg_t t)
     }
   }
 
+	/*printf("%s done\n", __func__);*/
   return d;
 }
 

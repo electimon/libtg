@@ -94,10 +94,13 @@ static int md_callback(
 	printf("dialogs: %d\n", dialogs->dialogs_len);
 	printf("messages: %d\n", dialogs->messages_len);
 	printf("chats: %d\n", dialogs->chats_len);
-	tl_message_t *m = dialogs->messages_[0];
 	/*printf("MSG: %s\n", STRING_T_TO_STR(m->message_));*/
 	/*printf("message len: %d\n", m->message_);*/
-	printf("MSG: %s\n", m->message_.data);
+	int i;
+	for (i = 0; i < dialogs->messages_len; ++i) {
+		tl_message_t *m = dialogs->messages_[i];
+		printf("MSG: %s\n", m->message_.data);
+	}
 
 	return 0;
 }

@@ -12,6 +12,7 @@
 #include "types.h"
 
 extern void  buf_init(buf_t *buf);
+extern void buf_realloc(buf_t *buf, ui32_t size);
 extern buf_t buf_add(ui8_t data[], ui32_t size);
 extern buf_t buf_cat(buf_t dest, buf_t src);
 extern buf_t buf_cat_ui32(buf_t dest, ui32_t);

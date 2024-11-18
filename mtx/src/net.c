@@ -84,6 +84,10 @@ process_error:
 
     shared_rc.net.sockfd = net.sockfd;
 
+		// send intermediate protocol
+	  char init[] = {0xee, 0xee, 0xee, 0xee};
+    send(net.sockfd, init, 4, 0);
+
     return net;
 }
 
@@ -96,6 +100,7 @@ void net_send(const buf_t buf)
 {
 	printf("net send...");
   net_t net = shared_rc_get_net();
+
   i32_t n = (i32_t)send(net.sockfd, buf.data, buf.size, 0);
 
   if (n < 0) {

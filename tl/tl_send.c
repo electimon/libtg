@@ -105,36 +105,36 @@ tl_t * tl_handle_serialized_message(buf_t msg)
 tl_t * tl_send_tl_message(buf_t s, msg_t mtype)
 {
 	shared_rc.seqnh++;
-	printf("message:\n");
-	buf_dump(s);
+	/*printf("message:\n");*/
+	/*buf_dump(s);*/
 
 	buf_t s1 = api.hdl.header(s, mtype);
-	printf("+header:\n");
-	api.buf.dump(s1);
+	/*printf("+header:\n");*/
+	/*api.buf.dump(s1);*/
   
 	buf_t e = api.enl.encrypt(s1, mtype);
-	printf("+crypt:\n");
-	api.buf.dump(e);
+	/*printf("+crypt:\n");*/
+	/*api.buf.dump(e);*/
   
 	buf_t t = api.trl.transport(e);
-	printf("+transport:\n");
-	api.buf.dump(t);
+	/*printf("+transport:\n");*/
+	/*api.buf.dump(t);*/
   
 	buf_t nr = api.net.drive(t, SEND_RECEIVE);
-	printf("received:\n");
-	api.buf.dump(nr);
+	/*printf("received:\n");*/
+	/*api.buf.dump(nr);*/
       
 	buf_t tr = api.trl.detransport(nr);
-	printf("-transport:\n");
-	api.buf.dump(tr);
+	/*printf("-transport:\n");*/
+	/*api.buf.dump(tr);*/
 	
 	buf_t d = api.enl.decrypt(tr, mtype);
-	printf("-crypt:\n");
-	api.buf.dump(d);
+	/*printf("-crypt:\n");*/
+	/*api.buf.dump(d);*/
   
 	buf_t s1r = api.hdl.deheader(d, mtype);
-	printf("message:\n");
-	api.buf.dump(s1r);
+	/*printf("message:\n");*/
+	/*api.buf.dump(s1r);*/
 
 	tl_t *tl = tl_handle_serialized_message(s1r);
 	if (tl && tl->_id == id_bad_server_salt) // resend message

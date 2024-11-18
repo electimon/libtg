@@ -24,9 +24,13 @@ buf_t cry_rsa_e(buf_t b)
 
 buf_t cry_aes_e(buf_t b, buf_t key, buf_t iv)
 {
+	//printf("%s\n", __func__);
   buf_t r = {};
 	buf_init(&r);
-  int l = aes_e(b.data, r.data, b.size, key.data, iv.data);
+	if (b.size > r.size)
+		buf_realloc(&r, b.size * 2);
+
+	int l = aes_e(b.data, r.data, b.size, key.data, iv.data);
 
   if (!l) {
     api.log.error("error during aes encryption");
@@ -34,14 +38,19 @@ buf_t cry_aes_e(buf_t b, buf_t key, buf_t iv)
 
   r.size = l;
 
+	//printf("%s done\n", __func__);
   return r;
 }
 
 buf_t cry_aes_d(buf_t b, buf_t key, buf_t iv)
 {
+	//printf("%s\n", __func__);
   buf_t r = {};
 	buf_init(&r);
-  int l = aes_d(b.data, r.data, b.size, key.data, iv.data);
+	if (b.size > r.size)
+		buf_realloc(&r, b.size * 2);
+  
+	int l = aes_d(b.data, r.data, b.size, key.data, iv.data);
 
   if (!l) {
     api.log.error("error during aes decryption");
@@ -49,5 +58,6 @@ buf_t cry_aes_d(buf_t b, buf_t key, buf_t iv)
 
   r.size = l;
 
+	//printf("%s done\n", __func__);
   return r;
 }

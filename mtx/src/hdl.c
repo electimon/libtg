@@ -106,9 +106,9 @@ buf_t hdl_deheader(buf_t b, msg_t t)
       ui32_t msg_data_len = api.buf.get_ui32(d);
       d.size -= 4;
 
-      if (msg_data_len != d.size) {
-        api.log.error("msg_data_len mismatch");
-      }
+      //if (msg_data_len != d.size) {
+        //api.log.error("msg_data_len mismatch");
+      //}
       
       // remove len
       d = api.buf.add(d.data + 4, d.size);

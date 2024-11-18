@@ -313,10 +313,10 @@ int append_deserialize_table(
 				m->name),
 		 	g->deserialize_table_c);
 
-	fputs(STR(buf, BLEN,
-				"\tprintf(\"deserialize obj: %s (%.8x)\\n\");\n",
-				m->name, m->id),
-			 g->deserialize_table_c);
+	//fputs(STR(buf, BLEN,
+				//"\tprintf(\"deserialize obj: %s (%.8x)\\n\");\n",
+				//m->name, m->id),
+			 //g->deserialize_table_c);
 	
 	fputs(
 			STR(buf, BLEN,
@@ -343,11 +343,11 @@ int append_deserialize_table(
 				,m->args[i].name, m->args[i].type)
 				, g->deserialize_table_c);
 		
-		fputs(
-				STR(buf, BLEN,
-				"\tprintf(\"obj: %s: parse arg %s (%s)\\n\");\n"
-				,m->name, m->args[i].name, m->args[i].type)
-				, g->deserialize_table_c);
+		//fputs(
+				//STR(buf, BLEN,
+				//"\tprintf(\"obj: %s: parse arg %s (%s)\\n\");\n"
+				//,m->name, m->args[i].name, m->args[i].type)
+				//, g->deserialize_table_c);
 		
 
 		// check if flag
@@ -360,10 +360,10 @@ int append_deserialize_table(
 				, ++nflag)
 				, g->deserialize_table_c);
 
-			fputs(STR(buf, BLEN,
-				"\tprintf(\"flag value: %%.32b\\n\", flag%d);\n"
-				, nflag)
-				, g->deserialize_table_c);
+			//fputs(STR(buf, BLEN,
+				//"\tprintf(\"flag value: %%.32b\\n\", flag%d);\n"
+				//, nflag)
+				//, g->deserialize_table_c);
 
 		} else if (m->args[i].type == NULL){
 			//skip
@@ -380,6 +380,7 @@ int append_deserialize_table(
 					"\t{\n"
 					, g->deserialize_table_c);
 
+			/*
 			if (m->args[i].flagn)
 				fputs(
 						STR(buf, BLEN,
@@ -388,6 +389,7 @@ int append_deserialize_table(
 						, g->deserialize_table_c);
 			else 
 				fputs("\t\tprintf(\"\\targ is mandatory\\n\");\n", g->deserialize_table_c);
+				*/
 
 			// handle arguments
 			char *p;
@@ -475,10 +477,10 @@ int append_deserialize_table(
 					, m->args[i].name, m->args[i].name, m->args[i].name)
 					, g->deserialize_table_c);
 					
-					fputs(STR(buf, BLEN,
-						"\t\tprintf(\"\\tvector len: %%d\\n\", obj->%s_len);\n"
-					, m->args[i].name)
-					, g->deserialize_table_c);
+					//fputs(STR(buf, BLEN,
+						//"\t\tprintf(\"\\tvector len: %%d\\n\", obj->%s_len);\n"
+					//, m->args[i].name)
+					//, g->deserialize_table_c);
 
 					fputs(STR(buf, BLEN,
 					  "\t\tif (obj->%s_len < 0 || obj->%s_len > 100) {printf(\"vector len error\\n\"); return (tl_t*)obj;}; // some error\n"
