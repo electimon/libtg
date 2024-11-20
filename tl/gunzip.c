@@ -7,8 +7,8 @@ int gunzip_buf(buf_t *dst, buf_t src){
 	/*buf_dump(src);*/
 	
 	// allocte data
-	unsigned char *data = 
-		MALLOC(src.size * 4, return 1);
+	buf_init(dst);
+	buf_realloc(dst, src.size * 4);
 	
 	z_stream s;
 	s.zalloc    = Z_NULL;
@@ -16,8 +16,8 @@ int gunzip_buf(buf_t *dst, buf_t src){
 	s.opaque    = Z_NULL;
 	s.avail_in  = src.size;
 	s.next_in   = src.data;
-	s.avail_out = src.size * 2;
-	s.next_out  = data;
+	s.avail_out = dst->allo;
+	s.next_out  = dst->data;
 	if (inflateInit2(&s, 16 + MAX_WBITS) != Z_OK){
 		printf("can't init inflate\n");
 		return 1;
@@ -60,7 +60,7 @@ int gunzip_buf(buf_t *dst, buf_t src){
 	/*printf("total_out: %ld\n", s.total_out);*/
 	inflateEnd(&s);
 
-	*dst = buf_add(data, s.total_out);
+	dst->size = s.total_out;
 
 	/*printf("done\n");*/
 	return 0;

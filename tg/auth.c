@@ -1,8 +1,125 @@
 #include "../config.h"
 #include "tg.h"
 #include "../mtx/include/net.h"
+#include "../mtx/include/cmn.h"
+#include "../mtx/include/hsh.h"
+#include "../mtx/include/cry.h"
 #include <stdlib.h>
 #include "strtok_foreach.h"
+#include "../tl/serialize.h"
+
+static int _new_auth_key(tg_t *tg, void *on_err_data,
+		void (*on_err)(void *on_err_data, tl_t *tl, const char *err))
+{
+	reset_shared_rc();
+	net_open(_ip, _port);
+	shared_rc.seqnh = -1;
+	
+	tl_t *tl = NULL;
+	buf_t nonce = buf_rand(16);
+	buf_t req_pq = tl_req_pq_multi(nonce);
+	tl = tl_send_tl_message(req_pq, RFC);
+	if (tl && tl->_id == id_resPQ){
+		tl_resPQ_t *resPQ = (tl_resPQ_t *)tl;
+		printf("server fingerprints:\n");
+		int i;
+		for (i = 0; i < resPQ->server_public_key_fingerprints_len; ++i) {
+			printf("%.16lx\n", resPQ->server_public_key_fingerprints_[i]);
+		}
+
+		ui64_t pq_ = buf_get_ui64(buf_swap(resPQ->pq_));
+		printf("PQ: %ld\n", pq_);
+
+		ui32_t p_, q_;
+		cmn_fact(pq_, &p_, &q_);
+		if (!(p_ < q_)) {
+			SWAP(p_, q_);
+		}
+		buf_t p  = buf_swap(buf_add_ui32(p_));
+		buf_t q  = buf_swap(buf_add_ui32(q_));
+		printf("P: %d\n", p_);
+		printf("Q: %d\n", q_);
+
+		buf_t pq_str = 
+			serialize_bytes(resPQ->pq_.data, resPQ->pq_.size);
+		buf_t p_str = 
+			serialize_bytes(p.data, p.size);
+		buf_t q_str = 
+			serialize_bytes(q.data, q.size);
+		
+		buf_t new_nonce = buf_rand(32);
+
+		buf_t dc  = buf_add_ui32(2);
+		
+		buf_t p_q_inner_data_dc = buf_add_ui32(id_p_q_inner_data_dc);
+		/*tl_p_q_inner_data_dc(
+		 * const char *pq_, 
+		 * const char *p_, 
+		 * const char *q_, 
+		 * int128 nonce_, 
+		 * int128 server_nonce_, 
+		 * int256 new_nonce_, 
+		 * int dc_);*/
+		p_q_inner_data_dc = 
+			buf_cat(p_q_inner_data_dc, pq_str);
+		p_q_inner_data_dc = 
+			buf_cat(p_q_inner_data_dc, p_str);
+		p_q_inner_data_dc = 
+			buf_cat(p_q_inner_data_dc, q_str);
+		p_q_inner_data_dc = 
+			buf_cat(p_q_inner_data_dc, nonce);
+		p_q_inner_data_dc = 
+			buf_cat(p_q_inner_data_dc, resPQ->server_nonce_);
+		p_q_inner_data_dc = 
+			buf_cat(p_q_inner_data_dc, new_nonce);
+		p_q_inner_data_dc = 
+			buf_cat(p_q_inner_data_dc, dc);
+
+		buf_t h = hsh_sha1(p_q_inner_data_dc);
+		buf_t dwh = buf_cat(h, p_q_inner_data_dc);	
+		buf_t pad = {};
+		buf_init(&pad);
+		pad.size = 255 - dwh.size;
+		dwh = buf_cat(dwh, pad);
+		buf_t e = cry_rsa_e(dwh);
+		buf_t encrypted_data = 
+			serialize_bytes(e.data, e.size);
+		
+		buf_t public_key_fingerprint = 
+			buf_swap(buf_add_ui64(resPQ->server_public_key_fingerprints_[0]));
+		printf("fingerprint: %.16lx\n", *(long*)public_key_fingerprint.data);
+		buf_t req_DH_params = buf_add_ui32(id_req_DH_params);
+		//buf_t req_DH_params = 
+			//tl_req_DH_params(
+					//int128 nonce_, 
+					//int128 server_nonce_, 
+					//const char *p_, 
+					//const char *q_, 
+					//resPQ->server_public_key_fingerprints_[0], 
+					//const char *encrypted_data_);
+		req_DH_params = buf_cat(req_DH_params, nonce);
+		req_DH_params = 
+			buf_cat(req_DH_params, resPQ->server_nonce_);
+		req_DH_params = buf_cat(req_DH_params, p_str);
+		req_DH_params = buf_cat(req_DH_params, q_str);
+		req_DH_params = 
+			buf_cat(req_DH_params, public_key_fingerprint);
+		req_DH_params = buf_cat(req_DH_params, encrypted_data);
+
+		tl = tl_send_tl_message(req_DH_params, RFC);
+		printf("ANSW: %.8x\n", tl->_id);
+
+		return 0;
+	}
+
+	// throw error
+	char *err = tg_strerr(tl); 
+	if (on_err)
+		on_err(on_err_data, tl, err);
+	free(err);
+
+	return 1;
+}
 
 static buf_t _init(tg_t *tg, buf_t query)
 {
@@ -97,10 +214,12 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number,
 	}
 	
 	// authorize with new key
-  api.app.open();
-  api.log.info(".. new session");
-  shared_rc.ssid = api.buf.rand(8);
-	api.srl.ping();
+	//api.app.open();
+	/*api.log.info(".. new session");*/
+	/*shared_rc.ssid = api.buf.rand(8);*/
+	/*api.srl.ping();*/
+	if (_new_auth_key(tg, on_err_data, on_err))
+		return NULL;
 	
 	CodeSettings codeSettings = tl_codeSettings(
 			false,

@@ -49,20 +49,20 @@ buf_t trl_detransport(buf_t a)
 
   if (!a.size) {
     api.log.error("trl_transport: received nothing");
+		return a;
   }
 
 	ui32_t len = buf_get_ui32(a);
 	b = buf_add(a.data + 4, len);
 
-  //ui32_t err_ = 0xfffffe6c;
+  ui32_t err = 0xfffffe6c;
 	//buf_t err = api.buf.add_ui32(err_);
 
-	//if (a.size == 4 && api.buf.cmp(a, err)) {
-		//api.log.error("trl_transport: 404");
-		//buf_t buf;
-		//buf_init(&buf);
-		//return buf;
-	//}
+	if (b.size == 4 && *(ui32_t *)(b.data) == err) {
+		api.log.error("trl_transport: 404");
+		b.size = 0;
+		return b;
+	}
 
 	// check len
   //buf_t a_len = api.buf.add(a.data, 4);

@@ -102,6 +102,21 @@ static int md_callback(
 		printf("MSG: %s\n", m->message_.data);
 	}
 
+	printf("CHATS:\n");
+	for (i = 0; i < dialogs->chats_len; ++i) {
+		if (dialogs->chats_[i]->_id == id_channel){
+			tl_channel_t *channel = 
+				(tl_channel_t *)dialogs->chats_[i];
+			printf("Channel %d: %s\n", i, channel->title_.data);
+		}
+		//tl_chat_t *chat = dialogs->chats_[i];
+		//if (chat->_id == id_chat)
+			//printf("CHAT %d: %s\n", i, chat->title_.data);
+		//if (chat->_id == id_chatEmpty)
+			//printf("chat empty\n");
+		//printf("%.8x\n", chat->_id);
+	}
+
 	return 0;
 }
 
@@ -120,7 +135,7 @@ int main(int argc, char *argv[])
 	
 	tg_connect(tg, NULL, callback);
 
-	tg_get_dialogs(tg, 0, 20, 
+	tg_get_dialogs(tg, 0, 6, 
 			NULL, md_callback);
 
 	tg_close(tg);

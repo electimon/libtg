@@ -19,12 +19,12 @@ void tg_get_dialogs(tg_t *tg, int off_msg_id, int limit,
 		printf("ID: %d\n", id);
 		buf_t getDialogs = 
 			tl_messages_getDialogs(
-					true,
-					0, 
-					time(NULL),
+					NULL,
+					NULL, 
+					0,
 					id, 
 					&inputPeer, 
-					10,
+					limit,
 					hash);
 
 		/*buf_dump(getDialogs);*/

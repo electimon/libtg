@@ -12,8 +12,8 @@ ui32_t deserialize_ui32(buf_t *b){
 	return c;
 }
 
-ui32_t deserialize_ui64(buf_t *b){
-	ui32_t c;
+ui64_t deserialize_ui64(buf_t *b){
+	ui64_t c;
 	c = buf_get_ui64(*b);
 	*b = buf_add(b->data + 8, b->size - 8);
 	return c;

@@ -835,6 +835,9 @@ int append_methods_header(
 			char buf[64];
 			len = STR(buf, 64, ", int %slen", name);
 		}
+		
+		if (m->args[i].flagn && strcmp(type, "string"))
+			pointer = "*";
 
 		if (
 				strcmp(type, "string") &&
@@ -945,6 +948,9 @@ int append_methods(
 			len = STR(buf, 64, ", int %slen", name);
 		}
 
+		if (m->args[i].flagn && strcmp(type, "string"))
+			pointer = "*";
+
 		if (
 				strcmp(type, "string") &&
 				strcmp(type, "true") &&
@@ -1041,11 +1047,18 @@ int append_methods(
 			
 			fputs("\t{\n",g->methods_c);
 
-			fputs(
-					STR(buf, BLEN, 
-						"\t\tbuf = buf_cat(buf, buf_add_ui32(%s_));\n", 
-						m->args[i].name), 
-					g->methods_c);
+			if (m->args[i].flagn != 0)
+				fputs(
+						STR(buf, BLEN, 
+							"\t\tbuf = buf_cat(buf, buf_add_ui32(*%s_));\n", 
+							m->args[i].name), 
+						g->methods_c);
+			else
+				fputs(
+						STR(buf, BLEN, 
+							"\t\tbuf = buf_cat(buf, buf_add_ui32(%s_));\n", 
+							m->args[i].name), 
+						g->methods_c);
 
 			if (m->args[i].flagn)
 				fputs(
@@ -1132,11 +1145,19 @@ int append_methods(
 			
 			fputs("\t{\n",g->methods_c);
 
-			fputs(
-					STR(buf, BLEN, 
-						"\t\tbuf = buf_cat(buf, buf_add_ui64(%s_));\n", 
-						m->args[i].name), 
-					g->methods_c);
+			if (m->args[i].flagn != 0)
+				fputs(
+						STR(buf, BLEN, 
+							"\t\tbuf = buf_cat(buf, buf_add_ui64(*%s_));\n", 
+							m->args[i].name), 
+						g->methods_c);
+			else
+				fputs(
+						STR(buf, BLEN, 
+							"\t\tbuf = buf_cat(buf, buf_add_ui64(%s_));\n", 
+							m->args[i].name), 
+						g->methods_c);
+
 
 			if (m->args[i].flagn)
 				fputs(

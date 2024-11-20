@@ -68,6 +68,11 @@ buf_t hdl_header(buf_t b, msg_t t)
 
 buf_t hdl_deheader(buf_t b, msg_t t)
 {
+	if (!b.size){
+    api.log.error("got nothing");
+		return b;
+	}
+
   buf_t d;
 	buf_init(&d);
 

@@ -136,12 +136,16 @@ where x = 0 for messages from client to server and x = 8 for those from server t
 			free(aes_iv.data);
 			free(data.data);
 			free(enc.data);
+			free(b.data);
 
       break;
     }
     case RFC:
     {
+			// add 0 for auth_key
+			e = buf_cat_ui64(e, 0);
       e = api.buf.cat(e, b);
+			free(b.data);
       break;
     }
     default:
@@ -231,15 +235,16 @@ buf_t enl_decrypt(buf_t m, msg_t t)
     }
     case RFC:
     {
-      buf_t key = {};
-			buf_init(&key);
-      key.size = 8;
+      /*buf_t key = {};*/
+			/*buf_init(&key);*/
+      /*key.size = 8;*/
 
-      buf_t d_key = api.buf.add(m.data, 8);
+			
+      /*buf_t d_key = api.buf.add(m.data, 8);*/
 
-      if (!api.buf.cmp(key, d_key)) {
-        api.log.error("trl_transport: keys mismatch");
-      }
+      /*if (!api.buf.cmp(key, d_key)) {*/
+        /*api.log.error("trl_transport: keys mismatch");*/
+      /*}*/
 
       d = api.buf.add(m.data + 8, m.size - 8);
 

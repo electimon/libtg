@@ -95,6 +95,9 @@ tl_t * tl_handle_deserialized_message(tl_t *tl)
 
 tl_t * tl_handle_serialized_message(buf_t msg)
 {
+	if (!msg.size)
+		return NULL;
+
 	tl_t *tl = tl_deserialize(&msg);
 	if (!tl)
 		return NULL;
@@ -135,7 +138,6 @@ tl_t * tl_send_tl_message(buf_t s, msg_t mtype)
 	buf_t s1r = api.hdl.deheader(d, mtype);
 	/*printf("message:\n");*/
 	/*api.buf.dump(s1r);*/
-
 	tl_t *tl = tl_handle_serialized_message(s1r);
 	if (tl && tl->_id == id_bad_server_salt) // resend message
 		tl = tl_send_tl_message(s, mtype);
