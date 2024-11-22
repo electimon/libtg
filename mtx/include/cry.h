@@ -11,8 +11,8 @@
 
 #include "types.h"
 
-extern buf_t cry_rsa_e(buf_t b);
-extern buf_t cry_aes_e(buf_t b, buf_t key, buf_t iv);
-extern buf_t cry_aes_d(buf_t b, buf_t key, buf_t iv);
+extern buf_t_ cry_rsa_e(buf_t_ b);
+extern buf_t_ cry_aes_e(buf_t_ b, buf_t_ key, buf_t_ iv);
+extern buf_t_ cry_aes_d(buf_t_ b, buf_t_ key, buf_t_ iv);
 
 #endif /* defined(__mtx__cry__) */

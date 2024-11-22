@@ -11,7 +11,7 @@
 
 #include "types.h"
 
-extern buf_t hsh_sha1(buf_t b);
-extern buf_t hsh_sha256(buf_t b);
+extern buf_t_ hsh_sha1(buf_t_ b);
+extern buf_t_ hsh_sha256(buf_t_ b);
 
 #endif /* defined(__mtx__hsh__) */

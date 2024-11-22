@@ -9,23 +9,18 @@
 #ifndef mtx_buf_h
 #define mtx_buf_h
 
-#include "types.h"
+#include "../include/types.h"
 
-extern void  buf_init(buf_t *buf);
-extern void buf_realloc(buf_t *buf, ui32_t size);
-extern buf_t buf_add(ui8_t data[], ui32_t size);
-extern buf_t buf_cat(buf_t dest, buf_t src);
-extern buf_t buf_cat_ui32(buf_t dest, ui32_t);
-extern buf_t buf_cat_ui64(buf_t dest, ui64_t);
-extern buf_t buf_cat_data(buf_t dest, ui8_t *data, ui32_t len);
-extern void  buf_dump(buf_t);
-extern ui8_t buf_cmp(buf_t, buf_t);
-extern buf_t buf_swap(buf_t);
-extern buf_t buf_add_ui32(ui32_t);
-extern buf_t buf_add_ui64(ui64_t);
-extern ui32_t buf_get_ui32(buf_t);
-extern ui64_t buf_get_ui64(buf_t);
-extern buf_t buf_rand(ui32_t s);
-extern buf_t buf_xor(buf_t, buf_t);
+extern buf_t_ buf_add_(ui8_t data[], ui32_t size);
+extern buf_t_ buf_cat_(buf_t_ dest, buf_t_ src);
+extern void buf_dump_(buf_t_);
+extern ui8_t buf_cmp_(buf_t_, buf_t_);
+extern buf_t_ buf_swap_(buf_t_);
+extern buf_t_ buf_add_ui32_(ui32_t);
+extern buf_t_ buf_add_ui64_(ui64_t);
+extern ui32_t buf_get_ui32_(buf_t_);
+extern ui64_t buf_get_ui64_(buf_t_);
+extern buf_t_ buf_rand_(ui32_t s);
+extern buf_t_ buf_xor_(buf_t_, buf_t_);
 
 #endif

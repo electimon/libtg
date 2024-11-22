@@ -1,11 +1,12 @@
 #ifndef TL_H_
 #define TL_H_
-#include "../mtx/include/buf.h"
+#include "buf.h"
+#include <stdbool.h>
 #include <stdio.h>
-#include "../mtx/include/hdl.h"
+#include <stdint.h>
 
 typedef struct tl_ {
-	ui32_t _id;
+	uint32_t _id;
 } tl_t;
 
 typedef struct mtp_message_ {
@@ -15,6 +16,6 @@ typedef struct mtp_message_ {
 	buf_t body;
 } mtp_message_t; 
 
-tl_t * tl_send_tl_message(buf_t s, msg_t mtype);
+tl_t * tl_send_query_(buf_t s, bool encrypt);
 buf_t tl_salt_new();
 #endif /* ifndef TL_H_ */

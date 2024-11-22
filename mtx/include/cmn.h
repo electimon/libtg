@@ -12,6 +12,6 @@
 #include "types.h"
 
 extern void cmn_fact(ui64_t pq, ui32_t * p, ui32_t * q);
-extern buf_t cmn_pow_mod(buf_t g, buf_t e, buf_t m);
+extern buf_t_ cmn_pow_mod(buf_t_ g, buf_t_ e, buf_t_ m);
 
 #endif /* defined(__mtx__cmn__) */

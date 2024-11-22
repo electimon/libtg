@@ -19,13 +19,10 @@ typedef enum msg_
   CTER,
 } msg_t;
 
-#define BOOL_FALSE 0xbc799737
-#define BOOL_TRUE  0x997275b5
-
 typedef enum tl_type_
 {
   TYPE_QX,
-  TYPE_BOOL_,
+  TYPE_BOOL,
   TYPE_CHAT,
   TYPE_CHATFULL,
   TYPE_CHATPARTICIPANTS,
@@ -76,7 +73,6 @@ typedef enum tl_type_
   TYPE_VECTOR_INT,
   TYPE_VECTOR_LONG,
   TYPE_VECTOR_STRING,
-  TYPE_VECTOR,
   TYPE_VIDEO,
   TYPE_BYTES,
   TYPE_CONTACTS_FOREIGNLINK,
@@ -90,17 +86,13 @@ typedef enum tl_type_
   TYPE_STRING,
   TYPE_UPDATES_STATE,
   TYPE_ID,
-  TYPE_X,
-  TYPE_FLAG,
 } tl_type_t;
 
 typedef struct param_
 {
   ui32_t        id;
-  buf_t         value;
+  buf_t_         value;
   tl_type_t     type;
-	int           flag_num;
-	int           flag_bit;
 } param_t;
 
 typedef struct abstract_
@@ -110,9 +102,6 @@ typedef struct abstract_
   msg_t         type;
   stk_mode_t    stk_mode;
 } abstract_t;
-
-typedef void method_callback_t(
-		void *userdata, abstract_t *a);
 
 typedef struct method_req_pq_ method_req_pq_t;
 
@@ -190,7 +179,7 @@ struct ctor_P_Q_inner_data_
 
 ctor_P_Q_inner_data_t ctor_P_Q_inner_data_init(method_req_pq_t m1, method_req_DH_params_t m2);
 
-buf_t ctor_P_Q_inner_data_drive(ctor_P_Q_inner_data_t c);
+buf_t_ ctor_P_Q_inner_data_drive(ctor_P_Q_inner_data_t c);
 
 struct ctor_Server_DH_Params_ok_
 {
@@ -245,16 +234,16 @@ struct ctor_Server_DH_inner_data_
   param_t       dh_prime;
   param_t       g_a;
   param_t       server_time;
-  buf_t         answer;
-  buf_t         tmp_aes_key;
-  buf_t         tmp_aes_iv;
+  buf_t_         answer;
+  buf_t_         tmp_aes_key;
+  buf_t_         tmp_aes_iv;
 };
 
 ctor_Server_DH_inner_data_t
 ctor_Server_DH_inner_data_init(method_req_pq_t, method_req_DH_params_t);
 
 ctor_Server_DH_inner_data_t
-ctor_Server_DH_inner_data_drive(buf_t);
+ctor_Server_DH_inner_data_drive(buf_t_);
 
 struct ctor_Client_DH_Inner_Data_
 {
@@ -264,13 +253,13 @@ struct ctor_Client_DH_Inner_Data_
   param_t       server_nonce;
   param_t       retry_id;
   param_t       g_b;
-  buf_t         b;
+  buf_t_         b;
 };
 
 ctor_Client_DH_Inner_Data_t
 ctor_Client_DH_Inner_Data_init(method_req_pq_t m1, ctor_Server_DH_inner_data_t c1);
 
-buf_t ctor_Client_DH_Inner_Data_drive(ctor_Client_DH_Inner_Data_t);
+buf_t_ ctor_Client_DH_Inner_Data_drive(ctor_Client_DH_Inner_Data_t);
 
 struct ctor_Set_client_DH_params_answer_ok_
 {
@@ -310,7 +299,7 @@ struct method_set_client_DH_params_
   ctor_Server_DH_inner_data_t         ctor_Server_DH_inner_data;
   ctor_Client_DH_Inner_Data_t         ctor_Client_DH_Inner_Data;
 
-  buf_t         salt;
+  buf_t_         salt;
 };
 
 method_set_client_DH_params_t
@@ -319,13 +308,6 @@ method_set_client_DH_params_init(method_req_pq_t m1, method_req_DH_params_t m2);
 method_set_client_DH_params_t
 method_set_client_DH_params_drive(method_set_client_DH_params_t);
 
-typedef struct ctor_MsgsAck_
-{
-  msg_t         type__;
-  ui32_t        id__;
-  param_t       msg_ids;
-} ctor_MsgsAck_t;
-
 struct ctor_Pong_
 {
   msg_t         type__;
@@ -333,22 +315,6 @@ struct ctor_Pong_
   param_t       msg_id;
   param_t       ping_id;
 };
-
-typedef struct CodeSettings_
-{
-  msg_t         type__;
-  ui32_t        id__;
-  param_t       flags;
-  param_t       allow_flashcall;
-  param_t       current_number;
-  param_t       allow_app_hash;
-  param_t       allow_missed_call;
-  param_t       allow_firebase;
-  param_t       unknown_number;
-  param_t       logout_tokens;
-  param_t       device_token;
-  param_t       is_app_sandbox;
-} CodeSettings_t;
 
 struct method_ping_
 {
@@ -366,11 +332,8 @@ struct ctor_auth_SentCode_
 {
   msg_t         type__;
   ui32_t        id__;
-	param_t       flags;
-	param_t       type;
+  param_t       phone_registered;
   param_t       phone_code_hash;
-  param_t       next_type;
-  param_t       timeout;
 };
 
 struct method_auth_sendCode_
@@ -378,55 +341,17 @@ struct method_auth_sendCode_
   msg_t         type__;
   ui32_t        id__;
   param_t       phone_number;
-	param_t       sms_type;
+  param_t       sms_type;
   param_t       api_id;
   param_t       api_hash;
-	param_t       lang_code;
-	param_t       settings;
-	/*ctor_auth_SentCode_t  ctor_auth_SentCode;*/
+  param_t       lang_code;
+
+  ctor_auth_SentCode_t  ctor_auth_SentCode;
 };
 
-method_auth_sendCode_t method_auth_sendCode_init(
-		const char *phone_number);
+method_auth_sendCode_t method_auth_sendCode_init();
 
-ctor_auth_SentCode_t
-method_auth_sendCode_drive(method_auth_sendCode_t);
-
-
-typedef struct method_auth_resendCode_
-{
-  msg_t         type__;
-  ui32_t        id__;
-	param_t       flags;
-  param_t       phone_number;
-	param_t       phone_code_hash;
-  param_t       reason;
-} method_auth_resendCode_t;
-
-method_auth_resendCode_t 
-method_auth_resendCode_init(const char *phone_code_hash);
-
-ctor_auth_SentCode_t
-method_auth_resendCode_drive(method_auth_resendCode_t);
-
-typedef struct method_auth_singIn_
-{
-  msg_t         type__;
-  ui32_t        id__;
-	param_t       flags;
-  param_t       phone_number;
-	param_t       phone_code_hash;
-  param_t       phone_code;
-  param_t       email_verification;
-} method_auth_singIn_t;
-
-method_auth_singIn_t 
-method_auth_singIn_init(
-		const char *phone_code_hash,
-		const char *phone_code);
-
-ctor_auth_SentCode_t
-method_auth_singIn_drive(method_auth_singIn_t);
+method_auth_sendCode_t method_auth_sendCode_drive(method_auth_sendCode_t);
 
 struct ctor_NewSession_
 {
@@ -452,75 +377,9 @@ struct method_msgs_ack_
   param_t       ctor_MsgsAck;
 };
 
-method_msgs_ack_t method_msgs_ack_init(buf_t msg_id);
+method_msgs_ack_t method_msgs_ack_init(buf_t_ msg_id);
 
 method_msgs_ack_t method_msgs_ack_drive(method_msgs_ack_t);
-
-typedef struct ctor_rpc_error_
-{
-  msg_t         type__;
-  ui32_t        id__;
-  param_t       error_code;
-  param_t       error_message;
-} ctor_rpc_error_t;
-
-typedef struct method_initConnection_
-{
-  msg_t         type__;
-  ui32_t        id__;
-	param_t       flags; //#Flags, see TL conditional fields
-	param_t       api_id; //int Application identifier 
-												//(see. App configuration)
-	param_t device_model;//     string
-											 //     Device model
-	param_t system_version;//   string
-												 //   Operation system version
-	param_t app_version;//      string
-											//      Application version
-	param_t system_lang_code;// string                   Code
-													 // for the language used on the
-													 // device's OS, ISO 639-1
-													 // standard
-	param_t lang_pack;//        string
-										//        Platform identifier (i.e.
-										//        android, tdesktop, etc).
-	param_t lang_code;//        string
-										//        Either an ISO 639-1 language
-										//        code or a language pack name
-										//        obtained from a language pack
-										//        link.
-	param_t proxy;//            flags.0?InputClientProxy Info
-								//            about an MTProto proxy
-	param_t params;//           flags.1?JSONValue
-								 //           Additional initConnection
-								 //           parameters.
-								 // For now, only the tz_offset field is
-								 // supported, for specifying the timezone
-								 // offset in seconds.
-	param_t query; //            !X                       The
-								 //            query itself
-
-} method_initConnection_t;
-
-method_initConnection_t 
-method_initConnection_init(buf_t query);
-
-abstract_t
-method_initConnection_drive(method_initConnection_t);
-
-typedef struct method_invokeWithLayer_
-{
-  msg_t         type__;
-  ui32_t        id__;
-	param_t       layer;
-	param_t       query;
-} method_invokeWithLayer_t;
-
-method_invokeWithLayer_t 
-method_invokeWithLayer_init(int layer, buf_t query);
-
-abstract_t
-method_invokeWithLayer_drive(method_invokeWithLayer_t);
 
 typedef struct tg_api_type_system_
 {
@@ -529,11 +388,7 @@ typedef struct tg_api_type_system_
   method_set_client_DH_params_t       method_set_client_DH_params;
   method_ping_t                       method_ping;
   method_auth_sendCode_t              method_auth_sendCode;
-  method_auth_resendCode_t            method_auth_resendCode;
-  method_auth_singIn_t                method_auth_singIn;
   method_msgs_ack_t                   method_msgs_ack;
-  method_initConnection_t             method_initConnection;
-  method_invokeWithLayer_t            method_invokeWithLayer;
   ctor_ResPQ_t                        ctor_ResPQ;
   ctor_Server_DH_Params_t             ctor_Server_DH_Params;
   ctor_P_Q_inner_data_t               ctor_P_Q_inner_data;
@@ -544,9 +399,6 @@ typedef struct tg_api_type_system_
   ctor_auth_SentCode_t                ctor_auth_SentCode;
   ctor_MessageContainer_t             ctor_MessageContainer;
   ctor_NewSession_t                   ctor_NewSession;
-	CodeSettings_t                      CodeSettings;
-	long msg_id;
 } tg_api_type_system_t;
-
 
 #endif /* defined(__mtx__tgt__) */

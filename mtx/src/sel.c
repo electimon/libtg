@@ -16,19 +16,19 @@ sel_t sel_init(trl_t trl)
   return sel;
 }
 
-buf_t sel_serialize_id(buf_t b)
+buf_t_ sel_serialize_id(buf_t_ b)
 {
-  buf_t s;
-	buf_init(&s);
+  buf_t_ s;
+	//buf_init(&s);
   s = api.buf.add(b.data, 4);
 
   return s;
 }
 
-buf_t sel_serialize_param(param_t p)
+buf_t_ sel_serialize_param(param_t p)
 {
-  buf_t s;
-	buf_init(&s);
+  buf_t_ s;
+	//buf_init(&s);
 
   switch (p.type)
   {
@@ -95,8 +95,8 @@ buf_t sel_serialize_param(param_t p)
 
 param_t sel_deserialize_param(param_t p)
 {
-  buf_t s;
-	buf_init(&s);
+  buf_t_ s;
+	//buf_init(&s);
 
   switch (p.type)
   {
@@ -164,12 +164,12 @@ param_t sel_deserialize_param(param_t p)
   return rp;
 }
 
-buf_t sel_deserialize_string(buf_t b)
+buf_t_ sel_deserialize_string(buf_t_ b)
 {
 	/*buf_dump(b);*/
-  buf_t s;
-	buf_init(&s);
-  buf_t byte = api.buf.add(b.data, 4);
+  buf_t_ s;
+	//buf_init(&s);
+  buf_t_ byte = api.buf.add(b.data, 4);
   int offset = byte.data[0];
 
   /*if (byte.data[0] <= 253 && !b.data[1 + offset] && !b.data[2 + offset] && !b.data[3 + offset]) {*/
@@ -178,14 +178,14 @@ buf_t sel_deserialize_string(buf_t b)
     s = api.buf.add(b.data + 1, size);
   } else if (byte.data[0] >= 254) {
     ui8_t start = 0xfe;
-    buf_t s1 = api.buf.add((ui8_t *)&start, 1);
-    buf_t s2 = api.buf.add(b.data, 1);
+    buf_t_ s1 = api.buf.add((ui8_t *)&start, 1);
+    buf_t_ s2 = api.buf.add(b.data, 1);
 
     if (!api.buf.cmp(s1, s2)) {
       api.log.error("can't deserialize string");
     }
 
-    buf_t len_ = api.buf.add(b.data + 1, 3);
+    buf_t_ len_ = api.buf.add(b.data + 1, 3);
     len_.size = 4; // hack
     ui32_t len = api.buf.get_ui32(len_);
     b = api.buf.add(b.data + 4, b.size - 4);
@@ -197,31 +197,31 @@ buf_t sel_deserialize_string(buf_t b)
   return s;
 }
 
-buf_t sel_serialize_string(buf_t b)
+buf_t_ sel_serialize_string(buf_t_ b)
 {
-  buf_t s = {};
-	buf_init(&s);
+  buf_t_ s = {};
+	//buf_init(&s);
   ui32_t size = b.size;
 
   if (size <= 253) {
     s = api.buf.add((ui8_t *)&size, 1);
     s = api.buf.cat(s, b);
     int pad = (4 - (s.size % 4)) % 4;
-    buf_t p = {};
-		buf_init(&p);
+    buf_t_ p = {};
+		//buf_init(&p);
     p.size = pad;
     s = api.buf.cat(s, p);
   } else if (size >= 254) {
     ui8_t start = 0xfe;
     s = api.buf.add((ui8_t *)&start, 1);
-    buf_t len = api.buf.add((ui8_t *)&size, 3);
+    buf_t_ len = api.buf.add((ui8_t *)&size, 3);
     s = api.buf.cat(s, len);
     s = api.buf.cat(s, b);
     int pad = (4 - (s.size % 4)) % 4;
 
     if (pad) {
-      buf_t p = {};
-			buf_init(&p);
+      buf_t_ p = {};
+			//buf_init(&p);
       p.size = pad;
       s = api.buf.cat(s, p);
     }
@@ -232,12 +232,12 @@ buf_t sel_serialize_string(buf_t b)
   return s;
 }
 
-buf_t sel_serialize(abstract_t a)
+buf_t_ sel_serialize(abstract_t a)
 {
-  buf_t b;
-	buf_init(&b);
-  buf_t s = {};
-	buf_init(&s);
+  buf_t_ b;
+	//buf_init(&b);
+  buf_t_ s = {};
+	//buf_init(&s);
 
   for (ui32_t i = 0; i < a.size; ++i) {
     b = api.sel.serialize_param(a.params[i]);
@@ -248,7 +248,7 @@ buf_t sel_serialize(abstract_t a)
   return s;
 }
 
-abstract_t sel_deserialize(buf_t b)
+abstract_t sel_deserialize(buf_t_ b)
 {
   abstract_t a;
   ui32_t id = api.buf.get_ui32(b);
@@ -261,12 +261,12 @@ abstract_t sel_deserialize(buf_t b)
   return a;
 }
 
-buf_t sel_deserialize_vector(param_t p)
+buf_t_ sel_deserialize_vector(param_t p)
 {
   //api.buf.dump(p.value);
-  buf_t d;
-	buf_init(&d);
-  buf_t b = p.value;
+  buf_t_ d;
+	//buf_init(&d);
+  buf_t_ b = p.value;
   ui32_t id = api.buf.get_ui32(b);
 
   if (id != _id_Vector) {
@@ -278,8 +278,8 @@ buf_t sel_deserialize_vector(param_t p)
 
   if (!q) {
     api.log.info("empty container deserialized");
-    buf_t e = {};
-		buf_init(&e);
+    buf_t_ e = {};
+		//buf_init(&e);
 
     return e;
   }

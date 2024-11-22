@@ -11,50 +11,29 @@
 #include "../include/types.h"
 #include "../include/api.h"
 
-void buf_init(buf_t *buf)
+buf_t_ buf_add_(ui8_t data[], ui32_t size)
 {
-	buf->data = malloc(max_buf_size + 1); 
-	buf->allo = max_buf_size;
-	buf->size = 0;
-}
-
-void buf_realloc(buf_t *buf, ui32_t size)
-{
-	if (size > buf->allo){
-		void *ptr = realloc(buf->data, size);
-		if (ptr){
-			buf->data = ptr;
-			buf->allo = size;
-		}
-	}
-}
-
-buf_t buf_add(ui8_t data[], ui32_t size)
-{
-  buf_t b;
-	buf_init(&b);
-
-  if (size > b.allo) {
-		buf_realloc(&b, size + 1);
+  if (size > max_buf_size) {
+    api.log.error("can't add to buffer");
   }
 
-	ui32_t i;
-  for (i = 0; i < size; ++i) {
+  buf_t_ b = {};
+
+  for (ui32_t i = 0; i < size; ++i) {
     b.data[i] = data[i];
   }
-	b.data[i] = 0;
 
   b.size = size;
 
   return b;
 }
 
-buf_t buf_cat(buf_t dest, buf_t src)
+buf_t_ buf_cat_(buf_t_ dest, buf_t_ src)
 {
   ui32_t s = dest.size + src.size;
 
-  if (s > dest.allo) {
-		buf_realloc(&dest, s);
+  if (s > max_buf_size) {
+    api.log.error("can't cat to buffer");
   }
 
   int offset = dest.size;
@@ -68,9 +47,9 @@ buf_t buf_cat(buf_t dest, buf_t src)
   return dest;
 }
 
-void buf_dump(buf_t b)
+void buf_dump_(buf_t_ b)
 {
-  if (b.size > b.allo) {
+  if (b.size > max_buf_size) {
     api.log.error("Error: buf_dump: max size reached");
   } else if (!b.size) {
     api.log.error("Error: buf_dump: buffer is empty");
@@ -79,7 +58,7 @@ void buf_dump(buf_t b)
   api.log.hex(b.data, b.size);
 }
 
-ui8_t buf_cmp(buf_t a, buf_t b)
+ui8_t buf_cmp_(buf_t_ a, buf_t_ b)
 {
   if (a.size != b.size) {
     api.log.error("Error: buf_cmp: different sizes");
@@ -94,7 +73,7 @@ ui8_t buf_cmp(buf_t a, buf_t b)
   return 1;
 }
 
-buf_t buf_swap(buf_t b)
+buf_t_ buf_swap_(buf_t_ b)
 {
   unsigned char * lo = (unsigned char *)b.data;
   unsigned char * hi = (unsigned char *)b.data + b.size - 1;
@@ -109,30 +88,29 @@ buf_t buf_swap(buf_t b)
   return b;
 }
 
-buf_t buf_add_ui32(ui32_t v)
+buf_t_ buf_add_ui32_(ui32_t v)
 {
-  return buf_add((ui8_t *)&v, 4);
+  return api.buf.add((ui8_t *)&v, 4);
 }
 
-buf_t buf_add_ui64(ui64_t v)
+buf_t_ buf_add_ui64_(ui64_t v)
 {
-  return buf_add((ui8_t *)&v, 8);
+  return api.buf.add((ui8_t *)&v, 8);
 }
 
-ui32_t buf_get_ui32(buf_t b)
+ui32_t buf_get_ui32_(buf_t_ b)
 {
   return *(ui32_t *)b.data;
 }
 
-ui64_t buf_get_ui64(buf_t b)
+ui64_t buf_get_ui64_(buf_t_ b)
 {
   return *(ui64_t *)b.data;
 }
 
-buf_t buf_rand(ui32_t s)
+buf_t_ buf_rand_(ui32_t s)
 {
-  buf_t b = {};
-	buf_init(&b);
+  buf_t_ b = {};
 
   srand((unsigned int)time(NULL));
 
@@ -145,14 +123,13 @@ buf_t buf_rand(ui32_t s)
   return b;
 }
 
-buf_t buf_xor(buf_t a, buf_t b)
+buf_t_ buf_xor_(buf_t_ a, buf_t_ b)
 {
   if (a.size != b.size) {
     api.log.error("Error: buf_cmp: different sizes");
   }
 
-  buf_t r;
-	buf_init(&r);
+  buf_t_ r;
 
   for (ui32_t i = 0; i < a.size; ++i) {
     r.data[i] = a.data[i] ^ b.data[i];
@@ -161,26 +138,4 @@ buf_t buf_xor(buf_t a, buf_t b)
   r.size = a.size;
   
   return r;
-}
-
-buf_t buf_cat_ui32(buf_t dest, ui32_t i)
-{
-	buf_t src = buf_add_ui32(i);
-	buf_t buf = buf_cat(dest, src);
-	free(src.data);
-	return buf; 
-}
-
-buf_t buf_cat_ui64(buf_t dest, ui64_t i){
-	buf_t src = buf_add_ui64(i);
-	buf_t buf = buf_cat(dest, src);
-	free(src.data);
-	return buf; 
-}
-
-buf_t buf_cat_data(buf_t dest, ui8_t *data, ui32_t len){
-	buf_t src = buf_add(data, len);
-	buf_t buf = buf_cat(dest, src);
-	free(src.data);
-	return buf; 
 }

@@ -12,7 +12,7 @@
 #include "types.h"
 
 extern trl_t trl_init();
-extern buf_t trl_transport(buf_t);
-extern buf_t trl_detransport(buf_t);
+extern buf_t_ trl_transport(buf_t_);
+extern buf_t_ trl_detransport(buf_t_);
 
 #endif /* defined(__mtx__trl__) */

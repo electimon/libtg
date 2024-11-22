@@ -10,27 +10,22 @@
 #include "../include/hdl.h"
 #include "../include/buf.h"
 #include <assert.h>
-#include <time.h>
-
-#ifdef __APPLE__
-#include "darwin-posix-rt/darwin-posix-rt.h"
-#endif
 
 extern hdl_t hdl;
 
-buf_t hdl_header(buf_t b, msg_t t)
+buf_t_ hdl_header(buf_t_ b, msg_t t)
 {
-  buf_t s = {};
-	buf_init(&s);
+  buf_t_ s = {};
+	//buf_init(&s);
 
   switch (t) {
     case RFC:
     {
       ui64_t msg_id_ = get_current_time();
-      buf_t msg_id = api.buf.add((ui8_t *)&msg_id_, 8);
+      buf_t_ msg_id = api.buf.add((ui8_t *)&msg_id_, 8);
       s = api.buf.cat(s, msg_id);
       ui32_t msg_data_len_ = b.size;
-      buf_t msg_data_len = api.buf.add((ui8_t *)&msg_data_len_, 4);
+      buf_t_ msg_data_len = api.buf.add((ui8_t *)&msg_data_len_, 4);
       s = api.buf.cat(s, msg_data_len);
       s = api.buf.cat(s, b);
 
@@ -38,18 +33,18 @@ buf_t hdl_header(buf_t b, msg_t t)
     }
     case API:
     {
-      buf_t salt = shared_rc_get_salt();
+      buf_t_ salt = shared_rc_get_salt();
       s = api.buf.cat(s, salt);
-      buf_t session_id = shared_rc_get_ssid();
+      buf_t_ session_id = shared_rc_get_ssid();
       s = api.buf.cat(s, session_id);
       ui64_t msg_id_ = get_current_time();
-      buf_t msg_id = api.buf.add((ui8_t *)&msg_id_, 8);
+      buf_t_ msg_id = api.buf.add((ui8_t *)&msg_id_, 8);
       s = api.buf.cat(s, msg_id);
       ui32_t seqnh = shared_rc_get_seqnh();
-      buf_t seq_no = api.buf.add_ui32(seqnh);
+      buf_t_ seq_no = api.buf.add_ui32(seqnh);
       s = api.buf.cat(s, seq_no);
       ui32_t msg_data_len_ = b.size;
-      buf_t msg_data_len = api.buf.add((ui8_t *)&msg_data_len_, 4);
+      buf_t_ msg_data_len = api.buf.add((ui8_t *)&msg_data_len_, 4);
       s = api.buf.cat(s, msg_data_len);
       s = api.buf.cat(s, b);
 
@@ -66,15 +61,10 @@ buf_t hdl_header(buf_t b, msg_t t)
   return s;
 }
 
-buf_t hdl_deheader(buf_t b, msg_t t)
+buf_t_ hdl_deheader(buf_t_ b, msg_t t)
 {
-	if (!b.size){
-    api.log.error("got nothing");
-		return b;
-	}
-
-  buf_t d;
-	buf_init(&d);
+  buf_t_ d;
+	//buf_init(&d);
 
   switch (t) {
     case RFC:
@@ -97,8 +87,6 @@ buf_t hdl_deheader(buf_t b, msg_t t)
     case API:
     {
       // remove salt
-			ui64_t salt = buf_get_ui64(b);
-      shared_rc.salt = buf_add_ui64(salt);
       d = api.buf.add(b.data + 8, b.size - 8);
       // remove session_id
       d = api.buf.add(d.data + 8, d.size - 8);
@@ -111,9 +99,9 @@ buf_t hdl_deheader(buf_t b, msg_t t)
       ui32_t msg_data_len = api.buf.get_ui32(d);
       d.size -= 4;
 
-      //if (msg_data_len != d.size) {
-        //api.log.error("msg_data_len mismatch");
-      //}
+      if (msg_data_len != d.size) {
+        api.log.error("msg_data_len mismatch");
+      }
       
       // remove len
       d = api.buf.add(d.data + 4, d.size);
@@ -166,24 +154,15 @@ void my_clock_gettime(int clock_id, struct timespec * T)
 #endif
 }
 
-long long precise_time;
-long long precise_time_rdtsc;
-static __inline__ unsigned long long rdtsc(void)
-{
-//#ifdef __ARM_ARCH_ISA_A64
-	//uint64_t cntvct;
-  //__asm__ __volatile__("mrs %0, cntvct_el0; " : "=r"(cntvct) :: "memory");
-  //return cntvct;
-//#else
+//long long precise_time;
+//long long precise_time_rdtsc;
+//static __inline__ unsigned long long rdtsc(void)
+//{
   //unsigned hi, lo;
   //__asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
 
   //return ((unsigned long long)lo) | (((unsigned long long)hi) << 32);
-//#endif
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return 1000000000ULL * ts.tv_sec * ts.tv_nsec;
-}
+//}
 
 double get_utime(int clock_id)
 {
@@ -191,10 +170,10 @@ double get_utime(int clock_id)
   my_clock_gettime(clock_id, &T);
   double res = T.tv_sec + (double) T.tv_nsec * 1e-9;
 
-  if (clock_id == CLOCK_REALTIME) {
-    precise_time = (long long)(res * (1LL << 32));
-    precise_time_rdtsc = rdtsc();
-  }
+  //if (clock_id == CLOCK_REALTIME) {
+    //precise_time = (long long)(res * (1LL << 32));
+    //precise_time_rdtsc = rdtsc();
+  //}
 
   return res;
 }

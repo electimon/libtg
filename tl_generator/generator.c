@@ -34,6 +34,7 @@ typedef struct generator_ {
 	FILE *tojson_table_h;
 	FILE *tojson_table_c;
 	array_t *type_names;
+	int isMtproto;
 } generator_t;
 
 
@@ -356,7 +357,7 @@ int append_deserialize_table(
 				strstr(m->args[i].name, "flags"))
 		{
 			fputs(STR(buf, BLEN,
-				"\tui32_t flag%d = deserialize_ui32(buf);\n"
+				"\tuint32_t flag%d = deserialize_ui32(buf);\n"
 				, ++nflag)
 				, g->deserialize_table_c);
 
@@ -445,16 +446,18 @@ int append_deserialize_table(
 				}
 				else if (strcmp(m->args[i].type, "int128") == 0){
 					fputs(STR(buf, BLEN,
+					  "\t\tbuf_init(&obj->%s_);\n"
 					  "\t\tint i; for (i=0; i<4; ++i)\n"
 					  "\t\t\tobj->%s_ = buf_cat(obj->%s_, buf_add_ui32(deserialize_ui32(buf)));\n"
-					, m->args[i].name, m->args[i].name)
+					, m->args[i].name, m->args[i].name, m->args[i].name)
 					, g->deserialize_table_c);
 				}
 				else if (strcmp(m->args[i].type, "int256") == 0){
 					fputs(STR(buf, BLEN,
+					  "\t\tbuf_init(&obj->%s_);\n"
 					  "\t\tint i; for (i=0; i<8; ++i)\n"
 					  "\t\t\tobj->%s_ = buf_cat(obj->%s_, buf_add_ui32(deserialize_ui32(buf)));\n"
-					, m->args[i].name, m->args[i].name)
+					, m->args[i].name, m->args[i].name, m->args[i].name)
 					, g->deserialize_table_c);
 				}
 				else if (
@@ -642,10 +645,10 @@ int append_struct(
 	fputs(STR(buf, BLEN, "typedef struct tl_%s_ {\n", m->name),
 		 	g->struct_h);
 	
-	fputs("\tui32_t _id;\n", g->struct_h);
+	fputs("\tuint32_t _id;\n", g->struct_h);
 
 	if (strcmp(m->name, "vector") == 0){
-		fputs("\tui32_t len_;\n", g->struct_h);
+		fputs("\tuint32_t len_;\n", g->struct_h);
 		fputs("\tbuf_t data_;\n", g->struct_h);
 	}
 
@@ -853,6 +856,9 @@ int append_methods_header(
 		if (strcmp(type, "bytes") == 0)
 			type = "buf_t";
 		
+		if (strcmp(type, "string") == 0 && g->isMtproto)
+			type = "buf_t";
+		
 		if (strcmp(type, "string") == 0)
 			type = "const char *";
 
@@ -962,6 +968,9 @@ int append_methods(
 				strcmp(type, "double"))
 			pointer = "*";
 		
+		if (strcmp(type, "string") == 0 && g->isMtproto)
+			type = "buf_t";
+		
 		if (strcmp(type, "bytes") == 0)
 			type = "buf_t";
 		
@@ -1017,7 +1026,7 @@ int append_methods(
 		{
 			// handle flags
 			fputs(STR(buf, BLEN,
-					"\tui32_t *flag%d = (ui32_t *)(&buf.data[buf.size]);\n"
+					"\tuint32_t *flag%d = (uint32_t *)(&buf.data[buf.size]);\n"
 					"\tbuf = buf_cat(buf, buf_add_ui32(0));\n"
 					, ++nflag)
 				,g->methods_c);
@@ -1168,6 +1177,57 @@ int append_methods(
 
 			fputs("\t}\n",g->methods_c);
 
+		} else if (strcmp(m->args[i].type, "string") == 0 && g->isMtproto)
+		{
+			if (m->args[i].flagn != 0)
+				fputs(
+					STR(buf, BLEN, 
+						"\tif (%s_)\n", m->args[i].name), 
+					g->methods_c);
+			
+			fputs("\t{\n",g->methods_c);
+
+			fputs(
+					STR(buf, BLEN, 
+						"\t\tbuf = buf_cat(buf, serialize_bytes(%s_.data, %s_.size));\n", 
+						m->args[i].name, m->args[i].name), 
+					g->methods_c);
+
+			if (m->args[i].flagn)
+				fputs(
+					STR(buf, BLEN, 
+						"\t\t*flag%d |= (1 << %d);\n", 
+						m->args[i].flagn, m->args[i].flagb), 
+					g->methods_c);
+
+			fputs("\t}\n",g->methods_c);
+
+		} else if (strcmp(m->args[i].type, "bytes") == 0)
+		{
+
+			if (m->args[i].flagn != 0)
+				fputs(
+					STR(buf, BLEN, 
+						"\tif (%s_)\n", m->args[i].name), 
+					g->methods_c);
+			
+			fputs("\t{\n",g->methods_c);
+
+			fputs(
+					STR(buf, BLEN, 
+						"\t\tbuf = buf_cat(buf, serialize_bytes(%s_->data, %s_->size));\n", 
+						m->args[i].name, m->args[i].name), 
+					g->methods_c);
+
+			if (m->args[i].flagn)
+				fputs(
+					STR(buf, BLEN, 
+						"\t\t*flag%d |= (1 << %d);\n", 
+						m->args[i].flagn, m->args[i].flagb), 
+					g->methods_c);
+
+			fputs("\t}\n",g->methods_c);
+
 		} else if (strcmp(m->args[i].type, "string") == 0){
 
 			if (m->args[i].flagn != 0)
@@ -1182,31 +1242,6 @@ int append_methods(
 					STR(buf, BLEN, 
 						"\t\tbuf = buf_cat(buf, serialize_string(%s_));\n", 
 						m->args[i].name), 
-					g->methods_c);
-
-			if (m->args[i].flagn)
-				fputs(
-					STR(buf, BLEN, 
-						"\t\t*flag%d |= (1 << %d);\n", 
-						m->args[i].flagn, m->args[i].flagb), 
-					g->methods_c);
-
-			fputs("\t}\n",g->methods_c);
-
-		} else if (strcmp(m->args[i].type, "bytes") == 0){
-
-			if (m->args[i].flagn != 0)
-				fputs(
-					STR(buf, BLEN, 
-						"\tif (%s_)\n", m->args[i].name), 
-					g->methods_c);
-			
-			fputs("\t{\n",g->methods_c);
-
-			fputs(
-					STR(buf, BLEN, 
-						"\t\tbuf = buf_cat(buf, serialize_bytes(%s_->data, %s_->size));\n", 
-						m->args[i].name, m->args[i].name), 
 					g->methods_c);
 
 			if (m->args[i].flagn)
@@ -1388,8 +1423,11 @@ int main(int argc, char *argv[])
 	if (open_deserialize_table_header(&g)) return 1;
 	if (open_deserialize_table(&g)) return 1;
 
+	g.isMtproto = 1;
 	tl_parse("mtproto_api.tl",
 		 	&g,cb);
+	
+	g.isMtproto = 0;
 	tl_parse("telegram_api.tl",
 		 	&g, cb);
 

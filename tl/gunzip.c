@@ -1,4 +1,4 @@
-#include "../mtx/include/buf.h"
+#include "buf.h"
 #include "alloc.h"
 #include <zlib.h>
 int gunzip_buf(buf_t *dst, buf_t src){
@@ -16,7 +16,7 @@ int gunzip_buf(buf_t *dst, buf_t src){
 	s.opaque    = Z_NULL;
 	s.avail_in  = src.size;
 	s.next_in   = src.data;
-	s.avail_out = dst->allo;
+	s.avail_out = dst->asize;
 	s.next_out  = dst->data;
 	if (inflateInit2(&s, 16 + MAX_WBITS) != Z_OK){
 		printf("can't init inflate\n");

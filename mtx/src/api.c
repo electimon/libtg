@@ -43,17 +43,17 @@ api_t api =
   },
   .buf =
   {
-    .add                  = buf_add,
-    .cat                  = buf_cat,
-    .dump                 = buf_dump,
-    .cmp                  = buf_cmp,
-    .swap                 = buf_swap,
-    .add_ui32             = buf_add_ui32,
-    .add_ui64             = buf_add_ui64,
-    .get_ui32             = buf_get_ui32,
-    .get_ui64             = buf_get_ui64,
-    .rand                 = buf_rand,
-    .xor                  = buf_xor,
+    .add                  = buf_add_,
+    .cat                  = buf_cat_,
+    .dump                 = buf_dump_,
+    .cmp                  = buf_cmp_,
+    .swap                 = buf_swap_,
+    .add_ui32             = buf_add_ui32_,
+    .add_ui64             = buf_add_ui64_,
+    .get_ui32             = buf_get_ui32_,
+    .get_ui64             = buf_get_ui64_,
+    .rand                 = buf_rand_,
+    .xor                  = buf_xor_,
   },
   .app =
   {
@@ -88,12 +88,6 @@ api_t api =
     .init                 = srl_init,
     .auth                 = srl_auth,
     .ping                 = srl_ping,
-		.sendCode             = srl_sendCode,
-		.resendCode           = srl_resendCode,
-		.singIn               = srl_singIn,
-		.msgsAck              = srl_msgsAck,
-		.initConnection       = srl_initConnection,
-		.invokeWithLayer      = srl_invokeWithLayer,
   },
   .cmn =
   {

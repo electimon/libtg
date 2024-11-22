@@ -8,6 +8,7 @@
 
 #include <stddef.h>
 #include "../include/api.h"
+#include "../include/buf.h"
 
 static uint32_t crc32_tab[] =
 {
@@ -70,9 +71,10 @@ uint32_t crc32_(uint32_t crc, const void * buf, size_t size)
   return crc ^ ~0U;
 }
 
-buf_t crc_crc32(const buf_t buf)
+buf_t_ crc_crc32(const buf_t_ buf)
 {
-  buf_t b;
+  buf_t_ b;
+	//buf_init(&b);
   uint32_t crc = crc32_(0, buf.data, buf.size);
   ui8_t * crc_ptr = (ui8_t *)&crc;
 

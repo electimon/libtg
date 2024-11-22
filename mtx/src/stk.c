@@ -10,26 +10,31 @@
 
 abstract_t stk_drive(abstract_t a)
 {
-  buf_t s = api.sel.serialize(a);
-  /*api.buf.dump(s);*/
-  buf_t s1 = api.hdl.header(s, a.type);
-  //api.buf.dump(s1);
-  buf_t e = api.enl.encrypt(s1, a.type);
-  //api.buf.dump(e);
-  buf_t t = api.trl.transport(e);
-  //api.buf.dump(t);
-  buf_t nr = api.net.drive(t, a.stk_mode);
-	//api.buf.dump(nr);
+  buf_t_ s = api.sel.serialize(a);
+	printf("serialize:\n");
+	api.buf.dump(s);
+  buf_t_ s1 = api.hdl.header(s, a.type);
+	printf("header:\n");
+	api.buf.dump(s1);
+  buf_t_ e = api.enl.encrypt(s1, a.type);
+	printf("encrypt:\n");
+	api.buf.dump(e);
+  buf_t_ t = api.trl.transport(e);
+	printf("transport:\n");
+	api.buf.dump(t);
+  buf_t_ nr = api.net.drive(t, a.stk_mode);
+	printf("response:\n");
+	api.buf.dump(nr);
   abstract_t ar = {};
 
   switch (a.stk_mode) {
     case SEND_RECEIVE:
     {
-      buf_t tr = api.trl.detransport(nr);
+      buf_t_ tr = api.trl.detransport(nr);
       //api.buf.dump(tr);
-      buf_t d = api.enl.decrypt(tr, a.type);
+      buf_t_ d = api.enl.decrypt(tr, a.type);
       //api.buf.dump(d);
-      buf_t s1r = api.hdl.deheader(d, a.type);
+      buf_t_ s1r = api.hdl.deheader(d, a.type);
       //api.buf.dump(s1r);
       ar = api.sel.deserialize(s1r);
 

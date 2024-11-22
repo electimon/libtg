@@ -11,10 +11,10 @@
 #include "../include/aes.h"
 #include "../include/buf.h"
 
-buf_t cry_rsa_e(buf_t b)
+buf_t_ cry_rsa_e(buf_t_ b)
 {
-  buf_t r = {};
-	buf_init(&r);
+  buf_t_ r = {};
+	/*buf_init(&r);*/
   r.size = 256;
 
   rsa(b.data, b.size, r.data, r.size);
@@ -22,13 +22,13 @@ buf_t cry_rsa_e(buf_t b)
   return r;
 }
 
-buf_t cry_aes_e(buf_t b, buf_t key, buf_t iv)
+buf_t_ cry_aes_e(buf_t_ b, buf_t_ key, buf_t_ iv)
 {
 	//printf("%s\n", __func__);
-  buf_t r = {};
-	buf_init(&r);
-	if (b.size > r.size)
-		buf_realloc(&r, b.size * 2);
+  buf_t_ r = {};
+	/*buf_init(&r);*/
+	//if (b.size > r.size)
+		//buf_realloc(&r, b.size * 2);
 
 	int l = aes_e(b.data, r.data, b.size, key.data, iv.data);
 
@@ -42,13 +42,13 @@ buf_t cry_aes_e(buf_t b, buf_t key, buf_t iv)
   return r;
 }
 
-buf_t cry_aes_d(buf_t b, buf_t key, buf_t iv)
+buf_t_ cry_aes_d(buf_t_ b, buf_t_ key, buf_t_ iv)
 {
 	//printf("%s\n", __func__);
-  buf_t r = {};
-	buf_init(&r);
-	if (b.size > r.size)
-		buf_realloc(&r, b.size * 2);
+  buf_t_ r = {};
+	/*buf_init(&r);*/
+	//if (b.size > r.size)
+		//buf_realloc(&r, b.size * 2);
   
 	int l = aes_d(b.data, r.data, b.size, key.data, iv.data);
 

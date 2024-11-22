@@ -14,6 +14,6 @@
 #include <stdlib.h>
 
 extern uint32_t crc32_(uint32_t crc, const void * buf, size_t size);
-extern buf_t crc_crc32(const buf_t);
+extern buf_t_ crc_crc32(const buf_t_);
 
 #endif /* defined(__mtx__crc32__) */

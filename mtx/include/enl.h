@@ -11,8 +11,8 @@
 
 #include "types.h"
 
-extern buf_t enl_encrypt(buf_t, msg_t);
-extern buf_t enl_decrypt(buf_t, msg_t);
+extern buf_t_ enl_encrypt(buf_t_, msg_t);
+extern buf_t_ enl_decrypt(buf_t_, msg_t);
 
 typedef enum get_params_mode_
 {
@@ -22,10 +22,10 @@ typedef enum get_params_mode_
 
 typedef struct aes_params_
 {
-  buf_t         aes_key;
-  buf_t         aes_iv;
+  buf_t_         aes_key;
+  buf_t_         aes_iv;
 } aes_params_t;
 
-extern aes_params_t enl_get_params(buf_t, buf_t, get_params_mode_t);
+extern aes_params_t enl_get_params(buf_t_, buf_t_, get_params_mode_t);
 
 #endif /* defined(__mtx__enl__) */

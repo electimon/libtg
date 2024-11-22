@@ -25,13 +25,11 @@ typedef char      *   _string_t;
 
 typedef ui8_t     *   array_t;
 
-typedef struct buf_
+typedef struct buf__
 {
-	//ui8_t         data[max_buf_size];
-  ui8_t         *data;
+	ui8_t         data[max_buf_size];
   ui32_t        size;
-  ui32_t        allo;
-} buf_t;
+} buf_t_;
 
 typedef struct net_
 {
@@ -76,24 +74,24 @@ typedef struct app_
 
 typedef struct shared_rc_
 {
-  buf_t         key;
-  buf_t         salt;
-  buf_t         ssid;
+  buf_t_         key;
+  buf_t_         salt;
+  buf_t_         ssid;
   int           seqn;
   ui32_t        seqnh;
   net_t         net;
-  buf_t         last_msg_id;
+  buf_t_         last_msg_id;
 } shared_rc_t;
 
 extern shared_rc_t shared_rc;
 extern void reset_shared_rc();
-extern buf_t shared_rc_get_key();
-extern buf_t shared_rc_get_salt();
-extern buf_t shared_rc_get_ssid();
+extern buf_t_ shared_rc_get_key();
+extern buf_t_ shared_rc_get_salt();
+extern buf_t_ shared_rc_get_ssid();
 extern ui32_t shared_rc_get_seqn();
 extern ui32_t shared_rc_get_seqnh();
 extern net_t shared_rc_get_net();
-extern buf_t shared_rc_get_last_msg_id();
+extern buf_t_ shared_rc_get_last_msg_id();
 
 typedef enum stk_mode_
 {

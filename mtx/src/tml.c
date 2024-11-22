@@ -38,30 +38,10 @@ methods_t methods__ =
     .init = method_auth_sendCode_init,
     .drive = method_auth_sendCode_drive,
   },
-	.auth_resendCode =
-  {
-    .init = method_auth_resendCode_init,
-    .drive = method_auth_resendCode_drive,
-  },
-	.auth_singIn =
-  {
-    .init = method_auth_singIn_init,
-    .drive = method_auth_singIn_drive,
-  },
   .msgs_ack =
   {
     .init = method_msgs_ack_init,
     .drive = method_msgs_ack_drive,
-  },
-	.initConnection =
-  {
-    .init = method_initConnection_init,
-    .drive = method_initConnection_drive,
-  },
-	.invokeWithLayer =
-  {
-    .init = method_invokeWithLayer_init,
-    .drive = method_invokeWithLayer_drive,
   },
 };
 

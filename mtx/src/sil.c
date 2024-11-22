@@ -7,9 +7,6 @@
 //
 
 #include "../include/api.h"
-#include "../include/buf.h"
-#include "../include/net.h"
-#include "../include/trl.h"
 
 typedef struct abstract_type_
 {
@@ -74,71 +71,20 @@ abstract_t sil_abstract(tg_api_type_system_t t)
     a.params[0].value = api.buf.add_ui32(t.method_ping.id__);
     a.params[1] = t.method_ping.ping_id;
     a.size = 2;
-  } else if (t.CodeSettings.id__) {
-    a.type = RFC;
-    a.params[0].value = api.buf.add_ui32(t.CodeSettings.id__);
-    a.params[1] = t.CodeSettings.flags;
-    //a.params[2] = t.CodeSettings.allow_flashcall;
-    //a.params[3] = t.CodeSettings.current_number;
-    //a.params[4] = t.CodeSettings.allow_app_hash;
-    //a.params[5] = t.CodeSettings.allow_missed_call;
-    //a.params[6] = t.CodeSettings.allow_firebase;
-    //a.params[7] = t.CodeSettings.unknown_number;
-    //a.params[8] = t.CodeSettings.logout_tokens;
-    //a.params[9] = t.CodeSettings.device_token;
-    //a.params[10] = t.CodeSettings.is_app_sandbox;
-    a.size = 2;
   } else if (t.method_auth_sendCode.id__) {
     a.type = API;
     a.params[0].value = api.buf.add_ui32(t.method_auth_sendCode.id__);
     a.params[1] = t.method_auth_sendCode.phone_number;
-		/*a.params[2] = t.method_auth_sendCode.sms_type;*/
-		a.params[2] = t.method_auth_sendCode.api_id;
-		a.params[3] = t.method_auth_sendCode.api_hash;
-		/*a.params[5] = t.method_auth_sendCode.lang_code;*/
-		a.params[4] = t.method_auth_sendCode.settings;
-    a.size = 5;
-	} else if (t.method_auth_resendCode.id__) {
-    a.type = API;
-    a.params[0].value = api.buf.add_ui32(t.method_auth_resendCode.id__);
-    a.params[1] = t.method_auth_resendCode.flags;
-    a.params[2] = t.method_auth_resendCode.phone_number;
-		a.params[3] = t.method_auth_resendCode.phone_code_hash;
-    a.size = 4;
-	} else if (t.method_auth_singIn.id__) {
-    a.type = API;
-    a.params[0].value = api.buf.add_ui32(t.method_auth_singIn.id__);
-    a.params[1] = t.method_auth_singIn.flags;
-    a.params[2] = t.method_auth_singIn.phone_number;
-		a.params[3] = t.method_auth_singIn.phone_code_hash;
-		a.params[4] = t.method_auth_singIn.phone_code;
-    a.size = 5;
+    a.params[2] = t.method_auth_sendCode.sms_type;
+    a.params[3] = t.method_auth_sendCode.api_id;
+    a.params[4] = t.method_auth_sendCode.api_hash;
+    a.params[5] = t.method_auth_sendCode.lang_code;
+    a.size = 6;
   } else if (t.method_msgs_ack.id__) {
     a.type = API;
     a.params[0].value = api.buf.add_ui32(t.method_msgs_ack.id__);
     a.params[1] = t.method_msgs_ack.msg_ids;
     a.size = 2;
-	} else if (t.method_initConnection.id__) {
-    a.type = API;
-    a.params[0].value = api.buf.add_ui32(t.method_initConnection.id__);
-    a.params[1] = t.method_initConnection.flags;
-    a.params[2] = t.method_initConnection.api_id;
-    a.params[3] = t.method_initConnection.device_model;
-    a.params[4] = t.method_initConnection.system_version;
-    a.params[5] = t.method_initConnection.app_version;
-    a.params[6] = t.method_initConnection.system_lang_code;
-    a.params[7] = t.method_initConnection.lang_pack;
-    a.params[8] = t.method_initConnection.lang_code;
-    /*a.params[9] = t.method_initConnection.proxy;*/
-    /*a.params[10] = t.method_initConnection.params;*/
-		a.params[9] = t.method_initConnection.query;
-    a.size = 10;
-	} else if (t.method_invokeWithLayer.id__) {
-    a.type = API;
-    a.params[0].value = api.buf.add_ui32(t.method_invokeWithLayer.id__);
-    a.params[1] = t.method_invokeWithLayer.layer;
-    a.params[2] = t.method_invokeWithLayer.query;
-    a.size = 3;
   } else {
     api.log.error("can't abstract");
   }
@@ -169,9 +115,7 @@ tg_api_type_system_t sil_concrete(abstract_t a)
   ui32_t id = api.buf.get_ui32(a.params[0].value);
   param_t p;
   p.id = id;
-  buf_t s = a.params[1].value; // hack
-  //api.buf.dump(s);
-  printf("current id: %.8x\n", id);
+  buf_t_ s = a.params[1].value; // hack
   switch (id) {
     case _id_resPQ:
     {
@@ -294,12 +238,11 @@ tg_api_type_system_t sil_concrete(abstract_t a)
       c.type__  = API;
       p.value = s;
       p.type = TYPE_VECTOR_MESSAGE;
-      buf_t content = api.buf.add(p.value.data, p.value.size); // hack
+      buf_t_ content = api.buf.add(p.value.data, p.value.size); // hack
       p.value = api.buf.add_ui32(_id_Vector); // hack
       p.value = api.buf.cat(p.value, content);
       p = api.sel.deserialize_param(p);
-      buf_t b;
-			buf_init(&b);
+      buf_t_ b;
 
       for (int i = 0; i < 2; ++i) {
         //api.buf.dump(p.value);
@@ -353,162 +296,9 @@ tg_api_type_system_t sil_concrete(abstract_t a)
 
       break;
     }
-		case _id_msgs_ack:
-    {
-/* A server usually acknowledges the receipt of a message
- * from a client (normally, an RPC query) using an RPC
- * response. If a response is a long time coming, a
- * server may first send a receipt acknowledgment, and
- * somewhat later, the RPC response itself. */
-      ctor_MsgsAck_t c;
-      c.id__ = id;
-      c.type__ = RFC;
-      p.value = s;
-      p.type = TYPE_VECTOR_LONG;
-			c.msg_ids = 
-				api.sel.deserialize_param(p);
-      //s = api.buf.add(s.data + 8, s.size - 8);
-      //p.value = s;
-      //p.type = TYPE_LONG;
-      //c.ping_id = api.sel.deserialize_param(p);
-      //api.buf.dump(c.ping_id.value);
-      //t.ctor_MsgsAck = c;
-
-			ui64_t *msg_id = s.data;
-      printf("msgs_ack: %.8x\n", *msg_id);
-			
-			// waight for message
-			buf_t r = net_receive();
-      //api.buf.dump(r);
-
-			buf_t tr = api.trl.detransport(r);
-      //api.buf.dump(tr);
-      
-			buf_t d = api.enl.decrypt(tr, a.type);
-      //api.buf.dump(d);
-      
-			buf_t s1r = api.hdl.deheader(d, a.type);
-      //api.buf.dump(s1r);
-      
-			abstract_t b = api.sel.deserialize(s1r);
-			sil_concrete(b);
-
-      break;
-    }
-		case _id_rpc_result:
-		{
-			ui64_t msg_id = *(ui64_t *)(s.data);
-      printf("rpc_result msg_id: %.16lx, ", msg_id);
-			ui32_t *object_id = s.data + 8;
-      printf("object_id: %.8x\n", *object_id);
-			
-			switch (*object_id) {
-				case _id_rpc_error:
-				{
-					//RPC Error
-					ctor_rpc_error_t c;
-					c.id__ = *object_id;
-					c.type__ = RFC;
-					
-					s = api.buf.add(s.data + 12, s.size - 12);
-					p.value = s;
-					p.type = TYPE_INT;
-					c.error_code = api.sel.deserialize_param(p);
-					
-					s = api.buf.add(s.data + 4, s.size - 4);
-					p.value = s;
-					p.type = TYPE_STRING;
-					c.error_message = api.sel.deserialize_param(p);
-
-					printf("rpc_error_code: %.8x, ", 
-							c.error_code.value);
-					printf("rpc_error_message: %s\n", 
-							c.error_message.value);
-					
-					break;
-				}
-				//case id_auth_sentCode:
-				//{
-					//ctor_auth_SentCode_t c;
-					//c.id__ = *object_id;
-					//c.type__ = RFC;
-					
-					//s = api.buf.add(s.data + 12, s.size - 12);
-					//int *flags = (int *)(s.data);
-					//printf("sentCode flags: b%.32b\n", *flags);
-
-					//s = api.buf.add(s.data + 4, s.size - 4);
-					//int *type = (int *)(s.data);
-					//printf("sentCode type: %.8x\n", *type);
-					//if (*type == 0x3dbb5986 ||
-							//*type == 0xc000bba2 ||
-							//*type == 0x5353e5a7 )
-					//{
-						//s = api.buf.add(s.data + 4, s.size - 4);
-						//int *lenght = (int *)(s.data);
-						//printf("sentCode length: %d\n", *lenght);
-
-						//s = api.buf.add(s.data + 4, s.size - 4);
-						//p.value = s;
-						//p.type = TYPE_STRING;
-						//c.phone_code_hash = 
-							//api.sel.deserialize_param(p);
-						
-						//printf("sntCode hash: %s\n", 
-							//c.phone_code_hash.value);
-					//}
-
-					//t.msg_id = msg_id;	
-					
-					// acknolage
-					/*buf_t msg = {};*/
-					/*buf_add_ui64(msg_id);*/
-					/*method_msgs_ack_t m = */
-						/*method_msgs_ack_init(msg);*/
-					/*method_msgs_ack_drive(m);*/
-					
-					//tg_api_type_system_t t = {};
-					//t.method_msgs_ack = m;
-					//abstract_t a = api.sil.abstract(t);
-					//a.stk_mode = SEND_RECEIVE;
-					//a = api.stk.drive(a);
-					//api.sil.concrete(a).ctor_auth_SentCode;
-
-					// handle with setnCode
-					//ctor_auth_SentCode_t c;
-					//c.id__ = *object_id;
-					//c.type__ = API;
-					//p.value = s;
-					//p.type = TYPE_LONG;
-					
-					//api.buf.dump(c.msg_id.value);
-					//s = api.buf.add(s.data + 8, s.size - 8);
-					//p.value = s;
-					//p.type = TYPE_LONG;
-					//c.ping_id = api.sel.deserialize_param(p);
-					////api.buf.dump(c.ping_id.value);
-					//t.ctor_Pong = c;
-
-					//t.ctor_auth_SentCode = c;
-					//break;
-				//}	
-				default: break;
-			}
-			break;
-		}
     case _id_bad_msg_notification:
     {
-      printf("current id: %.8x\n", id);
-			long *id = s.data;
-			int *seqn = s.data + 8;
-			int *code = s.data + 12;
-      api.log.info(
-					"id_bad_msg_notification received");
-      printf(
-					"ID: %0.8x "
-					"SQN: %d " 
-					"CODE: %d\n", 
-					 *id, *seqn, *code);
+      api.log.error("id_bad_msg_notification received");
 
       break;
     }

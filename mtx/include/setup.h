@@ -13,20 +13,20 @@
 #define product             "mtx"
 #define _version             "0.1"
 
-/*#define _ip                 "149.154.167.40"*/
-#define _ip                 "149.154.167.50"
+#define _ip                 "149.154.167.40"
+/*#define _ip                 "149.154.167.50"*/
 #define _port               443
 
-#define _api_id             24646404
-#define _api_hash           "818803c99651e8b777c54998e6ded6a0"
+#define _api_id             0
+#define _api_hash           ""
 #define _lang_code          "ru"
 
 #define public_key          "pub.pkcs"
 
 enum settings_atomic_operations
 {
-	//max_buf_size              = 800,
-	max_buf_size              = 1024,
+	max_buf_size              = 800,
+	//max_buf_size              = 1024,
 };
 
 enum settings_tgt
@@ -47,10 +47,6 @@ enum settings_id_codes
   _id_new_session_created    = 0x9ec20908,
   _id_pong                   = 0x347773c5,
   _id_bad_msg_notification   = 0xa7eff811,
-  _id_msgs_ack               = 0x62d6b459,
-  _id_rpc_result             = 0xf35c6d01,
-	_id_rpc_error              = 0x2144ca19,
-	/*id_auth_sentCode          = 0x5e002502,*/
 };
 
 #endif

@@ -1,19 +1,18 @@
 #include "tl.h"
 #include "names.h"
 #include "deserialize_table.h"
-#include "../mtx/include/api.h"
 #include <stdio.h>
 #include <string.h>
 
-ui32_t deserialize_ui32(buf_t *b){
-	ui32_t c;
+uint32_t deserialize_ui32(buf_t *b){
+	uint32_t c;
 	c = buf_get_ui32(*b);
 	*b = buf_add(b->data + 4, b->size - 4);
 	return c;
 }
 
-ui64_t deserialize_ui64(buf_t *b){
-	ui64_t c;
+uint64_t deserialize_ui64(buf_t *b){
+	uint64_t c;
 	c = buf_get_ui64(*b);
 	*b = buf_add(b->data + 8, b->size - 8);
 	return c;
@@ -27,7 +26,7 @@ buf_t deserialize_bytes(buf_t *b)
 
   buf_t byte = buf_add(b->data, 4);
   int offset = 0;
-  ui32_t len = 0;
+  uint32_t len = 0;
 
   if (byte.data[0] <= 253) {
     len = byte.data[0];
@@ -36,12 +35,12 @@ buf_t deserialize_bytes(buf_t *b)
 		s = buf_add(b->data, len);
 		offset = 1;
   } else if (byte.data[0] >= 254) {
-    ui8_t start = 0xfe;
-    buf_t s1 = buf_add((ui8_t *)&start, 1);
+    uint8_t start = 0xfe;
+    buf_t s1 = buf_add((uint8_t *)&start, 1);
     buf_t s2 = buf_add(b->data, 1);
 
     if (!buf_cmp(s1, s2)) {
-      api.log.error("can't deserialize bytes");
+      printf("can't deserialize bytes");
     }
 
     buf_t len_ = buf_add(b->data + 1, 3);
@@ -51,7 +50,7 @@ buf_t deserialize_bytes(buf_t *b)
 		*b = buf_add(b->data + 4, b->size - 4);
     s = buf_add(b->data, len);
   } else {
-    api.log.error("can't deserialize bytes");
+    printf("can't deserialize bytes");
   }
 	
 	*b = buf_add(b->data + len, b->size - len);
@@ -80,7 +79,7 @@ static tl_deserialize_function *get_fun(unsigned int id){
 
 tl_t * tl_deserialize(buf_t *buf)
 {
-	ui32_t *id = (ui32_t *)(buf->data);
+	uint32_t *id = (uint32_t *)(buf->data);
 	if (!*id)
 		return NULL;
 
@@ -100,8 +99,8 @@ tl_t * tl_deserialize(buf_t *buf)
 }
 
 
-ui32_t id_from_tl_buf(buf_t tl_buf){
-	return *(ui32_t *)tl_buf.data;
+uint32_t id_from_tl_buf(buf_t tl_buf){
+	return *(uint32_t *)tl_buf.data;
 }
 
 mtp_message_t deserialize_mtp_message(buf_t *b){

@@ -37,6 +37,8 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 		void *on_err_data,
 		void (*on_err)(void *on_err_data, tl_t *tl, const char *err));
 
+int _tg_new_auth_key(tg_t *tg, void *on_err_data,
+		void (*on_err)(void *on_err_data, tl_t *tl, const char *err));
 /* all-in-one auth function */
 typedef enum {
 	TG_AUTH_ERROR,

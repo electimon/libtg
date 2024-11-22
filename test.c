@@ -4,6 +4,7 @@
 #include "mtx/include/api.h"
 #include "mtx/include/buf.h"
 #include "mtx/include/types.h"
+#include "tl/buf.h"
 #include "tl/deserialize.h"
 #include "tl/id.h"
 #include <stdbool.h>
@@ -14,6 +15,8 @@
 #include <time.h>
 
 #include "api_id.h"
+#include "tl/tl.h"
+#include "tl/net.h"
 
 
 char * callback(
@@ -120,7 +123,7 @@ static int md_callback(
 	return 0;
 }
 
-int main(int argc, char *argv[])
+int main_ss(int argc, char *argv[])
 {
 	int apiId = 0;
 	char *apiHash = NULL;
@@ -139,5 +142,26 @@ int main(int argc, char *argv[])
 			NULL, md_callback);
 
 	tg_close(tg);
+	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	printf("TGTEST\n");
+	int apiId = 0;
+	char *apiHash = NULL;
+
+	SETUP_API_ID(apiId)
+	SETUP_API_HASH(apiHash)
+	
+	tg_t *tg = tg_new(
+			"test.db", 
+			apiId, 
+			apiHash);
+
+	tl_net_open(_ip, _port);
+
+	_tg_new_auth_key(tg, NULL, on_err);
+	//api.app.open();
 	return 0;
 }

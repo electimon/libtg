@@ -10,6 +10,10 @@ tg_strerr(tl_t *tl)
 	char *str = NULL;
 
 	switch (tl->_id) {
+		case 0xfffffe6c:
+			str = strdup("404_ERROR");
+			break;
+
 		case id_rpc_error:
 			{
 				tl_rpc_error_t *err = 

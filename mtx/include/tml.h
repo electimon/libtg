@@ -11,7 +11,6 @@
 
 #include "macro.h"
 #include "tgt.h"
-#include "types.h"
 
 typedef struct method_req_pq_api_
 {
@@ -33,25 +32,13 @@ typedef struct method_set_client_DH_params_api_
 
 typedef struct method_auth_sendCode_api_
 {
-  METHOD(init, method_auth_sendCode_t, const char *)
-  METHOD(drive, ctor_auth_SentCode_t, method_auth_sendCode_t)
+  METHOD(init, method_auth_sendCode_t)
+  METHOD(drive, method_auth_sendCode_t, method_auth_sendCode_t)
 } method_auth_sendCode_api_t;
-
-typedef struct method_auth_resendCode_api_
-{
-  METHOD(init, method_auth_resendCode_t, const char *)
-  METHOD(drive, ctor_auth_SentCode_t, method_auth_resendCode_t)
-} method_auth_resendCode_api_t;
-
-typedef struct method_auth_singIn_api_
-{
-  METHOD(init, method_auth_singIn_t, const char *, const char *)
-  METHOD(drive, ctor_auth_SentCode_t, method_auth_singIn_t)
-} method_auth_singIn_api_t;
 
 typedef struct method_msgs_ack_api_
 {
-  METHOD(init, method_msgs_ack_t, buf_t)
+  METHOD(init, method_msgs_ack_t, buf_t_)
   METHOD(drive, method_msgs_ack_t, method_msgs_ack_t)
 } method_msgs_ack_api_t;
 
@@ -64,32 +51,20 @@ typedef struct ctor_method_ping_api_
 typedef struct ctor_P_Q_inner_data_api_
 {
   METHOD(init, ctor_P_Q_inner_data_t, method_req_pq_t, method_req_DH_params_t)
-  METHOD(drive, buf_t, ctor_P_Q_inner_data_t)
+  METHOD(drive, buf_t_, ctor_P_Q_inner_data_t)
 } ctor_P_Q_inner_data_api_t;
 
 typedef struct ctor_Server_DH_inner_data_api_
 {
   METHOD(init, ctor_Server_DH_inner_data_t, method_req_pq_t, method_req_DH_params_t)
-  METHOD(drive, ctor_Server_DH_inner_data_t, buf_t)
+  METHOD(drive, ctor_Server_DH_inner_data_t, buf_t_)
 } ctor_Server_DH_inner_data_api_t;
 
 typedef struct ctor_Client_DH_Inner_Data_api_
 {
   METHOD(init, ctor_Client_DH_Inner_Data_t, method_req_pq_t, ctor_Server_DH_inner_data_t)
-  METHOD(drive, buf_t, ctor_Client_DH_Inner_Data_t)
+  METHOD(drive, buf_t_, ctor_Client_DH_Inner_Data_t)
 } ctor_Client_DH_Inner_Data_api_t;
-
-typedef struct method_initConnection_api_
-{
-  METHOD(init, method_initConnection_t, buf_t);
-  METHOD(drive, abstract_t, method_initConnection_t)
-} method_initConnection_api_t;
-
-typedef struct method_invokeWithLayer_api_
-{
-  METHOD(init, method_invokeWithLayer_t, int, buf_t);
-  METHOD(drive, abstract_t, method_invokeWithLayer_t)
-} method_invokeWithLayer_api_t;
 
 typedef struct methods_
 {
@@ -98,11 +73,7 @@ typedef struct methods_
   method_set_client_DH_params_api_t   set_client_DH_params;
   ctor_method_ping_api_t              ping;
   method_auth_sendCode_api_t          auth_sendCode;
-  method_auth_resendCode_api_t        auth_resendCode;
-  method_auth_singIn_api_t            auth_singIn;
   method_msgs_ack_api_t               msgs_ack;
-	method_initConnection_api_t         initConnection;
-	method_invokeWithLayer_api_t        invokeWithLayer;
 } methods_t;
 
 typedef struct constructors_

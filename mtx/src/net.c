@@ -10,17 +10,16 @@
 #include "../include/net.h"
 #include "../include/buf.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include "stdlib.h"
+#include <stdio.h>
+#include <strings.h>
 
 #ifdef __GNUC__
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
-#include <strings.h>
 
 net_t net_open(const _string_t ip, ui32_t port)
 {
@@ -84,10 +83,6 @@ process_error:
 
     shared_rc.net.sockfd = net.sockfd;
 
-		// send intermediate protocol
-		char init[] = {0xee, 0xee, 0xee, 0xee};
-		send(net.sockfd, init, 4, 0);
-
     return net;
 }
 
@@ -96,52 +91,29 @@ void net_close(net_t net)
   close(net.sockfd);
 }
 
-void net_send(const buf_t buf)
+void net_send(const buf_t_ buf)
 {
-	printf("net send...\n");
-	buf_dump(buf);
   net_t net = shared_rc_get_net();
-
   i32_t n = (i32_t)send(net.sockfd, buf.data, buf.size, 0);
 
   if (n < 0) {
     api.log.error("ERROR writing to socket");
   }
-	printf("done\n");
 }
 
-buf_t net_receive()
+buf_t_ net_receive()
 {
-	printf("net receive...\n");
-	net_t net = shared_rc_get_net();
-	buf_t buf;
-	buf_init(&buf);
-	unsigned long LEN = max_buf_size;
-	buf_t b;
-	b.size = LEN;	
-	do
-	{		
-			buf_init(&b);
-			b.size = recv(net.sockfd,
-				 	b.data, LEN, 0);
-			if (b.size == 0)
-			{
-				printf("received nothing\n");
-			}
-			else if (b.size > 0)
-			{
-				buf = buf_cat(buf, b);
-				printf("received %d bytes\n", b.size);
-			}
-			else /* < 0 */
-			{
-				fprintf(stderr, "socket error\n");
-			}
-			free(b.data);
-	} while (b.size == LEN);
+  buf_t_ buf;
+	/*buf_init(&buf);*/
+  net_t net = shared_rc_get_net();
+  i32_t n = (i32_t)recv(net.sockfd, buf.data, max_buf_size, 0);
 
-	printf("net receive ... done\n");
-	buf_dump(buf);
+  if (n < 0) {
+    api.log.error("ERROR reading from socket");
+  }
+
+  buf.size = n;
+
   return buf;
 }
 
@@ -150,7 +122,7 @@ buf_t net_receive()
 #include <winsock.h>
 
 SOCKET s;
-net_t net_open(const _string_t ip, ui32_t port)
+net_t net_open(const string_t ip, ui32_t port)
 {
   net_t n = {};
   WSADATA wsa;
@@ -180,16 +152,16 @@ void net_close(const net_t net)
   closesocket(s);
 }
 
-void net_send(const buf_t buf)
+void net_send(const buf_t_ buf)
 {
   if (send(s , (const char *)buf.data , buf.size , 0) < 0) {
     //puts("Send failed");
   }
 }
 
-buf_t net_receive()
+buf_t_ net_receive()
 {
-  buf_t buf;
+  buf_t_ buf;
   i32_t n = (i32_t)recv(s, (char *)buf.data, max_buf_size, 0);
 
   if (n < 0) {
@@ -205,11 +177,11 @@ buf_t net_receive()
 #error Do not know which socket model we will use
 #endif
 
-buf_t net_drive(const buf_t buf, stk_mode_t m)
+buf_t_ net_drive(const buf_t_ buf, stk_mode_t m)
 {
   net_send(buf);
-  buf_t r = {};
-	buf_init(&r);
+  buf_t_ r = {};
+	/*buf_init(&r);*/
 
   switch (m) {
     case SEND_RECEIVE:

@@ -20,17 +20,17 @@ void reset_shared_rc()
   shared_rc.net.sockfd = 0;
 }
 
-buf_t shared_rc_get_key()
+buf_t_ shared_rc_get_key()
 {
   return shared_rc.key;
 }
 
-buf_t shared_rc_get_salt()
+buf_t_ shared_rc_get_salt()
 {
   return shared_rc.salt;
 }
 
-buf_t shared_rc_get_ssid()
+buf_t_ shared_rc_get_ssid()
 {
   return shared_rc.ssid;
 }
@@ -50,7 +50,7 @@ net_t shared_rc_get_net()
   return shared_rc.net;
 }
 
-buf_t shared_rc_get_last_msg_id()
+buf_t_ shared_rc_get_last_msg_id()
 {
   return shared_rc.last_msg_id;
 };
