@@ -16,6 +16,4 @@ typedef struct mtp_message_ {
 	buf_t body;
 } mtp_message_t; 
 
-tl_t * tl_send_query_(buf_t s, bool encrypt);
-buf_t tl_salt_new();
 #endif /* ifndef TL_H_ */

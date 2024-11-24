@@ -37,8 +37,6 @@ buf_t serialize_bytes(
 
 buf_t serialize_string(const char *string)
 {
-	//buf_t b = buf_add(string, strlen(string));
-	//return sel_serialize_string(b);
 	return serialize_bytes(
 			(uint8_t *)string, strlen(string));
 }

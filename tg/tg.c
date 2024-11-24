@@ -1,15 +1,13 @@
 #include "../libtg.h"
-#include "tg.h"
-#include "../mtx/include/api.h"
 #include "../tl/alloc.h"
-#include "../mtx/include/net.h"
-#include "../mtx/include/srl.h"
-#include "../mtx/include/app.h"
+#include "tg.h"
+#include "../transport/net.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 tg_t *tg_new(const char *database_path,
-		int apiId, const char *apiHash)
+		int apiId, const char *apiHash, const char *pem)
 {
 	if (!database_path)
 		return NULL;
@@ -28,6 +26,14 @@ tg_t *tg_new(const char *database_path,
 	tg->apiId = apiId;
 	strncpy(tg->apiHash, apiHash, 33);
 
+	// set public_key
+	tg->pubkey = pem;
+
+	// set server address
+	strncpy(tg->ip, SERVER_IP,
+			sizeof(tg->ip) - 1);
+	tg->port = SERVER_PORT;
+
 	return tg;
 }
 
@@ -35,13 +41,49 @@ void tg_close(tg_t *tg)
 {
 	// close Telegram
 	
-	// close mtproto
-  net_t n = shared_rc_get_net();
-  api.net.close(n);
+	// close network
+	tg_net_close(tg);
 	
 	// close database
 	sqlite3_close(tg->db);
 	
 	// free
 	free(tg);
+}
+
+void tg_set_on_error(tg_t *tg,
+		void *on_err_data,
+		void (*on_err)(void *on_err_data, tl_t *tl, const char *err))
+{
+	if (tg){
+		tg->on_err = on_err;
+		tg->on_err_data = on_err_data;
+	}
+}
+
+void tg_set_on_log(tg_t *tg,
+		void *on_log_data,
+		void (*on_log)(void *on_log_data, const char *msg))
+{
+	if (tg){
+		tg->on_log = on_log;
+		tg->on_log_data = on_log_data;
+	}
+}
+
+void tg_set_server_address(tg_t *tg, const char *ip, int port)
+{
+	if (tg){
+		strncpy(tg->ip, ip,
+			 	sizeof(tg->ip) - 1);
+		tg->port = port;
+	}
+}
+
+void tg_add_mgsid(tg_t *tg, uint64_t msgid){
+	memmove(
+			&(tg->msgids[1]), 
+			tg->msgids, 
+			sizeof(uint64_t)*19);
+	tg->msgids[0] = msgid;
 }

@@ -16,9 +16,8 @@
 
 #include "api_id.h"
 #include "tl/tl.h"
-#include "tl/net.h"
 
-
+/*
 char * callback(
 			void *userdata,
 			TG_AUTH auth,
@@ -97,8 +96,8 @@ static int md_callback(
 	printf("dialogs: %d\n", dialogs->dialogs_len);
 	printf("messages: %d\n", dialogs->messages_len);
 	printf("chats: %d\n", dialogs->chats_len);
-	/*printf("MSG: %s\n", STRING_T_TO_STR(m->message_));*/
-	/*printf("message len: %d\n", m->message_);*/
+	//printf("MSG: %s\n", STRING_T_TO_STR(m->message_));
+	//printf("message len: %d\n", m->message_);
 	int i;
 	for (i = 0; i < dialogs->messages_len; ++i) {
 		tl_message_t *m = dialogs->messages_[i];
@@ -123,18 +122,15 @@ static int md_callback(
 	return 0;
 }
 
-int main_ss(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-	int apiId = 0;
-	char *apiHash = NULL;
-
-	SETUP_API_ID(apiId)
-	SETUP_API_HASH(apiHash)
+	int SETUP_API_ID(apiId)
+	char * SETUP_API_HASH(apiHash)
 	
 	tg_t *tg = tg_new(
 			"test.db", 
 			apiId, 
-			apiHash);
+			apiHash, "pub.pkcs");
 	
 	tg_connect(tg, NULL, callback);
 
@@ -143,6 +139,15 @@ int main_ss(int argc, char *argv[])
 
 	tg_close(tg);
 	return 0;
+}
+*/
+
+void on_err(void *d, tl_t *tl, const char *err){
+	printf("!!!ERR: %s\n", err);
+}
+
+void on_log(void *d, const char *msg){
+	printf("%s\n", msg);
 }
 
 int main(int argc, char *argv[])
@@ -157,11 +162,12 @@ int main(int argc, char *argv[])
 	tg_t *tg = tg_new(
 			"test.db", 
 			apiId, 
-			apiHash);
+			apiHash, 
+			"pub.pkcs");
 
-	tl_net_open(_ip, _port);
+	tg_set_on_error(tg, NULL, on_err);
+	tg_set_on_log  (tg, NULL, on_log);
 
-	_tg_new_auth_key(tg, NULL, on_err);
-	//api.app.open();
+	tg_new_auth_key(tg);
 	return 0;
 }

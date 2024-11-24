@@ -2,8 +2,6 @@
 #include "strtok_foreach.h"
 #include <stdio.h>
 #include <string.h>
-#include "../mtx/include/net.h"
-#include <byteswap.h>
 
 struct tg_connect_t {
 	void *userdata;
@@ -47,9 +45,15 @@ int tg_connect(
 	struct tg_connect_t t = 
 	{userdata, callback, 0};
 
+	// save previous error handler
+	/*void  *_prev_on_err_data = tg->on_err_data;*/
+	/*void (*_prev_on_err_call)= tg->on_err;*/
+
+	tg_set_on_error(tg, &t, on_err);
+
 	// check if authorized
 	tl_user_t *user = 
-		tg_is_authorized(tg, NULL, NULL);
+		tg_is_authorized(tg);
 	if (user){
 		_TG_CB(TG_AUTH_SUCCESS, user, "authorized!");
 		return 0;
@@ -70,8 +74,7 @@ int tg_connect(
 
 	// send authorization code
 	tl_auth_sentCode_t *sentCode = 
-		tg_auth_sendCode(tg, phone_number, 
-				&t, on_err);
+		tg_auth_sendCode(tg, phone_number);
 
 	// check if need password
 	if (strcmp(t.error, "SESSION_PASSWORD_NEEDED") == 0)
@@ -104,8 +107,7 @@ int tg_connect(
 	_TG_CB(TG_AUTH_INFO, sentCode, "phone code: %s", phone_code);
 
 	user = 
-		tg_auth_signIn(tg, sentCode, phone_number, phone_code, 
-				&t, on_err);
+		tg_auth_signIn(tg, sentCode, phone_number, phone_code);
 	if (user){
 		// authorized!
 		_TG_CB(TG_AUTH_SUCCESS, user, "authorized!");

@@ -1,5 +1,5 @@
 #include "tg.h"
-#include "str.h"
+#include "../tl/str.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +9,7 @@ static int tg_sqlite3_open(tg_t *tg)
 	int err = sqlite3_open(
 			tg->database_path, &tg->db);
 	if (err){
-		api.log.error((char *)sqlite3_errmsg(tg->db));
+		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(tg->db));
 		return 1;
 	}
 
@@ -50,7 +50,6 @@ static int tg_sqlite3_exec(
 	if (tg_sqlite3_open(tg))
 		return 1;
 
-	/*printf("%s\n", sql);*/
 	char *errmsg = NULL;
 
 	int res = 
@@ -80,7 +79,7 @@ int database_init(tg_t *tg, const char *database_path)
 			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 
 			NULL);
 	if (err){
-		api.log.error((char *)sqlite3_errmsg(tg->db));
+		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(tg->db));
 		return 1;
 	}
 
@@ -95,7 +94,7 @@ buf_t auth_key_from_database(tg_t *tg)
 	memset(&auth_key, 0, sizeof(buf_t));
 	tg_sqlite3_for_each(tg, sql, stmt){
 		auth_key = buf_add(
-			(ui8_t*)sqlite3_column_blob(stmt, 0),
+			(uint8_t*)sqlite3_column_blob(stmt, 0),
 			sqlite3_column_bytes(stmt, 0));
 	}
 	

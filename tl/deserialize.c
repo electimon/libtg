@@ -1,3 +1,4 @@
+#include "buf.h"
 #include "tl.h"
 #include "names.h"
 #include "deserialize_table.h"
@@ -16,6 +17,12 @@ uint64_t deserialize_ui64(buf_t *b){
 	c = buf_get_ui64(*b);
 	*b = buf_add(b->data + 8, b->size - 8);
 	return c;
+}
+
+buf_t deserialize_buf(buf_t *b, int size){
+	buf_t ret = buf_add(b->data, size);
+	*b = buf_add(b->data + size, b->size - size);
+	return ret;
 }
 
 buf_t deserialize_bytes(buf_t *b)

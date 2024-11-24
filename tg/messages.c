@@ -29,7 +29,7 @@ void tg_get_dialogs(tg_t *tg, int off_msg_id, int limit,
 
 		/*buf_dump(getDialogs);*/
 
-		tl_t *tl = tl_send_query(getDialogs);
+		tl_t *tl = tg_send_query(tg, getDialogs);
 
 		if (tl && tl->_id == id_messages_dialogsSlice)
 		{

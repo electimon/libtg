@@ -2,7 +2,7 @@
  * File              : buf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 22.11.2024
+ * Last Modified Date: 23.11.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef TL_BUF_H
@@ -15,7 +15,7 @@ typedef	struct buf_ {
 	unsigned char * data;
 	int   size;
 	int   asize;
-	void     *aptr;
+	void  *aptr;
 } buf_t;
 
 extern void     buf_init(buf_t *buf);
@@ -25,7 +25,9 @@ extern buf_t    buf_cat(buf_t dest, buf_t src);
 extern buf_t    buf_cat_ui32(buf_t dest, uint32_t);
 extern buf_t    buf_cat_ui64(buf_t dest, uint64_t);
 extern buf_t    buf_cat_data(buf_t dest, uint8_t *data, uint32_t len);
+extern buf_t    buf_cat_rand(buf_t dest, uint32_t);
 extern void     buf_dump(buf_t);
+extern char *   buf_sdump(buf_t);
 extern uint8_t  buf_cmp(buf_t, buf_t);
 extern buf_t    buf_swap(buf_t);
 extern buf_t    buf_add_ui32(uint32_t);

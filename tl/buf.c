@@ -10,34 +10,41 @@
 #include <stdlib.h>
 #include <time.h>
 #include "buf.h"
+#include "str.h"
 
-void log_hex(unsigned char * a, uint32_t s)
+char * log_hex(unsigned char * a, uint32_t s)
 {
+	struct str str;
+	str_init(&str);
+
   int m = 16;
   int b = 8;
   int f = 0;
 
-  fprintf(stderr, "size : %d\n", s);
+  str_appendf(&str, "size : %d\n", s);
 
   for (uint32_t i = 0; i < s; i++) {
     if (!i) {
-      fprintf(stderr, "%.4x | ", i), f = 1;
+      str_appendf(&str, "%.4x | ", i), f = 1;
     }
 
     if (!(i % m) && i) {
-      fprintf(stderr, "\n%.4x | ", i), f = 1;
+      str_appendf(&str, "\n%.4x | ", i), f = 1;
     }
 
     if (!(i % b) && i && !f) {
-      fprintf(stderr, " ");
+      str_appendf(&str, " ");
     }
 
-    fprintf(stderr, "%.2x ", a[i]);
+    str_appendf(&str, "%.2x ", a[i]);
     f = 0;
   }
 
-  fprintf(stderr, "\n");
+  /*str_appendf(&str, "\n");*/
+
+	return str.str;
 }
+
 void buf_init(buf_t *buf)
 {
 	buf->aptr = malloc(BUFSIZ + 1); 
@@ -99,13 +106,14 @@ buf_t buf_cat(buf_t dest, buf_t src)
 
 void buf_dump(buf_t b)
 {
-  if (b.size > b.asize) {
-    printf("Error: buf_dump: max size reached\n");
-  } else if (!b.size) {
-    printf("buffer is empty\n");
-  }
+  char *str = log_hex(b.data, b.size);
+	printf("%s\n", str);
+	free(str);
+}
 
-  log_hex(b.data, b.size);
+char * buf_sdump(buf_t b)
+{
+  return log_hex(b.data, b.size);
 }
 
 uint8_t buf_cmp(buf_t a, buf_t b)
@@ -212,6 +220,14 @@ buf_t buf_cat_ui64(buf_t dest, uint64_t i){
 
 buf_t buf_cat_data(buf_t dest, uint8_t *data, uint32_t len){
 	buf_t src = buf_add(data, len);
+	buf_t buf = buf_cat(dest, src);
+	free(src.aptr);
+	return buf; 
+}
+
+buf_t buf_cat_rand(buf_t dest, uint32_t s)
+{
+	buf_t src = buf_rand(s);
 	buf_t buf = buf_cat(dest, src);
 	free(src.aptr);
 	return buf; 
