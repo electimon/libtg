@@ -12,6 +12,12 @@ int tg_new_auth_key(tg_t *tg)
 	memset(&tg->key, 0, sizeof(buf_t));
 	if (!tg->sockfd)
 		tg_net_open(tg);
+
+	// get fingerprint
+	tg->fingerprint = tg_cry_rsa_fpt(tg);
+
+	ON_LOG(tg, "%s: public RSA fingerprint: %.16lx", 
+			__func__, tg->fingerprint);
 	
  /* Client sends query to server
 	* req_pq_multi#be7e8ef1 nonce:int128 = ResPQ;
@@ -60,7 +66,25 @@ int tg_new_auth_key(tg_t *tg)
 	if (tl && tl->_id == id_resPQ){
 		tl_resPQ_t resPQ = *(tl_resPQ_t *)tl;
 		// handle fingerprints
-		// //
+		int i, nfpt = -1; // fingerprint number
+		for (i = 0; 
+				i < resPQ.server_public_key_fingerprints_len;
+			 	++i) 
+		{
+			ON_LOG(tg, "%s: server fingerprint %d: %.16lx", 
+					__func__, i, resPQ.server_public_key_fingerprints_[i]);
+			if (resPQ.server_public_key_fingerprints_[i] ==
+					tg->fingerprint)
+				{
+					nfpt = i;	
+					break;
+				}
+		}
+		if (nfpt == -1){
+			ON_ERR(tg, NULL, 
+					"%s: no server RSA public key matching", __func__);
+			return 1;
+		}
 
 		uint64_t pq_ = buf_get_ui64(buf_swap(resPQ.pq_));
 		ON_LOG(tg, "%s: pq: %ld", __func__, pq_);
@@ -231,7 +255,7 @@ generation_new_random_temp_key:;
 					resPQ.nonce_,
 					 resPQ.server_nonce_, 
 					&p, &q, 
-					resPQ.server_public_key_fingerprints_[0], 
+					resPQ.server_public_key_fingerprints_[nfpt], 
 					&encrypted_data);
 
 		tl = tg_send_query_(tg, req_DH_params, false);

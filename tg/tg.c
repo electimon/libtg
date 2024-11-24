@@ -2,6 +2,7 @@
 #include "../tl/alloc.h"
 #include "tg.h"
 #include "../transport/net.h"
+#include "../crypto/cry.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>

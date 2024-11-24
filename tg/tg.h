@@ -23,6 +23,7 @@ struct tg_ {
 	buf_t key;
 	buf_t salt;
 	buf_t ssid;
+	uint64_t fingerprint;
 	uint64_t msgids[20]; 
 };
 
