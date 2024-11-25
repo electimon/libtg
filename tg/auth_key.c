@@ -138,7 +138,7 @@ int tg_new_auth_key(tg_t *tg)
 					new_nonce, 
 					0002);
 
-		ON_LOG_BUF(tg, data,"%s: p_q_inner_data_dc: ", __func__);
+		//ON_LOG_BUF(tg, data,"%s: p_q_inner_data_dc: ", __func__);
 
 	 /* encrypted_data := RSA_PAD (data, server_public_key),
 		* where RSA_PAD is a version of RSA with a variant of
@@ -166,10 +166,10 @@ int tg_new_auth_key(tg_t *tg)
 		 *  the byte order.*/
 		buf_t data_pad_reversed = buf_swap(data_with_padding);
 
-		int c = 0;
+		int tryes = 0;
 generation_new_random_temp_key:;
 		/* a random 32-byte temp_key is generated */
-		buf_t temp_key = buf_rand(32*8);
+		buf_t temp_key = tg_cry_rnd(32*8);
 
 		/* data_with_hash := data_pad_reversed + SHA256(temp_key
 		 * + data_with_padding); -- after this assignment,
@@ -208,8 +208,8 @@ generation_new_random_temp_key:;
 			 return 1;
 		 }
 
-		 ON_LOG_BUF(tg, key_aes_encrypted, 
-				 "%s: key_aes_encrypted: ", __func__);
+		 //ON_LOG_BUF(tg, key_aes_encrypted, 
+				 //"%s: key_aes_encrypted: ", __func__);
 
 		/* The value of key_aes_encrypted is compared with the
 		 * RSA-modulus of server_pubkey as a big-endian 2048-bit
@@ -224,7 +224,7 @@ generation_new_random_temp_key:;
 					"%s: key_aes_encrypted is greater than or "
 					"equal to the RSA-modulus of server_pubkey. "
 					"generate new temp_key", __func__);
-			if (c++ > 2){
+			if (tryes++ > 100){
 				ON_ERR(tg, NULL, "%s: can't generate temp_key", __func__);
 				return 1;
 			}

@@ -2,7 +2,7 @@
  * File              : cmn.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 24.11.2024
- * Last Modified Date: 24.11.2024
+ * Last Modified Date: 25.11.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "cmn.h"

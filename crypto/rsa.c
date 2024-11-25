@@ -37,6 +37,14 @@ static RSA *read_pubkey(tg_t *tg)
 }
 
 uint64_t tg_cry_rsa_fpt(tg_t *tg){
+ /* key fingerprint (64 lower-order bits of SHA1
+	* (server_public_key); the public key is represented as a
+	* bare type rsa_public_key n:string e:string =
+	* RSAPublicKey, where, as usual, n and e are numbers in
+	* big endian format serialized as strings of bytes,
+	* following
+	* which SHA1 is computed) received by the server. */
+
 	RSA *rsa = read_pubkey(tg);
 	if (!rsa)
 		return 1;
