@@ -10,8 +10,6 @@
 int tg_new_auth_key(tg_t *tg)
 {
 	memset(&tg->key, 0, sizeof(buf_t));
-	if (!tg->sockfd)
-		tg_net_open(tg);
 
 	// get fingerprint
 	tg->fingerprint = tg_cry_rsa_fpt(tg);

@@ -474,6 +474,9 @@ tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 
 tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 {
+	if (!tg->sockfd)
+		tg_net_open(tg);
+	
 	tg->seqn++;
 	
 	buf_t h = header(tg, query, enc);
