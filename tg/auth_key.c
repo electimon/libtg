@@ -156,13 +156,19 @@ int tg_new_auth_key(tg_t *tg)
 		}
 		buf_t random_padding_bytes = 
 			buf_rand(192*8 - data.size);
-		buf_t data_with_padding = 
+		buf_t data_with_padding;
+		buf_init(&data_with_padding);
+		data_with_padding = 
+			buf_cat(data_with_padding, data);
+		data_with_padding = 
 			buf_cat(data, random_padding_bytes);
 
 		/* data_pad_reversed := BYTE_REVERSE(data_with_padding);
 		 * -- is obtained from data_with_padding by reversing
 		 *  the byte order.*/
-		buf_t data_pad_reversed = buf_swap(data_with_padding);
+		buf_t data_pad_reversed = 
+			buf_add(data_with_padding.data, data_with_padding.size);
+		buf_swap(data_with_padding);
 
 		int tryes = 0;
 generation_new_random_temp_key:;
@@ -172,12 +178,20 @@ generation_new_random_temp_key:;
 		/* data_with_hash := data_pad_reversed + SHA256(temp_key
 		 * + data_with_padding); -- after this assignment,
 		 * data_with_hash is exactly 224 bytes long. */
-		buf_t temp_key_data_with_padding =
-			buf_cat(temp_key, data_with_padding);
+		buf_t temp_key_data_with_padding;
+		buf_init(&temp_key_data_with_padding);
+		temp_key_data_with_padding =
+			buf_cat(temp_key_data_with_padding, temp_key);
+		temp_key_data_with_padding =
+			buf_cat(temp_key_data_with_padding, data_with_padding);
 		buf_t temp_key_data_with_padding_hash = 
 			tg_hsh_sha256(temp_key_data_with_padding);
-		buf_t data_with_hash = 
-			buf_cat(data_pad_reversed, temp_key_data_with_padding_hash);
+		buf_t data_with_hash;
+		buf_init(&data_with_hash);
+		data_with_hash = 
+			buf_cat(data_with_hash, data_pad_reversed);
+		data_with_hash = 
+			buf_cat(data_with_hash, temp_key_data_with_padding_hash);
 		if (data_with_hash.size != 224*8){
 			ON_ERR(tg, NULL, 
 					"%s: data_with_hash len is longer 244 bytes: %d",
