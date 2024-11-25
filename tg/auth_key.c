@@ -3,6 +3,7 @@
 #include "../crypto/cmn.h"
 #include "../crypto/cry.h"
 #include "../crypto/hsh.h"
+#include "../tl/serialize.h"
 #include <string.h>
 
 #define SWAP(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
@@ -156,42 +157,29 @@ int tg_new_auth_key(tg_t *tg)
 		}
 		buf_t random_padding_bytes = 
 			buf_rand(192*8 - data.size);
-		buf_t data_with_padding;
-		buf_init(&data_with_padding);
-		data_with_padding = 
-			buf_cat(data_with_padding, data);
-		data_with_padding = 
-			buf_cat(data, random_padding_bytes);
+		buf_t data_with_padding = 
+			buf_add_bufs(2, data, random_padding_bytes);
 
 		/* data_pad_reversed := BYTE_REVERSE(data_with_padding);
 		 * -- is obtained from data_with_padding by reversing
 		 *  the byte order.*/
 		buf_t data_pad_reversed = 
-			buf_add(data_with_padding.data, data_with_padding.size);
-		buf_swap(data_with_padding);
+			buf_swap(buf_add_buf(data_with_padding));
 
 		int tryes = 0;
 generation_new_random_temp_key:;
 		/* a random 32-byte temp_key is generated */
-		buf_t temp_key = tg_cry_rnd(32*8);
+		buf_t temp_key = buf_rand(32*8);
 
 		/* data_with_hash := data_pad_reversed + SHA256(temp_key
 		 * + data_with_padding); -- after this assignment,
 		 * data_with_hash is exactly 224 bytes long. */
-		buf_t temp_key_data_with_padding;
-		buf_init(&temp_key_data_with_padding);
-		temp_key_data_with_padding =
-			buf_cat(temp_key_data_with_padding, temp_key);
-		temp_key_data_with_padding =
-			buf_cat(temp_key_data_with_padding, data_with_padding);
-		buf_t temp_key_data_with_padding_hash = 
-			tg_hsh_sha256(temp_key_data_with_padding);
-		buf_t data_with_hash;
-		buf_init(&data_with_hash);
-		data_with_hash = 
-			buf_cat(data_with_hash, data_pad_reversed);
-		data_with_hash = 
-			buf_cat(data_with_hash, temp_key_data_with_padding_hash);
+		buf_t temp_key_data_with_padding = 
+			buf_add_bufs(2, temp_key, data_with_padding);
+		buf_t data_with_hash = 
+			buf_add_bufs(2, 
+					data_pad_reversed, 
+					tg_hsh_sha256(temp_key_data_with_padding));
 		if (data_with_hash.size != 224*8){
 			ON_ERR(tg, NULL, 
 					"%s: data_with_hash len is longer 244 bytes: %d",
@@ -212,7 +200,7 @@ generation_new_random_temp_key:;
 		/* key_aes_encrypted := temp_key_xor + aes_encrypted; --
 		 * exactly 256 bytes (2048 bits) long */
 		buf_t key_aes_encrypted = 
-			buf_cat(temp_key_xor, aes_encrypted);
+			buf_add_bufs(2, temp_key_xor, aes_encrypted);
 		 if (key_aes_encrypted.size != 256*8){
 			ON_ERR(tg, NULL, 
 					"%s: key_aes_encrypted len is longer 256 bytes: %d",
@@ -296,4 +284,116 @@ generation_new_random_temp_key:;
 	free(err);
 
 	return 1;
+}
+
+int tg_new_auth_key2(tg_t *tg)
+{
+	memset(&tg->key, 0, sizeof(buf_t));
+
+	// get fingerprint
+	tg->fingerprint = tg_cry_rsa_fpt(tg);
+
+	ON_LOG(tg, "%s: public RSA fingerprint: %.16lx", 
+			__func__, tg->fingerprint);
+	
+	tl_t *tl = NULL;
+	buf_t nonce = buf_rand(16);
+	buf_t req_pq = 
+		buf_add_bufs(2, 
+				buf_add_ui32(0x60469778),
+				nonce);
+	tl = tg_send_query_(tg, req_pq, false);
+
+	if (tl && tl->_id == id_resPQ){
+		tl_resPQ_t resPQ = *(tl_resPQ_t *)tl;
+	
+		// handle fingerprints
+		int i, nfpt = -1; // fingerprint number
+		for (i = 0; 
+				i < resPQ.server_public_key_fingerprints_len;
+			 	++i) 
+		{
+			ON_LOG(tg, "%s: server fingerprint %d: %.16lx", 
+					__func__, i, resPQ.server_public_key_fingerprints_[i]);
+			if (resPQ.server_public_key_fingerprints_[i] ==
+					tg->fingerprint)
+				{
+					nfpt = i;	
+					break;
+				}
+		}
+		if (nfpt == -1){
+			ON_ERR(tg, NULL, 
+					"%s: no server RSA public key matching", __func__);
+			return 1;
+		}
+		buf_t fingerprint = 
+			buf_add_ui64(resPQ.server_public_key_fingerprints_[nfpt]);
+
+		uint64_t pq = buf_get_ui64(buf_swap(resPQ.pq_));
+		ON_LOG(tg, "%s: pq: %ld", __func__, pq);
+		buf_t pq_ = buf_swap(buf_add_ui64(pq));
+
+	 /* Client decomposes pq into prime factors such that
+		* p < q. */
+		uint32_t p_, q_;
+		tg_cmn_fact(pq, &p_, &q_);
+		if (!(p_ < q_)) {
+			SWAP(p_, q_);
+		}
+		ON_LOG(tg, "%s: p: %d, q: %d", __func__, p_, q_);
+
+		buf_t p  = buf_swap(buf_add_ui32(p_));
+		buf_t q  = buf_swap(buf_add_ui32(q_));
+
+		buf_t rand_array = buf_rand(32);
+		rand_array.size = 32;
+
+		// inner data
+		buf_t p_q_inner_data = 
+			buf_add_bufs(7,
+					buf_add_ui32(0x83c95aec),
+					serialize_bytes(resPQ.pq_.data, resPQ.pq_.size),
+					serialize_bytes(p.data, p.size),
+					serialize_bytes(q.data, q.size),
+					nonce,
+					resPQ.server_nonce_,
+					rand_array);
+		ON_LOG_BUF(tg, p_q_inner_data, "%s: p_q_inner_data: ", __func__);
+		
+		// hash
+		buf_t h = tg_hsh_sha1(p_q_inner_data);
+
+		buf_t dwh = buf_add_bufs(2, h, p_q_inner_data);
+		buf_t pad = buf_rand(256);
+		pad.size = 255 - dwh.size;
+		dwh = buf_cat(dwh, pad);
+		ON_LOG_BUF(tg, dwh, "%s: dwh: ", __func__);
+		
+		buf_t encrypted_data = tg_cry_rsa_e(tg, dwh); 
+		ON_LOG_BUF(tg, encrypted_data, "%s: encrypted_data: ", __func__);
+
+		// req_DH_params
+		buf_t req_DH_params = 
+			buf_add_bufs(7,
+					buf_add_ui32(0xd712e4be),
+					nonce,
+					resPQ.server_nonce_,
+					serialize_bytes(p.data, p.size),
+					serialize_bytes(q.data, q.size),
+					fingerprint,
+					serialize_bytes(
+						encrypted_data.data, encrypted_data.size));
+		//ON_LOG_BUF(tg, req_DH_params, "%s: req_DH_params: ", __func__);
+
+		tl = tg_send_query_(tg, req_DH_params, false);
+	}
+	
+	// throw error
+	char *err = tg_strerr(tl); 
+	ON_ERR(tg, tl, "%s", err);
+	free(err);
+
+	return 1;
+
 }

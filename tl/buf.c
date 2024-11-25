@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Pavel Morozkin. All rights reserved.
 //
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -83,6 +84,26 @@ buf_t buf_add(uint8_t *data, uint32_t size)
   b.size = size;
 
   return b;
+}
+
+buf_t buf_add_buf(buf_t buf)
+{
+	return buf_add(buf.data, buf.size);
+}
+
+buf_t buf_add_bufs(int n, ...)
+{
+	buf_t buf;
+	buf_init(&buf);
+	va_list argv;
+	va_start(argv, n);
+	int i;
+	for (i = 0; i < n; ++i) {
+		buf_t arg = va_arg(argv, buf_t);
+		buf = buf_cat(buf, arg);
+	}
+	va_end(argv);
+	return buf;
 }
 
 buf_t buf_cat(buf_t dest, buf_t src)

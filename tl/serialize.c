@@ -46,3 +46,40 @@ static bool flag_is_set(int value, int flag)
 	int flagb = (1 << flag);
 	return (value & flagb) != flagb;
 }
+
+buf_t serialize_str(buf_t b)
+{
+  buf_t s;
+	buf_init(&s);
+  ui32_t size = b.size;
+
+  if (size <= 253) {
+    s = buf_add((ui8_t *)&size, 1);
+    s = buf_cat(s, b);
+    int pad = (4 - (s.size % 4)) % 4;
+    buf_t p;
+		buf_init(&p);
+    p.size = pad;
+    s = buf_cat(s, p);
+  } else if (size >= 254) {
+    ui8_t start = 0xfe;
+    s = buf_add((ui8_t *)&start, 1);
+    buf_t len = buf_add((ui8_t *)&size, 3);
+    s = buf_cat(s, len);
+    s = buf_cat(s, b);
+    int pad = (4 - (s.size % 4)) % 4;
+
+    if (pad) {
+      buf_t p;
+			buf_init(&p);
+      p.size = pad;
+      s = buf_cat(s, p);
+    }
+  } else {
+    api.log.error("can't serialize string");
+  }
+
+  return s;
+}
+
+

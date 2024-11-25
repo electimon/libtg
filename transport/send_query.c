@@ -10,6 +10,7 @@
 #include "../crypto/hsh.h"
 #include "../crypto/cry.h"
 #include "../transport/net.h"
+#include "../transport/crc.h"
 
 static void tg_my_clock_gettime(int clock_id, struct timespec * T)
 {
@@ -331,8 +332,24 @@ static buf_t transport(tg_t *tg, buf_t buf)
 	buf_init(&b);
 	
 	// intermediate header
-	b = buf_cat_ui32(b, buf.size);
-	b = buf_cat(b, buf);
+	//b = buf_cat_ui32(b, buf.size);
+	//b = buf_cat(b, buf);
+
+	// add size
+  uint32_t len_ = buf.size + 12;
+  uint8_t * len_ptr = (uint8_t *)&len_;
+  buf_t len = buf_add(len_ptr, sizeof(buf.size));
+  b = buf_cat(b, len);
+  // add seq
+  uint32_t seqn = tg->seqn;
+  buf_t seq = buf_add_ui32(seqn);
+  b = buf_cat(b, seq);
+  // add buf
+  b = buf_cat(b, buf);
+  // add crc
+  buf_t crc = crc_crc32(b);
+  b = buf_cat(b, crc);
+
 
 	ON_LOG_BUF(tg, b, "%s: ", __func__);
   return b;
@@ -349,12 +366,15 @@ static buf_t detransport(tg_t *tg, buf_t a)
   }
 
 	uint32_t len = deserialize_ui32(&a);
-	b = buf_cat(b, a);
-
-	if (a.size == 4 && buf_get_ui32(a) == 0xfffffe6c) {
+	
+	if (len == -404 || buf_get_ui32(a) == 0xfffffe6c) {
     ON_ERR(tg, NULL, "%s: 404", __func__);
+		b = buf_cat_ui32(b, 0xfffffe6c);
 		return b;
 	}
+	
+	//b = buf_cat(b, a);
+	b = buf_cat_data(b, a.data + 4, a.size - 4);
 
 	// check len
 	if (len != b.size) {

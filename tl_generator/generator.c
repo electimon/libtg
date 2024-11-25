@@ -434,7 +434,7 @@ int append_deserialize_table(
 				else if (strcmp(m->args[i].type, "string") == 0)
 				{
 					fputs(STR(buf, BLEN,
-					  "\t\tobj->%s_ = deserialize_bytes(buf);\n"
+					  "\t\tobj->%s_ = deserialize_str(buf);\n"
 					, m->args[i].name)
 					, g->deserialize_table_c);
 				}
@@ -446,18 +446,14 @@ int append_deserialize_table(
 				}
 				else if (strcmp(m->args[i].type, "int128") == 0){
 					fputs(STR(buf, BLEN,
-					  "\t\tbuf_init(&obj->%s_);\n"
-					  "\t\tint i; for (i=0; i<4; ++i)\n"
-					  "\t\t\tobj->%s_ = buf_cat(obj->%s_, buf_add_ui32(deserialize_ui32(buf)));\n"
-					, m->args[i].name, m->args[i].name, m->args[i].name)
+					  "\t\tobj->%s_ = deserialize_buf(buf, 16);\n"
+					, m->args[i].name)
 					, g->deserialize_table_c);
 				}
 				else if (strcmp(m->args[i].type, "int256") == 0){
 					fputs(STR(buf, BLEN,
-					  "\t\tbuf_init(&obj->%s_);\n"
-					  "\t\tint i; for (i=0; i<8; ++i)\n"
-					  "\t\t\tobj->%s_ = buf_cat(obj->%s_, buf_add_ui32(deserialize_ui32(buf)));\n"
-					, m->args[i].name, m->args[i].name, m->args[i].name)
+					  "\t\tobj->%s_ = deserialize_buf(buf, 32);\n"
+					, m->args[i].name)
 					, g->deserialize_table_c);
 				}
 				else if (
@@ -546,7 +542,7 @@ int append_deserialize_table(
 							"\t\t\tobj->%s_ = (buf_t *)MALLOC(obj->%s_len * sizeof(buf_t), return NULL);\n"
 							"\t\t\tint i;\n"
 							"\t\t\tfor(i=0; i<obj->%s_len; ++i){\n"
-							"\t\t\t\tobj->%s_[i] = deserialize_bytes(buf);\n"
+							"\t\t\t\tobj->%s_[i] = deserialize_str(buf);\n"
 							"\t\t\t}\n"
 						, m->args[i].name, m->args[i].name, m->args[i].name, m->args[i].name)
 						, g->deserialize_table_c);
@@ -1087,17 +1083,9 @@ int append_methods(
 			
 			fputs("\t{\n",g->methods_c);
 
-			/*fputs(*/
-					/*STR(buf, BLEN, */
-						/*"\t\tint i;\n"*/
-						/*"\t\tfor (i=0; i<4; ++i)\n" */
-						/*"\t\t\tbuf = buf_cat(buf, buf_add_ui32(%s_[i]));\n" */
-						/*,m->args[i].name), */
-					/*g->methods_c);*/
-			
 			fputs(
 						STR(buf, BLEN, 
-							"\t\t\tbuf = buf_cat(buf, %s_);\n", 
+							"\t\t\tbuf = buf_cat_data(buf, %s_.data, 16);\n", 
 							m->args[i].name), 
 						g->methods_c);
 
@@ -1119,17 +1107,9 @@ int append_methods(
 			
 			fputs("\t{\n",g->methods_c);
 
-			/*fputs(*/
-					/*STR(buf, BLEN, */
-						/*"\t\tint i;\n"*/
-						/*"\t\tfor (i=0; i<8; ++i)\n" */
-						/*"\t\t\tbuf = buf_cat(buf, buf_add_ui32(%s_[i]));\n" */
-						/*,m->args[i].name), */
-					/*g->methods_c);*/
-			
 			fputs(
 						STR(buf, BLEN, 
-							"\t\t\tbuf = buf_cat(buf, %s_);\n", 
+							"\t\t\tbuf = buf_cat_data(buf, %s_.data, 32);\n", 
 							m->args[i].name), 
 						g->methods_c);
 
@@ -1189,8 +1169,8 @@ int append_methods(
 
 			fputs(
 					STR(buf, BLEN, 
-						"\t\tbuf = buf_cat(buf, serialize_bytes(%s_.data, %s_.size));\n", 
-						m->args[i].name, m->args[i].name), 
+						"\t\tbuf = buf_cat(buf, serialize_str(%s_));\n", 
+						m->args[i].name), 
 					g->methods_c);
 
 			if (m->args[i].flagn)

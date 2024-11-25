@@ -38,6 +38,7 @@ tl_user_t * tg_is_authorized(tg_t *tg);
 
 /* return 0 if new key created */
 int tg_new_auth_key(tg_t *tg);
+int tg_new_auth_key2(tg_t *tg);
 
 /* send auth code to phone number and return sentCode 
  * tl object or thow error */

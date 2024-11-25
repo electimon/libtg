@@ -13,7 +13,9 @@ libtg_la_SOURCES = tg.c \
 									../crypto/aes.c \
 									../crypto/cmn.c \
 									../crypto/rnd.c \
+									../crypto/sha1.c \
 									../transport/send_query.c \
+									../transport/crc.c \
 									../transport/net.c
 
 libtg_la_LIBADD = ../tl/*.o -lsqlite3 -lcrypto -lz

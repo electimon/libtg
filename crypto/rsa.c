@@ -128,3 +128,68 @@ buf_t tg_cry_rsa_enc(tg_t *tg, buf_t buf)
 
 	return ret;
 }
+
+unsigned rsax(unsigned char * from, int from_len, unsigned char * to, int to_len, const BIGNUM * N, const BIGNUM * E)
+{
+  BIGNUM *x = BN_new();
+	BIGNUM *y = BN_new();
+  BN_CTX * BN_ctx;
+  BN_ctx = BN_CTX_new();
+  BN_bin2bn((unsigned char *) from, from_len, x);
+  BIO * wbio = NULL;
+  wbio = BIO_new(BIO_s_file());
+  BIO_set_fp(wbio, stdout, BIO_NOCLOSE);
+  //BN_print(wbio, &x);
+  //puts("");
+  //BN_print(wbio, N);
+  //puts("");
+  //BN_print(wbio, E);
+  assert(BN_mod_exp(y, x, E, N, BN_ctx)); // y = x^E % N
+  //BN_print(wbio, &y);
+  BIO_free(wbio);
+  unsigned y_len = BN_num_bytes(y); //printf("y_len: %d\n", y_len);
+  memset(to, 0x00, to_len);
+  BN_bn2bin(y, (unsigned char *) to);
+  BN_CTX_free(BN_ctx);
+  BN_free(x);
+  BN_free(y);
+
+  return y_len;
+}
+
+void rsa(tg_t *tg, unsigned char * from, size_t from_size, unsigned char * to, size_t to_size)
+{
+  assert(from_size == 255 || to_size == 256);
+  FILE * pub = NULL;
+  pub = fopen(tg->pubkey, "r");
+
+  if (pub == NULL) {
+    puts("PEM_read_RSAPublicKey returns NULL\n");
+  }
+
+  RSA * rsa = PEM_read_RSAPublicKey(pub, NULL, NULL, NULL);
+
+  if (!rsa) {
+    RSA_free(rsa);
+    puts("Can not read public key from file\n");
+  }
+
+#ifdef __APPLE__
+  rsax(from, (int)from_size, to, (int)to_size, rsa->n, rsa->e);
+#else
+  rsax(from, (int)from_size, to, (int)to_size, RSA_get0_n(rsa), RSA_get0_e(rsa));
+#endif
+  RSA_free(rsa);
+  fclose(pub);
+}
+
+buf_t tg_cry_rsa_e(tg_t *tg, buf_t b)
+{
+  buf_t r = {};
+	buf_init(&r);
+  r.size = 256;
+
+  rsa(tg, b.data, b.size, r.data, r.size);
+
+  return r;
+}

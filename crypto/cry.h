@@ -16,4 +16,5 @@ extern uint64_t tg_cry_rsa_fpt(tg_t *tg);
 extern buf_t    tg_cry_aes_e(buf_t b, buf_t key, buf_t iv);
 extern buf_t    tg_cry_aes_d(buf_t b, buf_t key, buf_t iv);
 extern buf_t    tg_cry_rnd(int);
+extern buf_t    tg_cry_rsa_e(tg_t *tg, buf_t b);
 #endif /* defined(TL_CRY_H) */
