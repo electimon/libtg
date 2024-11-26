@@ -17,7 +17,7 @@
 #include "api_id.h"
 #include "tl/tl.h"
 
-/*
+
 char * callback(
 			void *userdata,
 			TG_AUTH auth,
@@ -83,10 +83,10 @@ char * callback(
 	return NULL;
 }
 
-static void on_err(void *d, tl_t *tl, const char *err)
-{
-	printf("ERR: %s\n", err);
-}
+//static void on_err(void *d, tl_t *tl, const char *err)
+//{
+//	printf("ERR: %s\n", err);
+//}
 
 static int md_callback(
 		void *data, 
@@ -122,6 +122,10 @@ static int md_callback(
 	return 0;
 }
 
+void on_log(void *d, const char *msg){
+	printf("%s\n", msg);
+}
+
 int main(int argc, char *argv[])
 {
 	int SETUP_API_ID(apiId)
@@ -131,8 +135,10 @@ int main(int argc, char *argv[])
 			"test.db", 
 			apiId, 
 			apiHash, "pub.pkcs");
-	
-	tg_connect(tg, NULL, callback);
+
+	tg_set_on_log  (tg, NULL, on_log);
+	if (tg_connect(tg, NULL, callback))
+	  return 1;
 
 	tg_get_dialogs(tg, 0, 6, 
 			NULL, md_callback);
@@ -140,17 +146,14 @@ int main(int argc, char *argv[])
 	tg_close(tg);
 	return 0;
 }
-*/
+
 
 void on_err(void *d, tl_t *tl, const char *err){
 	printf("!!!ERR: %s\n", err);
 }
 
-void on_log(void *d, const char *msg){
-	printf("%s\n", msg);
-}
 
-int main(int argc, char *argv[])
+int main_aa(int argc, char *argv[])
 {
 	printf("TGTEST\n");
 	int apiId = 0;
@@ -169,6 +172,6 @@ int main(int argc, char *argv[])
 	tg_set_on_log  (tg, NULL, on_log);
 
 	//tg_new_auth_key2(tg);
-	tg_new_auth_key(tg);
+	//tg_new_auth_key(tg);
 	return 0;
 }

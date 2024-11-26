@@ -14,8 +14,8 @@ buf_t tg_hsh_sha1(buf_t b)
 {
   buf_t h;
 	buf_init(&h);
-	/*SHA1(b.data, b.size, h.data);*/
-	sha1(b.data, b.size, h.data);
+	SHA1(b.data, b.size, h.data);
+	/* sha1(b.data, b.size, h.data); */
   h.size = 20;
 
   return h;

@@ -49,8 +49,8 @@ int tg_net_open(tg_t *tg)
   }
 
 	// send intermediate protocol
-	/*char init[] = {0xee, 0xee, 0xee, 0xee};*/
-	/*send(tg->sockfd, init, 4, 0);*/
+	char init[] = {0xee, 0xee, 0xee, 0xee};
+	send(tg->sockfd, init, 4, 0);
 
 	tg->seqn = -1;
 
@@ -64,12 +64,13 @@ void tg_net_close(tg_t *tg)
 
 void tg_net_send(tg_t *tg, const buf_t buf)
 {
-	ON_LOG_BUF(tg, buf, "%s: ", __func__);
+  ON_LOG_BUF(tg, buf, "%s: ", __func__);
   int32_t n = (int32_t)send(
 			tg->sockfd, 
 			buf.data, 
 			buf.size, 0);
-
+  ON_LOG(tg, "%s: send size: %d", __func__, n);
+  
   if (n < 0) {
     ON_ERR(tg, NULL, "%s: can't write to socket", __func__);
   }

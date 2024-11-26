@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include "strtok_foreach.h"
 #include "../tl/serialize.h"
+#include "../mtx/include/types.h"
+#include "../mtx/include/api.h"
+#include <sys/socket.h>
 
 static buf_t _init(tg_t *tg, buf_t query)
 {
@@ -34,7 +37,7 @@ static buf_t _init(tg_t *tg, buf_t query)
 	return invokeWithLayer;
 }
 
-tl_user_t * 
+tl_user_t *
 tg_is_authorized(tg_t *tg)
 {
 	// try to load auth_key_id from database
@@ -96,12 +99,34 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 	}
 	
 	// authorize with new key
-	if (tg_new_auth_key(tg))
-		return NULL;
+	tg_net_close(tg);
+	app_t app = api.app.open();
+	api.net.close(shared_rc.net);
+	// check if has key
+    if (!shared_rc.key.size){
+	  ON_ERR(tg, NULL, "%s: can't generate new auth key", __func__);
+	  api.app.close(app);
+	  return NULL;
+	}
 
+	// save key and salt
+	tg->key =
+	  buf_add(shared_rc.key.data, shared_rc.key.size);
+	tg->salt =
+	  buf_add(shared_rc.salt.data, shared_rc.salt.size);
+	tg->sockfd = shared_rc.net.sockfd;
+	tg->seqn = shared_rc.seqnh;
+	
+	api.app.close(app);
+
+	// start new session
 	tg->ssid = buf_rand(8);
 	ON_LOG(tg, "%s: new session...", __func__);
-	
+
+	// send intermediate protocol
+	char init[] = {0xee, 0xee, 0xee, 0xee};
+	send(tg->sockfd, init, 4, 0);
+
 	CodeSettings codeSettings = tl_codeSettings(
 			false,
 		 	false,
@@ -114,7 +139,7 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 		 	NULL,
 		 	NULL);
 
-	ON_LOG_BUF(tg, codeSettings, 
+  	ON_LOG_BUF(tg, codeSettings, 
 			"%s: codeSettings: ", __func__);
 
 	buf_t sendCode = 
