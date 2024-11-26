@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 	tg_set_on_error(tg, NULL, on_err);
 	tg_set_on_log  (tg, NULL, on_log);
 
-	tg_new_auth_key2(tg);
-	//tg_new_auth_key(tg);
+	//tg_new_auth_key2(tg);
+	tg_new_auth_key(tg);
 	return 0;
 }

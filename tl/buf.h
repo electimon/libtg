@@ -18,6 +18,7 @@ typedef	struct buf_ {
 	void  *aptr;
 } buf_t;
 
+extern buf_t    buf_new();
 extern void     buf_init(buf_t *buf);
 extern void     buf_realloc(buf_t *buf, uint32_t size);
 extern buf_t    buf_add(uint8_t *data, uint32_t size);

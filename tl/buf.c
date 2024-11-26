@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "buf.h"
 #include "str.h"
@@ -52,16 +53,26 @@ void buf_init(buf_t *buf)
 	buf->asize = BUFSIZ;
 	buf->size = 0;
 	buf->data = buf->aptr;
+	memset(buf->aptr, 0, buf->asize + 1);
+}
+
+buf_t buf_new(){
+	buf_t b;
+	buf_init(&b);
+	return b;
 }
 
 void buf_realloc(buf_t *buf, uint32_t size)
 {
+	long offset = (void *)buf->data - buf->aptr;
 	if (size > buf->asize){
-		void *ptr = realloc(buf->data, size);
+		void *ptr = realloc(buf->data, size + 1);
 		if (ptr){
 			buf->aptr = ptr;
+			buf->data = buf->aptr + offset;
+			memset(&buf->aptr[buf->asize], 0,
+				 	size - buf->asize + 1);
 			buf->asize = size;
-			buf->data = buf->data;
 		}
 	}
 }
@@ -72,14 +83,13 @@ buf_t buf_add(uint8_t *data, uint32_t size)
 	buf_init(&b);
 
   if (size > b.asize) {
-		buf_realloc(&b, size + 1);
+		buf_realloc(&b, size);
   }
 
 	uint32_t i;
   for (i = 0; i < size; ++i) {
     b.data[i] = data[i];
   }
-	b.data[i] = 0;
 
   b.size = size;
 

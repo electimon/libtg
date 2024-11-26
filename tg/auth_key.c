@@ -299,9 +299,8 @@ int tg_new_auth_key2(tg_t *tg)
 	tl_t *tl = NULL;
 	buf_t nonce = buf_rand(16);
 	buf_t req_pq = 
-		buf_add_bufs(2, 
-				buf_add_ui32(0x60469778),
-				nonce);
+		buf_add_bufs(2, buf_add_ui32(0x60469778), nonce);
+
 	tl = tg_send_query_(tg, req_pq, false);
 
 	if (tl && tl->_id == id_resPQ){
@@ -332,7 +331,6 @@ int tg_new_auth_key2(tg_t *tg)
 
 		uint64_t pq = buf_get_ui64(buf_swap(resPQ.pq_));
 		ON_LOG(tg, "%s: pq: %ld", __func__, pq);
-		buf_t pq_ = buf_swap(buf_add_ui64(pq));
 
 	 /* Client decomposes pq into prime factors such that
 		* p < q. */
@@ -346,26 +344,27 @@ int tg_new_auth_key2(tg_t *tg)
 		buf_t p  = buf_swap(buf_add_ui32(p_));
 		buf_t q  = buf_swap(buf_add_ui32(q_));
 
-		buf_t rand_array = buf_rand(32);
-		rand_array.size = 32;
+		buf_t new_nonce = buf_rand(32);
+		new_nonce.size = 32;
 
 		// inner data
 		buf_t p_q_inner_data = 
 			buf_add_bufs(7,
 					buf_add_ui32(0x83c95aec),
-					serialize_bytes(resPQ.pq_.data, resPQ.pq_.size),
-					serialize_bytes(p.data, p.size),
-					serialize_bytes(q.data, q.size),
+					serialize_str(resPQ.pq_),
+					serialize_str(p),
+					serialize_str(q),
 					nonce,
 					resPQ.server_nonce_,
-					rand_array);
+					new_nonce);
 		ON_LOG_BUF(tg, p_q_inner_data, "%s: p_q_inner_data: ", __func__);
 		
 		// hash
 		buf_t h = tg_hsh_sha1(p_q_inner_data);
 
 		buf_t dwh = buf_add_bufs(2, h, p_q_inner_data);
-		buf_t pad = buf_rand(256);
+		//buf_t pad = buf_rand(256);
+		buf_t pad = buf_new();
 		pad.size = 255 - dwh.size;
 		dwh = buf_cat(dwh, pad);
 		ON_LOG_BUF(tg, dwh, "%s: dwh: ", __func__);
@@ -379,11 +378,10 @@ int tg_new_auth_key2(tg_t *tg)
 					buf_add_ui32(0xd712e4be),
 					nonce,
 					resPQ.server_nonce_,
-					serialize_bytes(p.data, p.size),
-					serialize_bytes(q.data, q.size),
+					serialize_str(p),
+					serialize_str(q),
 					fingerprint,
-					serialize_bytes(
-						encrypted_data.data, encrypted_data.size));
+					serialize_str(encrypted_data));
 		//ON_LOG_BUF(tg, req_DH_params, "%s: req_DH_params: ", __func__);
 
 		tl = tg_send_query_(tg, req_DH_params, false);
