@@ -12,6 +12,7 @@ libtg_la_SOURCES = tg.c \
 				   ../transport/encrypt.c \
 				   ../transport/header.c \
 				   ../transport/transport.c \
+				   ../transport/crc.c \
 				   ../transport/net.c
 
 libtg_la_LIBADD = ../tl/*.o ../mtx/src/*.o -lsqlite3 -lcrypto -lz

@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 25.11.2024
+ * Last Modified Date: 27.11.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -25,7 +25,7 @@ int tg_net_open(tg_t *tg)
   }
 
   server = gethostbyname(tg->ip);
-
+ 
   if (server == 0) {
 		ON_ERR(tg, NULL, "%s: no host with ip: '%s'", __func__, tg->ip);
     return -1;
@@ -49,7 +49,7 @@ int tg_net_open(tg_t *tg)
   }
 
 	// send intermediate protocol
-	char init[] = {0xee, 0xee, 0xee, 0xee};
+		char init[] = {0xee, 0xee, 0xee, 0xee};
 	send(tg->sockfd, init, 4, 0);
 
 	tg->seqn = -1;
@@ -64,7 +64,7 @@ void tg_net_close(tg_t *tg)
 
 void tg_net_send(tg_t *tg, const buf_t buf)
 {
-  ON_LOG_BUF(tg, buf, "%s: ", __func__);
+  //ON_LOG_BUF(tg, buf, "%s: ", __func__);
   int32_t n = (int32_t)send(
 			tg->sockfd, 
 			buf.data, 

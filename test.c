@@ -16,6 +16,7 @@
 
 #include "api_id.h"
 #include "tl/tl.h"
+#include "transport/net.h"
 
 
 char * callback(
@@ -153,7 +154,7 @@ void on_err(void *d, tl_t *tl, const char *err){
 }
 
 
-int main_aa(int argc, char *argv[])
+int main_ss(int argc, char *argv[])
 {
 	printf("TGTEST\n");
 	int apiId = 0;
@@ -170,8 +171,9 @@ int main_aa(int argc, char *argv[])
 
 	tg_set_on_error(tg, NULL, on_err);
 	tg_set_on_log  (tg, NULL, on_log);
-
-	//tg_new_auth_key2(tg);
+	tg_net_open(tg);
+	
+	tg_new_auth_key2(tg);
 	//tg_new_auth_key(tg);
 	return 0;
 }

@@ -10,7 +10,7 @@
 
 #include "../libtg.h"
 
-extern uint32_t crc32_(uint32_t crc, const void * buf, size_t size);
-extern buf_t crc_crc32(const buf_t);
+extern uint32_t tg_crc32_(uint32_t crc, const void * buf, size_t size);
+extern buf_t tg_crc_crc32(const buf_t);
 
 #endif /* defined(TG_CRC_H) */

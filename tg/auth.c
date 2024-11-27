@@ -88,6 +88,8 @@ tg_is_authorized(tg_t *tg)
 tl_auth_sentCode_t *
 tg_auth_sendCode(tg_t *tg, const char *phone_number) 
 {
+	tg->key = auth_key_from_database(tg);
+
 	// get tokens from database 
 	buf_t t[20]; int tn = 0;
 	char *auth_tokens = auth_tokens_from_database(tg);
@@ -98,34 +100,41 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 		}
 	}
 	
-	// authorize with new key
-	tg_net_close(tg);
-	app_t app = api.app.open();
-	api.net.close(shared_rc.net);
-	// check if has key
-    if (!shared_rc.key.size){
-	  ON_ERR(tg, NULL, "%s: can't generate new auth key", __func__);
-	  api.app.close(app);
-	  return NULL;
+	if (!tg->key.size){
+		// authorize with new key
+		tg_net_close(tg);
+		app_t app = api.app.open();
+		api.net.close(shared_rc.net);
+		// check if has key
+			if (!shared_rc.key.size){
+			ON_ERR(tg, NULL, "%s: can't generate new auth key", __func__);
+			api.app.close(app);
+			return NULL;
+		}
+
+		// save key and salt
+		tg->key =
+			buf_add(shared_rc.key.data, shared_rc.key.size);
+		auth_key_to_database(tg, tg->key, phone_number);
+		tg->salt =
+			buf_add(shared_rc.salt.data, shared_rc.salt.size);
+		//tg->sockfd = shared_rc.net.sockfd;
+		printf("SOCKET: %d\n", shared_rc.net.sockfd);
+		int seqn = shared_rc.seqn;
+		
+		api.app.close(app);
 	}
 
-	// save key and salt
-	tg->key =
-	  buf_add(shared_rc.key.data, shared_rc.key.size);
-	tg->salt =
-	  buf_add(shared_rc.salt.data, shared_rc.salt.size);
-	tg->sockfd = shared_rc.net.sockfd;
-	tg->seqn = shared_rc.seqnh;
+	tg_net_open(tg);
+	//tg->seqn = seqn;
 	
-	api.app.close(app);
-
 	// start new session
 	tg->ssid = buf_rand(8);
 	ON_LOG(tg, "%s: new session...", __func__);
 
 	// send intermediate protocol
-	char init[] = {0xee, 0xee, 0xee, 0xee};
-	send(tg->sockfd, init, 4, 0);
+	//char init[] = {0xee, 0xee, 0xee, 0xee};
+	//send(tg->sockfd, init, 4, 0);
 
 	CodeSettings codeSettings = tl_codeSettings(
 			false,

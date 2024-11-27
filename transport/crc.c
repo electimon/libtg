@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include "crc.h"
 
-static uint32_t crc32_tab[] =
+static uint32_t tg_crc32_tab[] =
 {
   0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
   0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
@@ -56,7 +56,7 @@ static uint32_t crc32_tab[] =
   0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
 };
 
-uint32_t crc32_(uint32_t crc, const void * buf, size_t size)
+uint32_t tg_crc32_(uint32_t crc, const void * buf, size_t size)
 {
   const uint8_t * p;
 
@@ -64,17 +64,17 @@ uint32_t crc32_(uint32_t crc, const void * buf, size_t size)
   crc = crc ^ ~0U;
 
   while (size--) {
-    crc = crc32_tab[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
+    crc = tg_crc32_tab[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
   }
 
   return crc ^ ~0U;
 }
 
-buf_t crc_crc32(const buf_t buf)
+buf_t tg_crc_crc32(const buf_t buf)
 {
   buf_t b;
 	buf_init(&b);
-  uint32_t crc = crc32_(0, buf.data, buf.size);
+  uint32_t crc = tg_crc32_(0, buf.data, buf.size);
   uint8_t * crc_ptr = (uint8_t *)&crc;
 
   b = buf_add(crc_ptr, sizeof(crc));
