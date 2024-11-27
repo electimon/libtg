@@ -314,10 +314,10 @@ int append_deserialize_table(
 				m->name),
 		 	g->deserialize_table_c);
 
-	fputs(STR(buf, BLEN,
-				"\tprintf(\"deserialize obj: %s (%.8x)\\n\");\n",
-				m->name, m->id),
-			 g->deserialize_table_c);
+	//fputs(STR(buf, BLEN,
+				//"\tprintf(\"deserialize obj: %s (%.8x)\\n\");\n",
+				//m->name, m->id),
+			 //g->deserialize_table_c);
 	
 	fputs(
 			STR(buf, BLEN,
@@ -344,11 +344,11 @@ int append_deserialize_table(
 				,m->args[i].name, m->args[i].type)
 				, g->deserialize_table_c);
 		
-		fputs(
-				STR(buf, BLEN,
-				"\tprintf(\"obj: %s: parse arg %s (%s)\\n\");\n"
-				,m->name, m->args[i].name, m->args[i].type)
-				, g->deserialize_table_c);
+		//fputs(
+				//STR(buf, BLEN,
+				//"\tprintf(\"obj: %s: parse arg %s (%s)\\n\");\n"
+				//,m->name, m->args[i].name, m->args[i].type)
+				//, g->deserialize_table_c);
 		
 
 		// check if flag

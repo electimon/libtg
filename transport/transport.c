@@ -58,6 +58,8 @@ buf_t detransport(tg_t *tg, buf_t a)
 		ON_ERR(tg, NULL, 
 				"%s: len mismatch: expected: %d, got: %d", 
 				__func__, len, b.size);
+		// we should start new transfer
+		b = buf_add_ui32(-405);
 	}
 
   return b;

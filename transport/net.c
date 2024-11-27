@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 27.11.2024
+ * Last Modified Date: 28.11.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -78,14 +78,15 @@ void tg_net_send(tg_t *tg, const buf_t buf)
 
 buf_t tg_net_receive(tg_t *tg)
 {
+	int LEN = BUFSIZ;
 	buf_t data, buf;
 	buf_init(&data);
-	buf.size = BUFSIZ;	
+	buf.size = LEN;	
 	do
 	{		
 			buf_init(&buf);
 			buf.size = recv(tg->sockfd,
-				 	buf.data, BUFSIZ, 0);
+				 	buf.data, LEN, 0);
 			if (buf.size == 0)
 			{
 				ON_LOG(tg, "%s: received nothing", __func__);
@@ -100,7 +101,9 @@ buf_t tg_net_receive(tg_t *tg)
 				ON_ERR(tg, NULL, "%s: socket error: %d", __func__, buf.size);
 			}
 			buf_free(buf);
-	} while (buf.size == BUFSIZ);
+			// give some time betwin packages
+			usleep(100000); // in microseconds
+	} while (buf.size == LEN);
 
 	ON_LOG_BUF(tg, data, "%s: ", __func__);
   return data;

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
 #define _POSIX_C_SOURCE 199309L
 
 #include <time.h>
@@ -134,7 +135,8 @@ tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 {
 	tg->seqn += 2;
-	printf("SEQ_NO: %d\n", tg->seqn);
+
+	//printf("SEQ_NO: %d\n", tg->seqn);
 	
 	buf_t h = header(tg, query, enc);
 	
@@ -152,12 +154,17 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 	buf_t tr = detransport(tg, r);
 	if (!tr.size)
 		return NULL;
+	buf_free(r);
 	if (buf_get_ui32(tr) == 0xfffffe6c){
 		tl_t *tl = NEW(tl_t, return NULL);
 		tl->_id = 0xfffffe6c;
 		return tl;
 	}
-	buf_free(r);
+	if (tr.size == 4 && buf_get_ui32(tr) == -405){
+		sleep(1);
+		// send message again
+		return tg_send_query_(tg, query, enc);
+	}
 
 	buf_t d = decrypt(tg, tr, enc);
 	if (!d.size)

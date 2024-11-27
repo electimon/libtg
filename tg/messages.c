@@ -17,10 +17,11 @@ void tg_get_dialogs(tg_t *tg, int off_msg_id, int limit,
 	/*for (i = 0; i < limit; ++i) {*/
 	for (i = 0; i < 1; ++i) {
 		printf("ID: %d\n", id);
+		int folder_id = 0;
 		buf_t getDialogs = 
 			tl_messages_getDialogs(
 					NULL,
-					NULL, 
+					&folder_id, 
 					0,
 					id, 
 					&inputPeer, 
