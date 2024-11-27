@@ -123,6 +123,10 @@ static int md_callback(
 	return 0;
 }
 
+void on_err(void *d, tl_t *tl, const char *err){
+	printf("!!!ERR: %s\n", err);
+}
+
 void on_log(void *d, const char *msg){
 	printf("%s\n", msg);
 }
@@ -137,20 +141,17 @@ int main(int argc, char *argv[])
 			apiId, 
 			apiHash, "pub.pkcs");
 
-	tg_set_on_log  (tg, NULL, on_log);
 	if (tg_connect(tg, NULL, callback))
 	  return 1;
+	
+	tg_set_on_log  (tg, NULL, on_log);
+	tg_set_on_error  (tg, NULL, on_err);
 
 	tg_get_dialogs(tg, 0, 6, 
 			NULL, md_callback);
 
 	tg_close(tg);
 	return 0;
-}
-
-
-void on_err(void *d, tl_t *tl, const char *err){
-	printf("!!!ERR: %s\n", err);
 }
 
 

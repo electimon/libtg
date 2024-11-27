@@ -4,10 +4,13 @@ libtg_la_SOURCES = tg.c \
 				   connect.c \
 				   database.c \
 				   auth.c \
+				   auth_key.c \
 				   strerr.c \
 				   messages.c \
-                   ../crypto/hsh.c \
-                   ../crypto/aes.c \
+           ../crypto/hsh.c \
+           ../crypto/aes.c \
+           ../crypto/cmn.c \
+           ../crypto/rsa.c \
 				   ../transport/send_query.c \
 				   ../transport/encrypt.c \
 				   ../transport/header.c \

@@ -2,6 +2,7 @@
 #include "strtok_foreach.h"
 #include <stdio.h>
 #include <string.h>
+#include "../transport/net.h"
 
 struct tg_connect_t {
 	void *userdata;
@@ -50,6 +51,8 @@ int tg_connect(
 	/*void (*_prev_on_err_call)= tg->on_err;*/
 
 	tg_set_on_error(tg, &t, on_err);
+
+	tg_net_open(tg);
 
 	// check if authorized
 	tl_user_t *user = 

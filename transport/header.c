@@ -111,6 +111,8 @@ buf_t deheader(tg_t *tg, buf_t b, bool enc)
 		uint64_t msg_data_len = deserialize_ui32(&b);
 		// set data len without padding
 		b.size = msg_data_len;
+		
+		d = buf_cat(d, b);
   
 	} else {
 	//auth_key_id = 0 message_id message_data_length message_data

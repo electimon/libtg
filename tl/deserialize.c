@@ -84,7 +84,10 @@ buf_t deserialize_str(buf_t *b)
   if (byte.data[0] <= 253) {
     uint32_t size = byte.data[0];
     s = buf_add(b->data + 1, size);
-		*b = buf_add(b->data + size, b->size - size);
+		int pad = (4 - ((size + 1) % 4)) % 4;
+		*b = buf_add(
+				b->data + size + 1 + pad, 
+				b->size - size - 1 - pad);
   } else if (byte.data[0] >= 254) {
     uint8_t start = 0xfe;
     buf_t s1 = buf_add((uint8_t *)&start, 1);
@@ -97,9 +100,11 @@ buf_t deserialize_str(buf_t *b)
     buf_t len_ = buf_add(b->data + 1, 3);
     len_.size = 4; // hack
     uint32_t len = buf_get_ui32(len_);
-    *b = buf_add(b->data + 4, b->size - 4);
-    s = buf_add(b->data, len);
-    *b = buf_add(b->data + len, b->size - len);
+    s = buf_add(b->data + 4, len);
+		int pad = (4 - (len % 4)) % 4;
+    *b = buf_add(
+				b->data + len + 4 + pad,
+			 	b->size - len - 4 - pad);
   } else {
     printf("can't deserialize string");
   }

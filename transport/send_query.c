@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 #define _POSIX_C_SOURCE 199309L
 
 #include <time.h>
@@ -104,6 +105,10 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 				tl_bad_msg_notification_t *obj = 
 					(tl_bad_msg_notification_t *)tl;
 				// handle bad msg notification
+				char *err = tg_strerr(tl);
+				ON_ERR(tg, tl, "%s", err);
+				free(err);
+				return tl;
 			}
 			break;
 
@@ -128,10 +133,8 @@ tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 
 tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 {
-	if (!tg->sockfd)
-		tg_net_open(tg);
-	
-	tg->seqn++;
+	tg->seqn += 2;
+	printf("SEQ_NO: %d\n", tg->seqn);
 	
 	buf_t h = header(tg, query, enc);
 	
