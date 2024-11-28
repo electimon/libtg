@@ -82,6 +82,10 @@ process_error:
     }
 
     shared_rc.net.sockfd = net.sockfd;
+	
+		// send intermediate protocol
+		char init[] = {0xee, 0xee, 0xee, 0xee};
+		send(net.sockfd, init, 4, 0);
 
     return net;
 }

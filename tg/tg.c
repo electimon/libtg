@@ -35,6 +35,9 @@ tg_t *tg_new(const char *database_path,
 			sizeof(tg->ip) - 1);
 	tg->port = SERVER_PORT;
 
+	// set auth_key
+	tg->key = auth_key_from_database(tg);
+
 	return tg;
 }
 

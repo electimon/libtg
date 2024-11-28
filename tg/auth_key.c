@@ -5,10 +5,43 @@
 #include "../crypto/hsh.h"
 #include "../tl/serialize.h"
 #include <string.h>
+#include "../mtx//include/app.h"
+#include "../mtx//include/api.h"
 
 #define SWAP(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
 
+bool tg_has_auth_key(tg_t *tg){
+	if (tg->key.size)
+		return true;
+	return false;
+} 
+
 int tg_new_auth_key(tg_t *tg)
+{
+	app_t app = api.app.open();
+	// check if has key
+	if (!shared_rc.key.size){
+		ON_ERR(tg, NULL, "%s: can't generate new auth key", __func__);
+		api.app.close(app);
+		return 1;
+	}
+
+	// update tg
+	tg->key =
+		buf_add(shared_rc.key.data, shared_rc.key.size);
+	tg->salt =
+		buf_add(shared_rc.salt.data, shared_rc.salt.size);
+
+	// save key
+	auth_key_to_database(
+			tg, tg->key, 
+			"000");
+	
+	api.app.close(app);
+	return 0;
+}
+
+int tg_new_auth_key1(tg_t *tg)
 {
 	memset(&tg->key, 0, sizeof(buf_t));
 
@@ -203,7 +236,7 @@ generation_new_random_temp_key:;
 			buf_add_bufs(2, temp_key_xor, aes_encrypted);
 		 if (key_aes_encrypted.size != 256*8){
 			ON_ERR(tg, NULL, 
-					"%s: key_aes_encrypted len is longer 256 bytes: %d",
+					"%s: key_aes_encrypted len mismatch: expexted 2048: has: %d",
 				 	__func__, key_aes_encrypted.size);
 			 return 1;
 		 }
@@ -239,14 +272,23 @@ generation_new_random_temp_key:;
 		 * stored as a big-endian integer consisting of 
 		 * exactly 256 bytes (with leading zero bytes if 
 		 * required). */
-		 buf_t encrypted_data = 
+		 buf_t encrypted_data_ = 
 			 tg_cry_rsa_enc(tg, key_aes_encrypted);
-		 if (encrypted_data.size != 256*8){
-			ON_ERR(tg, NULL, 
-					"%s: encrypted_data len is longer 256 bytes: %d",
-				 	__func__, encrypted_data.size);
-			 return 1;
-		 }
+		 int pad = 2048 - encrypted_data_.size;
+		 buf_t encrypted_data; 
+		 buf_init(&encrypted_data);
+		 buf_realloc(&encrypted_data, 2048);
+	   encrypted_data.size = pad;
+		 memset(encrypted_data.data, 0, pad);
+	   encrypted_data = 
+			 buf_cat(encrypted_data, encrypted_data_);
+		 buf_free(encrypted_data_);
+		 /*if (encrypted_data.size != 256*8){*/
+			/*ON_ERR(tg, NULL, */
+					/*"%s: encrypted_data len mismatch: expexted 2048, has: %d",*/
+					 /*__func__, encrypted_data.size);*/
+			 /*return 1;*/
+		 /*}*/
 
 		/* Send req_DH_params query with generated
 		 * encrypted_data */

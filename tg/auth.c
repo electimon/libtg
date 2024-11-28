@@ -40,19 +40,9 @@ static buf_t _init(tg_t *tg, buf_t query)
 tl_user_t *
 tg_is_authorized(tg_t *tg)
 {
-	// try to load auth_key_id from database
-	tg->key = auth_key_from_database(tg);
-
 	if (tg->key.size){
 		ON_LOG(tg, "have auth_key with len: %d", tg->key.size);
 
-		if (!tg->sockfd)
-			tg_net_open(tg);
-		
-		tg->salt = buf_rand(8);
-		tg->ssid = buf_rand(8);
-		ON_LOG(tg, "%s: new session...", __func__);
-		
 		// check if authorized
 		InputUser iuser = tl_inputUserSelf();
 		ON_LOG_BUF(tg, iuser, 
@@ -100,42 +90,6 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 		}
 	}
 	
-	if (!tg->key.size){
-		// authorize with new key
-		tg_net_close(tg);
-		app_t app = api.app.open();
-		api.net.close(shared_rc.net);
-		// check if has key
-			if (!shared_rc.key.size){
-			ON_ERR(tg, NULL, "%s: can't generate new auth key", __func__);
-			api.app.close(app);
-			return NULL;
-		}
-
-		// save key and salt
-		tg->key =
-			buf_add(shared_rc.key.data, shared_rc.key.size);
-		auth_key_to_database(tg, tg->key, phone_number);
-		tg->salt =
-			buf_add(shared_rc.salt.data, shared_rc.salt.size);
-		//tg->sockfd = shared_rc.net.sockfd;
-		printf("SOCKET: %d\n", shared_rc.net.sockfd);
-		int seqn = shared_rc.seqn;
-		
-		api.app.close(app);
-	}
-
-	tg_net_open(tg);
-	//tg->seqn = seqn;
-	
-	// start new session
-	tg->ssid = buf_rand(8);
-	ON_LOG(tg, "%s: new session...", __func__);
-
-	// send intermediate protocol
-	//char init[] = {0xee, 0xee, 0xee, 0xee};
-	//send(tg->sockfd, init, 4, 0);
-
 	CodeSettings codeSettings = tl_codeSettings(
 			false,
 		 	false,

@@ -33,6 +33,9 @@ char * tg_strerr(tl_t *tl);
 /* send TL query to server and return answer */
 tl_t *tg_send_query(tg_t *tg, buf_t query);
 
+/* return true if has auth key */
+bool tg_has_auth_key(tg_t *tg); 
+
 /* return authorized user tl object or throw error */
 tl_user_t * tg_is_authorized(tg_t *tg);
 
@@ -71,6 +74,8 @@ int tg_connect(
 			const tl_t *tl,
 			const char *msg));
 
+
+tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg);
 
 void tg_get_dialogs(tg_t *tg, int off_msg_id, int limit,
 		void *data,

@@ -15,6 +15,7 @@ struct tg_ {
 	char ip[16];
 	int port;
 	int sockfd;
+	bool net;
 	void *on_err_data;
 	void (*on_err)(void *on_err_data, tl_t *tl, const char *err);
 	void *on_log_data;
@@ -25,6 +26,8 @@ struct tg_ {
 	buf_t ssid;
 	uint64_t fingerprint;
 	uint64_t msgids[20]; 
+	bool mtx;
+	bool mtx_net;
 };
 
 int database_init(tg_t *tg, const char *database_path);

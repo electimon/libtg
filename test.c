@@ -3,7 +3,9 @@
 #include "libtg.h"
 #include "mtx/include/api.h"
 #include "mtx/include/buf.h"
+#include "mtx/include/setup.h"
 #include "mtx/include/types.h"
+#include "tg/tg.h"
 #include "tl/buf.h"
 #include "tl/deserialize.h"
 #include "tl/id.h"
@@ -141,11 +143,19 @@ int main(int argc, char *argv[])
 			apiId, 
 			apiHash, "pub.pkcs");
 
-	if (tg_connect(tg, NULL, callback))
-	  return 1;
-	
 	tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
+
+	if (!tg_has_auth_key(tg)){
+		tg->mtx = true;
+		tl_auth_sentCode_t *sentCode = 
+			tg_auth_sendCode(tg, "+79990407731");
+		if (!sentCode)
+			return 1;
+		tg->mtx = false;
+	}
+
+	return 0;
 
 	tg_get_dialogs(tg, 0, 6, 
 			NULL, md_callback);
@@ -174,7 +184,7 @@ int main_ss(int argc, char *argv[])
 	tg_set_on_log  (tg, NULL, on_log);
 	tg_net_open(tg);
 	
-	tg_new_auth_key2(tg);
-	//tg_new_auth_key(tg);
+	//tg_new_auth_key2(tg);
+	tg_new_auth_key(tg);
 	return 0;
 }

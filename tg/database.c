@@ -27,7 +27,7 @@ static int tg_sqlite3_prepare(
 		 	NULL);
 	if (res != SQLITE_OK){
 		// parse error
-		perror(sqlite3_errmsg(tg->db));
+		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(tg->db));
 		return 1;
 	}	
 
@@ -56,14 +56,14 @@ static int tg_sqlite3_exec(
 		sqlite3_exec(tg->db, sql, NULL, NULL, &errmsg);
 	if (errmsg){
 		// parse error
-		perror(errmsg);
+		ON_ERR(tg, NULL, "%s", errmsg);
 		sqlite3_free(errmsg);	
 		sqlite3_close(tg->db);
 		return 1;
 	}	
 	if (res != SQLITE_OK){
 		// parse error
-		perror(sqlite3_errmsg(tg->db));
+		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(tg->db));
 		sqlite3_close(tg->db);
 		return 1;
 	}
@@ -191,7 +191,7 @@ int auth_key_to_database(
 	char *errmsg = NULL;
 	res = sqlite3_exec(tg->db, sql, NULL, NULL, &errmsg);
 	if (errmsg) {
-		perror(errmsg);
+		ON_ERR(tg, NULL, "%s", errmsg);
 		free(errmsg);
 		return 1;
 	}	
@@ -202,14 +202,14 @@ int auth_key_to_database(
 	sqlite3_stmt *stmt;
 	res = sqlite3_prepare_v2(tg->db, sql, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
-		perror(errmsg);
+		ON_ERR(tg, NULL, "%s", errmsg);
 		free(errmsg);
 		return 1;
 	}	
 
 	res = sqlite3_bind_blob(stmt, 1, auth_key.data, auth_key.size, SQLITE_TRANSIENT);
 	if (res != SQLITE_OK) {
-		perror(sqlite3_errmsg(tg->db));		
+		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(tg->db));
 	}	
 	
 	sqlite3_step(stmt);

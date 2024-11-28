@@ -13,6 +13,7 @@
 #include "../crypto/cry.h"
 #include "../transport/net.h"
 //#include "../transport/crc.h"
+#include "../mtx/include/api.h"
 
 buf_t encrypt    (tg_t *tg, buf_t b, bool enc);
 buf_t decrypt    (tg_t *tg, buf_t b, bool enc);
@@ -134,47 +135,112 @@ tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 
 tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 {
-	tg->seqn += 2;
+	// init net
+	if (tg->mtx) {
+		// use mtx driver
+		ON_LOG(tg, "%s: mtx driver", __func__);
+		if (!tg->mtx_net){
+			reset_shared_rc();
+			api.net.open(tg->ip, tg->port);
+		}
+		
+		// get new auth_key
+		if (!shared_rc.key.size)
+			api.srl.auth();
+		else if (!shared_rc.ssid.size){
+			ON_LOG(tg, "%s: new session...", __func__);
+			shared_rc.ssid = api.buf.rand(8);
+		}
+	} else {
+		// use tg driver
+		if (tg->mtx_net){
+			// close mtx
+			api.net.close(shared_rc.net);
+		}
 
-	//printf("SEQ_NO: %d\n", tg->seqn);
-	
-	buf_t h = header(tg, query, enc);
-	
-	buf_t e = encrypt(tg, h, enc);
-	buf_free(h);
+		if (!tg->net)
+			tg_net_open(tg);
 
-	buf_t t = transport(tg, e);
-	buf_free(e);
+		if (!tg->salt.size)
+			tg->salt = buf_rand(8);
+		
+		if (!tg->ssid.size){
+			tg->ssid = buf_rand(8);
+			ON_LOG(tg, "%s: new session...", __func__);
+		}
 
-	tg_net_send(tg, t);
-	buf_free(t);
-	
-	buf_t r = tg_net_receive(tg);
-
-	buf_t tr = detransport(tg, r);
-	if (!tr.size)
-		return NULL;
-	buf_free(r);
-	if (buf_get_ui32(tr) == 0xfffffe6c){
-		tl_t *tl = NEW(tl_t, return NULL);
-		tl->_id = 0xfffffe6c;
-		return tl;
+		if (tg->seqn == -1)
+			tg->seqn = 0;
+		else
+			tg->seqn += 2;
 	}
-	if (tr.size == 4 && buf_get_ui32(tr) == -405){
-		sleep(1);
-		// send message again
-		return tg_send_query_(tg, query, enc);
+		
+	// DRIVE
+	buf_t msg;
+
+	if (tg->mtx){
+		msg_t type = RFC;
+		if (enc)
+			type = API;
+
+		buf_t_ s = api.buf.add(query.data,query.size);
+		buf_t_ s1 = api.hdl.header(s, type);
+		buf_t_ e = api.enl.encrypt(s1, type);
+		buf_t_ tt = api.trl.transport(e);
+		buf_t_ nr = api.net.drive(tt, SEND_RECEIVE);
+		buf_t_ tr = api.trl.detransport(nr);
+		if (!tr.size)
+			return NULL;
+		if (api.buf.get_ui32(tr) == 0xfffffe6c){
+			tl_t *tl = NEW(tl_t, return NULL);
+			tl->_id = 0xfffffe6c;
+			return tl;
+		}
+		buf_t_ d = api.enl.decrypt(tr, type);
+		buf_t_ s1r = api.hdl.deheader(d, type);
+
+		msg = buf_add(s1r.data, s1r.size);
+
+	} else {
+
+		buf_t h = header(tg, query, enc);
+		
+		buf_t e = encrypt(tg, h, enc);
+		buf_free(h);
+
+		buf_t t = transport(tg, e);
+		buf_free(e);
+
+		tg_net_send(tg, t);
+		buf_free(t);
+		
+		buf_t r = tg_net_receive(tg);
+
+		buf_t tr = detransport(tg, r);
+		if (!tr.size)
+			return NULL;
+		buf_free(r);
+		if (buf_get_ui32(tr) == 0xfffffe6c){
+			tl_t *tl = NEW(tl_t, return NULL);
+			tl->_id = 0xfffffe6c;
+			return tl;
+		}
+		if (tr.size == 4 && buf_get_ui32(tr) == -405){
+			sleep(1);
+			// send message again
+			return tg_send_query_(tg, query, enc);
+		}
+
+		buf_t d = decrypt(tg, tr, enc);
+		if (!d.size)
+			return NULL;
+		buf_free(tr);
+
+		msg = deheader(tg, d, enc);
+		if (!msg.size)
+			return NULL;
+		buf_free(d);
 	}
-
-	buf_t d = decrypt(tg, tr, enc);
-	if (!d.size)
-		return NULL;
-	buf_free(tr);
-
-	buf_t msg = deheader(tg, d, enc);
-	if (!msg.size)
-		return NULL;
-	buf_free(d);
 
 	tl_t *tl = tg_handle_serialized_message(tg, msg);
 	if (tl && tl->_id == id_bad_server_salt) // resend message

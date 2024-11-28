@@ -109,8 +109,6 @@ buf_t tg_cry_rsa_enc(tg_t *tg, buf_t buf)
 	if (!rsa)
 		return ret;
 	
-	BIGNUM *r = BN_new();
-
 	BIGNUM *a = BN_new();
   BN_bin2bn(buf.data, buf.size, a);
 	
@@ -118,8 +116,9 @@ buf_t tg_cry_rsa_enc(tg_t *tg, buf_t buf)
 	const BIGNUM *e = RSA_get0_e(rsa);
   
 	BN_CTX * BN_ctx = BN_CTX_new();
+	BIGNUM *r = BN_new();
   assert(BN_mod_exp(r, a, e, n, BN_ctx)); // r = a^e % n
-	int len = BN_bn2bin(a, (unsigned char *) ret.data);
+	int len = BN_bn2bin(r, (unsigned char *) ret.data);
 	ret.size = len;
 
 	BN_free(a);
@@ -129,7 +128,7 @@ buf_t tg_cry_rsa_enc(tg_t *tg, buf_t buf)
 	return ret;
 }
 
-unsigned rsax(unsigned char * from, int from_len, unsigned char * to, int to_len, const BIGNUM * N, const BIGNUM * E)
+unsigned tg_rsax(unsigned char * from, int from_len, unsigned char * to, int to_len, const BIGNUM * N, const BIGNUM * E)
 {
   BIGNUM *x = BN_new();
 	BIGNUM *y = BN_new();
@@ -157,7 +156,7 @@ unsigned rsax(unsigned char * from, int from_len, unsigned char * to, int to_len
   return y_len;
 }
 
-void rsa(tg_t *tg, unsigned char * from, size_t from_size, unsigned char * to, size_t to_size)
+void tg_rsa(tg_t *tg, unsigned char * from, size_t from_size, unsigned char * to, size_t to_size)
 {
   assert(from_size == 255 || to_size == 256);
   FILE * pub = NULL;
@@ -177,7 +176,7 @@ void rsa(tg_t *tg, unsigned char * from, size_t from_size, unsigned char * to, s
 #ifdef __APPLE__
   rsax(from, (int)from_size, to, (int)to_size, rsa->n, rsa->e);
 #else
-  rsax(from, (int)from_size, to, (int)to_size, RSA_get0_n(rsa), RSA_get0_e(rsa));
+  tg_rsax(from, (int)from_size, to, (int)to_size, RSA_get0_n(rsa), RSA_get0_e(rsa));
 #endif
   RSA_free(rsa);
   fclose(pub);
@@ -189,7 +188,7 @@ buf_t tg_cry_rsa_e(tg_t *tg, buf_t b)
 	buf_init(&r);
   r.size = 256;
 
-  rsa(tg, b.data, b.size, r.data, r.size);
+  tg_rsa(tg, b.data, b.size, r.data, r.size);
 
   return r;
 }

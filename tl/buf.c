@@ -14,7 +14,7 @@
 #include "buf.h"
 #include "str.h"
 
-char * log_hex(unsigned char * a, uint32_t s)
+char * tl_log_hex(unsigned char * a, uint32_t s)
 {
 	struct str str;
 	str_init(&str);
@@ -137,14 +137,14 @@ buf_t buf_cat(buf_t dest, buf_t src)
 
 void buf_dump(buf_t b)
 {
-  char *str = log_hex(b.data, b.size);
+  char *str = tl_log_hex(b.data, b.size);
 	printf("%s\n", str);
 	free(str);
 }
 
 char * buf_sdump(buf_t b)
 {
-  return log_hex(b.data, b.size);
+  return tl_log_hex(b.data, b.size);
 }
 
 uint8_t buf_cmp(buf_t a, buf_t b)

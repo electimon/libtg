@@ -49,10 +49,11 @@ int tg_net_open(tg_t *tg)
   }
 
 	// send intermediate protocol
-		char init[] = {0xee, 0xee, 0xee, 0xee};
+	char init[] = {0xee, 0xee, 0xee, 0xee};
 	send(tg->sockfd, init, 4, 0);
 
 	tg->seqn = -1;
+	tg->net = true;
 
 	return 0;
 }
