@@ -74,4 +74,6 @@ tl_t * tg_send_query_(tg_t *tg, buf_t s, bool encrypt);
 	 }\
 	})
 
+buf_t image_from_photo_stripped(buf_t photoStreppedData);
+
 #endif /* ifndef TG_H_ */

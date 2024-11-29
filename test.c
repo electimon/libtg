@@ -125,6 +125,8 @@ static int md_callback(
 		strndup((char *)dialog->top_message->message_.data, 40);
 	printf("%s:\t%s\n",
 			dialog->name, m);
+	if (dialog->thumb.size)
+		printf("HAS IMAGE\n");
 	return 0;
 }
 

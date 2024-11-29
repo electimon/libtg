@@ -116,13 +116,9 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 							tl_userProfilePhoto_t *photo = 
 								(tl_userProfilePhoto_t *)user->photo_; 
 							d.photo_id = photo->photo_id_;
-							buf_t p = buf_add_buf(photo->stripped_thumb_);
-							tl_t *thumb = tl_deserialize(&p);
-							if (thumb && thumb->_id == id_photoStrippedSize){
-								tl_photoStrippedSize_t *pss = 
-									(tl_photoStrippedSize_t *)thumb;
-								d.thumb = buf_add_buf(pss->bytes_);
-							}
+							d.thumb = 
+								image_from_photo_stripped(
+										photo->stripped_thumb_);
 						}
 					}
 				} else if (md.users_[k]->_id == id_userEmpty){
@@ -153,13 +149,9 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 							tl_chatPhoto_t *photo = 
 								(tl_chatPhoto_t *)channel->photo_; 
 							d.photo_id = photo->photo_id_;
-							buf_t p = buf_add_buf(photo->stripped_thumb_);
-							tl_t *thumb = tl_deserialize(&p);
-							if (thumb && thumb->_id == id_photoStrippedSize){
-								tl_photoStrippedSize_t *pss = 
-									(tl_photoStrippedSize_t *)thumb;
-								d.thumb = buf_add_buf(pss->bytes_);
-							}						
+							d.thumb = 
+								image_from_photo_stripped(
+										photo->stripped_thumb_);
 						}
 					}
 				}
@@ -189,13 +181,9 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 							tl_chatPhoto_t *photo = 
 								(tl_chatPhoto_t *)chat->photo_; 
 							d.photo_id = photo->photo_id_;
-							buf_t p = buf_add_buf(photo->stripped_thumb_);
-							tl_t *thumb = tl_deserialize(&p);
-							if (thumb && thumb->_id == id_photoStrippedSize){
-								tl_photoStrippedSize_t *pss = 
-									(tl_photoStrippedSize_t *)thumb;
-								d.thumb = buf_add_buf(pss->bytes_);
-							}
+							d.thumb = 
+								image_from_photo_stripped(
+										photo->stripped_thumb_);
 						}
 					}
 				}
