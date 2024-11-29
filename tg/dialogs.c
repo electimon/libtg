@@ -110,7 +110,20 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 						d.name = 
 							strndup((char *)user->username_.data,
 									user->username_.size);
-
+						if (user->photo_ && 
+								user->photo_->_id == id_userProfilePhoto)
+						{
+							tl_userProfilePhoto_t *photo = 
+								(tl_userProfilePhoto_t *)user->photo_; 
+							d.photo_id = photo->photo_id_;
+							buf_t p = buf_add_buf(photo->stripped_thumb_);
+							tl_t *thumb = tl_deserialize(&p);
+							if (thumb && thumb->_id == id_photoStrippedSize){
+								tl_photoStrippedSize_t *pss = 
+									(tl_photoStrippedSize_t *)thumb;
+								d.thumb = buf_add_buf(pss->bytes_);
+							}
+						}
 					}
 				} else if (md.users_[k]->_id == id_userEmpty){
 					tl_userEmpty_t *user =
@@ -134,6 +147,20 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 						d.name = 
 							strndup((char *)channel->title_.data,
 									channel->title_.size);
+						if (channel->photo_ && 
+								channel->photo_->_id == id_chatPhoto)
+						{
+							tl_chatPhoto_t *photo = 
+								(tl_chatPhoto_t *)channel->photo_; 
+							d.photo_id = photo->photo_id_;
+							buf_t p = buf_add_buf(photo->stripped_thumb_);
+							tl_t *thumb = tl_deserialize(&p);
+							if (thumb && thumb->_id == id_photoStrippedSize){
+								tl_photoStrippedSize_t *pss = 
+									(tl_photoStrippedSize_t *)thumb;
+								d.thumb = buf_add_buf(pss->bytes_);
+							}						
+						}
 					}
 				}
 				else if (md.chats_[k]->_id == id_channelForbidden){
@@ -156,6 +183,20 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 						d.name = 
 							strndup((char *)chat->title_.data,
 									chat->title_.size);
+						if (chat->photo_ && 
+								chat->photo_->_id == id_chatPhoto)
+						{
+							tl_chatPhoto_t *photo = 
+								(tl_chatPhoto_t *)chat->photo_; 
+							d.photo_id = photo->photo_id_;
+							buf_t p = buf_add_buf(photo->stripped_thumb_);
+							tl_t *thumb = tl_deserialize(&p);
+							if (thumb && thumb->_id == id_photoStrippedSize){
+								tl_photoStrippedSize_t *pss = 
+									(tl_photoStrippedSize_t *)thumb;
+								d.thumb = buf_add_buf(pss->bytes_);
+							}
+						}
 					}
 				}
 				else if (md.chats_[k]->_id == id_chatForbidden){

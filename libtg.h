@@ -1,6 +1,7 @@
 #ifndef SYMBOL
 #define SYMBOL
 
+#include "tl/buf.h"
 #include  "tl/libtl.h"
 #include <time.h>
 
@@ -94,6 +95,8 @@ typedef struct tg_dialog_ {
 	tl_t *tl;
 	char *name;
 	tl_message_t *top_message;
+	buf_t thumb;
+	long photo_id;
 
 } tg_dialog_t;
 
