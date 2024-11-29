@@ -119,39 +119,12 @@ char * callback(
 
 static int md_callback(
 		void *data, 
-		tl_messages_dialogsSlice_t *dialogs, 
-		const char *err)
+		const tg_dialog_t *dialog)
 {
-	if (err){
-		printf("%s\n", err);
-		return 0;
-	}
-	printf("dialogs: %d\n", dialogs->dialogs_len);
-	printf("messages: %d\n", dialogs->messages_len);
-	printf("chats: %d\n", dialogs->chats_len);
-	//printf("MSG: %s\n", STRING_T_TO_STR(m->message_));
-	//printf("message len: %d\n", m->message_);
-	int i;
-	for (i = 0; i < dialogs->messages_len; ++i) {
-		tl_message_t *m = dialogs->messages_[i];
-		printf("MSG: %s\n", m->message_.data);
-	}
-
-	printf("CHATS:\n");
-	for (i = 0; i < dialogs->chats_len; ++i) {
-		if (dialogs->chats_[i]->_id == id_channel){
-			tl_channel_t *channel = 
-				(tl_channel_t *)dialogs->chats_[i];
-			printf("Channel %d: %s\n", i, channel->title_.data);
-		}
-		//tl_chat_t *chat = dialogs->chats_[i];
-		//if (chat->_id == id_chat)
-			//printf("CHAT %d: %s\n", i, chat->title_.data);
-		//if (chat->_id == id_chatEmpty)
-			//printf("chat empty\n");
-		//printf("%.8x\n", chat->_id);
-	}
-
+	char *m = 
+		strndup((char *)dialog->top_message->message_.data, 40);
+	printf("%s:\t%s\n",
+			dialog->name, m);
 	return 0;
 }
 
@@ -184,8 +157,12 @@ int main(int argc, char *argv[])
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
 
-	tg_get_dialogs(tg, 0, 6, 
-			NULL, md_callback);
+	int folder = 0;
+	long hash = 0;
+	tl_peerUser_t *peer = NULL;
+	tg_get_dialogs(tg, 0, 6,
+		 	0, &hash, &folder, 
+			&peer, md_callback);
 
 	tg_close(tg);
 	return 0;
@@ -210,7 +187,7 @@ int main_ss(int argc, char *argv[])
 	tg_set_on_error(tg, NULL, on_err);
 	tg_set_on_log  (tg, NULL, on_log);
 	
-	tg_new_auth_key2(tg);
-	//tg_new_auth_key(tg);
+	//tg_new_auth_key2(tg);
+	tg_new_auth_key1(tg);
 	return 0;
 }
