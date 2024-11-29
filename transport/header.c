@@ -40,8 +40,16 @@ buf_t header(tg_t *tg, buf_t b, bool enc)
 		//message_id
 		s = buf_cat_ui64(s, tg_get_current_time());
 		
+	 /* The seqno of a content-related message is thus
+	  * msg.seqNo = (current_seqno*2)+1 (and after generating
+	  * it, the local current_seqno counter must be
+	  * incremented by
+	  * 1), the seqno of a non-content related message is
+	  * msg.seqNo = (current_seqno*2) (current_seqno must not
+	  * be incremented by 1 after generation).*/
 		//seq_no
-		s = buf_cat_ui32(s, tg->seqn);
+		//s = buf_cat_ui32(s, tg->seqn);
+		s = buf_cat_ui32(s, tg->seqn++ * 2 + 1);
 		
 		//message_data_length
 		s = buf_cat_ui32(s, b.size);
@@ -105,10 +113,11 @@ buf_t deheader(tg_t *tg, buf_t b, bool enc)
 		tg_add_mgsid(tg, msg_id);
 		
 		// seq_no
-		uint64_t seq_no = deserialize_ui32(&b);
+		uint32_t seq_no = deserialize_ui32(&b);
+		ON_LOG(tg, "%s: SEQ_NO: %d", __func__, seq_no);
 
 		// data len
-		uint64_t msg_data_len = deserialize_ui32(&b);
+		uint32_t msg_data_len = deserialize_ui32(&b);
 		// set data len without padding
 		b.size = msg_data_len;
 		

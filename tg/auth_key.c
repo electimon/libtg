@@ -32,11 +32,6 @@ int tg_new_auth_key(tg_t *tg)
 	tg->salt =
 		buf_add(shared_rc.salt.data, shared_rc.salt.size);
 
-	// save key
-	auth_key_to_database(
-			tg, tg->key, 
-			"000");
-	
 	api.app.close(app);
 	return 0;
 }

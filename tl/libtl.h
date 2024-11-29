@@ -8,7 +8,7 @@
 #include "methods.h"
 #include "deserialize.h"
 
-#define SERVER_IP   "149.154.167.50"
+#define SERVER_IP   "149.154.167.40"
 #define SERVER_PORT 443
 
 uint32_t id_from_tl_buf(buf_t tl_buf);

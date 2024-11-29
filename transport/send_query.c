@@ -135,6 +135,8 @@ tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 
 tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 {
+	ON_LOG_BUF(tg, query, "%s: %s: ", 
+			__func__, enc?"API":"RFC");
 	// init net
 	if (tg->mtx) {
 		// use mtx driver
@@ -144,13 +146,16 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 			api.net.open(tg->ip, tg->port);
 		}
 		
+		shared_rc.key = api.buf.add(tg->key.data, tg->key.size);
+		shared_rc.salt = api.buf.rand(8);
+		shared_rc.ssid = api.buf.rand(8);
 		// get new auth_key
-		if (!shared_rc.key.size)
-			api.srl.auth();
-		else if (!shared_rc.ssid.size){
-			ON_LOG(tg, "%s: new session...", __func__);
-			shared_rc.ssid = api.buf.rand(8);
-		}
+		/*if (!shared_rc.key.size)*/
+			/*api.srl.auth();*/
+		/*else if (!shared_rc.ssid.size){*/
+			/*ON_LOG(tg, "%s: new session...", __func__);*/
+			/*shared_rc.ssid = api.buf.rand(8);*/
+		/*}*/
 	} else {
 		// use tg driver
 		if (tg->mtx_net){
@@ -168,11 +173,6 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 			tg->ssid = buf_rand(8);
 			ON_LOG(tg, "%s: new session...", __func__);
 		}
-
-		if (tg->seqn == -1)
-			tg->seqn = 0;
-		else
-			tg->seqn += 2;
 	}
 		
 	// DRIVE

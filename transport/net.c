@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 28.11.2024
+ * Last Modified Date: 29.11.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -52,7 +52,6 @@ int tg_net_open(tg_t *tg)
 	char init[] = {0xee, 0xee, 0xee, 0xee};
 	send(tg->sockfd, init, 4, 0);
 
-	tg->seqn = -1;
 	tg->net = true;
 
 	return 0;

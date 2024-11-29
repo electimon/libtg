@@ -78,7 +78,20 @@ tg_is_authorized(tg_t *tg)
 tl_auth_sentCode_t *
 tg_auth_sendCode(tg_t *tg, const char *phone_number) 
 {
-	tg->key = auth_key_from_database(tg);
+	// create new auth_key
+	if (tg->net){
+		tg_net_close(tg);
+	}
+
+	api.app.open();
+	tg->sockfd = shared_rc.net.sockfd;
+	tg->net = true;
+	tg->key = 
+		buf_add(shared_rc.key.data, shared_rc.key.size);
+	tg->salt = 
+		buf_add(shared_rc.salt.data, shared_rc.salt.size);
+	tg->ssid = buf_rand(8);
+	tg->seqn = shared_rc.seqnh + 1;
 
 	// get tokens from database 
 	buf_t t[20]; int tn = 0;

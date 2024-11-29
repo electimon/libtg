@@ -96,6 +96,10 @@ static int md_callback(
 		tl_messages_dialogsSlice_t *dialogs, 
 		const char *err)
 {
+	if (err){
+		printf("%s\n", err);
+		return 0;
+	}
 	printf("dialogs: %d\n", dialogs->dialogs_len);
 	printf("messages: %d\n", dialogs->messages_len);
 	printf("chats: %d\n", dialogs->chats_len);
@@ -146,16 +150,13 @@ int main(int argc, char *argv[])
 	tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
 
-	if (!tg_has_auth_key(tg)){
-		tg->mtx = true;
-		tl_auth_sentCode_t *sentCode = 
-			tg_auth_sendCode(tg, "+79990407731");
-		if (!sentCode)
-			return 1;
-		tg->mtx = false;
+	if (tg_is_authorized(tg)) {
+		printf("AUTHORIZED!\n");
 	}
+	return 1;
 
-	return 0;
+	//if (tg_connect(tg, NULL, callback))
+		//return 1;	
 
 	tg_get_dialogs(tg, 0, 6, 
 			NULL, md_callback);
@@ -182,9 +183,8 @@ int main_ss(int argc, char *argv[])
 
 	tg_set_on_error(tg, NULL, on_err);
 	tg_set_on_log  (tg, NULL, on_log);
-	tg_net_open(tg);
 	
-	//tg_new_auth_key2(tg);
-	tg_new_auth_key(tg);
+	tg_new_auth_key2(tg);
+	//tg_new_auth_key(tg);
 	return 0;
 }

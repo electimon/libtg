@@ -38,6 +38,9 @@ tg_t *tg_new(const char *database_path,
 	// set auth_key
 	tg->key = auth_key_from_database(tg);
 
+	// start new seqn
+	tg->seqn = 0;
+	
 	return tg;
 }
 
