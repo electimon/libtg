@@ -15,12 +15,12 @@
 //#include "../transport/crc.h"
 #include "../mtx/include/api.h"
 
-buf_t encrypt    (tg_t *tg, buf_t b, bool enc);
-buf_t decrypt    (tg_t *tg, buf_t b, bool enc);
-buf_t header     (tg_t *tg, buf_t b, bool enc);
-buf_t deheader   (tg_t *tg, buf_t b, bool enc);
-buf_t transport  (tg_t *tg, buf_t b);
-buf_t detransport(tg_t *tg, buf_t b);
+buf_t tg_encrypt    (tg_t *tg, buf_t b, bool enc);
+buf_t tg_decrypt    (tg_t *tg, buf_t b, bool enc);
+buf_t tg_header     (tg_t *tg, buf_t b, bool enc);
+buf_t tg_deheader   (tg_t *tg, buf_t b, bool enc);
+buf_t tg_transport  (tg_t *tg, buf_t b);
+buf_t tg_detransport(tg_t *tg, buf_t b);
 
 
 tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg);
@@ -152,12 +152,12 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 	// DRIVE
 	buf_t msg;
 
-	buf_t h = header(tg, query, enc);
+	buf_t h = tg_header(tg, query, enc);
 	
-	buf_t e = encrypt(tg, h, enc);
+	buf_t e = tg_encrypt(tg, h, enc);
 	buf_free(h);
 
-	buf_t t = transport(tg, e);
+	buf_t t = tg_transport(tg, e);
 	buf_free(e);
 
 	tg_net_send(tg, t);
@@ -165,7 +165,7 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 	
 	buf_t r = tg_net_receive(tg);
 
-	buf_t tr = detransport(tg, r);
+	buf_t tr = tg_detransport(tg, r);
 	if (!tr.size)
 		return NULL;
 	buf_free(r);
@@ -180,12 +180,12 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 		return tg_send_query_(tg, query, enc);
 	}
 
-	buf_t d = decrypt(tg, tr, enc);
+	buf_t d = tg_decrypt(tg, tr, enc);
 	if (!d.size)
 		return NULL;
 	buf_free(tr);
 
-	msg = deheader(tg, d, enc);
+	msg = tg_deheader(tg, d, enc);
 	if (!msg.size)
 		return NULL;
 	buf_free(d);

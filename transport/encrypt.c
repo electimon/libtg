@@ -3,7 +3,7 @@
 #include "../crypto/cry.h"
 #include <stdio.h>
 
-buf_t encrypt(tg_t *tg, buf_t b, bool enc)
+buf_t tg_encrypt(tg_t *tg, buf_t b, bool enc)
 {
   buf_t e = {};
 	buf_init(&e);
@@ -101,7 +101,7 @@ buf_t encrypt(tg_t *tg, buf_t b, bool enc)
   return e;
 }
 
-buf_t decrypt(tg_t *tg, buf_t m, bool enc)
+buf_t tg_decrypt(tg_t *tg, buf_t m, bool enc)
 {
   buf_t d;
 	buf_init(&d);

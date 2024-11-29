@@ -1,7 +1,7 @@
 #include "../tg/tg.h"
 #include "crc.h"
 
-buf_t transport(tg_t *tg, buf_t buf)
+buf_t tg_transport(tg_t *tg, buf_t buf)
 {
   buf_t b;
 	buf_init(&b);
@@ -32,7 +32,7 @@ buf_t transport(tg_t *tg, buf_t buf)
 	return b;
 }
 
-buf_t detransport(tg_t *tg, buf_t a)
+buf_t tg_detransport(tg_t *tg, buf_t a)
 {
 	buf_t b;
 	buf_init(&b);

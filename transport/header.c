@@ -22,7 +22,7 @@ static long long tg_get_current_time()
 				tg_get_utime(CLOCK_REALTIME)) & -4;
 }
 
-buf_t header(tg_t *tg, buf_t b, bool enc)
+buf_t tg_header(tg_t *tg, buf_t b, bool enc)
 {
   buf_t s = {};
 	buf_init(&s);
@@ -82,7 +82,7 @@ buf_t header(tg_t *tg, buf_t b, bool enc)
   return s;
 }
 
-buf_t deheader(tg_t *tg, buf_t b, bool enc)
+buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 {
 	if (!b.size){
 		ON_ERR(tg, NULL, "%s: got nothing", __func__);
