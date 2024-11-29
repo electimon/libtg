@@ -1,6 +1,9 @@
 #include "../tg/tg.h"
 #include <time.h>
 #include <assert.h>
+#ifdef __APPLE__
+#include "darwin-posix-rt/darwin-posix-rt.h"
+#endif
 
 static void tg_my_clock_gettime(int clock_id, struct timespec * T)
 {
