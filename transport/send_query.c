@@ -59,16 +59,16 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 					(tl_msgs_ack_t *)tl;
 				// get new message
 				buf_t r = tg_net_receive(tg);
-				buf_t tr = detransport(tg, r);
+				buf_t tr = tg_detransport(tg, r);
 				buf_free(r);
 				if (buf_get_ui32(tr) == 0xfffffe6c){
 					tl_t *tl = NEW(tl_t, return NULL);
 					tl->_id = buf_get_ui32(tr);
 					return tl;
 				}
-				buf_t d = decrypt(tg, tr, true);
+				buf_t d = tg_decrypt(tg, tr, true);
 				buf_free(tr);
-				buf_t msg = deheader(tg, d, true);
+				buf_t msg = tg_deheader(tg, d, true);
 				buf_free(d);
 				tl = tg_handle_serialized_message(tg, msg);
 			}
