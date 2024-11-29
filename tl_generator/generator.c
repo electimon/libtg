@@ -469,11 +469,9 @@ int append_deserialize_table(
 					, g->deserialize_table_c);
 
 					fputs(STR(buf, BLEN,
-					  "\t\tif(obj->%s_len != id_vector)\n"
-					  "\t\tprintf(\"ERR! id is not vector: %%.8x\\n\", obj->%s_len);\n"
-					  "\t\telse\n"
+					  "\t\tif(obj->%s_len == id_vector)\n"
 					  "\t\t\tobj->%s_len = deserialize_ui32(buf); // skip vector definition\n"
-					, m->args[i].name, m->args[i].name, m->args[i].name)
+					, m->args[i].name, m->args[i].name)
 					, g->deserialize_table_c);
 					
 					//fputs(STR(buf, BLEN,

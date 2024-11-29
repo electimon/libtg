@@ -26,8 +26,6 @@ struct tg_ {
 	buf_t ssid;
 	uint64_t fingerprint;
 	uint64_t msgids[20]; 
-	bool mtx;
-	bool mtx_net;
 };
 
 int database_init(tg_t *tg, const char *database_path);

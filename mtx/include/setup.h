@@ -13,8 +13,8 @@
 #define product             "mtx"
 #define _version             "0.1"
 
-#define _ip                 "149.154.167.40"
-/*#define _ip                 "149.154.167.50"*/
+/*#define _ip                 "149.154.167.40"*/
+#define _ip                 "149.154.167.50"
 #define _port               443
 
 #define _api_id             0

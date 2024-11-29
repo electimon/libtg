@@ -38,7 +38,33 @@ char * callback(
 			break;
 		case TG_AUTH_PHONE_CODE_NEEDED:
 			{
+				tl_auth_sentCode_t *sentCode =
+					(tl_auth_sentCode_t *)tl;
+				
+				char *type = NULL;
+				switch (sentCode->type_->_id) {
+					case id_auth_sentCodeTypeFlashCall:
+						type = "FlashCall";
+						break;
+					case id_auth_sentCodeTypeApp:
+						type = "Application";
+						break;
+					case id_auth_sentCodeTypeCall:
+						type = "Call";
+						break;
+					case id_auth_sentCodeTypeMissedCall:
+						type = "MissedCall";
+						break;
+					case id_auth_sentCodeTypeEmailCode:
+						type = "Email";
+						break;
+					
+					default:
+						break;
+				}
+
 				int code;
+				printf("The code was send via %s\n", type);
 				printf("enter code: \n");
 				scanf("%d", &code);
 				printf("code: %d\n", code);
@@ -147,16 +173,16 @@ int main(int argc, char *argv[])
 			apiId, 
 			apiHash, "pub.pkcs");
 
-	tg_set_on_log  (tg, NULL, on_log);
-	tg_set_on_error  (tg, NULL, on_err);
+	/*tg_set_on_log  (tg, NULL, on_log);*/
+	/*tg_set_on_error  (tg, NULL, on_err);*/
 
-	if (tg_is_authorized(tg)) {
-		printf("AUTHORIZED!\n");
-	}
-	return 1;
+	/*if (tg_is_authorized(tg)) {*/
+		/*printf("AUTHORIZED!\n");*/
+	/*}*/
+	/*return 1;*/
 
-	//if (tg_connect(tg, NULL, callback))
-		//return 1;	
+	if (tg_connect(tg, NULL, callback))
+		return 1;	
 
 	tg_get_dialogs(tg, 0, 6, 
 			NULL, md_callback);
