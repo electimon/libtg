@@ -53,7 +53,7 @@ int tg_net_open(tg_t *tg)
 	send(tg->sockfd, init, 4, 0);
 
 	tg->net = true;
-
+	
 	return 0;
 }
 
