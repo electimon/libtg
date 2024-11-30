@@ -80,7 +80,7 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 {
 	// create new auth_key
 	if (tg->net){
-		tg_net_close(tg);
+		tg_net_close(tg, tg->sockfd);
 	}
 
 	api.app.open();
@@ -178,7 +178,7 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 			auth_token_to_database(tg, auth_token);
 		}
 		// save auth_key_id 
-		auth_key_to_database(tg, tg->key, phone_number);
+		auth_key_to_database(tg, tg->key);
 
 		return (tl_user_t *)auth->user_;
 	}

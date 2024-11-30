@@ -11,7 +11,10 @@ typedef struct tg_ tg_t;
 /* create new libtg structure */
 tg_t * tg_new(
 		const char *database_path, 
-		int apiId, const char apiHash[33], const char *pubkey_pem);
+		int id,
+		int apiId, 
+		const char apiHash[33], 
+		const char *pubkey_pem);
 
 /* set on_error callback */
 void tg_set_on_error(tg_t *tg,
@@ -104,9 +107,15 @@ typedef struct tg_dialog_ {
  * %top_msg_id, callback dialogs array and update messages
  * %hash (if not NULL) 
  * set folder_id NULL to get all folders, pointer to 0 for 
- * non-hidden dialogs, pointer to 1 for hidden dialogs */ 
-int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
-		time_t date, long * hash, int *folder_id, void *data,
+ * non-hidden dialogs, pointer to 1 for hidden dialogs 
+ * return number of dialogs*/ 
+int tg_get_dialogs(
+		tg_t *tg, 
+		int limit,
+		time_t date, 
+		long * hash, 
+		int *folder_id, 
+		void *data,
 		int (*callback)(void *data, 
 			const tg_dialog_t *dialog));
 #endif /* ifndef SYMBOL */

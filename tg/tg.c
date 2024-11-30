@@ -7,8 +7,12 @@
 #include <stdio.h>
 #include <string.h>
 
-tg_t *tg_new(const char *database_path,
-		int apiId, const char *apiHash, const char *pem)
+tg_t *tg_new(
+		const char *database_path,
+		int id,
+		int apiId, 
+		const char *apiHash, 
+		const char *pem)
 {
 	if (!database_path)
 		return NULL;
@@ -18,6 +22,8 @@ tg_t *tg_new(const char *database_path,
 
 	strncpy(tg->database_path,
 		 	database_path, BUFSIZ-1);
+
+	tg->id = id;
 	
 	// connect to SQL
 	if (database_init(tg, database_path))
@@ -49,7 +55,7 @@ void tg_close(tg_t *tg)
 	// close Telegram
 	
 	// close network
-	tg_net_close(tg);
+	tg_net_close(tg, tg->sockfd);
 	
 	// close database
 	sqlite3_close(tg->db);

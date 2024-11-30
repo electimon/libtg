@@ -15,6 +15,7 @@
 #include "tl/libtl.h"
 #include "tl/names.h"
 #include <time.h>
+#include <unistd.h>
 
 #include "api_id.h"
 #include "tl/tl.h"
@@ -121,12 +122,14 @@ static int md_callback(
 		void *data, 
 		const tg_dialog_t *dialog)
 {
-	char *m = 
-		strndup((char *)dialog->top_message->message_.data, 40);
+	/*char *m = */
+		/*strndup((char *)dialog->top_message->message_.data, 40);*/
 	printf("%s:\t%s\n",
-			dialog->name, m);
-	if (dialog->thumb.size)
-		printf("HAS IMAGE\n");
+			dialog->name, "");
+	int *d = data;
+	if (d)
+		if (dialog->top_message)
+			*d = dialog->top_message->date_;
 	return 0;
 }
 
@@ -145,11 +148,12 @@ int main(int argc, char *argv[])
 	
 	tg_t *tg = tg_new(
 			"test.db", 
+			0,
 			apiId, 
 			apiHash, "pub.pkcs");
 
-	/*tg_set_on_log  (tg, NULL, on_log);*/
-	/*tg_set_on_error  (tg, NULL, on_err);*/
+	//tg_set_on_log  (tg, NULL, on_log);
+	//tg_set_on_error  (tg, NULL, on_err);
 
 	/*if (tg_is_authorized(tg)) {*/
 		/*printf("AUTHORIZED!\n");*/
@@ -159,37 +163,23 @@ int main(int argc, char *argv[])
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
 
+	//tg_set_on_log  (tg, NULL, on_log);
+	//tg_set_on_error  (tg, NULL, on_err);
+
+	time_t t = time(NULL);
+
 	int folder = 0;
 	long hash = 0;
-	tl_peerUser_t *peer = NULL;
-	tg_get_dialogs(tg, 0, 6,
-		 	0, &hash, &folder, 
-			&peer, md_callback);
+	
+	int d = time(NULL);
+	int ret = 10;
+	while (ret >= 10){
+		ret = tg_get_dialogs(tg, 10,
+				d, &hash, &folder, 
+				&d, md_callback);
+		sleep(2);
+	}
 
 	tg_close(tg);
-	return 0;
-}
-
-
-int main_ss(int argc, char *argv[])
-{
-	printf("TGTEST\n");
-	int apiId = 0;
-	char *apiHash = NULL;
-
-	SETUP_API_ID(apiId)
-	SETUP_API_HASH(apiHash)
-	
-	tg_t *tg = tg_new(
-			"test.db", 
-			apiId, 
-			apiHash, 
-			"pub.pkcs");
-
-	tg_set_on_error(tg, NULL, on_err);
-	tg_set_on_log  (tg, NULL, on_log);
-	
-	//tg_new_auth_key2(tg);
-	tg_new_auth_key1(tg);
 	return 0;
 }

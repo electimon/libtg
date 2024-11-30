@@ -89,7 +89,10 @@ int database_init(tg_t *tg, const char *database_path)
 
 buf_t auth_key_from_database(tg_t *tg)
 {
-	char sql[] ="SELECT auth_key FROM auth_keys WHERE id = 0;";
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"SELECT auth_key FROM auth_keys WHERE id = %d;"
+			, tg->id);
 	buf_t auth_key;
 	memset(&auth_key, 0, sizeof(buf_t));
 	tg_sqlite3_for_each(tg, sql, stmt){
@@ -103,7 +106,10 @@ buf_t auth_key_from_database(tg_t *tg)
 
 char * phone_number_from_database(tg_t *tg)
 {
-	char sql[] ="SELECT phone_number FROM phone_numbers WHERE id = 0;";
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"SELECT phone_number FROM phone_numbers WHERE id = %d;"
+			, tg->id);
 	char buf[BUFSIZ] = {0};
 	tg_sqlite3_for_each(tg, sql, stmt)
 		strcpy(buf, (char *)sqlite3_column_text(stmt, 0));
@@ -123,19 +129,21 @@ int phone_number_to_database(
 			"CREATE TABLE IF NOT EXISTS phone_numbers (id INT); "
 			"ALTER TABLE \'phone_numbers\' ADD COLUMN \'phone_number\' TEXT; "
 			"INSERT INTO \'phone_numbers\' (\'id\') "
-			"SELECT 0 "
-			"WHERE NOT EXISTS (SELECT 1 FROM phone_numbers WHERE id = 0); "
-			"UPDATE \'phone_numbers\' SET \'phone_number\' = \'%s\', id = 0; "
-		, phone_number);
+			"SELECT %d "
+			"WHERE NOT EXISTS (SELECT 1 FROM phone_numbers WHERE id = %d); "
+			"UPDATE \'phone_numbers\' SET \'phone_number\' = \'%s\', id = %d; "
+		,tg->id, tg->id, phone_number, tg->id);
 	return tg_sqlite3_exec(tg, sql);
 }
 
 char * auth_tokens_from_database(tg_t *tg)
 {
-	char sql[] = 
+	char sql[BUFSIZ];
+	sprintf(sql, 
 		"SELECT * FROM ((SELECT ROW_NUMBER() OVER (ORDER BY ID) "
-		"AS Number, auth_token FROM auth_tokens)) WHERE id = 0 ORDER BY Number DESC "	
-		"LIMIT 20;";
+		"AS Number, auth_token FROM auth_tokens)) WHERE id = %d "
+		"ORDER BY Number DESC "	
+		"LIMIT 20;", tg->id);
 	struct str s;
 	if (str_init(&s))
 		return NULL;
@@ -168,20 +176,22 @@ int auth_token_to_database(
 	sprintf(sql, 
 			"CREATE TABLE IF NOT EXISTS auth_tokens (id INT); "
 			"ALTER TABLE \'auth_tokens\' ADD COLUMN \'auth_token\' TEXT; "
-			"INSERT INTO \'auth_tokens\' (id, \'auth_token\') VALUES (0, \'%s\'); "
-		, auth_token);
+			"INSERT INTO \'auth_tokens\' (id, \'auth_token\') VALUES (%d, \'%s\'); "
+		, tg->id, auth_token);
 	return tg_sqlite3_exec(tg, sql);
 }
 
 int auth_key_to_database(
-		tg_t *tg, buf_t auth_key, const char *phone_number)
+		tg_t *tg, buf_t auth_key)
 {
-	char sql[BUFSIZ] =
+	char sql[BUFSIZ];
+	sprintf(sql, 
 			"CREATE TABLE IF NOT EXISTS auth_keys (id INT); "
 			"ALTER TABLE \'auth_keys\' ADD COLUMN \'auth_key\' BLOB; "
 			"INSERT INTO \'auth_keys\' (id) "
-			"SELECT 0 "
-			"WHERE NOT EXISTS (SELECT 1 FROM auth_keys WHERE id = 0); ";
+			"SELECT %d "
+			"WHERE NOT EXISTS (SELECT 1 FROM auth_keys WHERE id = %d); "
+			, tg->id, tg->id);
 	
 	int res = sqlite3_open(tg->database_path, &tg->db);
 	if (res){
@@ -197,7 +207,8 @@ int auth_key_to_database(
 	}	
 			
 	sprintf(sql, 
-			"UPDATE \'auth_keys\' SET \'auth_key\' = (?) WHERE id = 0; ");
+			"UPDATE \'auth_keys\' SET \'auth_key\' = (?) "
+			"WHERE id = %d; ", tg->id);
 	
 	sqlite3_stmt *stmt;
 	res = sqlite3_prepare_v2(tg->db, sql, -1, &stmt, NULL);

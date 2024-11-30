@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 29.11.2024
+ * Last Modified Date: 30.11.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -15,11 +15,12 @@ int tg_net_open(tg_t *tg)
 {
   struct sockaddr_in serv_addr;
   struct hostent * server;
+	int sockfd;
 
-  tg->sockfd = 
+  sockfd = 
 		socket(AF_INET, SOCK_STREAM, 0);
 
-  if (tg->sockfd < 0) {
+  if (sockfd < 0) {
 		ON_ERR(tg, NULL, "%s: can't open socket", __func__);
     return 1;
   }
@@ -40,7 +41,7 @@ int tg_net_open(tg_t *tg)
   serv_addr.sin_port = htons(tg->port);
 
   if (connect(
-				tg->sockfd, 
+				sockfd, 
 				(struct sockaddr *) &serv_addr, 
 				sizeof(serv_addr)) < 0) 
 	{
@@ -50,23 +51,21 @@ int tg_net_open(tg_t *tg)
 
 	// send intermediate protocol
 	char init[] = {0xee, 0xee, 0xee, 0xee};
-	send(tg->sockfd, init, 4, 0);
+	send(sockfd, init, 4, 0);
 
-	tg->net = true;
-	
-	return 0;
+	return sockfd;
 }
 
-void tg_net_close(tg_t *tg)
+void tg_net_close(tg_t *tg, int sockfd)
 {
-  close(tg->sockfd);
+  close(sockfd);
 }
 
-void tg_net_send(tg_t *tg, const buf_t buf)
+void tg_net_send(tg_t *tg, int sockfd, const buf_t buf)
 {
   //ON_LOG_BUF(tg, buf, "%s: ", __func__);
   int32_t n = (int32_t)send(
-			tg->sockfd, 
+			sockfd, 
 			buf.data, 
 			buf.size, 0);
   ON_LOG(tg, "%s: send size: %d", __func__, n);
@@ -76,7 +75,7 @@ void tg_net_send(tg_t *tg, const buf_t buf)
   }
 }
 
-buf_t tg_net_receive(tg_t *tg)
+buf_t tg_net_receive(tg_t *tg, int sockfd)
 {
 	int LEN = BUFSIZ;
 	buf_t data, buf;
@@ -85,7 +84,7 @@ buf_t tg_net_receive(tg_t *tg)
 	do
 	{		
 			buf_init(&buf);
-			buf.size = recv(tg->sockfd,
+			buf.size = recv(sockfd,
 				 	buf.data, LEN, 0);
 			if (buf.size == 0)
 			{

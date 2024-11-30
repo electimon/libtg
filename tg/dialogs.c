@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 29.11.2024
+ * Last Modified Date: 01.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -11,18 +11,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include "time.h"
+#include "../tl/alloc.h"
 
-int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit, 
-		time_t date, long * hash, int *folder_id, void *data,
+int tg_get_dialogs(
+		tg_t *tg, 
+		int limit, 
+		time_t date, 
+		long * hash, 
+		int *folder_id, 
+		void *data,
 		int (*callback)(void *data, 
 			const tg_dialog_t *dialog))
 {
-	int i, id=top_msg_id;
+	int i;
 	long h = 0;
 	if (hash)
 		h = *hash;
 
-	InputPeer inputPeer = tl_inputPeerSelf();
+	//InputPeer inputPeer = tl_inputPeerSelf();
+	InputPeer inputPeer = tl_inputPeerEmpty();
 	time_t t = time(NULL);
 	if (date)
 		t = date;
@@ -31,8 +38,8 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 		tl_messages_getDialogs(
 				NULL,
 				folder_id, 
-				0,
-				id, 
+				date,
+				0, 
 				&inputPeer, 
 				limit,
 				h);
@@ -74,29 +81,38 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 			h = h ^ (h << 35);
 			h = h ^ (h >> 4);
 			h = h + m->id_;
-			id = m->id_;
 		}
 		if (hash)
 			*hash = h;
-
-		printf("DIALOGS: %d\n", md.dialogs_len);
 
 		for (i = 0; i < md.dialogs_len; ++i) {
 			// handle dialogs
 			tg_dialog_t d;
 			memset(&d, 0, sizeof(d));
-			if (md.dialogs_[i]->_id != id_dialog){
+
+			tl_dialog_t dialog;
+			memset(&d, 0, sizeof(tl_dialog_t));
+			
+			if (md.dialogs_[i]->_id == id_dialogFolder){
+				tl_dialogFolder_t *df = 
+					(tl_dialogFolder_t *)md.dialogs_[i];
+				tl_folder_t *folder = 
+					(tl_folder_t *)df->folder_;
+
+				dialog.peer_ = df->peer_;
+				dialog.top_message_ = df->top_message_;
+				dialog.pinned_ = df->pinned_;
+
+			} else if (md.dialogs_[i]->_id != id_dialog){
 				ON_LOG(tg, "%s: unknown dialog type: %.8x",
 						__func__, md.dialogs_[i]->_id);
 				continue;
 			}
-			tl_dialog_t *dialog = (tl_dialog_t *)md.dialogs_[i];	
+			dialog = *(tl_dialog_t *)md.dialogs_[i];	
+			tl_peerChat_t *peer = (tl_peerChat_t *)dialog.peer_;
 			
-			d.dialog = (tl_dialog_t *)md.dialogs_[i];
-			
-			tl_peerChat_t *peer = (tl_peerChat_t *)dialog->peer_;
 			d.id = peer->chat_id_;
-			
+
 			int k;
 
 			// iterate users
@@ -107,9 +123,14 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 					if (d.id == user->id_){
 						d.type = TG_DIALOG_TYPE_USER;
 						d.tl = (tl_t *)user;
-						d.name = 
-							strndup((char *)user->username_.data,
-									user->username_.size);
+						if (user->username_.size)
+							d.name = 
+								strndup((char *)user->username_.data,
+										user->username_.size);
+						else 
+							d.name = 
+								strndup((char *)user->first_name_.data,
+										user->first_name_.size);
 						if (user->photo_ && 
 								user->photo_->_id == id_userProfilePhoto)
 						{
@@ -205,12 +226,12 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 				if (md.messages_[k]->_id == id_message){
 					tl_message_t *message = 
 						(tl_message_t *)md.messages_[k];
-					if (message->id_ == dialog->top_message_){
+					if (message->id_ == dialog.top_message_){
 						d.top_message = message;
 					}
 				}
 			} // done messages 
-			
+
 			// callback dialog
 			if (d.type == TG_DIALOG_TYPE_NULL) {
 				ON_LOG(tg, "%s: can't find dialog data "
@@ -228,7 +249,7 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 		// free tl
 		/* TODO:  <29-11-24, yourname> */
 		
-		return 0;
+		return md.dialogs_len;
 
 	} else { // not dialogs or dialogsSlice
 		// throw error
@@ -238,5 +259,5 @@ int tg_get_dialogs(tg_t *tg, int top_msg_id, int limit,
 		// free tl
 		/* TODO:  <29-11-24, yourname> */
 	}
-	return 1;
+	return 0;
 }

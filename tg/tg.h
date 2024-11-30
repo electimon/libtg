@@ -7,6 +7,7 @@
 #include "../tl/str.h"
 
 struct tg_ {
+	int id;
 	int apiId;
 	char apiHash[33];
 	char database_path[BUFSIZ];
@@ -36,14 +37,12 @@ char * auth_tokens_from_database(tg_t *tg);
 int phone_number_to_database(
 		tg_t *tg, const char *phone_number);
 
-int auth_token_to_database(
-		tg_t *tg, const char *auth_token);
+int auth_token_to_database(tg_t *tg, const char *auth_token);
 
 int auth_key_to_database(
-		tg_t *tg, buf_t auth_key, const char *phone_number);
+		tg_t *tg, buf_t auth_key);
 
 void tg_add_mgsid(tg_t*, uint64_t);
-
 
 tl_t * tg_send_query_(tg_t *tg, buf_t s, bool encrypt);
 

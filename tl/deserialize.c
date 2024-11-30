@@ -72,46 +72,6 @@ buf_t deserialize_bytes(buf_t *b)
   return s;
 }
 
-buf_t deserialize_str(buf_t *b)
-{
-	/*buf_dump(b);*/
-  buf_t s;
-	buf_init(&s);
-  buf_t byte = buf_add(b->data, 4);
-  int offset = byte.data[0];
-
-  /*if (byte.data[0] <= 253 && !b.data[1 + offset] && !b.data[2 + offset] && !b.data[3 + offset]) {*/
-  if (byte.data[0] <= 253) {
-    uint32_t size = byte.data[0];
-    s = buf_add(b->data + 1, size);
-		int pad = (4 - ((size + 1) % 4)) % 4;
-		*b = buf_add(
-				b->data + size + 1 + pad, 
-				b->size - size - 1 - pad);
-  } else if (byte.data[0] >= 254) {
-    uint8_t start = 0xfe;
-    buf_t s1 = buf_add((uint8_t *)&start, 1);
-    buf_t s2 = buf_add(b->data, 1);
-
-    if (!buf_cmp(s1, s2)) {
-      printf("can't deserialize string");
-    }
-
-    buf_t len_ = buf_add(b->data + 1, 3);
-    len_.size = 4; // hack
-    uint32_t len = buf_get_ui32(len_);
-    s = buf_add(b->data + 4, len);
-		int pad = (4 - (len % 4)) % 4;
-    *b = buf_add(
-				b->data + len + 4 + pad,
-			 	b->size - len - 4 - pad);
-  } else {
-    printf("can't deserialize string");
-  }
-
-  return s;
-}
-
 static tl_deserialize_function *get_fun(unsigned int id){
 	int i,
 			len = sizeof(tl_deserialize_table)/

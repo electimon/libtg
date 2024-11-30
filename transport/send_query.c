@@ -58,7 +58,7 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 				tl_msgs_ack_t *obj = 
 					(tl_msgs_ack_t *)tl;
 				// get new message
-				buf_t r = tg_net_receive(tg);
+				buf_t r = tg_net_receive(tg, tg->sockfd);
 				buf_t tr = tg_detransport(tg, r);
 				buf_free(r);
 				if (buf_get_ui32(tr) == 0xfffffe6c){
@@ -138,8 +138,10 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 	ON_LOG_BUF(tg, query, "%s: %s: ", 
 			__func__, enc?"API":"RFC");
 
-	if (!tg->net)
-		tg_net_open(tg);
+	if (!tg->net){
+		tg->sockfd = tg_net_open(tg);
+		tg->net = true;
+	}
 
 	if (!tg->salt.size)
 		tg->salt = buf_rand(8);
@@ -160,10 +162,10 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 	buf_t t = tg_transport(tg, e);
 	buf_free(e);
 
-	tg_net_send(tg, t);
+	tg_net_send(tg, tg->sockfd, t);
 	buf_free(t);
 	
-	buf_t r = tg_net_receive(tg);
+	buf_t r = tg_net_receive(tg, tg->sockfd);
 
 	buf_t tr = tg_detransport(tg, r);
 	if (!tr.size)
