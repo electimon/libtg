@@ -507,7 +507,9 @@ int tg_get_dialogs_from_database(tg_t *tg, void *data,
 	#undef TG_DIALOG_ARG
 	#undef TG_DIALOG_STR
 	
-	str_appendf(&s, "id FROM dialogs WHERE id = %d;", tg->id);
+	str_appendf(&s, 
+			"id FROM dialogs WHERE id = %d " 
+			"ORDER BY \'top_message_date\' DESC;", tg->id);
 		
 	tg_sqlite3_for_each(tg, s.str, stmt){
 		tg_dialog_t d;
