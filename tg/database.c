@@ -5,33 +5,34 @@
 #include <string.h>
 #include "database.h"
 
-int tg_sqlite3_open(tg_t *tg) 
+sqlite3 * tg_sqlite3_open(tg_t *tg) 
 {
+	sqlite3 *db = NULL;
 	int err = sqlite3_open_v2(
 			tg->database_path,
-		 	&tg->db, 
+		 	&db, 
 			SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, 
 			NULL);
 	if (err){
-		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(tg->db));
-		return 1;
+		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(db));
+		return NULL;
 	}
 
-	return 0;
+	return db;
 }
 
 int tg_sqlite3_prepare(
-		tg_t *tg, const char *sql, sqlite3_stmt **stmt) 
+		tg_t *tg, sqlite3 *db, const char *sql, sqlite3_stmt **stmt) 
 {
 	int res = sqlite3_prepare_v2(
-			tg->db, 
+			db, 
 			sql, 
 			-1, 
 			stmt,
 		 	NULL);
 	if (res != SQLITE_OK){
 		// parse error
-		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(tg->db));
+		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(db));
 		return 1;
 	}	
 
@@ -41,44 +42,45 @@ int tg_sqlite3_prepare(
 int tg_sqlite3_exec(
 		tg_t *tg, const char *sql) 
 {
-	if (!tg->db)	
-		if (tg_sqlite3_open(tg))
-			return 1;
+	sqlite3 *db =	tg_sqlite3_open(tg);
+	if (!db)
+		return 1;
 
 	char *errmsg = NULL;
 
 	int res = 
-		sqlite3_exec(tg->db, sql, NULL, NULL, &errmsg);
+		sqlite3_exec(db, sql, NULL, NULL, &errmsg);
 	if (errmsg){
 		// parse error
 		ON_ERR(tg, NULL, "%s", errmsg);
 		sqlite3_free(errmsg);	
-		sqlite3_close(tg->db);
+		sqlite3_close(db);
 		return 1;
 	}	
 	if (res != SQLITE_OK){
 		// parse error
-		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(tg->db));
-		sqlite3_close(tg->db);
+		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(db));
+		sqlite3_close(db);
 		return 1;
 	}
 
-	//sqlite3_close(tg->db);
+	sqlite3_close(db);
 	return 0;
 }
 
 int database_init(tg_t *tg, const char *database_path)
 {
+	sqlite3 *db;
 	int err = sqlite3_open_v2(
-			tg->database_path, &tg->db, 
+			tg->database_path, &db, 
 			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX, 
 			NULL);
 	if (err){
-		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(tg->db));
+		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(db));
 		return 1;
 	}
 
-	//sqlite3_close(tg->db);
+	sqlite3_close(db);
 	return 0;
 }
 
@@ -188,16 +190,13 @@ int auth_key_to_database(
 			"WHERE NOT EXISTS (SELECT 1 FROM auth_keys WHERE id = %d); "
 			, tg->id, tg->id);
 	
-	//int res = sqlite3_open(tg->database_path, &tg->db);
-	//if (res){
-		//ON_ERR(tg, NULL, "%s", sqlite3_errmsg(tg->db));
-		//return 1;
-	//}
+	sqlite3 *db = tg_sqlite3_open(tg);
 	char *errmsg = NULL;
-	int res = sqlite3_exec(tg->db, sql, NULL, NULL, &errmsg);
+	int res = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
 	if (errmsg) {
 		ON_ERR(tg, NULL, "%s", errmsg);
 		free(errmsg);
+		sqlite3_close(db);
 		return 1;
 	}	
 			
@@ -206,22 +205,23 @@ int auth_key_to_database(
 			"WHERE id = %d; ", tg->id);
 	
 	sqlite3_stmt *stmt;
-	res = sqlite3_prepare_v2(tg->db, sql, -1, &stmt, NULL);
+	res = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
 		ON_ERR(tg, NULL, "%s", errmsg);
 		free(errmsg);
+		sqlite3_close(db);
 		return 1;
 	}	
 
 	res = sqlite3_bind_blob(stmt, 1, auth_key.data, auth_key.size, SQLITE_TRANSIENT);
 	if (res != SQLITE_OK) {
-		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(tg->db));
+		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(db));
 	}	
 	
 	sqlite3_step(stmt);
 	
 	sqlite3_finalize(stmt);
-	//sqlite3_close(tg->db);
+	sqlite3_close(db);
 
 	return 0;
 }

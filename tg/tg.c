@@ -60,9 +60,6 @@ void tg_close(tg_t *tg)
 	// close network
 	tg_net_close(tg, tg->sockfd);
 	
-	// close database
-	sqlite3_close(tg->db);
-	
 	// free
 	free(tg);
 }

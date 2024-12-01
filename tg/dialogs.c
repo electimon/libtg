@@ -19,6 +19,7 @@
 #include "database.h"
 #include <unistd.h>
 #include "../transport/net.h"
+#include <string.h>
 
 #define BUF2STR(_b) strndup((char*)_b.data, _b.size)
 #define BUF2IMG(_b) \
@@ -42,9 +43,6 @@ int tg_get_dialogs(
 
 	//InputPeer inputPeer = tl_inputPeerSelf();
 	InputPeer inputPeer = tl_inputPeerEmpty();
-	time_t t = time(NULL);
-	if (date)
-		t = date;
 
 	buf_t getDialogs = 
 		tl_messages_getDialogs(
@@ -91,17 +89,8 @@ int tg_get_dialogs(
 		}
 		
 		int k;
-		for (k = 0;  k< md.messages_len; ++k) {
-			tl_message_t *m = (tl_message_t *)md.messages_[k];
-			h = h ^ (h >> 21);
-			h = h ^ (h << 35);
-			h = h ^ (h >> 4);
-			h = h + m->id_;
-		}
-		if (hash)
-			*hash = h;
-
-		ON_LOG(tg, "%s: got %d dialods\n", 
+		
+		ON_LOG(tg, "%s: got %d dialogs", 
 				__func__, md.dialogs_len);
 
 		for (i = 0; i < md.dialogs_len; ++i) {
@@ -350,6 +339,21 @@ int tg_get_dialogs(
 	return 0;
 }
 
+static void update_hash(long *hash, int msg_id){
+	int k;
+	long h = 0;
+	if (hash)
+		h = *hash;
+
+	h = h ^ (h >> 21);
+	h = h ^ (h << 35);
+	h = h ^ (h >> 4);
+	h = h + msg_id;
+	
+	if (hash)
+		*hash = h;
+}
+
 struct _async_dialogs_update_dialog_t{
 	tg_t *tg;
 	int d;
@@ -370,12 +374,21 @@ static int _async_dialogs_update_dialog(
 	// save dialog to database
 	struct str s;
 	str_init(&s);
-	str_appendf(&s, "UPDATE \'dialogs\' SET ");
 
+	str_appendf(&s,
+		"INSERT INTO \'dialogs\' (\'peer_id\') "
+		"SELECT %ld "
+		"WHERE NOT EXISTS (SELECT 1 FROM dialogs WHERE peer_id = %ld);\n"
+		, dialog->peer_id, dialog->peer_id);
+
+	str_appendf(&s, "UPDATE \'dialogs\' SET ");
+	
 	#define TG_DIALOG_STR(t, n, type, name) \
+	if (dialog->n){\
 		str_appendf(&s, "\'" name "\'" " = \'"); \
 		str_append(&s, (char*)dialog->n, strlen((char*)dialog->n)); \
 		str_appendf(&s, "\', "); \
+	}
 		
 	#define TG_DIALOG_ARG(t, n, type, name) \
 		str_appendf(&s, "\'" name "\'" " = %ld, ", (long)dialog->n);
@@ -384,10 +397,15 @@ static int _async_dialogs_update_dialog(
 	#undef TG_DIALOG_ARG
 	#undef TG_DIALOG_STR
 	
-	str_appendf(&s, "id = %d;", d->tg->id);
+	str_appendf(&s, "id = %d WHERE peer_id = %ld;\n"
+			, d->tg->id, dialog->peer_id);
 
 	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
-	int ret = tg_sqlite3_exec(d->tg, s.str);
+	if (tg_sqlite3_exec(d->tg, s.str) == 0){
+		// update hash
+		update_hash(&d->tg->dialogs_hash, 
+				        dialog->top_message_id);
+	}
 	free(s.str);
 
 	return 0;
@@ -398,9 +416,9 @@ static void _async_dialogs_update(tg_t *tg)
 	struct _async_dialogs_update_dialog_t d;
 	d.tg = tg;
 	d.d = time(NULL);
-	int ret = 6;
-	while (ret >= 6){
-		ret = tg_get_dialogs(tg, 6,
+	int ret = 10;
+	while (ret >= 10){
+		ret = tg_get_dialogs(tg, 10,
 				d.d, &tg->dialogs_hash,
 			 	NULL, 
 				&d,
@@ -448,7 +466,7 @@ int tg_async_dialogs_to_database(tg_t *tg, int seconds)
 	ON_LOG(tg, "%s", sql);
 	tg_sqlite3_exec(tg, sql);	
 	
-#define TG_DIALOG_ARG(t, n, type, name) \
+	#define TG_DIALOG_ARG(t, n, type, name) \
 		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
 				"\'" name "\' " type ";\n");\
 		ON_LOG(tg, "%s", sql);\
@@ -472,4 +490,47 @@ int tg_async_dialogs_to_database(tg_t *tg, int seconds)
 			tg);
 
 	return err;
+}
+
+int tg_get_dialogs_from_database(tg_t *tg, void *data,
+		int (*callback)(void *data, const tg_dialog_t *dialog))
+{
+	struct str s;
+	str_init(&s);
+	str_appendf(&s, "SELECT ");
+	
+	#define TG_DIALOG_ARG(t, n, type, name) \
+		str_appendf(&s, name ", ");
+	#define TG_DIALOG_STR(t, n, type, name) \
+		str_appendf(&s, name ", ");
+	TG_DIALOG_ARGS
+	#undef TG_DIALOG_ARG
+	#undef TG_DIALOG_STR
+	
+	str_appendf(&s, "id FROM dialogs WHERE id = %d;", tg->id);
+		
+	tg_sqlite3_for_each(tg, s.str, stmt){
+		tg_dialog_t d;
+		memset(&d, 0, sizeof(d));
+		
+		int col = 0;
+		#define TG_DIALOG_ARG(t, n, type, name) \
+			d.n = sqlite3_column_int64(stmt, col++);
+		#define TG_DIALOG_STR(t, n, type, name) \
+			d.n = strndup(\
+				(char *)sqlite3_column_text(stmt, col),\
+				sqlite3_column_bytes(stmt, col));\
+			col++;
+		
+		TG_DIALOG_ARGS
+		#undef TG_DIALOG_ARG
+		#undef TG_DIALOG_STR
+
+		if (callback)
+			if (callback(data, &d))
+				break;
+	}	
+	
+	free(s.str);
+	return 0;
 }

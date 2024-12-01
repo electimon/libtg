@@ -122,6 +122,13 @@ void on_log(void *d, const char *msg){
 	printf("%s\n", msg);
 }
 
+
+int dialogs_callback(void *data, const tg_dialog_t *d)
+{
+	printf("%s\n", d->name);
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	int SETUP_API_ID(apiId)
@@ -142,7 +149,10 @@ int main(int argc, char *argv[])
 	//tg_set_on_log  (tg, NULL, on_log);
 	//tg_set_on_error  (tg, NULL, on_err);
 
-	tg_async_dialogs_to_database(tg, 40);
+	/*tg_async_dialogs_to_database(tg, 40);*/
+
+	tg_get_dialogs_from_database(tg, NULL, 
+			dialogs_callback);
 	
 	printf("press any key to exit\n");
 	getchar();

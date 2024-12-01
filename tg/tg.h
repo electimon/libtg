@@ -13,7 +13,6 @@ struct tg_ {
 	char apiHash[33];
 	char database_path[BUFSIZ];
 	const char *pubkey;
-	sqlite3 *db;
 	char ip[16];
 	int port;
 	int sockfd;
