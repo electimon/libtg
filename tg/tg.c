@@ -46,6 +46,9 @@ tg_t *tg_new(
 
 	// start new seqn
 	tg->seqn = 0;
+
+	// load dialogs hash
+	tg->dialogs_hash = dialogs_hash_from_database(tg);
 	
 	return tg;
 }

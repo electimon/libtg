@@ -97,7 +97,7 @@ buf_t tg_encrypt(tg_t *tg, buf_t b, bool enc)
 		e = buf_cat(e, b);	
 	}
 
-	ON_LOG_BUF(tg, e, "%s: ", __func__);
+	//ON_LOG_BUF(tg, e, "%s: ", __func__);
   return e;
 }
 
@@ -107,7 +107,7 @@ buf_t tg_decrypt(tg_t *tg, buf_t m, bool enc)
 	buf_init(&d);
 
 	if (!m.size) {
-    ON_ERR(tg, NULL, "%s: received nothing", __func__);
+    ON_LOG(tg, "%s: received nothing", __func__);
 		return d;
   }
 
@@ -167,6 +167,6 @@ buf_t tg_decrypt(tg_t *tg, buf_t m, bool enc)
 		d = buf_cat(d, m);
 	}
 
-	ON_LOG_BUF(tg, d, "%s: ", __func__);
+	//ON_LOG_BUF(tg, d, "%s: ", __func__);
   return d;
 }

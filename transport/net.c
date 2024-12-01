@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 30.11.2024
+ * Last Modified Date: 01.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -71,7 +71,7 @@ void tg_net_send(tg_t *tg, int sockfd, const buf_t buf)
   ON_LOG(tg, "%s: send size: %d", __func__, n);
   
   if (n < 0) {
-    ON_ERR(tg, NULL, "%s: can't write to socket", __func__);
+    ON_LOG(tg, "%s: can't write to socket", __func__);
   }
 }
 
@@ -97,13 +97,13 @@ buf_t tg_net_receive(tg_t *tg, int sockfd)
 			}
 			else /* < 0 */
 			{
-				ON_ERR(tg, NULL, "%s: socket error: %d", __func__, buf.size);
+				ON_LOG(tg, "%s: socket error: %d", __func__, buf.size);
 			}
 			buf_free(buf);
 			// give some time betwin packages
 			usleep(100000); // in microseconds
 	} while (buf.size == LEN);
 
-	ON_LOG_BUF(tg, data, "%s: ", __func__);
+	/*ON_LOG_BUF(tg, data, "%s: ", __func__);*/
   return data;
 }

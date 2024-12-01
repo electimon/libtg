@@ -8,10 +8,22 @@
 #include "tg.h"
 #include "../tl/id.h"
 #include "../mtx/include/net.h"
+#include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "time.h"
 #include "../tl/alloc.h"
+#include "dialogs.h"
+#include "pthread.h"
+#include "database.h"
+#include <unistd.h>
+#include "../transport/net.h"
+
+#define BUF2STR(_b) strndup((char*)_b.data, _b.size)
+#define BUF2IMG(_b) \
+	({buf_t i = image_from_photo_stripped(_b); \
+	 buf_to_base64(i);}) 
 
 int tg_get_dialogs(
 		tg_t *tg, 
@@ -39,15 +51,19 @@ int tg_get_dialogs(
 				NULL,
 				folder_id, 
 				date,
-				0, 
+				-1, 
 				&inputPeer, 
 				limit,
 				h);
 
-	tl_t *tl = tg_send_query(tg, getDialogs);
+	tl_t *tl = tg_send_query_to_net(
+			tg, getDialogs, 
+			true, tg->async_dialogs_sockfd);
 	if (tl && tl->_id == id_messages_dialogsNotModified){
 		ON_LOG(tg, "%s: dialogs not modified", __func__);
-		return 0;
+		tl_messages_dialogsNotModified_t *dnm =
+			(tl_messages_dialogsNotModified_t *)tl;
+		return dnm->count_;
 	}
 
 	if ((tl && tl->_id == id_messages_dialogsSlice) ||
@@ -85,6 +101,9 @@ int tg_get_dialogs(
 		if (hash)
 			*hash = h;
 
+		ON_LOG(tg, "%s: got %d dialods\n", 
+				__func__, md.dialogs_len);
+
 		for (i = 0; i < md.dialogs_len; ++i) {
 			// handle dialogs
 			tg_dialog_t d;
@@ -109,131 +128,200 @@ int tg_get_dialogs(
 				continue;
 			}
 			dialog = *(tl_dialog_t *)md.dialogs_[i];	
-			tl_peerChat_t *peer = (tl_peerChat_t *)dialog.peer_;
+
+			d.top_message_id = dialog.top_message_;
 			
-			d.id = peer->chat_id_;
+			d.pinned = dialog.pinned_;
+			d.unread_mark = dialog.unread_mark_;
+			d.read_inbox_max_id = dialog.read_inbox_max_id_;
+			d.read_outbox_max_id = dialog.read_outbox_max_id_;
+			d.unread_count = dialog.unread_count_;
+			d.unread_mentions_count = dialog.unread_mentions_count_;
+			d.unread_reactions_count = dialog.unread_reactions_count_;
+			d.folder_id = dialog.folder_id_;
+			
+			tl_peerChat_t *peer = (tl_peerChat_t *)dialog.peer_;
+			if (peer){
+				d.peer_id = peer->chat_id_;
+			}
+
+			tl_peerNotifySettings_t *pns = 
+				(tl_peerNotifySettings_t *)dialog.notify_settings_;
+			if (pns){
+				d.silent = pns->silent_;
+				d.mute_until = pns->mute_until_;
+			}
 
 			int k;
 
 			// iterate users
 			for (k = 0; k < md.users_len; ++k) {
-				if (md.users_[k]->_id == id_user){
-					tl_user_t *user = 
-						(tl_user_t *)md.users_[k];
-					if (d.id == user->id_){
-						d.type = TG_DIALOG_TYPE_USER;
-						d.tl = (tl_t *)user;
-						if (user->username_.size)
-							d.name = 
-								strndup((char *)user->username_.data,
-										user->username_.size);
-						else 
-							d.name = 
-								strndup((char *)user->first_name_.data,
-										user->first_name_.size);
-						if (user->photo_ && 
-								user->photo_->_id == id_userProfilePhoto)
+				// skip on NULL
+				if (!md.users_[k])
+					continue;
+
+				switch (md.users_[k]->_id) {
+					case id_user:
 						{
-							tl_userProfilePhoto_t *photo = 
-								(tl_userProfilePhoto_t *)user->photo_; 
-							d.photo_id = photo->photo_id_;
-							d.thumb = 
-								image_from_photo_stripped(
-										photo->stripped_thumb_);
+							tl_user_t *user = 
+								(tl_user_t *)md.users_[k];
+							
+							if (d.peer_id == user->id_)
+							{
+								d.peer_type = TG_PEER_TYPE_USER;
+								if (user->username_.size)
+									d.name = BUF2STR(user->username_);
+								else
+									d.name = BUF2STR(user->first_name_);
+							
+								if (user->photo_ && 
+										user->photo_->_id == id_userProfilePhoto)
+								{
+									tl_userProfilePhoto_t *photo = 
+										(tl_userProfilePhoto_t *)user->photo_; 
+									d.photo_id = photo->photo_id_;
+									d.thumb = BUF2IMG(photo->stripped_thumb_);
+								}
+							}
 						}
-					}
-				} else if (md.users_[k]->_id == id_userEmpty){
-					tl_userEmpty_t *user =
-						(tl_userEmpty_t *)md.users_[k];
-					if (d.id == user->id_){
-						d.type = TG_DIALOG_TYPE_USER_EMPTY;
-						d.tl = (tl_t *)user;
-						d.name = strdup("empty"); 
-					}
-				}	
-			} // done users
+						break;
+				  case id_userEmpty:
+						{
+							tl_userEmpty_t *user =
+								(tl_userEmpty_t *)md.users_[k];
+							
+							if (d.peer_id == user->id_)
+							{
+								d.peer_type = TG_PEER_TYPE_USER;
+								d.name = strdup("empty"); 
+							}
+						}
+						break;
+					
+					default:
+						break;
+				}
+			}
 
 			// iterate chats
 			for (k = 0; k < md.chats_len; ++k) {
-				if (md.chats_[k]->_id == id_channel){
-					tl_channel_t *channel = 
-						(tl_channel_t *)md.chats_[k];
-					if (d.id == channel->id_){
-						d.type = TG_DIALOG_TYPE_CHANNEL;
-						d.tl = (tl_t *)channel;
-						d.name = 
-							strndup((char *)channel->title_.data,
-									channel->title_.size);
-						if (channel->photo_ && 
-								channel->photo_->_id == id_chatPhoto)
+				// skip on NULL
+				if (!md.chats_[k])
+					continue;
+				
+				switch (md.chats_[k]->_id) {
+				  case id_channel:
 						{
-							tl_chatPhoto_t *photo = 
-								(tl_chatPhoto_t *)channel->photo_; 
-							d.photo_id = photo->photo_id_;
-							d.thumb = 
-								image_from_photo_stripped(
-										photo->stripped_thumb_);
+							tl_channel_t *channel = 
+								(tl_channel_t *)md.chats_[k];
+							if (d.peer_id == channel->id_)
+							{
+								d.peer_type = TG_PEER_TYPE_CHANNEL;
+								d.name = BUF2STR(channel->title_);
+								if (channel->photo_ && 
+									channel->photo_->_id == id_chatPhoto)
+								{
+									tl_chatPhoto_t *photo = 
+										(tl_chatPhoto_t *)channel->photo_; 
+									d.photo_id = photo->photo_id_;
+									d.thumb = BUF2IMG(photo->stripped_thumb_);
+								}
+							}
 						}
-					}
-				}
-				else if (md.chats_[k]->_id == id_channelForbidden){
-					tl_channelForbidden_t *channel = 
-						(tl_channelForbidden_t *)md.chats_[k];
-					if (d.id == channel->id_){
-						d.type = TG_DIALOG_TYPE_CHANNEL_FORBIDEN;
-						d.tl = (tl_t *)channel;
-						d.name = 
-							strndup((char *)channel->title_.data,
-									channel->title_.size);
-					}
-				}
-				else if (md.chats_[k]->_id == id_chat){
-					tl_chat_t *chat = 
-						(tl_chat_t *)md.chats_[k];
-					if (d.id == chat->id_){
-						d.type = TG_DIALOG_TYPE_CHAT;
-						d.tl = (tl_t *)chat;
-						d.name = 
-							strndup((char *)chat->title_.data,
-									chat->title_.size);
-						if (chat->photo_ && 
-								chat->photo_->_id == id_chatPhoto)
+						break;
+				  
+					case id_channelForbidden:
 						{
-							tl_chatPhoto_t *photo = 
-								(tl_chatPhoto_t *)chat->photo_; 
-							d.photo_id = photo->photo_id_;
-							d.thumb = 
-								image_from_photo_stripped(
-										photo->stripped_thumb_);
+							tl_channelForbidden_t *channel = 
+								(tl_channelForbidden_t *)md.chats_[k];
+							if (d.peer_id == channel->id_)
+							{
+								d.peer_type = TG_PEER_TYPE_CHANNEL;
+								d.name = BUF2STR(channel->title_);
+							}
 						}
-					}
+						break;
+					
+					case id_chat:
+						{
+							tl_chat_t *chat = 
+								(tl_chat_t *)md.chats_[k];
+							if (d.peer_id == chat->id_)
+							{
+								d.peer_type = TG_PEER_TYPE_CHAT;
+								d.name = BUF2STR(chat->title_);
+								if (chat->photo_ && 
+									chat->photo_->_id == id_chatPhoto)
+								{
+									tl_chatPhoto_t *photo = 
+										(tl_chatPhoto_t *)chat->photo_; 
+									d.photo_id = photo->photo_id_;
+									d.thumb = BUF2IMG(photo->stripped_thumb_);
+								}
+							}
+						}
+						break;
+				  
+					case id_chatForbidden:
+						{
+							tl_chatForbidden_t *chat = 
+								(tl_chatForbidden_t *)md.chats_[k];
+							if (d.peer_id == chat->id_){
+								d.peer_type = TG_PEER_TYPE_CHAT;
+								d.name = BUF2STR(chat->title_);
+							}
+						}
+						break;
+					
+
+					default:
+						break;
 				}
-				else if (md.chats_[k]->_id == id_chatForbidden){
-					tl_chatForbidden_t *chat = 
-						(tl_chatForbidden_t *)md.chats_[k];
-					if (d.id == chat->id_){
-						d.type = TG_DIALOG_TYPE_CHAT_FORBIDEN;
-						d.tl = (tl_t *)chat;
-						d.name = 
-							strndup((char *)chat->title_.data,
-									chat->title_.size);
-					}
-				}
-			} // done chats
-		
+			}
+				
 			// iterate messages
 			for (k = 0; k < md.messages_len; ++k){
-				if (md.messages_[k]->_id == id_message){
+				if (md.messages_[k] && 
+						md.messages_[k]->_id == id_message)
+				{
 					tl_message_t *message = 
 						(tl_message_t *)md.messages_[k];
-					if (message->id_ == dialog.top_message_){
-						d.top_message = message;
+					if (message->id_ == d.top_message_id){
+						d.top_message_date = message->date_;
+						d.top_message_text = BUF2STR(message->message_);
+						/*
+						if (message->peer_id_){
+							tl_peerUser_t *from = 
+								(tl_peerUser_t *)message->from_id_;
+							switch (message->peer_id_->_id) {
+								case id_peerUser:
+									d.top_message_from_peer_type = TG_PEER_TYPE_USER;	
+									d.top_message_from_peer_id = from->user_id_;
+									break;
+								case id_peerChannel:
+									tl_peerChannel_t *from = 
+										(tl_peerChannel_t *)message->from_id_;
+									d.top_message_from_peer_type = TG_PEER_TYPE_CHANNEL;	
+									d.top_message_from_peer_id = from->user_id_;
+									break;
+								case id_peerChat:
+									d.top_message_from_peer_type = TG_PEER_TYPE_CHAT;	
+									d.top_message_from_peer_id = from->user_id_;
+									break;
+								
+								default:
+									d.top_message_from_peer_type = TG_PEER_TYPE_NULL;	
+									break;
+									
+							}
+						}
+						*/
 					}
 				}
 			} // done messages 
 
 			// callback dialog
-			if (d.type == TG_DIALOG_TYPE_NULL) {
+			if (d.peer_type == TG_PEER_TYPE_NULL) {
 				ON_LOG(tg, "%s: can't find dialog data "
 						"for peer: %.8x: %ld",
 						__func__, peer->_id, peer->chat_id_);
@@ -260,4 +348,128 @@ int tg_get_dialogs(
 		/* TODO:  <29-11-24, yourname> */
 	}
 	return 0;
+}
+
+struct _async_dialogs_update_dialog_t{
+	tg_t *tg;
+	int d;
+};
+
+static int _async_dialogs_update_dialog(
+		void *data, 
+		const tg_dialog_t *dialog)
+{
+	if (!dialog)
+		return 0;
+
+	struct _async_dialogs_update_dialog_t *d = data;
+	d->d = dialog->top_message_date; 
+
+	ON_LOG(d->tg, "%s: %s", __func__, dialog->name);
+
+	// save dialog to database
+	struct str s;
+	str_init(&s);
+	str_appendf(&s, "UPDATE \'dialogs\' SET ");
+
+	#define TG_DIALOG_STR(t, n, type, name) \
+		str_appendf(&s, "\'" name "\'" " = \'"); \
+		str_append(&s, (char*)dialog->n, strlen((char*)dialog->n)); \
+		str_appendf(&s, "\', "); \
+		
+	#define TG_DIALOG_ARG(t, n, type, name) \
+		str_appendf(&s, "\'" name "\'" " = %ld, ", (long)dialog->n);
+	
+	TG_DIALOG_ARGS
+	#undef TG_DIALOG_ARG
+	#undef TG_DIALOG_STR
+	
+	str_appendf(&s, "id = %d;", d->tg->id);
+
+	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
+	int ret = tg_sqlite3_exec(d->tg, s.str);
+	free(s.str);
+
+	return 0;
+}
+
+static void _async_dialogs_update(tg_t *tg)
+{
+	struct _async_dialogs_update_dialog_t d;
+	d.tg = tg;
+	d.d = time(NULL);
+	int ret = 6;
+	while (ret >= 6){
+		ret = tg_get_dialogs(tg, 6,
+				d.d, &tg->dialogs_hash,
+			 	NULL, 
+				&d,
+			 	_async_dialogs_update_dialog);
+		
+		// update hash
+		dialogs_hash_to_database(
+				d.tg, d.tg->dialogs_hash);
+
+		// sleep
+		sleep(2);
+	}
+}
+
+static void * _async_dialogs_thread(void * data)
+{
+	tg_t *tg = data;
+	ON_LOG(tg, "%s: start", __func__);
+
+	while (tg && tg->async_dialogs) {
+		ON_LOG(tg, "%s: updating dialogs...", __func__);	
+		_async_dialogs_update(tg);
+		sleep(tg->async_dialogs_seconds);
+	}
+
+	pthread_exit(0);	
+}
+
+int tg_async_dialogs_to_database(tg_t *tg, int seconds)
+{
+	tg->async_dialogs_seconds = seconds;
+	
+	if (tg->async_dialogs) // only update seconds
+		return 0;
+
+	tg->async_dialogs = true;
+
+	// open socket
+	tg->async_dialogs_sockfd = 
+		tg_net_open(tg);
+
+	// create table
+	char sql[BUFSIZ] = 
+		"CREATE TABLE IF NOT EXISTS dialogs (id INT);\n";
+	ON_LOG(tg, "%s", sql);
+	tg_sqlite3_exec(tg, sql);	
+	
+#define TG_DIALOG_ARG(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
+				"\'" name "\' " type ";\n");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	#define TG_DIALOG_STR(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
+				"\'" name "\' " type ";\n");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	TG_DIALOG_ARGS
+	#undef TG_DIALOG_ARG
+	#undef TG_DIALOG_STR
+	
+	printf("%s: %d\n", __func__, __LINE__);
+
+	//create new thread
+	int err = pthread_create(
+			&(tg->async_dialogs_tid), 
+			NULL, 
+			_async_dialogs_thread, 
+			tg);
+
+	return err;
 }

@@ -80,42 +80,4 @@ int tg_connect(
 			const tl_t *tl,
 			const char *msg));
 
-
-typedef enum {
-	TG_DIALOG_TYPE_NULL,
-	TG_DIALOG_TYPE_USER,
-	TG_DIALOG_TYPE_USER_EMPTY,
-	TG_DIALOG_TYPE_CHANNEL,
-	TG_DIALOG_TYPE_CHANNEL_FORBIDEN,
-	TG_DIALOG_TYPE_CHAT,
-	TG_DIALOG_TYPE_CHAT_FORBIDEN,
-} TG_DIALOG_TYPE;
-
-typedef struct tg_dialog_ {
-	tl_dialog_t *dialog;
-	long id;
-	TG_DIALOG_TYPE type;
-	tl_t *tl;
-	char *name;
-	tl_message_t *top_message;
-	buf_t thumb;
-	long photo_id;
-
-} tg_dialog_t;
-
-/* get %limit number of dialogs older then %date and
- * %top_msg_id, callback dialogs array and update messages
- * %hash (if not NULL) 
- * set folder_id NULL to get all folders, pointer to 0 for 
- * non-hidden dialogs, pointer to 1 for hidden dialogs 
- * return number of dialogs*/ 
-int tg_get_dialogs(
-		tg_t *tg, 
-		int limit,
-		time_t date, 
-		long * hash, 
-		int *folder_id, 
-		void *data,
-		int (*callback)(void *data, 
-			const tg_dialog_t *dialog));
 #endif /* ifndef SYMBOL */

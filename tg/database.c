@@ -3,11 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "database.h"
 
-static int tg_sqlite3_open(tg_t *tg) 
+int tg_sqlite3_open(tg_t *tg) 
 {
-	int err = sqlite3_open(
-			tg->database_path, &tg->db);
+	int err = sqlite3_open_v2(
+			tg->database_path,
+		 	&tg->db, 
+			SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, 
+			NULL);
 	if (err){
 		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(tg->db));
 		return 1;
@@ -16,7 +20,7 @@ static int tg_sqlite3_open(tg_t *tg)
 	return 0;
 }
 
-static int tg_sqlite3_prepare(
+int tg_sqlite3_prepare(
 		tg_t *tg, const char *sql, sqlite3_stmt **stmt) 
 {
 	int res = sqlite3_prepare_v2(
@@ -34,21 +38,12 @@ static int tg_sqlite3_prepare(
 	return 0;
 }
 
-#define tg_sqlite3_for_each(tg, sql, stmt) \
-	sqlite3_stmt *stmt;\
-	int sqlite_step;\
-	if (tg_sqlite3_open(tg) == 0)\
-		if (tg_sqlite3_prepare(tg, sql, &stmt) == 0)\
-			for (sqlite_step = sqlite3_step(stmt);\
-					sqlite_step	!= SQLITE_DONE || ({sqlite3_finalize(stmt); sqlite3_close(tg->db); 0;});\
-					sqlite_step = sqlite3_step(stmt))\
-			 
-
-static int tg_sqlite3_exec(
+int tg_sqlite3_exec(
 		tg_t *tg, const char *sql) 
 {
-	if (tg_sqlite3_open(tg))
-		return 1;
+	if (!tg->db)	
+		if (tg_sqlite3_open(tg))
+			return 1;
 
 	char *errmsg = NULL;
 
@@ -68,7 +63,7 @@ static int tg_sqlite3_exec(
 		return 1;
 	}
 
-	sqlite3_close(tg->db);
+	//sqlite3_close(tg->db);
 	return 0;
 }
 
@@ -76,14 +71,14 @@ int database_init(tg_t *tg, const char *database_path)
 {
 	int err = sqlite3_open_v2(
 			tg->database_path, &tg->db, 
-			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 
+			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX, 
 			NULL);
 	if (err){
 		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(tg->db));
 		return 1;
 	}
 
-	sqlite3_close(tg->db);
+	//sqlite3_close(tg->db);
 	return 0;
 }
 
@@ -193,13 +188,13 @@ int auth_key_to_database(
 			"WHERE NOT EXISTS (SELECT 1 FROM auth_keys WHERE id = %d); "
 			, tg->id, tg->id);
 	
-	int res = sqlite3_open(tg->database_path, &tg->db);
-	if (res){
-		printf("%s\n", sqlite3_errmsg(tg->db));
-		return 1;
-	}
+	//int res = sqlite3_open(tg->database_path, &tg->db);
+	//if (res){
+		//ON_ERR(tg, NULL, "%s", sqlite3_errmsg(tg->db));
+		//return 1;
+	//}
 	char *errmsg = NULL;
-	res = sqlite3_exec(tg->db, sql, NULL, NULL, &errmsg);
+	int res = sqlite3_exec(tg->db, sql, NULL, NULL, &errmsg);
 	if (errmsg) {
 		ON_ERR(tg, NULL, "%s", errmsg);
 		free(errmsg);
@@ -226,7 +221,36 @@ int auth_key_to_database(
 	sqlite3_step(stmt);
 	
 	sqlite3_finalize(stmt);
-	sqlite3_close(tg->db);
+	//sqlite3_close(tg->db);
 
 	return 0;
 }
+
+long dialogs_hash_from_database(tg_t *tg)
+{
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"SELECT hash FROM dialogs_hash WHERE id = %d;"
+			, tg->id);
+	long hash;
+	tg_sqlite3_for_each(tg, sql, stmt)
+		hash = sqlite3_column_int64(stmt, 0);
+
+	return hash;
+}
+
+int dialogs_hash_to_database(tg_t *tg, long hash)
+{
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"CREATE TABLE IF NOT EXISTS dialogs_hash (id INT); "
+			"ALTER TABLE \'dialogs_hash\' ADD COLUMN \'hash\' INT; "
+			"INSERT INTO \'dialogs_hash\' (\'id\') "
+			"SELECT %d "
+			"WHERE NOT EXISTS (SELECT 1 FROM dialogs_hash WHERE id = %d); "
+			"UPDATE \'dialogs_hash\' SET \'hash\' = \'%ld\', id = %d; "
+		,tg->id, tg->id, hash, tg->id);
+	
+	return tg_sqlite3_exec(tg, sql);
+}
+

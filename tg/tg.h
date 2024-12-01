@@ -1,5 +1,6 @@
 #ifndef TG_H_
 #define TG_H_
+#include <pthread.h>
 #include <stdint.h>
 #include <sqlite3.h>
 #include <string.h>
@@ -27,12 +28,19 @@ struct tg_ {
 	buf_t ssid;
 	uint64_t fingerprint;
 	uint64_t msgids[20]; 
+	long dialogs_hash;
+	bool async_dialogs;
+	int async_dialogs_sockfd;
+	pthread_t async_dialogs_tid;
+	int async_dialogs_seconds;
 };
 
 int database_init(tg_t *tg, const char *database_path);
 buf_t auth_key_from_database(tg_t *tg);
 char * phone_number_from_database(tg_t *tg);
 char * auth_tokens_from_database(tg_t *tg);
+long dialogs_hash_from_database(tg_t *tg);
+int dialogs_hash_to_database(tg_t *tg, long hash);
 
 int phone_number_to_database(
 		tg_t *tg, const char *phone_number);
@@ -45,6 +53,8 @@ int auth_key_to_database(
 void tg_add_mgsid(tg_t*, uint64_t);
 
 tl_t * tg_send_query_(tg_t *tg, buf_t s, bool encrypt);
+tl_t * tg_send_query_to_net(
+		tg_t *tg, buf_t query, bool enc, int sockfd);
 
 #define ON_ERR(tg, tl, ...)\
 	({if (tg->on_err){ \

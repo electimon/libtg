@@ -5,6 +5,7 @@
 #include "mtx/include/buf.h"
 #include "mtx/include/setup.h"
 #include "mtx/include/types.h"
+#include "tg/dialogs.h"
 #include "tg/tg.h"
 #include "tl/buf.h"
 #include "tl/deserialize.h"
@@ -113,26 +114,6 @@ char * callback(
 	return NULL;
 }
 
-//static void on_err(void *d, tl_t *tl, const char *err)
-//{
-//	printf("ERR: %s\n", err);
-//}
-
-static int md_callback(
-		void *data, 
-		const tg_dialog_t *dialog)
-{
-	/*char *m = */
-		/*strndup((char *)dialog->top_message->message_.data, 40);*/
-	printf("%s:\t%s\n",
-			dialog->name, "");
-	int *d = data;
-	if (d)
-		if (dialog->top_message)
-			*d = dialog->top_message->date_;
-	return 0;
-}
-
 void on_err(void *d, tl_t *tl, const char *err){
 	printf("!!!ERR: %s\n", err);
 }
@@ -152,13 +133,8 @@ int main(int argc, char *argv[])
 			apiId, 
 			apiHash, "pub.pkcs");
 
-	//tg_set_on_log  (tg, NULL, on_log);
+	tg_set_on_log  (tg, NULL, on_log);
 	//tg_set_on_error  (tg, NULL, on_err);
-
-	/*if (tg_is_authorized(tg)) {*/
-		/*printf("AUTHORIZED!\n");*/
-	/*}*/
-	/*return 1;*/
 
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
@@ -166,19 +142,10 @@ int main(int argc, char *argv[])
 	//tg_set_on_log  (tg, NULL, on_log);
 	//tg_set_on_error  (tg, NULL, on_err);
 
-	time_t t = time(NULL);
-
-	int folder = 0;
-	long hash = 0;
+	tg_async_dialogs_to_database(tg, 40);
 	
-	int d = time(NULL);
-	int ret = 10;
-	while (ret >= 10){
-		ret = tg_get_dialogs(tg, 10,
-				d, &hash, &folder, 
-				&d, md_callback);
-		sleep(2);
-	}
+	printf("press any key to exit\n");
+	getchar();
 
 	tg_close(tg);
 	return 0;

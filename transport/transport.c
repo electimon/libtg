@@ -28,7 +28,7 @@ buf_t tg_transport(tg_t *tg, buf_t buf)
 	//buf_t crc = tg_crc_crc32(b);
 	//b = buf_cat(b, crc);
 
-	ON_LOG_BUF(tg, b, "%s: ", __func__);
+	//ON_LOG_BUF(tg, b, "%s: ", __func__);
 	return b;
 }
 
@@ -38,7 +38,7 @@ buf_t tg_detransport(tg_t *tg, buf_t a)
 	buf_init(&b);
 	
 	if (!a.size) {
-	  ON_ERR(tg, NULL, "%s: received nothing", __func__);
+	  ON_LOG(tg, "%s: received nothing", __func__);
 	  return b;
 	}
 
@@ -55,7 +55,7 @@ buf_t tg_detransport(tg_t *tg, buf_t a)
 
 	// check len
 	if (len != b.size) {
-		ON_ERR(tg, NULL, 
+		ON_LOG(tg, 
 				"%s: len mismatch: expected: %d, got: %d", 
 				__func__, len, b.size);
 		// we should start new transfer

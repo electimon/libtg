@@ -133,15 +133,11 @@ tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 	return tg_handle_deserialized_message(tg, tl);
 }
 
-tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
+tl_t * tg_send_query_to_net(
+		tg_t *tg, buf_t query, bool enc, int sockfd)
 {
-	ON_LOG_BUF(tg, query, "%s: %s: ", 
-			__func__, enc?"API":"RFC");
-
-	if (!tg->net){
-		tg->sockfd = tg_net_open(tg);
-		tg->net = true;
-	}
+	ON_LOG_BUF(tg, query, "%s: %s: soc: %d", 
+			__func__, enc?"API":"RFC", sockfd);
 
 	if (!tg->salt.size)
 		tg->salt = buf_rand(8);
@@ -199,6 +195,15 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 	buf_free(msg);
 	
 	return tl;
+}
+
+tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
+{
+	if (!tg->net){
+		tg->sockfd = tg_net_open(tg);
+		tg->net = true;
+	}
+	return tg_send_query_to_net(tg, query, enc, tg->sockfd);
 }
 
 tl_t * tg_send_query(tg_t *tg, buf_t s)

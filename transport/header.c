@@ -81,7 +81,7 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc)
 		s = buf_cat(s, b);
   }
 
-	ON_LOG_BUF(tg, s, "%s: ", __func__);
+	/*ON_LOG_BUF(tg, s, "%s: ", __func__);*/
   return s;
 }
 
@@ -151,12 +151,12 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 
 		// check len matching
 		if (msg_data_len != b.size){
-			ON_ERR(tg, NULL, 
+			ON_LOG(tg, 
 					"%s: msg_data_len mismatch: expected: %d, got: %d", 
 					__func__, msg_data_len, b.size);
 		}
 	}
     
-	ON_LOG_BUF(tg, d, "%s: ", __func__);
+	/*ON_LOG_BUF(tg, d, "%s: ", __func__);*/
   return d;
 }

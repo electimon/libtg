@@ -13,6 +13,7 @@
 #include <time.h>
 #include "buf.h"
 #include "str.h"
+#include "base64.h"
 
 char * tl_log_hex(unsigned char * a, uint32_t s)
 {
@@ -268,4 +269,26 @@ void buf_free(buf_t b){
 	if (b.aptr)
 		free(b.aptr);
 	b.aptr = NULL;
+}
+
+char* buf_to_base64(buf_t b){
+	size_t l;
+	char *s = base64_encode(
+			b.data, 
+			b.size, 
+			&l);
+	base64_cleanup();
+	return s;
+}
+
+buf_t buf_from_base64(const char *s){
+	buf_t b;
+	size_t l;
+	b.data = b.aptr = base64_decode(
+			s, 
+			strlen(s), 
+			&l);
+	b.asize = b.size = l;
+	base64_cleanup();
+	return b;
 }

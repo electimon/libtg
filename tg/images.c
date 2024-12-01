@@ -2,7 +2,8 @@
 #include <stdint.h>
 #include <string.h>
 
-static const char header[] =
+buf_t image_from_photo_stripped(buf_t bytes){
+	static const char header[] =
 "\xff\xd8\xff\xe0\x00\x10\x4a\x46\x49"
 "\x46\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xdb\x00\x43\x00\x28\x1c" 
 "\x1e\x23\x1e\x19\x28\x23\x21\x23\x2d\x2b\x28\x30\x3c\x64\x41\x3c\x37\x37"
@@ -40,9 +41,8 @@ static const char header[] =
 "\xf5\xf6\xf7\xf8\xf9\xfa\xff\xda\x00\x0c\x03\x01\x00\x02\x11\x03\x11\x00"
 "\x3f\x00"; 
 
-static const char footer[] = "\xff\xd9"; 
+	static const char footer[] = "\xff\xd9"; 
 
-buf_t image_from_photo_stripped(buf_t bytes){
 	buf_t buf = buf_new();
 	if (bytes.size < 3 || bytes.data[0] != '\x01')
 		return buf;
