@@ -283,11 +283,12 @@ char* buf_to_base64(buf_t b){
 
 buf_t buf_from_base64(const char *s){
 	buf_t b;
-	size_t l;
+	size_t l = 0;
 	b.data = b.aptr = base64_decode(
 			s, 
 			strlen(s), 
 			&l);
+	printf("OUTPUT: %d\n", l);
 	b.asize = b.size = l;
 	return b;
 }

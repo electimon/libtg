@@ -128,6 +128,7 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 	printf("%s\n", d->name);
 	if (d->thumb){
 		buf_t b = buf_from_base64(d->thumb);
+		printf("buf_len: %d\n", b.size);
 	}
 	return 0;
 }
