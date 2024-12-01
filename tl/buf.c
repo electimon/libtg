@@ -289,6 +289,5 @@ buf_t buf_from_base64(const char *s){
 			strlen(s), 
 			&l);
 	b.asize = b.size = l;
-	base64_cleanup();
 	return b;
 }

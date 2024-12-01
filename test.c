@@ -126,6 +126,9 @@ void on_log(void *d, const char *msg){
 int dialogs_callback(void *data, const tg_dialog_t *d)
 {
 	printf("%s\n", d->name);
+	if (d->thumb){
+		buf_t b = buf_from_base64(d->thumb);
+	}
 	return 0;
 }
 
