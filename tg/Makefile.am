@@ -9,6 +9,7 @@ libtg_la_SOURCES = tg.c \
 				   dialogs.c \
 				   messages.c \
 				   images.c \
+				   peer.c \
            ../crypto/hsh.c \
            ../crypto/aes.c \
            ../crypto/cmn.c \

@@ -7,6 +7,7 @@
 #include "mtx/include/types.h"
 #include "tg/dialogs.h"
 #include "tg/messages.h"
+#include "tg/peer.h"
 #include "tg/tg.h"
 #include "tl/buf.h"
 #include "tl/deserialize.h"
@@ -128,13 +129,17 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 {
 	printf("%s\n", d->name);
 	tg_dialog_t *dialog = data;
-	*dialog = *d;
+	dialog->name = strdup(d->name);
+	dialog->peer_id = d->peer_id;
+	dialog->peer_type = d->peer_type;
+	dialog->access_hash = d->access_hash;
 	return 0;
 }
 
 int messages_callback(void *data, const tg_message_t *m)
 {
-	printf("%s\n", m->message);
+	printf("MESSAGE: ");
+	printf("%s\n", m->message_);
 	return 0;
 }
 
@@ -149,33 +154,25 @@ int main(int argc, char *argv[])
 			apiId, 
 			apiHash, "pub.pkcs");
 
-	tg_set_on_log  (tg, NULL, on_log);
-	//tg_set_on_error  (tg, NULL, on_err);
-
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
+	
+	tg_set_on_log  (tg, NULL, on_log);
+	tg_set_on_error  (tg, NULL, on_err);
 
 	tg_dialog_t d;
-	tg_get_dialogs(tg, 2,
+	tg_get_dialogs(tg, 1,
 		 	time(NULL),
 		 	NULL, NULL,
 		 	&d, dialogs_callback);
 
-	buf_t peer;
-	switch (d.peer_type) {
-		case TG_PEER_TYPE_CHANNEL:
-			peer = tl_peerChannel(d.peer_id);
-			break;
-		case TG_PEER_TYPE_CHAT:
-			peer = tl_peerChat(d.peer_id);
-			break;
-		case TG_PEER_TYPE_USER:
-			peer = tl_peerUser(d.peer_id);
-			break;
-		default:
-			break;
-	}
-
+	printf("NAME: %s\n", d.name);
+	printf("PEER ID: %.16lx\n", d.peer_id);
+	/*buf_t peer = buf_add_ui64(d.peer_id);*/
+	buf_t peer = 
+		tg_inputPeer(d.peer_type, 
+				d.peer_id, d.access_hash);
+	
 	tg_messages_getHistory(
 			tg,
 		 	&peer, 

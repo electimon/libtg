@@ -24,14 +24,8 @@
 	TG_DIALOG_ARG(long, peer_id, "INT", "peer_id") \
 	TG_DIALOG_ARG(long, photo_id, "INT", "photo_id") \
 	TG_DIALOG_STR(char*, thumb, "TEXT", "thumb") \
+	TG_DIALOG_ARG(long, access_hash, "INT", "access_hash") \
 
-
-typedef enum {
-	TG_PEER_TYPE_NULL = 0,
-	TG_PEER_TYPE_USER = id_peerUser,
-	TG_PEER_TYPE_CHANNEL = id_peerChannel,
-	TG_PEER_TYPE_CHAT = id_peerChat,
-} TG_PEER_TYPE;
 
 typedef struct tg_dialog_ {
 	#define TG_DIALOG_ARG(type, name, ...) type name;

@@ -136,7 +136,7 @@ tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 tl_t * tg_send_query_to_net(
 		tg_t *tg, buf_t query, bool enc, int sockfd)
 {
-	ON_LOG_BUF(tg, query, "%s: %s: soc: %d", 
+	ON_LOG_BUF(tg, query, "%s: %s: soc: %d ", 
 			__func__, enc?"API":"RFC", sockfd);
 
 	if (!tg->salt.size)

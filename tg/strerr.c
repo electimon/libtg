@@ -18,7 +18,9 @@ tg_strerr(tl_t *tl)
 			{
 				tl_rpc_error_t *err = 
 					(tl_rpc_error_t *)tl;
-				str = strdup((char *)err->error_message_.data);
+				str = strndup(
+						(char *)err->error_message_.data,
+						err->error_message_.size);
 			}
 			break;
 		

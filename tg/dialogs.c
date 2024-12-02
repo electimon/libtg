@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include "../transport/net.h"
 #include <string.h>
+#include "peer.h"
 
 #define BUF2STR(_b) strndup((char*)_b.data, _b.size)
 #define BUF2IMG(_b) \
@@ -155,6 +156,7 @@ int tg_get_dialogs(
 							
 							if (d.peer_id == user->id_)
 							{
+								d.access_hash = user->access_hash_;
 								d.peer_type = TG_PEER_TYPE_USER;
 								if (user->username_.size)
 									d.name = BUF2STR(user->username_);
@@ -203,6 +205,7 @@ int tg_get_dialogs(
 								(tl_channel_t *)md.chats_[k];
 							if (d.peer_id == channel->id_)
 							{
+								d.access_hash = channel->access_hash_;
 								d.peer_type = TG_PEER_TYPE_CHANNEL;
 								d.name = BUF2STR(channel->title_);
 								if (channel->photo_ && 
