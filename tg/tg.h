@@ -32,6 +32,11 @@ struct tg_ {
 	int async_dialogs_sockfd;
 	pthread_t async_dialogs_tid;
 	int async_dialogs_seconds;
+	long messages_hash;
+	bool async_messages;
+	int async_messages_sockfd;
+	pthread_t async_messages_tid;
+	int async_messages_seconds;
 };
 
 int database_init(tg_t *tg, const char *database_path);

@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 01.12.2024
+ * Last Modified Date: 02.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -36,7 +36,7 @@ int tg_get_dialogs(
 		int (*callback)(void *data, 
 			const tg_dialog_t *dialog))
 {
-	int i;
+	int i, k;
 	long h = 0;
 	if (hash)
 		h = *hash;
@@ -87,8 +87,6 @@ int tg_get_dialogs(
 		{
 			md = *(tl_messages_dialogs_t *)tl;
 		}
-		
-		int k;
 		
 		ON_LOG(tg, "%s: got %d dialogs", 
 				__func__, md.dialogs_len);

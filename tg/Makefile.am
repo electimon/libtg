@@ -7,6 +7,7 @@ libtg_la_SOURCES = tg.c \
 				   auth_key.c \
 				   strerr.c \
 				   dialogs.c \
+				   messages.c \
 				   images.c \
            ../crypto/hsh.c \
            ../crypto/aes.c \

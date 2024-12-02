@@ -6,6 +6,7 @@
 #include "mtx/include/setup.h"
 #include "mtx/include/types.h"
 #include "tg/dialogs.h"
+#include "tg/messages.h"
 #include "tg/tg.h"
 #include "tl/buf.h"
 #include "tl/deserialize.h"
@@ -126,10 +127,14 @@ void on_log(void *d, const char *msg){
 int dialogs_callback(void *data, const tg_dialog_t *d)
 {
 	printf("%s\n", d->name);
-	if (d->thumb){
-		buf_t b = buf_from_base64(d->thumb);
-		printf("buf_len: %d\n", b.size);
-	}
+	tg_dialog_t *dialog = data;
+	*dialog = *d;
+	return 0;
+}
+
+int messages_callback(void *data, const tg_message_t *m)
+{
+	printf("%s\n", m->message);
 	return 0;
 }
 
@@ -150,13 +155,48 @@ int main(int argc, char *argv[])
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
 
+	tg_dialog_t d;
+	tg_get_dialogs(tg, 2,
+		 	time(NULL),
+		 	NULL, NULL,
+		 	&d, dialogs_callback);
+
+	buf_t peer;
+	switch (d.peer_type) {
+		case TG_PEER_TYPE_CHANNEL:
+			peer = tl_peerChannel(d.peer_id);
+			break;
+		case TG_PEER_TYPE_CHAT:
+			peer = tl_peerChat(d.peer_id);
+			break;
+		case TG_PEER_TYPE_USER:
+			peer = tl_peerUser(d.peer_id);
+			break;
+		default:
+			break;
+	}
+
+	tg_messages_getHistory(
+			tg,
+		 	&peer, 
+			0, 
+			time(NULL), 
+			0, 
+			20, 
+			0, 
+			0, 
+			NULL, 
+			NULL, 
+			messages_callback);
+	
+
 	//tg_set_on_log  (tg, NULL, on_log);
 	//tg_set_on_error  (tg, NULL, on_err);
 
 	/*tg_async_dialogs_to_database(tg, 40);*/
 
-	tg_get_dialogs_from_database(tg, NULL, 
-			dialogs_callback);
+	//tg_get_dialogs_from_database(tg, NULL, 
+			//dialogs_callback);
 	
 	printf("press any key to exit\n");
 	getchar();
