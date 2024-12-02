@@ -64,10 +64,16 @@ int tg_messages_getHistory(
 		int (*callback)(void *data, 
 			const tg_message_t *message))
 {
+	tl_t *tl = NULL;
+
 	int i, k, c = 0;
 	long h = 0;
 	if (hash)
 		h = *hash;
+
+
+	if (peer == NULL)
+		goto tg_messeges_get_history_thow_error;
 
 	buf_t getHustory = 
 		tl_messages_getHistory(
@@ -80,7 +86,7 @@ int tg_messages_getHistory(
 				min_id, 
 				h);
 
-	tl_t *tl = tg_send_query(tg, getHustory); 
+	tl = tg_send_query(tg, getHustory); 
 
 	ON_LOG(tg, "%s: recived id: %.8x", __func__, tl->_id);
 	if (!tl)

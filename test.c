@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 	
 	tg_messages_getHistory(
 			tg,
-		 	&peer, 
+		 	0, 
 			0, 
 			time(NULL), 
 			0, 
