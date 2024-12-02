@@ -80,9 +80,7 @@ int tg_messages_getHistory(
 				min_id, 
 				h);
 
-	tl_t *tl = tg_send_query_to_net(
-			tg, getHustory, 
-			true, tg->async_messages_sockfd);
+	tl_t *tl = tg_send_query(tg, getHustory); 
 
 	ON_LOG(tg, "%s: recived id: %.8x", __func__, tl->_id);
 	if (!tl)
