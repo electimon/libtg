@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 02.12.2024
+ * Last Modified Date: 03.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -493,7 +493,11 @@ int tg_async_dialogs_to_database(tg_t *tg, int seconds)
 	return err;
 }
 
-int tg_get_dialogs_from_database(tg_t *tg, void *data,
+int tg_get_dialogs_from_database(
+		tg_t *tg,
+	  int offset,
+	  int limit,	
+		void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog))
 {
 	struct str s;
@@ -510,7 +514,12 @@ int tg_get_dialogs_from_database(tg_t *tg, void *data,
 	
 	str_appendf(&s, 
 			"id FROM dialogs WHERE id = %d " 
-			"ORDER BY \'top_message_date\' DESC;", tg->id);
+			"ORDER BY \'top_message_date\' DESC", tg->id);
+
+	if (offset > 0 && limit > 0)
+		str_appendf(&s, " LIMIT %d, %d", offset - 1, limit);
+	else if (limit > 0)
+		str_appendf(&s, " LIMIT %d", limit);
 		
 	tg_sqlite3_for_each(tg, s.str, stmt){
 		tg_dialog_t d;
