@@ -3,6 +3,7 @@
 #include "tg.h"
 #include "../transport/net.h"
 #include "../crypto/cry.h"
+#include "../crypto/hsh.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,6 +44,15 @@ tg_t *tg_new(
 
 	// set auth_key
 	tg->key = auth_key_from_database(tg);
+	if (tg->key.size){
+		// auth key id
+		buf_t key_hash = tg_hsh_sha1(tg->key);
+		buf_t auth_key_id = 
+			buf_add(key_hash.data + 12, 8);
+		tg->key_id = buf_get_ui64(auth_key_id);
+		buf_free(key_hash);
+		buf_free(auth_key_id);
+	}
 
 	// start new seqn
 	tg->seqn = 0;

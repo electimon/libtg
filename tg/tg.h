@@ -23,6 +23,7 @@ struct tg_ {
 	void (*on_log)(void *on_log_data, const char *msg);
 	int seqn;
 	buf_t key;
+	long key_id;
 	buf_t salt;
 	buf_t ssid;
 	uint64_t fingerprint;
