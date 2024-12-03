@@ -87,7 +87,7 @@ int tg_messages_getHistory(
 
 	tl = tg_send_query(tg, getHustory); 
 
-	ON_ERR(tg, tl, "%s: recived id: %.8x", __func__, tl->_id);
+	ON_LOG(tg, "%s: recived id: %.8x", __func__, tl->_id);
 	if (!tl)
 		goto tg_messeges_get_history_thow_error;
 
