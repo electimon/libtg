@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
 	
-	tg_set_on_log  (tg, NULL, on_log);
+	//tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
 
 	tg_dialog_t d;
@@ -172,10 +172,13 @@ int main(int argc, char *argv[])
 	buf_t peer = 
 		tg_inputPeer(d.peer_type, 
 				d.peer_id, d.access_hash);
+
+	tg_async_dialogs_to_database(tg, 40);
+	sleep(10);
 	
 	tg_messages_getHistory(
 			tg,
-		 	0, 
+		 	&peer, 
 			0, 
 			time(NULL), 
 			0, 

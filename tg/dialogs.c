@@ -459,7 +459,7 @@ int tg_async_dialogs_to_database(tg_t *tg, int seconds)
 
 	// open socket
 	tg->async_dialogs_sockfd = 
-		tg_net_open(tg);
+		tg_net_open_port(tg, 80);
 
 	// create table
 	char sql[BUFSIZ] = 
@@ -481,8 +481,6 @@ int tg_async_dialogs_to_database(tg_t *tg, int seconds)
 	#undef TG_DIALOG_ARG
 	#undef TG_DIALOG_STR
 	
-	printf("%s: %d\n", __func__, __LINE__);
-
 	//create new thread
 	int err = pthread_create(
 			&(tg->async_dialogs_tid), 

@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 01.12.2024
+ * Last Modified Date: 03.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -11,7 +11,7 @@
 #include <netdb.h>
 #include <unistd.h>
 
-int tg_net_open(tg_t *tg)
+int tg_net_open_port(tg_t *tg, int port)
 {
   struct sockaddr_in serv_addr;
   struct hostent * server;
@@ -38,7 +38,7 @@ int tg_net_open(tg_t *tg)
 			(char *)server->h_addr_list[0],
 		 	(char *)&serv_addr.sin_addr.s_addr,
 		 	server->h_length);
-  serv_addr.sin_port = htons(tg->port);
+  serv_addr.sin_port = htons(port);
 
   if (connect(
 				sockfd, 
@@ -54,6 +54,10 @@ int tg_net_open(tg_t *tg)
 	send(sockfd, init, 4, 0);
 
 	return sockfd;
+}
+
+int tg_net_open(tg_t *tg){
+	return tg_net_open_port(tg, tg->port);
 }
 
 void tg_net_close(tg_t *tg, int sockfd)
