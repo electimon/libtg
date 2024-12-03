@@ -463,7 +463,7 @@ int tg_async_dialogs_to_database(tg_t *tg, int seconds)
 
 	// create table
 	char sql[BUFSIZ] = 
-		"CREATE TABLE IF NOT EXISTS dialogs (id INT);\n";
+		"CREATE TABLE IF NOT EXISTS dialogs (id INT, peer_id INT UNIQUE);\n";
 	ON_LOG(tg, "%s", sql);
 	tg_sqlite3_exec(tg, sql);	
 	
