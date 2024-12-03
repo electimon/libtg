@@ -52,11 +52,7 @@ int tg_get_dialogs(
 			const tg_dialog_t *dialog));
 
 int tg_async_dialogs_to_database(tg_t *tg, int seconds);
-int tg_get_dialogs_from_database(
-		tg_t *tg,
-	  int offset,	
-		int limit,
-		void *data,
+int tg_get_dialogs_from_database(tg_t *tg, void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));
 
 #endif /* ifndef TG_DIALOGS_H_ */

@@ -495,8 +495,6 @@ int tg_async_dialogs_to_database(tg_t *tg, int seconds)
 
 int tg_get_dialogs_from_database(
 		tg_t *tg,
-	  int offset,
-	  int limit,	
 		void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog))
 {
@@ -514,12 +512,7 @@ int tg_get_dialogs_from_database(
 	
 	str_appendf(&s, 
 			"id FROM dialogs WHERE id = %d " 
-			"ORDER BY \'top_message_date\' DESC", tg->id);
-
-	if (offset > 0 && limit > 0)
-		str_appendf(&s, " LIMIT %d, %d", offset - 1, limit);
-	else if (limit > 0)
-		str_appendf(&s, " LIMIT %d", limit);
+			"ORDER BY \'top_message_date\' DESC;", tg->id);
 		
 	tg_sqlite3_for_each(tg, s.str, stmt){
 		tg_dialog_t d;
