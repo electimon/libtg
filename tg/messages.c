@@ -59,7 +59,7 @@ int tg_messages_getHistory(
 		int limit,
 		int max_id,
 		int min_id,
-		long *hash,
+		uint64_t *hash,
 		void *data,
 		int (*callback)(void *data, 
 			const tg_message_t *message))
@@ -67,7 +67,7 @@ int tg_messages_getHistory(
 	tl_t *tl = NULL;
 
 	int i, k, c = 0;
-	long h = 0;
+	uint64_t h = 0;
 	if (hash)
 		h = *hash;
 

@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 03.12.2024
+ * Last Modified Date: 04.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -31,14 +31,14 @@ int tg_get_dialogs(
 		tg_t *tg, 
 		int limit, 
 		time_t date, 
-		long * hash, 
-		int *folder_id, 
+		uint64_t * hash, 
+		uint32_t *folder_id, 
 		void *data,
 		int (*callback)(void *data, 
 			const tg_dialog_t *dialog))
 {
 	int i, k;
-	long h = 0;
+	uint64_t h = 0;
 	if (hash)
 		h = *hash;
 
@@ -340,9 +340,9 @@ int tg_get_dialogs(
 	return 0;
 }
 
-static void update_hash(long *hash, int msg_id){
+static void update_hash(uint64_t *hash, uint32_t msg_id){
 	int k;
-	long h = 0;
+	uint64_t h = 0;
 	if (hash)
 		h = *hash;
 

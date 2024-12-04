@@ -23,17 +23,17 @@ struct tg_ {
 	void (*on_log)(void *on_log_data, const char *msg);
 	int seqn;
 	buf_t key;
-	long key_id;
+	uint64_t key_id;
 	buf_t salt;
 	buf_t ssid;
 	uint64_t fingerprint;
 	uint64_t msgids[20]; 
-	long dialogs_hash;
+	uint64_t dialogs_hash;
 	bool async_dialogs;
 	int async_dialogs_sockfd;
 	pthread_t async_dialogs_tid;
 	int async_dialogs_seconds;
-	long messages_hash;
+	uint64_t messages_hash;
 	bool async_messages;
 	int async_messages_sockfd;
 	pthread_t async_messages_tid;
@@ -44,8 +44,8 @@ int database_init(tg_t *tg, const char *database_path);
 buf_t auth_key_from_database(tg_t *tg);
 char * phone_number_from_database(tg_t *tg);
 char * auth_tokens_from_database(tg_t *tg);
-long dialogs_hash_from_database(tg_t *tg);
-int dialogs_hash_to_database(tg_t *tg, long hash);
+uint64_t dialogs_hash_from_database(tg_t *tg);
+int dialogs_hash_to_database(tg_t *tg, uint64_t hash);
 
 int phone_number_to_database(
 		tg_t *tg, const char *phone_number);

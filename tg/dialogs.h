@@ -4,27 +4,27 @@
 #include "tg.h"
 
 #define TG_DIALOG_ARGS\
-	TG_DIALOG_STR(char*, name, "TEXT", "name") \
-	TG_DIALOG_ARG(bool, pinned, "INT", "pinned") \
-	TG_DIALOG_ARG(bool, unread_mark, "INT", "unread_mark") \
-	TG_DIALOG_ARG(int, top_message_id, "INT", "top_message_id") \
-	TG_DIALOG_ARG(int, top_message_from_peer_type, "INT", "top_message_from_peer_type") \
-	TG_DIALOG_ARG(long, top_message_from_peer_id, "INT", "top_message_from_peer_id") \
-	TG_DIALOG_ARG(int, top_message_date, "INT", "top_message_date") \
-	TG_DIALOG_STR(char*, top_message_text, "TEXT", "top_message_text") \
-	TG_DIALOG_ARG(int, read_inbox_max_id, "INT", "read_inbox_max_id") \
-	TG_DIALOG_ARG(int, read_outbox_max_id, "INT", "read_outbox_max_id") \
-	TG_DIALOG_ARG(int, unread_count, "INT", "unread_count") \
-	TG_DIALOG_ARG(int, unread_mentions_count, "INT", "unread_mentions_count") \
-	TG_DIALOG_ARG(int, unread_reactions_count, "INT", "unread_reactions_count") \
-	TG_DIALOG_ARG(int, folder_id, "INT", "folder_id") \
-	TG_DIALOG_ARG(bool, silent, "INT", "silent") \
-	TG_DIALOG_ARG(int, mute_until, "INT", "mute_until") \
-	TG_DIALOG_ARG(int, peer_type, "INT", "peer_type") \
-	TG_DIALOG_ARG(long, peer_id, "INT", "peer_id") \
-	TG_DIALOG_ARG(long, photo_id, "INT", "photo_id") \
-	TG_DIALOG_STR(char*, thumb, "TEXT", "thumb") \
-	TG_DIALOG_ARG(long, access_hash, "INT", "access_hash") \
+	TG_DIALOG_STR(char*,    name, "TEXT", "name") \
+	TG_DIALOG_ARG(bool,     pinned, "INT", "pinned") \
+	TG_DIALOG_ARG(bool,     unread_mark, "INT", "unread_mark") \
+	TG_DIALOG_ARG(uint32_t, top_message_id, "INT", "top_message_id") \
+	TG_DIALOG_ARG(uint32_t, top_message_from_peer_type, "INT", "top_message_from_peer_type") \
+	TG_DIALOG_ARG(uint64_t, top_message_from_peer_id, "INT", "top_message_from_peer_id") \
+	TG_DIALOG_ARG(uint32_t, top_message_date, "INT", "top_message_date") \
+	TG_DIALOG_STR(char*,    top_message_text, "TEXT", "top_message_text") \
+	TG_DIALOG_ARG(uint32_t, read_inbox_max_id, "INT", "read_inbox_max_id") \
+	TG_DIALOG_ARG(uint32_t, read_outbox_max_id, "INT", "read_outbox_max_id") \
+	TG_DIALOG_ARG(uint32_t, unread_count, "INT", "unread_count") \
+	TG_DIALOG_ARG(uint32_t, unread_mentions_count, "INT", "unread_mentions_count") \
+	TG_DIALOG_ARG(uint32_t, unread_reactions_count, "INT", "unread_reactions_count") \
+	TG_DIALOG_ARG(uint32_t, folder_id, "INT", "folder_id") \
+	TG_DIALOG_ARG(bool,     silent, "INT", "silent") \
+	TG_DIALOG_ARG(uint32_t, mute_until, "INT", "mute_until") \
+	TG_DIALOG_ARG(uint32_t, peer_type, "INT", "peer_type") \
+	TG_DIALOG_ARG(uint64_t, peer_id, "INT", "peer_id") \
+	TG_DIALOG_ARG(uint64_t, photo_id, "INT", "photo_id") \
+	TG_DIALOG_STR(char*,    thumb, "TEXT", "thumb") \
+	TG_DIALOG_ARG(uint64_t, access_hash, "INT", "access_hash") \
 
 
 typedef struct tg_dialog_ {
@@ -45,8 +45,8 @@ int tg_get_dialogs(
 		tg_t *tg, 
 		int limit,
 		time_t date, 
-		long * hash, 
-		int *folder_id, 
+		uint64_t * hash, 
+		uint32_t *folder_id, 
 		void *data,
 		int (*callback)(void *data, 
 			const tg_dialog_t *dialog));

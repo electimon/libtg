@@ -1,6 +1,6 @@
 #include "peer.h"
 
-buf_t tg_inputPeer(TG_PEER_TYPE t, long id, long h)
+buf_t tg_inputPeer(TG_PEER_TYPE t, uint64_t id, uint64_t h)
 {
 	buf_t p;
 	switch (t) {
@@ -22,7 +22,7 @@ buf_t tg_inputPeer(TG_PEER_TYPE t, long id, long h)
 	return p;
 }
 
-buf_t tg_peer(TG_PEER_TYPE t, long id)
+buf_t tg_peer(TG_PEER_TYPE t, uint64_t id)
 {
 	buf_t p;
 	switch (t) {

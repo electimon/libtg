@@ -4,25 +4,25 @@
 #include "tg.h"
 
 #define TG_MESSAGE_ARGS\
-	TG_MESSAGE_ARG(bool, out_, "INT", "out") \
-	TG_MESSAGE_ARG(bool, mentioned_, "INT", "mentioned") \
-	TG_MESSAGE_ARG(bool, media_unread_, "INT", "media_unread") \
-	TG_MESSAGE_ARG(bool, silent_, "INT", "silent") \
-	TG_MESSAGE_ARG(bool, post_, "INT", "post") \
-	TG_MESSAGE_ARG(bool, from_scheduled_, "INT", "from_scheduled") \
-	TG_MESSAGE_ARG(bool, legacy_, "INT", "legacy") \
-	TG_MESSAGE_ARG(bool, edit_hide_, "INT", "edit_hide") \
-	TG_MESSAGE_ARG(bool, pinned_, "INT", "pinned") \
-	TG_MESSAGE_ARG(bool, noforwards_, "INT", "noforwards") \
-	TG_MESSAGE_ARG(bool, invert_media_, "INT", "invert_media") \
-	TG_MESSAGE_ARG(bool, offline_, "INT", "offline") \
-	TG_MESSAGE_ARG(int,  id_, "INT", "msg_id") \
-	TG_MESSAGE_PER(long, from_id_, "INT", "from_id") \
-	TG_MESSAGE_ARG(int,  from_boosts_applied_, "INT", "from_boosts_applied") \
-	TG_MESSAGE_PER(long, peer_id_, "INT", "peer_id") \
-	TG_MESSAGE_PER(long,  saved_peer_id_, "INT", "saved_peer_id") \
-	TG_MESSAGE_ARG(int,   date_, "INT", "date") \
-	TG_MESSAGE_STR(char*, message_, "TEXT", "message") \
+	TG_MESSAGE_ARG(bool,     out_, "INT", "out") \
+	TG_MESSAGE_ARG(bool,     mentioned_, "INT", "mentioned") \
+	TG_MESSAGE_ARG(bool,     media_unread_, "INT", "media_unread") \
+	TG_MESSAGE_ARG(bool,     silent_, "INT", "silent") \
+	TG_MESSAGE_ARG(bool,     post_, "INT", "post") \
+	TG_MESSAGE_ARG(bool,     from_scheduled_, "INT", "from_scheduled") \
+	TG_MESSAGE_ARG(bool,     legacy_, "INT", "legacy") \
+	TG_MESSAGE_ARG(bool,     edit_hide_, "INT", "edit_hide") \
+	TG_MESSAGE_ARG(bool,     pinned_, "INT", "pinned") \
+	TG_MESSAGE_ARG(bool,     noforwards_, "INT", "noforwards") \
+	TG_MESSAGE_ARG(bool,     invert_media_, "INT", "invert_media") \
+	TG_MESSAGE_ARG(bool,     offline_, "INT", "offline") \
+	TG_MESSAGE_ARG(uint32_t, id_, "INT", "msg_id") \
+	TG_MESSAGE_PER(uint64_t, from_id_, "INT", "from_id") \
+	TG_MESSAGE_ARG(uint32_t, from_boosts_applied_, "INT", "from_boosts_applied") \
+	TG_MESSAGE_PER(uint64_t, peer_id_, "INT", "peer_id") \
+	TG_MESSAGE_PER(uint64_t, saved_peer_id_, "INT", "saved_peer_id") \
+	TG_MESSAGE_ARG(uint32_t, date_, "INT", "date") \
+	TG_MESSAGE_STR(char*,    message_, "TEXT", "message") \
 
 typedef struct tg_message_t {
 	#define TG_MESSAGE_ARG(t, arg, ...) t arg;
@@ -46,7 +46,7 @@ int tg_messages_getHistory(
 		int limit,
 		int max_id,
 		int min_id,
-		long *hash,
+		uint64_t *hash,
 		void *data,
 		int (*callback)(void *data, const tg_message_t *message));
 

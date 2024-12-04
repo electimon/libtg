@@ -133,7 +133,7 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 	dialog->peer_id = d->peer_id;
 	dialog->peer_type = d->peer_type;
 	dialog->access_hash = d->access_hash;
-	return 0;
+	return 1;
 }
 
 int messages_callback(void *data, const tg_message_t *m)
@@ -161,10 +161,13 @@ int main(int argc, char *argv[])
 	tg_set_on_error  (tg, NULL, on_err);
 
 	tg_dialog_t d;
-	tg_get_dialogs(tg, 1,
-		 	time(NULL),
-		 	NULL, NULL,
-		 	&d, dialogs_callback);
+	tg_get_dialogs_from_database(tg, &d, 
+			dialogs_callback);
+
+	//tg_get_dialogs(tg, 1,
+			 //time(NULL),
+			 //NULL, NULL,
+			 //&d, dialogs_callback);
 
 	printf("NAME: %s\n", d.name);
 	printf("PEER ID: %.16lx\n", d.peer_id);
@@ -173,8 +176,8 @@ int main(int argc, char *argv[])
 		tg_inputPeer(d.peer_type, 
 				d.peer_id, d.access_hash);
 
-	tg_async_dialogs_to_database(tg, 40);
-	sleep(10);
+	//tg_async_dialogs_to_database(tg, 40);
+	//sleep(10);
 	
 	tg_messages_getHistory(
 			tg,

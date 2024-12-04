@@ -226,20 +226,20 @@ int auth_key_to_database(
 	return 0;
 }
 
-long dialogs_hash_from_database(tg_t *tg)
+uint64_t dialogs_hash_from_database(tg_t *tg)
 {
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT hash FROM dialogs_hash WHERE id = %d;"
 			, tg->id);
-	long hash;
+	uint64_t hash;
 	tg_sqlite3_for_each(tg, sql, stmt)
 		hash = sqlite3_column_int64(stmt, 0);
 
 	return hash;
 }
 
-int dialogs_hash_to_database(tg_t *tg, long hash)
+int dialogs_hash_to_database(tg_t *tg, uint64_t hash)
 {
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -253,4 +253,3 @@ int dialogs_hash_to_database(tg_t *tg, long hash)
 	
 	return tg_sqlite3_exec(tg, sql);
 }
-
