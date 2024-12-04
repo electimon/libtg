@@ -24,6 +24,7 @@
 
 // #include <stdint.h>
 #if INTPTR_MAX == INT32_MAX
+    #error "Environment not 32 or 64-bit."
     #define THIS_IS_32_BIT_ENVIRONMENT
 		#define _LD_ "%lld"
 #elif INTPTR_MAX == INT64_MAX
