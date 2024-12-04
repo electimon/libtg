@@ -21,6 +21,7 @@
 #include "../transport/net.h"
 #include <string.h>
 #include "peer.h"
+#include <inttypes.h>
 
 #define BUF2STR(_b) strndup((char*)_b.data, _b.size)
 #define BUF2IMG(_b) \
@@ -378,8 +379,8 @@ static int _async_dialogs_update_dialog(
 
 	str_appendf(&s,
 		"INSERT INTO \'dialogs\' (\'peer_id\') "
-		"SELECT %ld "
-		"WHERE NOT EXISTS (SELECT 1 FROM dialogs WHERE peer_id = %ld);\n"
+		"SELECT  "PRIu64" "
+		"WHERE NOT EXISTS (SELECT 1 FROM dialogs WHERE peer_id = "PRIu64");\n"
 		, dialog->peer_id, dialog->peer_id);
 
 	str_appendf(&s, "UPDATE \'dialogs\' SET ");
