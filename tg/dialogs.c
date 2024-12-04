@@ -21,7 +21,18 @@
 #include "../transport/net.h"
 #include <string.h>
 #include "peer.h"
-#include <inttypes.h>
+
+// #include <stdint.h>
+#if INTPTR_MAX == INT32_MAX
+    #define THIS_IS_32_BIT_ENVIRONMENT
+		#define _LD_ "%lld"
+#elif INTPTR_MAX == INT64_MAX
+    #define THIS_IS_64_BIT_ENVIRONMENT
+		#define _LD_ "%ld"
+#else
+    #error "Environment not 32 or 64-bit."
+#endif
+
 
 #define BUF2STR(_b) strndup((char*)_b.data, _b.size)
 #define BUF2IMG(_b) \
@@ -379,8 +390,8 @@ static int _async_dialogs_update_dialog(
 
 	str_appendf(&s,
 		"INSERT INTO \'dialogs\' (\'peer_id\') "
-		"SELECT  "PRIu64" "
-		"WHERE NOT EXISTS (SELECT 1 FROM dialogs WHERE peer_id = "PRIu64");\n"
+		"SELECT  "_LD_" "
+		"WHERE NOT EXISTS (SELECT 1 FROM dialogs WHERE peer_id = "_LD_");\n"
 		, dialog->peer_id, dialog->peer_id);
 
 	str_appendf(&s, "UPDATE \'dialogs\' SET ");
@@ -393,15 +404,15 @@ static int _async_dialogs_update_dialog(
 	}
 		
 	#define TG_DIALOG_ARG(t, n, type, name) \
-		str_appendf(&s, "\'" name "\'" " = %ld, ", (long)dialog->n);
+		str_appendf(&s, "\'" name "\'" " = "_LD_", ", (uint64_t)dialog->n);
 	
 	TG_DIALOG_ARGS
 	#undef TG_DIALOG_ARG
 	#undef TG_DIALOG_STR
 	
-	str_appendf(&s, "id = %d WHERE peer_id = %ld;\n"
+	str_appendf(&s, "id = %d WHERE peer_id = "_LD_";\n"
 			, d->tg->id, dialog->peer_id);
-
+	
 	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
 	if (tg_sqlite3_exec(d->tg, s.str) == 0){
 		// update hash

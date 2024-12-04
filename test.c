@@ -176,21 +176,21 @@ int main(int argc, char *argv[])
 		tg_inputPeer(d.peer_type, 
 				d.peer_id, d.access_hash);
 
-	//tg_async_dialogs_to_database(tg, 40);
+	tg_async_dialogs_to_database(tg, 40);
 	//sleep(10);
 	
-	tg_messages_getHistory(
-			tg,
-		 	&peer, 
-			0, 
-			time(NULL), 
-			0, 
-			20, 
-			0, 
-			0, 
-			NULL, 
-			NULL, 
-			messages_callback);
+	//tg_messages_getHistory(
+			//tg,
+			 //&peer, 
+			//0, 
+			//time(NULL), 
+			//0, 
+			//20, 
+			//0, 
+			//0, 
+			//NULL, 
+			//NULL, 
+			//messages_callback);
 	
 
 	//tg_set_on_log  (tg, NULL, on_log);
