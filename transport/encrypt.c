@@ -124,7 +124,7 @@ buf_t tg_decrypt(tg_t *tg, buf_t m, bool enc)
 		if (auth_key_id != buf_get_ui64(auth_key_id_)){
 			ON_ERR(tg, NULL, "%s: auth_key_id mismatch", __func__);
 			buf_free(auth_key_id_);
-			return buf_cat(d, m);
+			return buf_cat_ui32(d, -406);
 		}
 		buf_free(auth_key_id_);
 		auth_key_id = deserialize_ui64(&m);
