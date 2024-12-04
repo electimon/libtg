@@ -181,12 +181,6 @@ tl_t * tg_send_query_to_net(
 	buf_t d = tg_decrypt(tg, tr, enc);
 	if (!d.size)
 		return NULL;
-	if (d.size == 4 && buf_get_ui32(d) == -406){
-		// auth_key_id mismatch
-		sleep(1);
-		// send message again
-		return tg_send_query_(tg, query, enc);
-	}
 
 	buf_free(tr);
 
