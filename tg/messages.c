@@ -181,7 +181,9 @@ int tg_send_message(tg_t *tg, buf_t *peer, const char *message)
 			NULL, 
 			NULL);
 
+	tg_send_query(tg, m);
 	buf_free(random_id);
+	buf_free(m);
 
 	return 0;
 }
