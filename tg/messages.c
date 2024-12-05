@@ -157,3 +157,31 @@ tg_messeges_get_history_finish:;
 
 	return c;
 }
+
+int tg_send_message(tg_t *tg, buf_t *peer, const char *message)
+{
+	buf_t random_id = buf_rand(8);
+	buf_t m = tl_messages_sendMessage(
+			NULL, 
+			NULL, 
+			NULL, 
+			NULL, 
+			NULL, 
+			NULL, 
+			NULL, 
+			peer, 
+			NULL, 
+			message, 
+			buf_get_ui64(random_id), 
+			NULL, 
+			NULL, 
+			0, 
+			NULL, 
+			NULL, 
+			NULL, 
+			NULL);
+
+	buf_free(random_id);
+
+	return 0;
+}

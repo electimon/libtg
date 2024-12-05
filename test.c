@@ -124,7 +124,6 @@ void on_log(void *d, const char *msg){
 	printf("%s\n", msg);
 }
 
-
 int dialogs_callback(void *data, const tg_dialog_t *d)
 {
 	printf("%s\n", d->name);

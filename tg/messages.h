@@ -54,4 +54,6 @@ int tg_async_messages_to_database(tg_t *tg, buf_t peer, int seconds);
 int tg_get_messages_from_database(tg_t *tg, buf_t peer, void *data,
 		int (*callback)(void *data, const tg_message_t *message));
 
+int tg_send_message(tg_t *tg, buf_t *peer, const char *message);
+
 #endif /* ifndef TG_MESSAGES_H */		
