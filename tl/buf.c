@@ -277,18 +277,22 @@ char* buf_to_base64(buf_t b){
 			b.data, 
 			b.size, 
 			&l);
-	base64_cleanup();
+	printf("%s: %ld: %ld\n", __func__, l, strlen(s));
 	return s;
 }
 
 buf_t buf_from_base64(const char *s){
+	printf("%s decode: %s\n", __func__, s);
+	printf("%s len: %ld (%%4):%ld\n", __func__, 
+			strlen(s), strlen(s)%4);
 	buf_t b;
 	buf_init(&b);
 	size_t l = 0;
 	void * data = base64_decode(
 			s, 
-			strlen(s), 
+			strlen(s) - 2, 
 			&l);
+	printf("data from base64 len:%ld\n", l);
 	if (!data)
 		return b;
 	

@@ -75,7 +75,7 @@ void tg_get_file(
 	buf_free(t);
 	
 	// net receive
-tg_get_file_net_receive:;
+	tg_get_file_net_receive:;
 	buf_t buf = buf_new();
 	buf_t r = tg_net_receive(tg, sockfd);
 	// check size
@@ -146,7 +146,6 @@ tg_get_file_net_receive:;
 		if (!tl)
 			goto tg_get_file_thow_error;
 		
-		printf("WE ARE HERE: %.8x\n", tl->_id);
 		switch (tl->_id) {
 			case id_msg_container:
 				{
@@ -189,7 +188,8 @@ tg_get_file_net_receive:;
 
   tg_get_file_thow_error:;
 		// throw error
-		printf("ID: %.8x\n", tl->_id);
+		if (tl)
+			printf("ID: %.8x\n", tl->_id);
 		char *err = tg_strerr(tl); 
 		ON_ERR(tg, tl, "%s", err);
 		free(err);

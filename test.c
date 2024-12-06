@@ -139,8 +139,13 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 
 int messages_callback(void *data, const tg_message_t *m)
 {
-	printf("MESSAGE: ");
-	printf("%s\n", m->message_);
+	//printf("%s\n", m->message_);
+	if (m->photo_id){
+		printf("HAS PHOTO!\n");
+		tg_message_t *msg = data;
+		*msg = *m;
+		return 1;
+	}
 	return 0;
 }
 
@@ -193,22 +198,37 @@ int main(int argc, char *argv[])
 	//tg_async_dialogs_to_database(tg, 40);
 	//sleep(10);
 	
-	//tg_messages_getHistory(
-			//tg,
-			 //&peer, 
-			//0, 
-			//time(NULL), 
-			//0, 
-			//20, 
-			//0, 
-			//0, 
-			//NULL, 
-			//NULL, 
-			//messages_callback);
-	
+	tg_message_t m;
+	tg_messages_getHistory(
+			tg,
+			 &peer, 
+			0, 
+			time(NULL), 
+			0, 
+			20, 
+			0, 
+			0, 
+			NULL, 
+			&m, 
+			messages_callback);
 
-	//tg_set_on_log  (tg, NULL, on_log);
-	//tg_set_on_error  (tg, NULL, on_err);
+	printf("MESSAGE: %s\n", m.message_);
+	printf("file reference: %s\n", m.photo_file_reference);
+
+	buf_t fr = buf_from_base64(m.photo_file_reference);
+	printf("FILE REF BUF SIZE: %d\n", fr.size);
+	
+	InputFileLocation location = 
+		tl_inputPhotoFileLocation(
+				m.photo_id, 
+				m.photo_access_hash, 
+				&fr, 
+				"s");
+	
+	buf_dump(location);
+
+	tg_set_on_log  (tg, NULL, on_log);
+	tg_set_on_error  (tg, NULL, on_err);
 
 	/*tg_async_dialogs_to_database(tg, 40);*/
 
@@ -216,11 +236,11 @@ int main(int argc, char *argv[])
 			//dialogs_callback);
 	
 	// download photo
-	InputFileLocation location = 
-		tl_inputPeerPhotoFileLocation(
-				true, 
-				&peer, 
-				d.photo_id);
+	//InputFileLocation location = 
+		//tl_inputPeerPhotoFileLocation(
+				//true, 
+				//&peer, 
+				//d.photo_id);
 
 	tg_get_file(
 			tg, 

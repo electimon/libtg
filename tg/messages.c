@@ -35,6 +35,8 @@ void tg_message_from_tl(
 						tgm->photo_id = photo->id_;
 						tgm->photo_dc_id = photo->dc_id_;
 						tgm->photo_date = photo->date_;
+						tgm->photo_file_reference = 
+							buf_to_base64(photo->file_reference_);
 					}
 				}
 				break;

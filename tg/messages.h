@@ -36,6 +36,7 @@ typedef struct tg_message_t {
 	uint64_t photo_access_hash;
 	uint32_t photo_dc_id;
 	uint32_t photo_date;
+	char * photo_file_reference; 
 } tg_message_t;
 
 /* convert tl_message to tg_message */
