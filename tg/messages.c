@@ -20,6 +20,28 @@ void tg_message_from_tl(
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
+
+	// handle with media
+	if (tlm->media_){
+		switch (tlm->media_->_id) {
+			case id_messageMediaPhoto:
+				{
+					tl_messageMediaPhoto_t *mmp = 
+						(tl_messageMediaPhoto_t *)tlm->media_;
+					if (mmp->photo_ && mmp->photo_->_id == id_photo)
+					{
+						tl_photo_t *photo = (tl_photo_t *)mmp->photo_;
+						tgm->photo_access_hash = photo->access_hash_; 
+						tgm->photo_id = photo->id_;
+						tgm->photo_dc_id = photo->dc_id_;
+						tgm->photo_date = photo->date_;
+					}
+				}
+				break;
+			default:
+				break;
+		}
+	}
 }
 
 static void parse_msg(

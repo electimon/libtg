@@ -32,6 +32,10 @@ typedef struct tg_message_t {
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
+	uint64_t photo_id;
+	uint64_t photo_access_hash;
+	uint32_t photo_dc_id;
+	uint32_t photo_date;
 } tg_message_t;
 
 /* convert tl_message to tg_message */
