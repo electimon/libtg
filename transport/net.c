@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 03.12.2024
+ * Last Modified Date: 06.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -22,7 +22,7 @@ int tg_net_open_port(tg_t *tg, int port)
 
   if (sockfd < 0) {
 		ON_ERR(tg, NULL, "%s: can't open socket", __func__);
-    return 1;
+    return -1;
   }
 
   server = gethostbyname(tg->ip);
@@ -46,7 +46,7 @@ int tg_net_open_port(tg_t *tg, int port)
 				sizeof(serv_addr)) < 0) 
 	{
     ON_ERR(tg, NULL, "%s: can't connect", __func__);
-    return 1;
+    return -1;
   }
 
 	// send intermediate protocol

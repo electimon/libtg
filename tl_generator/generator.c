@@ -839,9 +839,13 @@ int append_methods_header(
 			len = STR(buf, 64, ", int %slen", name);
 		}
 		
-		if (m->args[i].flagn && strcmp(type, "string"))
+		// add pointer to flag args
+		if (m->args[i].flagn && 
+				strcmp(type, "string") && 
+				strcmp(type, "true"))
 			pointer = "*";
 
+		// add pointer for unknown type
 		if (
 				strcmp(type, "string") &&
 				strcmp(type, "true") &&
@@ -960,7 +964,10 @@ int append_methods(
 			len = STR(buf, 64, ", int %slen", name);
 		}
 
-		if (m->args[i].flagn && strcmp(type, "string"))
+		// add pointer to flag args
+		if (m->args[i].flagn && 
+				strcmp(type, "string") && 
+				strcmp(type, "true"))
 			pointer = "*";
 
 		if (

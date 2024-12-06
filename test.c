@@ -6,6 +6,7 @@
 #include "mtx/include/setup.h"
 #include "mtx/include/types.h"
 #include "tg/dialogs.h"
+#include "tg/files.h"
 #include "tg/messages.h"
 #include "tg/peer.h"
 #include "tg/tg.h"
@@ -132,6 +133,7 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 	dialog->peer_id = d->peer_id;
 	dialog->peer_type = d->peer_type;
 	dialog->access_hash = d->access_hash;
+	dialog->photo_id = d->photo_id;
 	return 1;
 }
 
@@ -140,6 +142,19 @@ int messages_callback(void *data, const tg_message_t *m)
 	printf("MESSAGE: ");
 	printf("%s\n", m->message_);
 	return 0;
+}
+
+int file_cb(void *d, const tg_file_t *f){
+	int len = 0;
+	if (f->bytes_)
+		len = strlen(f->bytes_);
+	printf("FILE type: %.8x, len: %d\n", f->type_, len);
+
+	return 0;
+}
+
+void progress(void *p, int down, int total){
+	printf("DOWNLOADED: %d%%\n", down/total*100);
 }
 
 int main(int argc, char *argv[])
@@ -156,7 +171,7 @@ int main(int argc, char *argv[])
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
 	
-	//tg_set_on_log  (tg, NULL, on_log);
+	/*tg_set_on_log  (tg, NULL, on_log);*/
 	tg_set_on_error  (tg, NULL, on_err);
 
 	tg_dialog_t d;
@@ -178,18 +193,18 @@ int main(int argc, char *argv[])
 	//tg_async_dialogs_to_database(tg, 40);
 	//sleep(10);
 	
-	tg_messages_getHistory(
-			tg,
-			 &peer, 
-			0, 
-			time(NULL), 
-			0, 
-			20, 
-			0, 
-			0, 
-			NULL, 
-			NULL, 
-			messages_callback);
+	//tg_messages_getHistory(
+			//tg,
+			 //&peer, 
+			//0, 
+			//time(NULL), 
+			//0, 
+			//20, 
+			//0, 
+			//0, 
+			//NULL, 
+			//NULL, 
+			//messages_callback);
 	
 
 	//tg_set_on_log  (tg, NULL, on_log);
@@ -199,6 +214,21 @@ int main(int argc, char *argv[])
 
 	//tg_get_dialogs_from_database(tg, NULL, 
 			//dialogs_callback);
+	
+	// download photo
+	InputFileLocation location = 
+		tl_inputPeerPhotoFileLocation(
+				true, 
+				&peer, 
+				d.photo_id);
+
+	tg_get_file(
+			tg, 
+			&location, 
+			NULL, 
+			file_cb,
+			NULL,
+			progress);
 	
 	printf("press any key to exit\n");
 	getchar();

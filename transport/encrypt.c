@@ -112,6 +112,7 @@ buf_t tg_decrypt(tg_t *tg, buf_t m, bool enc)
   }
 
   if (enc){
+		
 		// Encrypted Message
 		// auth_key_id msg_key encrypted_data
 		// int64       int128  bytes
@@ -132,6 +133,11 @@ buf_t tg_decrypt(tg_t *tg, buf_t m, bool enc)
 		// msg_key
 		buf_t msg_key = deserialize_buf(&m, 16);
 		
+		// check encrypted_data size
+		if (m.size % 16 != 0){
+			ON_ERR(tg, NULL, "(length %% AES_BLOCK_SIZE) != 0");	
+			return d;
+		}
 		// encrypted_data
 		//sha256_a = SHA256 (msg_key + substr (auth_key, x, 36));
 		buf_t sha256_a_ = 

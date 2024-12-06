@@ -14,18 +14,9 @@
 #include "../transport/net.h"
 //#include "../transport/crc.h"
 #include "../mtx/include/api.h"
+#include "transport.h"
 
-buf_t tg_encrypt    (tg_t *tg, buf_t b, bool enc);
-buf_t tg_decrypt    (tg_t *tg, buf_t b, bool enc);
-buf_t tg_header     (tg_t *tg, buf_t b, bool enc);
-buf_t tg_deheader   (tg_t *tg, buf_t b, bool enc);
-buf_t tg_transport  (tg_t *tg, buf_t b);
-buf_t tg_detransport(tg_t *tg, buf_t b);
-
-
-tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg);
-
-tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
+tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl, int sockfd)
 {
 	int i;
 	switch (tl->_id) {
@@ -35,7 +26,7 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 					(tl_msg_container_t *)tl;
 				for (i = 0; i < obj->messages_len; ++i) {
 					mtp_message_t m = obj->messages_[i];
-					tl = tg_handle_serialized_message(tg, m.body);	
+					tl = tg_handle_serialized_message(tg, m.body, sockfd);	
 				}
 			}
 			break;
@@ -58,7 +49,7 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 				tl_msgs_ack_t *obj = 
 					(tl_msgs_ack_t *)tl;
 				// get new message
-				buf_t r = tg_net_receive(tg, tg->sockfd);
+				buf_t r = tg_net_receive(tg, sockfd);
 				buf_t tr = tg_detransport(tg, r);
 				buf_free(r);
 				if (buf_get_ui32(tr) == 0xfffffe6c){
@@ -70,7 +61,7 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 				buf_free(tr);
 				buf_t msg = tg_deheader(tg, d, true);
 				buf_free(d);
-				tl = tg_handle_serialized_message(tg, msg);
+				tl = tg_handle_serialized_message(tg, msg, sockfd);
 			}
 			break;
 		case id_rpc_result:
@@ -78,7 +69,7 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 				tl_rpc_result_t *obj = 
 					(tl_rpc_result_t *)tl;
 				tl_t *result = 
-					tg_handle_deserialized_message(tg, obj->result_);
+					tg_handle_deserialized_message(tg, obj->result_, sockfd);
 				if (result){
 					tl = result;
 					// acknowlege
@@ -98,7 +89,7 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 						ON_ERR(tg, result, "%s: %s", __func__, err);
 						free(err);
 					}
-					tl = tg_handle_serialized_message(tg, buf);
+					tl = tg_handle_serialized_message(tg, buf, sockfd);
 				}
 			}
 			break;
@@ -121,7 +112,20 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 	return tl;
 }
 
-tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
+buf_t tg_serialize_query(tg_t *tg, buf_t query, bool enc)
+{
+	buf_t h = tg_header(tg, query, enc);
+	
+	buf_t e = tg_encrypt(tg, h, enc);
+	buf_free(h);
+
+	buf_t t = tg_transport(tg, e);
+	buf_free(e);
+
+	return t;
+}
+
+tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg, int sockfd)
 {
 	if (!msg.size)
 		return NULL;
@@ -130,7 +134,7 @@ tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 	if (!tl)
 		return NULL;
 
-	return tg_handle_deserialized_message(tg, tl);
+	return tg_handle_deserialized_message(tg, tl, sockfd);
 }
 
 tl_t * tg_send_query_to_net(
@@ -150,14 +154,7 @@ tl_t * tg_send_query_to_net(
 	// DRIVE
 	buf_t msg;
 
-	buf_t h = tg_header(tg, query, enc);
-	
-	buf_t e = tg_encrypt(tg, h, enc);
-	buf_free(h);
-
-	buf_t t = tg_transport(tg, e);
-	buf_free(e);
-
+	buf_t t = tg_serialize_query(tg, query, enc);	
 	tg_net_send(tg, tg->sockfd, t);
 	buf_free(t);
 	
@@ -189,7 +186,7 @@ tl_t * tg_send_query_to_net(
 		return NULL;
 	buf_free(d);
 
-	tl_t *tl = tg_handle_serialized_message(tg, msg);
+	tl_t *tl = tg_handle_serialized_message(tg, msg, sockfd);
 	if (tl && tl->_id == id_bad_server_salt) // resend message
 		tl = tg_send_query_(tg, query, enc);
 
