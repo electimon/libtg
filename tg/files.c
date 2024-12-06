@@ -146,6 +146,7 @@ tg_get_file_net_receive:;
 		if (!tl)
 			goto tg_get_file_thow_error;
 		
+		printf("WE ARE HERE: %.8x\n", tl->_id);
 		switch (tl->_id) {
 			case id_msg_container:
 				{
@@ -159,8 +160,7 @@ tg_get_file_net_receive:;
 							// get message again
 							buf_free(buf);
 							goto tg_get_file_net_receive;
-						} else
-							tl = tg_handle_deserialized_message(tg, tl, sockfd);
+						}
 					}
 				}
 				break;
@@ -169,12 +169,13 @@ tg_get_file_net_receive:;
 				// get message again
 				buf_free(buf);
 				goto tg_get_file_net_receive;
+				break;
 			
 			default:
 				tl = tg_handle_deserialized_message(tg, tl, sockfd);
 				break;
 		}
-
+	
 		if (tl && tl->_id == id_upload_file){
 			tg_file_t file;
 			memset(&file, 0, sizeof(file));
