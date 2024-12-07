@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 06.12.2024
+ * Last Modified Date: 07.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -69,7 +69,7 @@ int tg_get_dialogs(
 
 	tl_t *tl = tg_send_query_to_net(
 			tg, getDialogs, 
-			true, tg->async_dialogs_sockfd);
+			true, tg->sync_dialogs_sockfd);
 	if (tl && tl->_id == id_messages_dialogsNotModified){
 		ON_LOG(tg, "%s: dialogs not modified", __func__);
 		tl_messages_dialogsNotModified_t *dnm =
@@ -352,34 +352,21 @@ int tg_get_dialogs(
 	return 0;
 }
 
-static void update_hash(uint64_t *hash, uint32_t msg_id){
-	int k;
-	uint64_t h = 0;
-	if (hash)
-		h = *hash;
-
-	h = h ^ (h >> 21);
-	h = h ^ (h << 35);
-	h = h ^ (h >> 4);
-	h = h + msg_id;
-	
-	if (hash)
-		*hash = h;
-}
-
-struct _async_dialogs_update_dialog_t{
+struct _sync_dialogs_update_dialog_t{
 	tg_t *tg;
 	int d;
+	void *userdata;
+  void (*on_done)(void *userdata);
 };
 
-static int _async_dialogs_update_dialog(
+static int _sync_dialogs_update_dialog(
 		void *data, 
 		const tg_dialog_t *dialog)
 {
 	if (!dialog)
 		return 0;
 
-	struct _async_dialogs_update_dialog_t *d = data;
+	struct _sync_dialogs_update_dialog_t *d = data;
 	d->d = dialog->top_message_date; 
 
 	ON_LOG(d->tg, "%s: %s", __func__, dialog->name);
@@ -424,53 +411,53 @@ static int _async_dialogs_update_dialog(
 	return 0;
 }
 
-static void _async_dialogs_update(tg_t *tg)
+static void _sync_dialogs_update(
+		struct _sync_dialogs_update_dialog_t *d)
 {
-	struct _async_dialogs_update_dialog_t d;
-	d.tg = tg;
-	d.d = time(NULL);
-	int ret = 10;
-	while (ret >= 10){
-		ret = tg_get_dialogs(tg, 10,
-				d.d, &tg->dialogs_hash,
+	int ret = 40;
+	while (ret >= 40){
+		ret = tg_get_dialogs(d->tg, 40,
+				d->d, &d->tg->dialogs_hash,
 			 	NULL, 
-				&d,
-			 	_async_dialogs_update_dialog);
+				d,
+			 	_sync_dialogs_update_dialog);
 		
 		// update hash
 		dialogs_hash_to_database(
-				d.tg, d.tg->dialogs_hash);
+				d->tg, d->tg->dialogs_hash);
 
 		// sleep
-		sleep(2);
+		sleep(1);
 	}
+	if (d->on_done)
+		d->on_done(d->userdata);
 }
 
-static void * _async_dialogs_thread(void * data)
+static void * _sync_dialogs_thread(void * data)
 {
-	tg_t *tg = data;
-	ON_LOG(tg, "%s: start", __func__);
+	struct _sync_dialogs_update_dialog_t *d = data;
+	ON_LOG(d->tg, "%s: start", __func__);
 
-	while (tg && tg->async_dialogs) {
-		ON_LOG(tg, "%s: updating dialogs...", __func__);	
-		_async_dialogs_update(tg);
-		sleep(tg->async_dialogs_seconds);
-	}
+	ON_LOG(d->tg, "%s: updating dialogs...", __func__);	
+	_sync_dialogs_update(d);
+
+	d->tg->sync_dialogs = false;
+
+	free(d);
 
 	pthread_exit(0);	
 }
 
-int tg_async_dialogs_to_database(tg_t *tg, int seconds)
+int tg_sync_dialogs_to_database(tg_t *tg,
+		void *userdata, void (*on_done)(void *userdata))
 {
-	tg->async_dialogs_seconds = seconds;
-	
-	if (tg->async_dialogs) // only update seconds
+	if (tg->sync_dialogs)
 		return 0;
 
-	tg->async_dialogs = true;
+	tg->sync_dialogs = true;
 
 	// open socket
-	tg->async_dialogs_sockfd = 
+	tg->sync_dialogs_sockfd = 
 		tg_net_open_port(tg, 80);
 
 	// create table
@@ -492,13 +479,21 @@ int tg_async_dialogs_to_database(tg_t *tg, int seconds)
 	TG_DIALOG_ARGS
 	#undef TG_DIALOG_ARG
 	#undef TG_DIALOG_STR
+
+	// set data
+	struct _sync_dialogs_update_dialog_t *d = 
+		NEW(struct _sync_dialogs_update_dialog_t, return 1);
+	d->tg = tg;
+	d->d = time(NULL);
+	d->userdata = userdata;
+	d->on_done = on_done;
 	
 	//create new thread
 	int err = pthread_create(
-			&(tg->async_dialogs_tid), 
+			&(tg->sync_dialogs_tid), 
 			NULL, 
-			_async_dialogs_thread, 
-			tg);
+			_sync_dialogs_thread, 
+			&d);
 
 	return err;
 }
@@ -522,7 +517,7 @@ int tg_get_dialogs_from_database(
 	
 	str_appendf(&s, 
 			"id FROM dialogs WHERE id = %d " 
-			"ORDER BY \'top_message_date\' DESC;", tg->id);
+			"ORDER BY \'pinned\' DESC, \'top_message_date\' DESC;", tg->id);
 		
 	tg_sqlite3_for_each(tg, s.str, stmt){
 		tg_dialog_t d;

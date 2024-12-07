@@ -5,6 +5,19 @@
 #include <string.h>
 #include "database.h"
 
+// #include <stdint.h>
+#if INTPTR_MAX == INT32_MAX
+    #define THIS_IS_32_BIT_ENVIRONMENT
+		#define _LD_ "%lld"
+#elif INTPTR_MAX == INT64_MAX
+    #define THIS_IS_64_BIT_ENVIRONMENT
+		#define _LD_ "%ld"
+#else
+    #error "Environment not 32 or 64-bit."
+#endif
+
+
+
 sqlite3 * tg_sqlite3_open(tg_t *tg) 
 {
 	sqlite3 *db = NULL;
@@ -250,6 +263,36 @@ int dialogs_hash_to_database(tg_t *tg, uint64_t hash)
 			"WHERE NOT EXISTS (SELECT 1 FROM dialogs_hash WHERE id = %d); "
 			"UPDATE \'dialogs_hash\' SET \'hash\' = \'%ld\', id = %d; "
 		,tg->id, tg->id, hash, tg->id);
+	
+	return tg_sqlite3_exec(tg, sql);
+}
+
+uint64_t messages_hash_from_database(tg_t *tg, uint64_t peer_id)
+{
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"SELECT hash FROM messages_hash WHERE id = %d "
+			"AND peer_id = "_LD_";"
+			, tg->id, peer_id);
+	uint64_t hash;
+	tg_sqlite3_for_each(tg, sql, stmt)
+		hash = sqlite3_column_int64(stmt, 0);
+
+	return hash;
+}
+
+int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash)
+{
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"CREATE TABLE IF NOT EXISTS messages_hash (id INT); "
+			"ALTER TABLE \'messages_hash\' ADD COLUMN \'hash\' INT; "
+			"ALTER TABLE \'messages_hash\' ADD COLUMN \'peer_id\' INT; "
+			"INSERT INTO \'messages_hash\' (\'peer_id\') "
+			"SELECT "_LD_" "
+			"WHERE NOT EXISTS (SELECT 1 FROM messages_hash WHERE peer_id = "_LD_"); "
+			"UPDATE \'messages_hash\' SET \'hash\' = "_LD_", id = %d; "
+		,peer_id, peer_id, hash, tg->id);
 	
 	return tg_sqlite3_exec(tg, sql);
 }

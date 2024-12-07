@@ -162,6 +162,10 @@ void progress(void *p, int down, int total){
 	printf("DOWNLOADED: %d%%\n", down/total*100);
 }
 
+void on_done (void *d){
+	printf("ON_DONE!\n");
+}
+
 int main(int argc, char *argv[])
 {
 	int SETUP_API_ID(apiId)
@@ -177,60 +181,60 @@ int main(int argc, char *argv[])
 		return 1;	
 	
 	/*tg_set_on_log  (tg, NULL, on_log);*/
-	tg_set_on_error  (tg, NULL, on_err);
+	/*tg_set_on_error  (tg, NULL, on_err);*/
 
-	tg_dialog_t d;
-	tg_get_dialogs_from_database(tg, &d, 
-			dialogs_callback);
+	/*tg_dialog_t d;*/
+	/*tg_get_dialogs_from_database(tg, &d, */
+			/*dialogs_callback);*/
 
 	//tg_get_dialogs(tg, 1,
 			 //time(NULL),
 			 //NULL, NULL,
 			 //&d, dialogs_callback);
 
-	printf("NAME: %s\n", d.name);
-	printf("PEER ID: %.16lx\n", d.peer_id);
+	/*printf("NAME: %s\n", d.name);*/
+	/*printf("PEER ID: %.16lx\n", d.peer_id);*/
 	/*buf_t peer = buf_add_ui64(d.peer_id);*/
-	buf_t peer = 
-		tg_inputPeer(d.peer_type, 
-				d.peer_id, d.access_hash);
+	/*buf_t peer = */
+		/*tg_inputPeer(d.peer_type, */
+				/*d.peer_id, d.access_hash);*/
 
 	//tg_async_dialogs_to_database(tg, 40);
 	//sleep(10);
 	
-	tg_message_t m;
-	tg_messages_getHistory(
-			tg,
-			 &peer, 
-			0, 
-			time(NULL), 
-			0, 
-			20, 
-			0, 
-			0, 
-			NULL, 
-			&m, 
-			messages_callback);
+	/*tg_message_t m;*/
+	/*tg_messages_getHistory(*/
+			/*tg,*/
+			 /*&peer, */
+			/*0, */
+			/*time(NULL), */
+			/*0, */
+			/*20, */
+			/*0, */
+			/*0, */
+			/*NULL, */
+			/*&m, */
+			/*messages_callback);*/
 
-	printf("MESSAGE: %s\n", m.message_);
-	printf("file reference: %s\n", m.photo_file_reference);
+	/*printf("MESSAGE: %s\n", m.message_);*/
+	/*printf("file reference: %s\n", m.photo_file_reference);*/
 
-	buf_t fr = buf_from_base64(m.photo_file_reference);
-	printf("FILE REF BUF SIZE: %d\n", fr.size);
+	/*buf_t fr = buf_from_base64(m.photo_file_reference);*/
+	/*printf("FILE REF BUF SIZE: %d\n", fr.size);*/
 	
-	InputFileLocation location = 
-		tl_inputPhotoFileLocation(
-				m.photo_id, 
-				m.photo_access_hash, 
-				&fr, 
-				"s");
+	/*InputFileLocation location = */
+		/*tl_inputPhotoFileLocation(*/
+				/*m.photo_id, */
+				/*m.photo_access_hash, */
+				/*&fr, */
+				/*"s");*/
 	
-	buf_dump(location);
+	/*buf_dump(location);*/
 
 	tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
 
-	/*tg_async_dialogs_to_database(tg, 40);*/
+	tg_sync_dialogs_to_database(tg, NULL, on_done);
 
 	//tg_get_dialogs_from_database(tg, NULL, 
 			//dialogs_callback);
@@ -242,13 +246,13 @@ int main(int argc, char *argv[])
 				//&peer, 
 				//d.photo_id);
 
-	tg_get_file(
-			tg, 
-			&location, 
-			NULL, 
-			file_cb,
-			NULL,
-			progress);
+	/*tg_get_file(*/
+			/*tg, */
+			/*&location, */
+			/*NULL, */
+			/*file_cb,*/
+			/*NULL,*/
+			/*progress);*/
 	
 	printf("press any key to exit\n");
 	getchar();

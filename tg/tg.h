@@ -29,10 +29,9 @@ struct tg_ {
 	uint64_t fingerprint;
 	uint64_t msgids[20]; 
 	uint64_t dialogs_hash;
-	bool async_dialogs;
-	int async_dialogs_sockfd;
-	pthread_t async_dialogs_tid;
-	int async_dialogs_seconds;
+	bool sync_dialogs;
+	int sync_dialogs_sockfd;
+	pthread_t sync_dialogs_tid;
 	uint64_t messages_hash;
 	bool async_messages;
 	int async_messages_sockfd;
@@ -44,8 +43,14 @@ int database_init(tg_t *tg, const char *database_path);
 buf_t auth_key_from_database(tg_t *tg);
 char * phone_number_from_database(tg_t *tg);
 char * auth_tokens_from_database(tg_t *tg);
+
+void update_hash(uint64_t *hash, uint32_t msg_id);
+
 uint64_t dialogs_hash_from_database(tg_t *tg);
 int dialogs_hash_to_database(tg_t *tg, uint64_t hash);
+
+uint64_t messages_hash_from_database(tg_t *tg, uint64_t peer_id);
+int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash);
 
 int phone_number_to_database(
 		tg_t *tg, const char *phone_number);

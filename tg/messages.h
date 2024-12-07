@@ -42,6 +42,10 @@ typedef struct tg_message_t {
 /* convert tl_message to tg_message */
 void tg_message_from_tl(tg_message_t*, tl_message_t*);
 
+/* get message from database */
+void tg_message_from_database(
+		tg_t*, tg_message_t*, uint32_t msg_id);
+
 int tg_messages_getHistory(
 		tg_t *tg,
 		buf_t *peer,

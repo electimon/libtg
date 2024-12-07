@@ -110,3 +110,18 @@ void tg_add_mgsid(tg_t *tg, uint64_t msgid){
 			sizeof(uint64_t)*19);
 	tg->msgids[0] = msgid;
 }
+
+void update_hash(uint64_t *hash, uint32_t msg_id){
+	int k;
+	uint64_t h = 0;
+	if (hash)
+		h = *hash;
+
+	h = h ^ (h >> 21);
+	h = h ^ (h << 35);
+	h = h ^ (h >> 4);
+	h = h + msg_id;
+	
+	if (hash)
+		*hash = h;
+}

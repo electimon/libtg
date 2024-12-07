@@ -1,11 +1,75 @@
 #include "messages.h"
+#include <stdint.h>
 #include <string.h>
 #include "peer.h"
 #include "tg.h"
+#include "database.h"
+#include "../tl/alloc.h"
+
+// #include <stdint.h>
+#if INTPTR_MAX == INT32_MAX
+    #define THIS_IS_32_BIT_ENVIRONMENT
+		#define _LD_ "%lld"
+#elif INTPTR_MAX == INT64_MAX
+    #define THIS_IS_64_BIT_ENVIRONMENT
+		#define _LD_ "%ld"
+#else
+    #error "Environment not 32 or 64-bit."
+#endif
+
+
+void tg_message_from_database(
+		tg_t *tg, tg_message_t *m, uint32_t msg_id)
+{
+	if (!m){
+		ON_ERR(tg, NULL, "TG_MESSAGE IS NULL");
+		return;
+	}
+	memset(m, 0, sizeof(tg_message_t));
+
+	struct str s;
+	str_init(&s);
+	str_appendf(&s, "SELECT ");
+	
+	#define TG_MESSAGE_ARG(t, n, type, name) \
+		str_appendf(&s, name ", ");
+	#define TG_MESSAGE_STR(t, n, type, name) \
+		str_appendf(&s, name ", ");
+	#define TG_MESSAGE_PER(t, n, type, name) \
+		str_appendf(&s, name ", type_%s, ", name);
+	TG_MESSAGE_ARGS
+	#undef TG_MESSAGE_ARG
+	#undef TG_MESSAGE_STR
+	#undef TG_MESSAGE_PER
+	
+	str_appendf(&s, 
+			"id FROM messages WHERE msg_id = %d;", msg_id);
+		
+	tg_sqlite3_for_each(tg, s.str, stmt){
+		int col = 0;
+		#define TG_MESSAGE_ARG(t, n, type, name) \
+			m->n = sqlite3_column_int64(stmt, col++);
+		#define TG_MESSAGE_STR(t, n, type, name) \
+			m->n = strndup(\
+				(char *)sqlite3_column_text(stmt, col),\
+				sqlite3_column_bytes(stmt, col));\
+			col++;
+		#define TG_MESSAGE_PER(t, n, type, name) \
+			m->n = sqlite3_column_int64(stmt, col); \
+			m->type_##n = sqlite3_column_int64(stmt, col); \
+			col++;
+		
+		TG_MESSAGE_ARGS
+		#undef TG_MESSAGE_ARG
+		#undef TG_MESSAGE_STR
+		#undef TG_MESSAGE_PER
+	}
+}
 
 void tg_message_from_tl(
 		tg_message_t *tgm, tl_message_t *tlm)
 {
+	memset(tgm, 0, sizeof(tg_message_t));
 	#define TG_MESSAGE_ARG(t, arg, ...) \
 		tgm->arg = tlm->arg;
 	#define TG_MESSAGE_STR(t, arg, ...) \
@@ -66,7 +130,6 @@ static void parse_msgs(
 			continue;
 				
 		tg_message_t m;
-		memset(&m, 0, sizeof(m));
 		parse_msg(c, &m, argv[i]);
 		if (callback)
 			if (callback(data, &m))
@@ -168,7 +231,6 @@ int tg_messages_getHistory(
 			break;
 	}
 	
-
 tg_messeges_get_history_thow_error:;
 	// throw error
 	char *err = tg_strerr(tl); 
@@ -211,3 +273,221 @@ int tg_send_message(tg_t *tg, buf_t *peer, const char *message)
 
 	return 0;
 }
+
+struct _sync_messages_update_message_t{
+	tg_t *tg;
+	int d;
+	uint32_t peer_type;
+	uint64_t peer_id;
+	uint64_t peer_access_hash;
+	void *userdata;
+  void (*on_done)(void *userdata);
+};
+
+static int _sync_messages_update_message(
+		void *data, 
+		const tg_message_t *m)
+{
+	if (!m)
+		return 0;
+
+	struct _sync_messages_update_message_t *d = data;
+	d->d = m->date_; 
+
+	ON_LOG(d->tg, "%s: %d", __func__, m->date_);
+
+	// save message to database
+	struct str s;
+	str_init(&s);
+
+	str_appendf(&s,
+		"INSERT INTO \'messages\' (\'msg_id\') "
+		"SELECT %d "
+		"WHERE NOT EXISTS (SELECT 1 FROM messages WHERE msg_id = %d);\n"
+		, m->id_, m->id_);
+
+	str_appendf(&s, "UPDATE \'message\' SET ");
+	
+	#define TG_MESSAGE_STR(t, n, type, name) \
+	if (m->n){\
+		str_appendf(&s, "\'" name "\'" " = \'"); \
+		str_append(&s, (char*)m->n, strlen((char*)m->n)); \
+		str_appendf(&s, "\', "); \
+	}
+		
+	#define TG_MESSAGE_ARG(t, n, type, name) \
+		str_appendf(&s, "\'" name "\'" " = "_LD_", ", (uint64_t)m->n);
+	
+	#define TG_MESSAGE_PER(t, n, type, name) \
+		str_appendf(&s, "\'" name "\'" " = "_LD_", ", (uint64_t)m->n); \
+		str_appendf(&s, "\'type_%s\' = "_LD_", ", name, (uint64_t)m->type_##n);
+	
+	TG_MESSAGE_ARGS
+	#undef TG_MESSAGE_ARG
+	#undef TG_MESSAGE_STR
+	#undef TG_MESSAGE_PER
+	
+	str_appendf(&s, "id = %d WHERE msg_id = %d;\n"
+			, d->tg->id, m->id_);
+	
+	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
+	if (tg_sqlite3_exec(d->tg, s.str) == 0){
+		// update hash
+		update_hash(&d->tg->dialogs_hash, 
+				        m->id_);
+	}
+	free(s.str);
+
+	return 0;
+}
+
+static void _sync_messages_update(
+		struct _sync_messages_update_message_t *d)
+{
+	uint64_t hash = 
+		messages_hash_from_database(d->tg, d->peer_id);	 
+
+	buf_t peer = tg_inputPeer(
+				d->peer_type, 
+				d->peer_id, 
+				d->peer_access_hash);
+		
+	tg_messages_getHistory(
+			d->tg, 
+			&peer, 
+			0, 
+			d->d, 
+			0, 
+			10, 
+			0, 
+			0, 
+			&hash, 
+			d, 
+			_sync_messages_update_message);
+	
+		messages_hash_to_database(
+				d->tg, d->peer_id, hash);
+
+	if (d->on_done)
+		d->on_done(d->userdata);
+}
+
+static void * _sync_messages_thread(void * data)
+{
+	struct _sync_messages_update_message_t *d = data;
+	ON_LOG(d->tg, "%s: start", __func__);
+
+	ON_LOG(d->tg, "%s: updating messages...", __func__);	
+	_sync_messages_update(d);
+
+	free(d);
+
+	pthread_exit(0);	
+}
+
+int tg_sync_messages_to_database(
+		tg_t *tg,
+		uint32_t date,
+		uint32_t peer_type,
+		uint64_t peer_id,
+		uint64_t peer_access_hash,
+		void *userdata, void (*on_done)(void *userdata))
+{
+	// create table
+	char sql[BUFSIZ] = 
+		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE);\n";
+	ON_LOG(tg, "%s", sql);
+	tg_sqlite3_exec(tg, sql);	
+	
+	#define TG_MESSAGE_ARG(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'" name "\' " type ";\n");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	#define TG_MESSAGE_STR(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'" name "\' " type ";\n");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	#define TG_MESSAGE_PER(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'" name "\' " type ";\n");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	\
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'type_%s\' " type ";\n", name);\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+
+	TG_MESSAGE_ARGS
+	#undef TG_MESSAGE_ARG
+	#undef TG_MESSAGE_STR
+	#undef TG_MESSAGE_PER
+
+	// set data
+	struct _sync_messages_update_message_t *d = 
+		NEW(struct _sync_messages_update_message_t, return 1);
+	d->tg = tg;
+	d->d  = date;
+	d->userdata = userdata;
+	d->on_done = on_done;
+	d->peer_id = peer_id;
+	d->peer_type = peer_type;
+	d->peer_access_hash = peer_access_hash;
+	
+	//create new thread
+	int err = pthread_create(
+			&(tg->sync_dialogs_tid), 
+			NULL, 
+			_sync_messages_thread, 
+			d);
+
+	return err;
+}
+
+//int tg_get_dialogs_from_database(
+		//tg_t *tg,
+		//void *data,
+		//int (*callback)(void *data, const tg_dialog_t *dialog))
+//{
+	//struct str s;
+	//str_init(&s);
+	//str_appendf(&s, "SELECT ");
+	
+	//#define TG_DIALOG_ARG(t, n, type, name) \
+		//str_appendf(&s, name ", ");
+	//#define TG_DIALOG_STR(t, n, type, name) \
+		//str_appendf(&s, name ", ");
+	//TG_DIALOG_ARGS
+	//#undef TG_DIALOG_ARG
+	//#undef TG_DIALOG_STR
+	
+	//str_appendf(&s, 
+			//"id FROM dialogs WHERE id = %d " 
+			//"ORDER BY \'pinned\' DESC, \'top_message_date\' DESC;", tg->id);
+		
+	//tg_sqlite3_for_each(tg, s.str, stmt){
+		//tg_dialog_t d;
+		//memset(&d, 0, sizeof(d));
+		
+		//int col = 0;
+		//#define TG_DIALOG_ARG(t, n, type, name) \
+			//d.n = sqlite3_column_int64(stmt, col++);
+		//#define TG_DIALOG_STR(t, n, type, name) \
+			//d.n = strndup(\
+				//(char *)sqlite3_column_text(stmt, col),\
+				//sqlite3_column_bytes(stmt, col));\
+			//col++;
+		
+		//TG_DIALOG_ARGS
+		//#undef TG_DIALOG_ARG
+		//#undef TG_DIALOG_STR
+
+		//if (callback)
+			//if (callback(data, &d))
+				//break;
+	//}	
+	
+	//free(s.str);
+	//return 0;
+//}
