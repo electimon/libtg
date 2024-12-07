@@ -93,6 +93,14 @@ int database_init(tg_t *tg, const char *database_path)
 		return 1;
 	}
 
+	char *errmsg = NULL;
+	sqlite3_exec(db, "PRAGMA journal_mode=wal", 
+			NULL, NULL, &errmsg);
+	if (errmsg){
+		ON_ERR(tg, NULL, "%s", errmsg);
+		sqlite3_free(errmsg);
+	}
+
 	sqlite3_close(db);
 	return 0;
 }

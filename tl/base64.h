@@ -2,7 +2,7 @@
  * File              : base64.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 05.04.2022
- * Last Modified Date: 06.12.2024
+ * Last Modified Date: 27.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -107,9 +107,8 @@ unsigned char *base64_decode(const char *data, size_t input_length,
   if (decoding_table == NULL)
     build_decoding_table();
 
-  //if (input_length % 4 != 0)
-    //return NULL;
-  input_length -= input_length % 4;
+  if (input_length % 4 != 0)
+    return NULL;
 
   *output_length = input_length / 4 * 3;
   if (data[input_length - 1] == '=')

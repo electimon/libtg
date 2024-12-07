@@ -537,8 +537,10 @@ int tg_get_dialogs_from_database(
 		#undef TG_DIALOG_STR
 
 		if (callback)
-			if (callback(data, &d))
+			if (callback(data, &d)){
+				sqlite3_close(db);
 				break;
+			}
 	}	
 	
 	free(s.str);

@@ -1,44 +1,42 @@
 #include "peer.h"
 
-buf_t tg_inputPeer(TG_PEER_TYPE t, uint64_t id, uint64_t h)
+buf_t tg_inputPeer(tg_peer_t peer)
 {
 	buf_t p;
-	switch (t) {
-		case TG_PEER_TYPE_NULL:
-			buf_init(&p);
-			break;
+	switch (peer.type) {
 		case TG_PEER_TYPE_CHANNEL:
-			p = tl_inputPeerChannel(id, h);
+			p = tl_inputPeerChannel(
+					peer.id, peer.access_hash);
 			break;
 		case TG_PEER_TYPE_CHAT:
-			p = tl_inputPeerChat(id);
+			p = tl_inputPeerChat(peer.id);
 			break;
 		case TG_PEER_TYPE_USER:
-			p = tl_inputPeerUser(id, h);
+			p = tl_inputPeerUser(
+					peer.id, peer.access_hash);
 			break;
 		default:
+			buf_init(&p);
 			break;
 	}
 	return p;
 }
 
-buf_t tg_peer(TG_PEER_TYPE t, uint64_t id)
+buf_t tg_peer(tg_peer_t peer)
 {
 	buf_t p;
-	switch (t) {
-		case TG_PEER_TYPE_NULL:
-			buf_init(&p);
-			break;
+	switch (peer.type) {
 		case TG_PEER_TYPE_CHANNEL:
-			p = tl_peerChannel(id);
+			p = tl_peerChannel(peer.id);
 			break;
 		case TG_PEER_TYPE_CHAT:
-			p = tl_peerChat(id);
+			p = tl_peerChat(peer.id);
 			break;
 		case TG_PEER_TYPE_USER:
-			p = tl_peerUser(id);
+			p = tl_peerUser(peer.id);
 			break;
 		default:
+			buf_init(&p);
 			break;
 	}
 	return p;

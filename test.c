@@ -25,7 +25,6 @@
 #include "tl/tl.h"
 #include "transport/net.h"
 
-
 char * callback(
 			void *userdata,
 			TG_AUTH auth,
@@ -140,12 +139,11 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 int messages_callback(void *data, const tg_message_t *m)
 {
 	//printf("%s\n", m->message_);
-	if (m->photo_id){
-		printf("HAS PHOTO!\n");
+	//if (m->photo_id){
+		//printf("HAS PHOTO!\n");
 		tg_message_t *msg = data;
 		*msg = *m;
-		return 1;
-	}
+	//}
 	return 0;
 }
 
@@ -180,25 +178,29 @@ int main(int argc, char *argv[])
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
 	
-	/*tg_set_on_log  (tg, NULL, on_log);*/
-	/*tg_set_on_error  (tg, NULL, on_err);*/
+	tg_set_on_log  (tg, NULL, on_log);
+	tg_set_on_error  (tg, NULL, on_err);
 
-	/*tg_dialog_t d;*/
-	/*tg_get_dialogs_from_database(tg, &d, */
-			/*dialogs_callback);*/
+	tg_dialog_t d;
+	tg_get_dialogs_from_database(tg, &d, 
+			dialogs_callback);
 
 	//tg_get_dialogs(tg, 1,
 			 //time(NULL),
 			 //NULL, NULL,
 			 //&d, dialogs_callback);
 
-	/*printf("NAME: %s\n", d.name);*/
-	/*printf("PEER ID: %.16lx\n", d.peer_id);*/
-	/*buf_t peer = buf_add_ui64(d.peer_id);*/
-	/*buf_t peer = */
-		/*tg_inputPeer(d.peer_type, */
-				/*d.peer_id, d.access_hash);*/
+	printf("NAME: %s\n", d.name);
+	printf("PEER ID: %.16lx\n", d.peer_id);
+	tg_peer_t peer = 
+	{d.peer_type, d.peer_id, d.access_hash};
 
+	tg_sync_messages_to_database(
+			tg, 
+			time(NULL), 
+			peer,
+			NULL, 
+			on_done);
 	//tg_async_dialogs_to_database(tg, 40);
 	//sleep(10);
 	
@@ -231,28 +233,26 @@ int main(int argc, char *argv[])
 	
 	/*buf_dump(location);*/
 
-	tg_set_on_log  (tg, NULL, on_log);
-	tg_set_on_error  (tg, NULL, on_err);
-
-	tg_sync_dialogs_to_database(tg, NULL, on_done);
+	//tg_sync_dialogs_to_database(tg, NULL, on_done);
 
 	//tg_get_dialogs_from_database(tg, NULL, 
 			//dialogs_callback);
 	
+	//buf_t peer_ = tg_inputPeer(peer);
 	// download photo
 	//InputFileLocation location = 
 		//tl_inputPeerPhotoFileLocation(
 				//true, 
-				//&peer, 
+				//&peer_, 
 				//d.photo_id);
 
-	/*tg_get_file(*/
-			/*tg, */
-			/*&location, */
-			/*NULL, */
-			/*file_cb,*/
-			/*NULL,*/
-			/*progress);*/
+	//tg_get_file(
+			//tg, 
+			//&location, 
+			//NULL, 
+			//file_cb,
+			//NULL,
+			//progress);
 	
 	printf("press any key to exit\n");
 	getchar();

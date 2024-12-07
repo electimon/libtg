@@ -2,6 +2,7 @@
 #define TG_MESSAGES_H
 
 #include "tg.h"
+#include "peer.h"
 
 #define TG_MESSAGE_ARGS\
 	TG_MESSAGE_ARG(bool,     out_, "INT", "out") \
@@ -48,7 +49,7 @@ void tg_message_from_database(
 
 int tg_messages_getHistory(
 		tg_t *tg,
-		buf_t *peer,
+		tg_peer_t peer,
 		int offset_id,
 		int offset_date,
 		int add_offset,
@@ -59,10 +60,15 @@ int tg_messages_getHistory(
 		void *data,
 		int (*callback)(void *data, const tg_message_t *message));
 
-int tg_async_messages_to_database(tg_t *tg, buf_t peer, int seconds);
-int tg_get_messages_from_database(tg_t *tg, buf_t peer, void *data,
+int tg_sync_messages_to_database(
+		tg_t *tg,
+		uint32_t date,
+		tg_peer_t peer,
+		void *userdata, void (*on_done)(void *userdata));
+
+int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		int (*callback)(void *data, const tg_message_t *message));
 
-int tg_send_message(tg_t *tg, buf_t *peer, const char *message);
+int tg_send_message(tg_t *tg, tg_peer_t peer, const char *message);
 
 #endif /* ifndef TG_MESSAGES_H */		

@@ -272,12 +272,22 @@ void buf_free(buf_t b){
 }
 
 char* buf_to_base64(buf_t b){
+	char *r = NULL;
+	if (b.size < 1)
+		return r;
+	
 	size_t l;
 	char *s = base64_encode(
 			b.data, 
 			b.size, 
 			&l);
-	return s;
+	
+	if (s && l > 0){
+		free(s);
+		r = strndup(s, l);
+	}
+
+	return r;
 }
 
 buf_t buf_from_base64(const char *s){

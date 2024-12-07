@@ -53,6 +53,7 @@ int tg_get_dialogs(
 
 int tg_sync_dialogs_to_database(tg_t *tg,
 		void *userdata, void (*on_done)(void *userdata));
+
 int tg_get_dialogs_from_database(tg_t *tg, void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));
 

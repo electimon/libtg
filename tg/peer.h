@@ -10,7 +10,13 @@ typedef enum {
 	TG_PEER_TYPE_CHAT = id_peerChat,
 } TG_PEER_TYPE;
 
-buf_t tg_inputPeer(TG_PEER_TYPE type, uint64_t id, uint64_t access_hash);
-buf_t tg_peer(TG_PEER_TYPE type, uint64_t id);
+typedef struct tg_peer_t_ {
+	TG_PEER_TYPE type;
+	uint64_t id;
+	uint64_t access_hash;
+} tg_peer_t;
+
+buf_t tg_inputPeer(tg_peer_t peer);
+buf_t tg_peer(tg_peer_t peer);
 
 #endif /* ifndef TG_PEER_H */
