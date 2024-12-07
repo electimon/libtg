@@ -493,7 +493,7 @@ int tg_sync_dialogs_to_database(tg_t *tg,
 			&(tg->sync_dialogs_tid), 
 			NULL, 
 			_sync_dialogs_thread, 
-			&d);
+			d);
 
 	return err;
 }
