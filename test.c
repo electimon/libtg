@@ -138,11 +138,11 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 
 int messages_callback(void *data, const tg_message_t *m)
 {
-	//printf("%s\n", m->message_);
+	printf("%d: %s\n", m->id_, m->message_);
 	//if (m->photo_id){
 		//printf("HAS PHOTO!\n");
-		tg_message_t *msg = data;
-		*msg = *m;
+		//tg_message_t *msg = data;
+		//*msg = *m;
 	//}
 	return 0;
 }
@@ -195,12 +195,18 @@ int main(int argc, char *argv[])
 	tg_peer_t peer = 
 	{d.peer_type, d.peer_id, d.access_hash};
 
-	tg_sync_messages_to_database(
+	tg_get_messages_from_database(
 			tg, 
-			time(NULL), 
-			peer,
+			peer, 
 			NULL, 
-			on_done);
+			messages_callback);
+
+	//tg_sync_messages_to_database(
+			//tg, 
+			//time(NULL), 
+			//peer,
+			//NULL, 
+			//on_done);
 	//tg_async_dialogs_to_database(tg, 40);
 	//sleep(10);
 	

@@ -55,12 +55,12 @@ void tg_message_from_database(
 				m->n = strndup(\
 					(char *)sqlite3_column_text(stmt, col),\
 					sqlite3_column_bytes(stmt, col));\
-				col++; \
-			}
+			}\
+			col++;
 		#define TG_MESSAGE_PER(t, n, type, name) \
 			m->n = sqlite3_column_int64(stmt, col); \
 			m->type_##n = sqlite3_column_int64(stmt, col); \
-			col++;
+			col++; col++;
 		
 		TG_MESSAGE_ARGS
 		#undef TG_MESSAGE_ARG
@@ -472,9 +472,9 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 	#undef TG_MESSAGE_PER
 	
 	str_appendf(&s, 
-			"id FROM messages WHERE id = %d "
-			"ORDER BY \'date\' DESC;", tg->id);
-		
+			"id FROM messages WHERE id = %d AND peer_id = "_LD_" "
+			"ORDER BY \'date\' DESC;", tg->id, peer.id);
+
 	tg_sqlite3_for_each(tg, s.str, stmt){
 		tg_message_t m;
 		memset(&m, 0, sizeof(m));
@@ -487,14 +487,15 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 				m.n = strndup(\
 					(char *)sqlite3_column_text(stmt, col),\
 					sqlite3_column_bytes(stmt, col));\
-				col++; \
-			}
+			}\
+			col++;
 		#define TG_MESSAGE_PER(t, n, type, name) \
 			m.n = sqlite3_column_int64(stmt, col); \
 			m.type_##n = sqlite3_column_int64(stmt, col); \
-			col++;
+			col++; col++;
 		
 		TG_MESSAGE_ARGS
+
 		#undef TG_MESSAGE_ARG
 		#undef TG_MESSAGE_STR
 		#undef TG_MESSAGE_PER
