@@ -43,7 +43,8 @@ void tg_message_from_database(
 	#undef TG_MESSAGE_PER
 	
 	str_appendf(&s, 
-			"id FROM messages WHERE msg_id = %d;", msg_id);
+			"id FROM messages WHERE msg_id = %d AND id = %d;"
+			, msg_id, tg->id);
 		
 	tg_sqlite3_for_each(tg, s.str, stmt){
 		int col = 0;
@@ -69,7 +70,7 @@ void tg_message_from_database(
 }
 
 void tg_message_from_tl(
-		tg_message_t *tgm, tl_message_t *tlm)
+		tg_t *tg, tg_message_t *tgm, tl_message_t *tlm)
 {
 	memset(tgm, 0, sizeof(tg_message_t));
 	#define TG_MESSAGE_ARG(t, arg, ...) \
@@ -114,10 +115,10 @@ void tg_message_from_tl(
 }
 
 static void parse_msg(
-		int *c, tg_message_t *tgm, void *tlm_)
+		int *c, tg_t *tg, tg_message_t *tgm, void *tlm_)
 {
 	printf("%s\n",__func__);
-	tg_message_from_tl(tgm, tlm_);
+	tg_message_from_tl(tg, tgm, tlm_);
 	*c += 1;
 }
 
@@ -135,7 +136,7 @@ static void parse_msgs(
 			continue;
 				
 		tg_message_t m;
-		parse_msg(c, &m, argv[i]);
+		parse_msg(c, tg, &m, argv[i]);
 		if (callback)
 			if (callback(data, &m))
 				break;
@@ -316,7 +317,7 @@ static int _sync_messages_update_message(
 		"WHERE NOT EXISTS (SELECT 1 FROM messages WHERE msg_id = %d);\n"
 		, m->id_, m->id_);
 
-	str_appendf(&s, "UPDATE \'message\' SET ");
+	str_appendf(&s, "UPDATE \'messages\' SET ");
 	
 	#define TG_MESSAGE_STR(t, n, type, name) \
 	if (m->n){\
@@ -452,49 +453,60 @@ int tg_sync_messages_to_database(
 	return err;
 }
 
-//int tg_get_dialogs_from_database(
-		//tg_t *tg,
-		//void *data,
-		//int (*callback)(void *data, const tg_dialog_t *dialog))
-//{
-	//struct str s;
-	//str_init(&s);
-	//str_appendf(&s, "SELECT ");
+int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
+		int (*callback)(void *data, const tg_message_t *message))
+{
+	struct str s;
+	str_init(&s);
+	str_appendf(&s, "SELECT ");
 	
-	//#define TG_DIALOG_ARG(t, n, type, name) \
-		//str_appendf(&s, name ", ");
-	//#define TG_DIALOG_STR(t, n, type, name) \
-		//str_appendf(&s, name ", ");
-	//TG_DIALOG_ARGS
-	//#undef TG_DIALOG_ARG
-	//#undef TG_DIALOG_STR
+	#define TG_MESSAGE_ARG(t, n, type, name) \
+		str_appendf(&s, name ", ");
+	#define TG_MESSAGE_STR(t, n, type, name) \
+		str_appendf(&s, name ", ");
+	#define TG_MESSAGE_PER(t, n, type, name) \
+		str_appendf(&s, name ", type_%s, ", name);
+	TG_MESSAGE_ARGS
+	#undef TG_MESSAGE_ARG
+	#undef TG_MESSAGE_STR
+	#undef TG_MESSAGE_PER
 	
-	//str_appendf(&s, 
-			//"id FROM dialogs WHERE id = %d " 
-			//"ORDER BY \'pinned\' DESC, \'top_message_date\' DESC;", tg->id);
+	str_appendf(&s, 
+			"id FROM messages WHERE id = %d "
+			"ORDER BY \'date\' DESC;", tg->id);
 		
-	//tg_sqlite3_for_each(tg, s.str, stmt){
-		//tg_dialog_t d;
-		//memset(&d, 0, sizeof(d));
-		
-		//int col = 0;
-		//#define TG_DIALOG_ARG(t, n, type, name) \
-			//d.n = sqlite3_column_int64(stmt, col++);
-		//#define TG_DIALOG_STR(t, n, type, name) \
-			//d.n = strndup(\
-				//(char *)sqlite3_column_text(stmt, col),\
-				//sqlite3_column_bytes(stmt, col));\
-			//col++;
-		
-		//TG_DIALOG_ARGS
-		//#undef TG_DIALOG_ARG
-		//#undef TG_DIALOG_STR
+	tg_sqlite3_for_each(tg, s.str, stmt){
+		tg_message_t m;
+		memset(&m, 0, sizeof(m));
 
-		//if (callback)
-			//if (callback(data, &d))
-				//break;
-	//}	
+		int col = 0;
+		#define TG_MESSAGE_ARG(t, n, type, name) \
+			m.n = sqlite3_column_int64(stmt, col++);
+		#define TG_MESSAGE_STR(t, n, type, name) \
+			if (sqlite3_column_bytes(stmt, col) > 0){ \
+				m.n = strndup(\
+					(char *)sqlite3_column_text(stmt, col),\
+					sqlite3_column_bytes(stmt, col));\
+				col++; \
+			}
+		#define TG_MESSAGE_PER(t, n, type, name) \
+			m.n = sqlite3_column_int64(stmt, col); \
+			m.type_##n = sqlite3_column_int64(stmt, col); \
+			col++;
+		
+		TG_MESSAGE_ARGS
+		#undef TG_MESSAGE_ARG
+		#undef TG_MESSAGE_STR
+		#undef TG_MESSAGE_PER
+
+		if (callback){
+			if (callback(data, &m)){
+				sqlite3_close(db);
+				break;
+			}
+		}
+	}	
 	
-	//free(s.str);
-	//return 0;
-//}
+	free(s.str);
+	return 0;
+}
