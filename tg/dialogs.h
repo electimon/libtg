@@ -55,7 +55,7 @@ int tg_get_dialogs(
 void tg_sync_dialogs_to_database(tg_t *tg,
 		void *userdata, void (*on_done)(void *userdata));
 
-/* load all dialogs to database async */
+/* load all dialogs to database in thread */
 void tg_async_dialogs_to_database(tg_t *tg,
 		void *userdata, void (*on_done)(void *userdata));
 
