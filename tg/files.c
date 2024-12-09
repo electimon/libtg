@@ -198,3 +198,62 @@ void tg_get_file(
 	// free tl
 	/* TODO:  <29-11-24, yourname> */
 }	
+
+static int get_photo_callback(void *d, const tg_file_t *p)
+{
+	char **photo = d;
+	if (p->bytes_)
+		*photo = strdup(p->bytes_);
+	return 0;
+}
+
+char *tg_get_photo_file(tg_t *tg, 
+		uint64_t photo_id, uint64_t photo_access_hash, 
+		const char *photo_file_reference,
+		const char *photo_size)
+{
+	buf_t fr = buf_from_base64(photo_file_reference);
+	InputFileLocation location = 
+					tl_inputPhotoFileLocation(
+							photo_id, 
+							photo_access_hash, 
+							&fr, 
+							photo_size);
+	 buf_free(fr);
+
+	 char *photo = NULL;
+	 tg_get_file(
+			tg, 
+			&location, 
+			&photo, 
+			get_photo_callback, 
+			NULL, 
+			NULL);
+
+	 return photo;
+}
+
+char *tg_get_peer_photo_file(tg_t *tg, 
+		tg_peer_t *peer, 
+		bool big_photo,
+		uint64_t photo_id)
+{
+	buf_t peer_ = tg_inputPeer(*peer);
+	InputFileLocation location = 
+		tl_inputPeerPhotoFileLocation(
+				true, 
+				&peer_, 
+				photo_id);
+	buf_free(peer_);
+
+	char *photo = NULL;
+	 tg_get_file(
+			tg, 
+			&location, 
+			&photo, 
+			get_photo_callback, 
+			NULL, 
+			NULL);
+
+	 return photo;
+}

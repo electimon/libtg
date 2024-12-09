@@ -2,6 +2,7 @@
 #define TG_FILES_H
 
 #include "tg.h"
+#include "peer.h"
 
 #define TG_FILE_ARGS\
 	TG_FILE_TYP(uint32_t, type_,  "INT",  "type") \
@@ -40,5 +41,16 @@ void tg_get_file(
 	  int (*callback)(void *data, const tg_file_t *file),
 		void *progressp,
 		void (*progress)(void *progressp, int down, int total));	
+
+char *tg_get_photo_file(tg_t *tg, 
+		uint64_t photo_id, uint64_t photo_access_hash, 
+		const char *photo_file_reference,
+		const char *photo_size);
+
+char *tg_get_peer_photo_file(tg_t *tg, 
+		tg_peer_t *peer, 
+		bool big_photo,
+		uint64_t photo_id);
+
 
 #endif /* ifndef TG_FILES_H */
