@@ -351,11 +351,20 @@ static int _sync_messages_update_message(
 	return 0;
 }
 
-static void _sync_messages_update(
-		struct _sync_messages_update_message_t *d)
+void tg_async_messages_to_database(
+		tg_t *tg,
+		uint32_t date,
+		tg_peer_t peer,
+		void *userdata, void (*on_done)(void *userdata))
 {
+  
 	uint64_t hash = 
 		messages_hash_from_database(d->tg, d->peer_id);	 
+
+	struct _sync_messages_update_message_t d = {
+	  .d = date,
+	  .hash = messages_hash_from_database(      tg, peer.id           )
+	};
 
 	d->hash = &hash;
 
@@ -395,7 +404,7 @@ static void * _sync_messages_thread(void * data)
 	pthread_exit(0);	
 }
 
-int tg_sync_messages_to_database(
+void tg_async_messages_to_database(
 		tg_t *tg,
 		uint32_t date,
 		tg_peer_t peer,
