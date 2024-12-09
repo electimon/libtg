@@ -67,16 +67,16 @@ int tg_messages_getHistory(
 
 void tg_sync_messages_to_database(
 		tg_t *tg,
-		uint32_t date,
 		tg_peer_t peer,
-		int count,
+		int offset,
+		int limit,
 		void *userdata, void (*on_done)(void *userdata));
 
 void tg_async_messages_to_database(
 		tg_t *tg,
-		uint32_t date,
 		tg_peer_t peer,
-		int count,
+		int offset,
+		int limit,
 		void *userdata, void (*on_done)(void *userdata));
 
 

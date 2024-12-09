@@ -1,6 +1,7 @@
 #include "messages.h"
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 #include "peer.h"
 #include "tg.h"
 #include "database.h"
@@ -307,8 +308,8 @@ int tg_send_message(tg_t *tg, tg_peer_t peer_, const char *message)
 
 struct _sync_messages_update_message_t{
 	tg_t *tg;
-	int d;
-	int count;
+	int offset;
+	int limit;
 	uint64_t *hash;
 	tg_peer_t peer;
 	void *userdata;
@@ -323,7 +324,6 @@ static int _sync_messages_update_message(
 		return 0;
 
 	struct _sync_messages_update_message_t *d = data;
-	d->d = m->date_; 
 
 	ON_LOG(d->tg, "%s: %d", __func__, m->date_);
 
@@ -428,9 +428,9 @@ static void create_table(tg_t *tg){
 
 void tg_sync_messages_to_database(
 		tg_t *tg,
-		uint32_t date,
 		tg_peer_t peer,
-		int count,
+		int offset,
+		int limit,
 		void *userdata, void (*on_done)(void *userdata))
 {
 	// create table
@@ -439,11 +439,11 @@ void tg_sync_messages_to_database(
 	uint64_t hash = 0;
   //uint64_t hash = messages_hash_from_database(tg, peer.id);
   	struct _sync_messages_update_message_t d = {
-	  .d = date,
+	  .offset = offset,
 	  .hash = &hash,
 		.peer = peer,
 	  .tg =tg,
-		.count = count,
+		.limit = limit,
 	  .on_done = on_done,
 	  .userdata = userdata,
 	};
@@ -452,9 +452,9 @@ void tg_sync_messages_to_database(
 			tg, 
 			peer, 
 			0, 
-			date, 
-			0, 
-			count, 
+			time(NULL), 
+			offset, 
+			limit, 
 			0, 
 			0, 
 			&hash, 
@@ -476,9 +476,9 @@ static void * _sync_messages_thread(void * data)
 	ON_LOG(d->tg, "%s: updating messages...", __func__);	
 	tg_sync_messages_to_database(
 								 d->tg,
-								 d->d,
 								 d->peer,
-								 d->count, 
+								 d->offset,
+								 d->limit, 
 								 d->userdata, 
 								 d->on_done);
 
@@ -489,20 +489,20 @@ static void * _sync_messages_thread(void * data)
 
 void tg_async_messages_to_database(
 		tg_t *tg,
-		uint32_t date,
 		tg_peer_t peer,
-		int count,
+		int offset,
+		int limit,
 		void *userdata, void (*on_done)(void *userdata))
 {
 	// set data
 	struct _sync_messages_update_message_t *d = 
 		NEW(struct _sync_messages_update_message_t, return);
 	d->tg = tg;
-	d->d  = date;
+	d->offset  = offset;
 	d->userdata = userdata;
 	d->on_done = on_done;
 	d->peer = peer;
-	d->count = count;
+	d->limit = limit;
 	
 	//create new thread
 	if (pthread_create(
