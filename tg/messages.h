@@ -24,20 +24,24 @@
 	TG_MESSAGE_PER(uint64_t, saved_peer_id_, "INT", "saved_peer_id") \
 	TG_MESSAGE_ARG(uint32_t, date_, "INT", "date") \
 	TG_MESSAGE_STR(char*,    message_, "TEXT", "message") \
+	TG_MESSAGE_SPA(uint64_t, photo_id, "INT", "photo_id") \
+	TG_MESSAGE_SPA(uint64_t, photo_access_hash, "INT", "photo_access_hash") \
+	TG_MESSAGE_SPA(uint32_t, photo_dc_id, "INT", "photo_dc_id") \
+	TG_MESSAGE_SPA(uint32_t, photo_date, "INT", "photo_date") \
+	TG_MESSAGE_SPS(char*,    photo_file_reference, "TEXT", "photo_file_reference") \
 
 typedef struct tg_message_t {
 	#define TG_MESSAGE_ARG(t, arg, ...) t arg;
 	#define TG_MESSAGE_STR(t, arg, ...) t arg;
 	#define TG_MESSAGE_PER(t, arg, ...) t arg; int type_##arg; 
+	#define TG_MESSAGE_SPA(t, arg, ...) t arg;
+	#define TG_MESSAGE_SPS(t, arg, ...) t arg;
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
-	uint64_t photo_id;
-	uint64_t photo_access_hash;
-	uint32_t photo_dc_id;
-	uint32_t photo_date;
-	char * photo_file_reference; 
+	#undef TG_MESSAGE_SPA
+	#undef TG_MESSAGE_SPS
 } tg_message_t;
 
 /* convert tl_message to tg_message */

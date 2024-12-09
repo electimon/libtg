@@ -37,10 +37,16 @@ void tg_message_from_database(
 		str_appendf(&s, name ", ");
 	#define TG_MESSAGE_PER(t, n, type, name) \
 		str_appendf(&s, name ", type_%s, ", name);
+	#define TG_MESSAGE_SPA(t, n, type, name) \
+		str_appendf(&s, name ", ");
+	#define TG_MESSAGE_SPS(t, n, type, name) \
+		str_appendf(&s, name ", ");
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
+	#undef TG_MESSAGE_SPA
+	#undef TG_MESSAGE_SPS
 	
 	str_appendf(&s, 
 			"id FROM messages WHERE msg_id = %d AND id = %d;"
@@ -61,11 +67,22 @@ void tg_message_from_database(
 			m->n = sqlite3_column_int64(stmt, col); \
 			m->type_##n = sqlite3_column_int64(stmt, col); \
 			col++; col++;
+		#define TG_MESSAGE_SPA(t, n, type, name) \
+			m->n = sqlite3_column_int64(stmt, col++);
+		#define TG_MESSAGE_SPS(t, n, type, name) \
+			if (sqlite3_column_bytes(stmt, col) > 0){ \
+				m->n = strndup(\
+					(char *)sqlite3_column_text(stmt, col),\
+					sqlite3_column_bytes(stmt, col));\
+			}\
+			col++;
 		
 		TG_MESSAGE_ARGS
 		#undef TG_MESSAGE_ARG
 		#undef TG_MESSAGE_STR
 		#undef TG_MESSAGE_PER
+		#undef TG_MESSAGE_SPA
+		#undef TG_MESSAGE_SPS
 	}
 }
 
@@ -84,10 +101,14 @@ void tg_message_from_tl(
 		tgm->arg = peer->user_id_;\
 		tgm->type_##arg = peer->_id;\
 	}
+	#define TG_MESSAGE_SPA(...)
+	#define TG_MESSAGE_SPS(...)
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
+	#undef TG_MESSAGE_SPA
+	#undef TG_MESSAGE_SPS
 
 	// handle with media
 	if (tlm->media_){
@@ -332,11 +353,23 @@ static int _sync_messages_update_message(
 		str_appendf(&s, "\'" name "\'" " = "_LD_", ", (uint64_t)m->n); \
 		str_appendf(&s, "\'type_%s\' = "_LD_", ", name, (uint64_t)m->type_##n);
 	
+	#define TG_MESSAGE_SPA(t, n, type, name) \
+		str_appendf(&s, "\'" name "\'" " = "_LD_", ", (uint64_t)m->n);
+	
+	#define TG_MESSAGE_SPS(t, n, type, name) \
+	if (m->n){\
+		str_appendf(&s, "\'" name "\'" " = \'"); \
+		str_append(&s, (char*)m->n, strlen((char*)m->n)); \
+		str_appendf(&s, "\', "); \
+	}
+
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
-	
+	#undef TG_MESSAGE_SPA
+	#undef TG_MESSAGE_SPS
+
 	str_appendf(&s, "id = %d WHERE msg_id = %d;\n"
 			, d->tg->id, m->id_);
 	
@@ -375,11 +408,22 @@ static void create_table(tg_t *tg){
 				"\'type_%s\' " type ";", name);\
 		ON_LOG(tg, "%s", sql);\
 		tg_sqlite3_exec(tg, sql);	
-
+	#define TG_MESSAGE_SPA(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'" name "\' " type ";");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);
+	#define TG_MESSAGE_SPS(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'" name "\' " type ";");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
+	#undef TG_MESSAGE_SPA
+	#undef TG_MESSAGE_SPS
 } 
 
 void tg_sync_messages_to_database(
@@ -482,11 +526,17 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		str_appendf(&s, name ", ");
 	#define TG_MESSAGE_PER(t, n, type, name) \
 		str_appendf(&s, name ", type_%s, ", name);
+	#define TG_MESSAGE_SPA(t, n, type, name) \
+		str_appendf(&s, name ", ");
+	#define TG_MESSAGE_SPS(t, n, type, name) \
+		str_appendf(&s, name ", ");
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
-	
+	#undef TG_MESSAGE_SPA
+	#undef TG_MESSAGE_SPS
+		
 	str_appendf(&s, 
 			"id FROM messages WHERE id = %d AND peer_id = "_LD_" "
 			"ORDER BY \'date\' DESC;", tg->id, peer.id);
@@ -509,12 +559,22 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 			m.n = sqlite3_column_int64(stmt, col); \
 			m.type_##n = sqlite3_column_int64(stmt, col); \
 			col++; col++;
-		
+		#define TG_MESSAGE_SPA(t, n, type, name) \
+			m.n = sqlite3_column_int64(stmt, col++);
+		#define TG_MESSAGE_SPS(t, n, type, name) \
+			if (sqlite3_column_bytes(stmt, col) > 0){ \
+				m.n = strndup(\
+					(char *)sqlite3_column_text(stmt, col),\
+					sqlite3_column_bytes(stmt, col));\
+			}\
+			col++;
 		TG_MESSAGE_ARGS
 
 		#undef TG_MESSAGE_ARG
 		#undef TG_MESSAGE_STR
 		#undef TG_MESSAGE_PER
+		#undef TG_MESSAGE_SPA
+		#undef TG_MESSAGE_SPS
 
 		if (callback){
 			int ret = callback(data, &m);
