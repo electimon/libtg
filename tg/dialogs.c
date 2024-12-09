@@ -489,7 +489,7 @@ void tg_async_dialogs_to_database(tg_t *tg,
 
 	// set data
 	struct _sync_dialogs_update_dialog_t *d = 
-		NEW(struct _sync_dialogs_update_dialog_t, return 1);
+		NEW(struct _sync_dialogs_update_dialog_t, return);
 	d->tg = tg;
 	d->d = time(NULL);
 	d->userdata = userdata;
