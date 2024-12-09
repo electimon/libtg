@@ -411,35 +411,42 @@ static int _sync_dialogs_update_dialog(
 	return 0;
 }
 
-static void _sync_dialogs_update(
-		struct _sync_dialogs_update_dialog_t *d)
+int tg_sync_dialogs_to_database(tg_t *tg,
+		void *userdata, void (*on_done)(void *userdata))
 {
-	int ret = 40;
-	while (ret >= 40){
-		ret = tg_get_dialogs(d->tg, 40,
-				d->d, &d->tg->dialogs_hash,
+  struct _sync_dialogs_update_dialog_t d = {
+	.d = time(NULL),
+	.tg = tg,
+	.on_done = on_done;
+  };
+
+  int ret = 40;
+  int date = time(NULL);
+  while (ret >= 40){
+	ret = tg_get_dialogs(tg, 40,
+				d.d, &tg->dialogs_hash,
 			 	NULL, 
-				d,
+				&d,
 			 	_sync_dialogs_update_dialog);
 		
-		// update hash
-		dialogs_hash_to_database(
-				d->tg, d->tg->dialogs_hash);
+	  // update hash
+	  dialogs_hash_to_database(
+	    d.tg, d.tg->dialogs_hash);
 
-		// sleep
-		sleep(1);
+	  // sleep
+	  sleep(1);
 	}
-	if (d->on_done)
-		d->on_done(d->userdata);
+	if (d.on_done)
+		d.on_done(userdata);
 }
 
-static void * _sync_dialogs_thread(void * data)
+static void * _async_dialogs_thread(void * data)
 {
 	struct _sync_dialogs_update_dialog_t *d = data;
 	ON_LOG(d->tg, "%s: start", __func__);
 
 	ON_LOG(d->tg, "%s: updating dialogs...", __func__);	
-	_sync_dialogs_update(d);
+	tg_sync_dialogs_to_database(d->tg, d->userdata, d->on_done);
 
 	d->tg->sync_dialogs = false;
 
@@ -448,11 +455,11 @@ static void * _sync_dialogs_thread(void * data)
 	pthread_exit(0);	
 }
 
-int tg_sync_dialogs_to_database(tg_t *tg,
+void tg_async_dialogs_to_database(tg_t *tg,
 		void *userdata, void (*on_done)(void *userdata))
 {
 	if (tg->sync_dialogs)
-		return 0;
+		return;
 
 	tg->sync_dialogs = true;
 
@@ -489,13 +496,11 @@ int tg_sync_dialogs_to_database(tg_t *tg,
 	d->on_done = on_done;
 	
 	//create new thread
-	int err = pthread_create(
+	pthread_create(
 			&(tg->sync_dialogs_tid), 
 			NULL, 
-			_sync_dialogs_thread, 
+			_async_dialogs_thread, 
 			d);
-
-	return err;
 }
 
 int tg_get_dialogs_from_database(
