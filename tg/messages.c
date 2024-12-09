@@ -517,9 +517,10 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		#undef TG_MESSAGE_PER
 
 		if (callback){
-			if (callback(data, &m)){
+			int ret = callback(data, &m);
+			if (ret){
 				sqlite3_close(db);
-				break;
+				return ret;
 			}
 		}
 	}	
