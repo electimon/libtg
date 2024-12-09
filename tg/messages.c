@@ -357,10 +357,10 @@ void tg_ sync_messages_to_database(
 		tg_peer_t peer,
 		void *userdata, void (*on_done)(void *userdata))
 {
-  uint64_t hash = messages_hash_from_database(tg, peer.id               );
+  uint64_t hash = messages_hash_from_database(tg, peer.id);
   	struct _sync_messages_update_message_t d = {
 	  .d = date,
-	  .hash = &hash                                                    ,
+	  .hash = &hash,
 	  .peer_access_hash = peer.access_hash,
 	  .peer_id = peer.id,
 	  .peer_type = peer.type,
@@ -370,16 +370,16 @@ void tg_ sync_messages_to_database(
 	};
                                                                          	
 	tg_messages_getHistory(
-			   tg, 
+			tg, 
 			peer, 
 			0, 
-			d. d, 
+			d.d, 
 			0, 
 			10, 
 			0, 
 			0, 
 			&hash, 
-			   &d,
+			&d,
 			_sync_messages_update_message);
 	
 		messages_hash_to_database(
