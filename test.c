@@ -195,18 +195,19 @@ int main(int argc, char *argv[])
 	tg_peer_t peer = 
 	{d.peer_type, d.peer_id, d.access_hash};
 
-	tg_get_messages_from_database(
-			tg, 
-			peer, 
-			NULL, 
-			messages_callback);
+	/*tg_get_messages_from_database(*/
+			/*tg, */
+			/*peer, */
+			/*NULL, */
+			/*messages_callback);*/
 
-	//tg_sync_messages_to_database(
-			//tg, 
-			//time(NULL), 
-			//peer,
-			//NULL, 
-			//on_done);
+	tg_sync_messages_to_database(
+			tg, 
+			time(NULL), 
+			peer,
+			10,
+			NULL, 
+			on_done);
 	//tg_async_dialogs_to_database(tg, 40);
 	//sleep(10);
 	

@@ -350,6 +350,38 @@ static int _sync_messages_update_message(
 	return 0;
 }
 
+static void create_table(tg_t *tg){
+	char sql[BUFSIZ] = 
+		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE);";
+	ON_LOG(tg, "%s", sql);
+	tg_sqlite3_exec(tg, sql);	
+	
+	#define TG_MESSAGE_ARG(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'" name "\' " type ";");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	#define TG_MESSAGE_STR(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'" name "\' " type ";");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	#define TG_MESSAGE_PER(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'" name "\' " type ";");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	\
+		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
+				"\'type_%s\' " type ";", name);\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+
+	TG_MESSAGE_ARGS
+	#undef TG_MESSAGE_ARG
+	#undef TG_MESSAGE_STR
+	#undef TG_MESSAGE_PER
+} 
+
 void tg_sync_messages_to_database(
 		tg_t *tg,
 		uint32_t date,
@@ -357,7 +389,11 @@ void tg_sync_messages_to_database(
 		int count,
 		void *userdata, void (*on_done)(void *userdata))
 {
-  uint64_t hash = messages_hash_from_database(tg, peer.id);
+	// create table
+	create_table(tg);
+
+	uint64_t hash = 0;
+  //uint64_t hash = messages_hash_from_database(tg, peer.id);
   	struct _sync_messages_update_message_t d = {
 	  .d = date,
 	  .hash = &hash,
@@ -367,8 +403,8 @@ void tg_sync_messages_to_database(
 	  .on_done = on_done,
 	  .userdata = userdata,
 	};
-                                                                        	
-	tg_messages_getHistory(
+	
+		tg_messages_getHistory(
 			tg, 
 			peer, 
 			0, 
@@ -414,37 +450,6 @@ void tg_async_messages_to_database(
 		int count,
 		void *userdata, void (*on_done)(void *userdata))
 {
-	// create table
-	char sql[BUFSIZ] = 
-		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE);";
-	ON_LOG(tg, "%s", sql);
-	tg_sqlite3_exec(tg, sql);	
-	
-	#define TG_MESSAGE_ARG(t, n, type, name) \
-		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
-				"\'" name "\' " type ";");\
-		ON_LOG(tg, "%s", sql);\
-		tg_sqlite3_exec(tg, sql);	
-	#define TG_MESSAGE_STR(t, n, type, name) \
-		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
-				"\'" name "\' " type ";");\
-		ON_LOG(tg, "%s", sql);\
-		tg_sqlite3_exec(tg, sql);	
-	#define TG_MESSAGE_PER(t, n, type, name) \
-		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
-				"\'" name "\' " type ";");\
-		ON_LOG(tg, "%s", sql);\
-		tg_sqlite3_exec(tg, sql);	\
-		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
-				"\'type_%s\' " type ";", name);\
-		ON_LOG(tg, "%s", sql);\
-		tg_sqlite3_exec(tg, sql);	
-
-	TG_MESSAGE_ARGS
-	#undef TG_MESSAGE_ARG
-	#undef TG_MESSAGE_STR
-	#undef TG_MESSAGE_PER
-
 	// set data
 	struct _sync_messages_update_message_t *d = 
 		NEW(struct _sync_messages_update_message_t, return);
