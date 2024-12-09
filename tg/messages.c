@@ -351,7 +351,7 @@ static int _sync_messages_update_message(
 	return 0;
 }
 
-void tg_async_messages_to_database(
+void tg_ sync_messages_to_database(
 		tg_t *tg,
 		uint32_t date,
 		tg_peer_t peer,
@@ -368,23 +368,18 @@ void tg_async_messages_to_database(
 	  .on_done = on_done,
 	  .userdata = userdata,
 	};
-
-	d->hash = &hash;
-
-	tg_peer_t peer = 
-	{d->peer_type, d->peer_id, d->peer_access_hash};
-	
+                                                                         	
 	tg_messages_getHistory(
-			d->tg, 
+			   tg, 
 			peer, 
 			0, 
-			d->d, 
+			d. d, 
 			0, 
 			10, 
 			0, 
 			0, 
 			&hash, 
-			d, 
+			   &d,
 			_sync_messages_update_message);
 	
 		messages_hash_to_database(
