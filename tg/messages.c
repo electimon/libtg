@@ -288,9 +288,7 @@ struct _sync_messages_update_message_t{
 	tg_t *tg;
 	int d;
 	uint64_t *hash;
-	uint32_t peer_type;
-	uint64_t peer_id;
-	uint64_t peer_access_hash;
+	tg_peer_t peer;
 	void *userdata;
   void (*on_done)(void *userdata);
 };
@@ -351,7 +349,7 @@ static int _sync_messages_update_message(
 	return 0;
 }
 
-void tg_ sync_messages_to_database(
+void tg_sync_messages_to_database(
 		tg_t *tg,
 		uint32_t date,
 		tg_peer_t peer,
@@ -361,19 +359,17 @@ void tg_ sync_messages_to_database(
   	struct _sync_messages_update_message_t d = {
 	  .d = date,
 	  .hash = &hash,
-	  .peer_access_hash = peer.access_hash,
-	  .peer_id = peer.id,
-	  .peer_type = peer.type,
+		.peer = peer,
 	  .tg =tg,
 	  .on_done = on_done,
 	  .userdata = userdata,
 	};
-                                                                         	
+                                                                        	
 	tg_messages_getHistory(
 			tg, 
 			peer, 
 			0, 
-			d.d, 
+			date, 
 			0, 
 			10, 
 			0, 
@@ -383,10 +379,10 @@ void tg_ sync_messages_to_database(
 			_sync_messages_update_message);
 	
 		messages_hash_to_database(
-				d->tg, d->peer_id, hash);
+				tg, peer.id, hash);
 
-	if (d->on_done)
-		d->on_done(d->userdata);
+	if (on_done)
+		on_done(userdata);
 }
 
 static void * _sync_messages_thread(void * data)
@@ -398,7 +394,9 @@ static void * _sync_messages_thread(void * data)
 	tg_sync_messages_to_database(
 								 d->tg,
 								 d->d,
-								 d->, void *userdata, void (*on_done)(void *))
+								 d->peer, 
+								 d->userdata, 
+								 d->on_done);
 
 	free(d);
 
@@ -444,23 +442,20 @@ void tg_async_messages_to_database(
 
 	// set data
 	struct _sync_messages_update_message_t *d = 
-		NEW(struct _sync_messages_update_message_t, return 1);
+		NEW(struct _sync_messages_update_message_t, return);
 	d->tg = tg;
 	d->d  = date;
 	d->userdata = userdata;
 	d->on_done = on_done;
-	d->peer_id = peer.id;
-	d->peer_type = peer.type;
-	d->peer_access_hash = peer.access_hash;
+	d->peer = peer;
 	
 	//create new thread
-	int err = pthread_create(
+	if (pthread_create(
 			&(tg->sync_dialogs_tid), 
 			NULL, 
 			_sync_messages_thread, 
-			d);
-
-	return err;
+			d))
+		ON_ERR(tg, NULL, "%s: can't create thread", __func__);
 }
 
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,

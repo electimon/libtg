@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 07.12.2024
+ * Last Modified Date: 09.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -418,6 +418,7 @@ void tg_sync_dialogs_to_database(tg_t *tg,
 	.d = time(NULL),
 	.tg = tg,
 	.on_done = on_done,
+	.userdata = userdata,
   };
 
   int ret = 40;
@@ -496,11 +497,12 @@ void tg_async_dialogs_to_database(tg_t *tg,
 	d->on_done = on_done;
 	
 	//create new thread
-	pthread_create(
+	if (pthread_create(
 			&(tg->sync_dialogs_tid), 
 			NULL, 
 			_async_dialogs_thread, 
-			d);
+			d))
+		ON_ERR(tg, NULL, "%s: can't create thread", __func__);
 }
 
 int tg_get_dialogs_from_database(

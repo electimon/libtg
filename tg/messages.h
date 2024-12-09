@@ -61,11 +61,18 @@ int tg_messages_getHistory(
 		void *data,
 		int (*callback)(void *data, const tg_message_t *message));
 
-int tg_sync_messages_to_database(
+void tg_sync_messages_to_database(
 		tg_t *tg,
 		uint32_t date,
 		tg_peer_t peer,
 		void *userdata, void (*on_done)(void *userdata));
+
+void tg_async_messages_to_database(
+		tg_t *tg,
+		uint32_t date,
+		tg_peer_t peer,
+		void *userdata, void (*on_done)(void *userdata));
+
 
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		int (*callback)(void *data, const tg_message_t *message));
