@@ -411,7 +411,7 @@ static int _sync_dialogs_update_dialog(
 	return 0;
 }
 
-int tg_sync_dialogs_to_database(tg_t *tg,
+void tg_sync_dialogs_to_database(tg_t *tg,
 		void *userdata, void (*on_done)(void *userdata))
 {
   struct _sync_dialogs_update_dialog_t d = {
@@ -436,8 +436,8 @@ int tg_sync_dialogs_to_database(tg_t *tg,
 	  // sleep
 	  sleep(1);
 	}
-	if (d.on_done)
-		d.on_done(userdata);
+   if (d.on_done)
+	   d.on_done(userdata);
 }
 
 static void * _async_dialogs_thread(void * data)
