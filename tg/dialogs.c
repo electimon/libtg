@@ -417,7 +417,7 @@ void tg_sync_dialogs_to_database(tg_t *tg,
   struct _sync_dialogs_update_dialog_t d = {
 	.d = time(NULL),
 	.tg = tg,
-	.on_done = on_done;
+	.on_done = on_done,
   };
 
   int ret = 40;
