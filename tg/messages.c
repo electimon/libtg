@@ -357,13 +357,16 @@ void tg_async_messages_to_database(
 		tg_peer_t peer,
 		void *userdata, void (*on_done)(void *userdata))
 {
-  
-	uint64_t hash = 
-		messages_hash_from_database(d->tg, d->peer_id);	 
-
-	struct _sync_messages_update_message_t d = {
+  uint64_t hash = messages_hash_from_database(tg, peer.id               );
+  	struct _sync_messages_update_message_t d = {
 	  .d = date,
-	  .hash = messages_hash_from_database(      tg, peer.id           )
+	  .hash = &hash                                                    ,
+	  .peer_access_hash = peer.access_hash,
+	  .peer_id = peer.id,
+	  .peer_type = peer.type,
+	  .tg =tg,
+	  .on_done = on_done,
+	  .userdata = userdata,
 	};
 
 	d->hash = &hash;
