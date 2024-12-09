@@ -395,7 +395,10 @@ static void * _sync_messages_thread(void * data)
 	ON_LOG(d->tg, "%s: start", __func__);
 
 	ON_LOG(d->tg, "%s: updating messages...", __func__);	
-	_sync_messages_update(d);
+	tg_sync_messages_to_database(
+								 d->tg,
+								 d->d,
+								 d->, void *userdata, void (*on_done)(void *))
 
 	free(d);
 
