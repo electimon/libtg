@@ -287,6 +287,7 @@ int tg_send_message(tg_t *tg, tg_peer_t peer_, const char *message)
 struct _sync_messages_update_message_t{
 	tg_t *tg;
 	int d;
+	int count;
 	uint64_t *hash;
 	tg_peer_t peer;
 	void *userdata;
@@ -353,6 +354,7 @@ void tg_sync_messages_to_database(
 		tg_t *tg,
 		uint32_t date,
 		tg_peer_t peer,
+		int count,
 		void *userdata, void (*on_done)(void *userdata))
 {
   uint64_t hash = messages_hash_from_database(tg, peer.id);
@@ -361,6 +363,7 @@ void tg_sync_messages_to_database(
 	  .hash = &hash,
 		.peer = peer,
 	  .tg =tg,
+		.count = count,
 	  .on_done = on_done,
 	  .userdata = userdata,
 	};
@@ -371,7 +374,7 @@ void tg_sync_messages_to_database(
 			0, 
 			date, 
 			0, 
-			10, 
+			count, 
 			0, 
 			0, 
 			&hash, 
@@ -394,7 +397,8 @@ static void * _sync_messages_thread(void * data)
 	tg_sync_messages_to_database(
 								 d->tg,
 								 d->d,
-								 d->peer, 
+								 d->peer,
+								 d->count, 
 								 d->userdata, 
 								 d->on_done);
 
@@ -407,6 +411,7 @@ void tg_async_messages_to_database(
 		tg_t *tg,
 		uint32_t date,
 		tg_peer_t peer,
+		int count,
 		void *userdata, void (*on_done)(void *userdata))
 {
 	// create table
@@ -448,6 +453,7 @@ void tg_async_messages_to_database(
 	d->userdata = userdata;
 	d->on_done = on_done;
 	d->peer = peer;
+	d->count = count;
 	
 	//create new thread
 	if (pthread_create(
