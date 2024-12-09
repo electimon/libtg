@@ -212,6 +212,11 @@ char *tg_get_photo_file(tg_t *tg,
 		const char *photo_file_reference,
 		const char *photo_size)
 {
+	char *photo = NULL;
+	photo = photo_file_from_database(tg, photo_id);
+	if (photo)
+		return photo;
+
 	buf_t fr = buf_from_base64(photo_file_reference);
 	InputFileLocation location = 
 					tl_inputPhotoFileLocation(
@@ -221,7 +226,6 @@ char *tg_get_photo_file(tg_t *tg,
 							photo_size);
 	 buf_free(fr);
 
-	 char *photo = NULL;
 	 tg_get_file(
 			tg, 
 			&location, 
@@ -229,6 +233,9 @@ char *tg_get_photo_file(tg_t *tg,
 			get_photo_callback, 
 			NULL, 
 			NULL);
+
+	 if (photo)
+		 photo_to_database(tg, photo_id, photo);
 
 	 return photo;
 }
@@ -238,6 +245,14 @@ char *tg_get_peer_photo_file(tg_t *tg,
 		bool big_photo,
 		uint64_t photo_id)
 {
+	char *photo = NULL;
+	if (!big_photo){
+		photo = peer_photo_file_from_database(
+				tg, peer->id, photo_id);
+		if (photo)
+			return photo;
+	}
+
 	buf_t peer_ = tg_inputPeer(*peer);
 	InputFileLocation location = 
 		tl_inputPeerPhotoFileLocation(
@@ -246,8 +261,7 @@ char *tg_get_peer_photo_file(tg_t *tg,
 				photo_id);
 	buf_free(peer_);
 
-	char *photo = NULL;
-	 tg_get_file(
+	tg_get_file(
 			tg, 
 			&location, 
 			&photo, 
@@ -255,5 +269,9 @@ char *tg_get_peer_photo_file(tg_t *tg,
 			NULL, 
 			NULL);
 
+	 if (photo && !big_photo)
+		 peer_photo_to_database(
+				 tg, photo_id, photo_id, photo);
+	 
 	 return photo;
 }

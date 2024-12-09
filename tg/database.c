@@ -1,5 +1,6 @@
 #include "tg.h"
 #include "../tl/str.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -299,8 +300,98 @@ int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash)
 			"INSERT INTO \'messages_hash\' (\'peer_id\') "
 			"SELECT "_LD_" "
 			"WHERE NOT EXISTS (SELECT 1 FROM messages_hash WHERE peer_id = "_LD_"); "
-			"UPDATE \'messages_hash\' SET \'hash\' = "_LD_", id = %d; "
-		,peer_id, peer_id, hash, tg->id);
+			"UPDATE \'messages_hash\' SET \'hash\' = "_LD_", id = %d " 
+			"WHERE \'peer_id\' = "_LD_";"
+		,peer_id, peer_id, hash, tg->id, peer_id);
 	
 	return tg_sqlite3_exec(tg, sql);
+}
+
+char *photo_file_from_database(tg_t *tg, uint64_t photo_id)
+{
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"SELECT data FROM photos WHERE id = %d "
+			"AND photo_id = "_LD_";"
+			, tg->id, photo_id);
+	char *photo = NULL;
+	tg_sqlite3_for_each(tg, sql, stmt)
+		if (sqlite3_column_bytes(stmt, 0) > 0){
+			photo = 
+				strndup(	
+					(char *)sqlite3_column_text(stmt, 0),
+					sqlite3_column_bytes(stmt, 0));
+			sqlite3_close(db);
+			break;
+		}
+
+	return photo;
+}
+
+int photo_to_database(tg_t *tg, uint64_t photo_id, const char *data)
+{
+	struct str sql;
+	str_init(&sql);
+	str_appendf(&sql, 
+			"CREATE TABLE IF NOT EXISTS photos (id INT); "
+			"ALTER TABLE \'photos\' ADD COLUMN \'data\' TEXT; "
+			"ALTER TABLE \'photos\' ADD COLUMN \'photo_id\' INT; "
+			"INSERT INTO \'photos\' (\'photo_id\') "
+			"SELECT "_LD_" "
+			"WHERE NOT EXISTS (SELECT 1 FROM photos WHERE photo_id = "_LD_"); "
+			"UPDATE \'photos\' SET \'photo_id\' = "_LD_", id = %d, data = \'"
+		,photo_id, photo_id, photo_id, tg->id);
+	str_append(&sql, data, strlen(data));
+	str_appendf(&sql, "\';");
+	
+	int ret = tg_sqlite3_exec(tg, sql.str);
+	free(sql.str);
+	return ret;
+}
+
+char *peer_photo_file_from_database(
+		tg_t *tg, uint64_t peer_id, uint64_t photo_id)
+{
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"SELECT data FROM peer_photos WHERE id = %d "
+			"AND peer_id = "_LD_" AND photo_id = "_LD_";"
+			, tg->id, peer_id, photo_id);
+	char *photo = NULL;
+	tg_sqlite3_for_each(tg, sql, stmt)
+		if (sqlite3_column_bytes(stmt, 0) > 0){
+			photo = 
+				strndup(	
+					(char *)sqlite3_column_text(stmt, 0),
+					sqlite3_column_bytes(stmt, 0));
+			sqlite3_close(db);
+			break;
+		}
+
+	return photo;
+}
+
+int peer_photo_to_database(tg_t *tg, 
+		uint64_t peer_id, uint64_t photo_id,
+		const char *data)
+{
+	struct str sql;
+	str_init(&sql);
+	str_appendf(&sql, 
+			"CREATE TABLE IF NOT EXISTS peer_photos (id INT); "
+			"ALTER TABLE \'peer_photos\' ADD COLUMN \'data\' TEXT; "
+			"ALTER TABLE \'peer_photos\' ADD COLUMN \'peer_id\' INT; "
+			"ALTER TABLE \'peer_photos\' ADD COLUMN \'photo_id\' INT; "
+			"INSERT INTO \'peer_photos\' (\'peer_id\') "
+			"SELECT "_LD_" "
+			"WHERE NOT EXISTS (SELECT 1 FROM peer_photos WHERE peer_id = "_LD_" AND photo_id = "_LD_"); "
+			"UPDATE \'peer_photos\' SET \'peer_id\' = "_LD_", id = %d, "
+			"\'photo_id\' = "_LD_", data = \'"
+		,photo_id, peer_id, photo_id, peer_id, tg->id, photo_id);
+	str_append(&sql, data, strlen(data));
+	str_appendf(&sql, "\';");
+	
+	int ret = tg_sqlite3_exec(tg, sql.str);
+	free(sql.str);
+	return ret;
 }
