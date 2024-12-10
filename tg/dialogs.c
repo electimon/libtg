@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 09.12.2024
+ * Last Modified Date: 10.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -421,10 +421,10 @@ void tg_sync_dialogs_to_database(tg_t *tg,
 	.userdata = userdata,
   };
 
-  int ret = 40;
+  int ret = 20;
   int date = time(NULL);
-  while (ret >= 40){
-	ret = tg_get_dialogs(tg, 40,
+  while (ret >= 20){
+	ret = tg_get_dialogs(tg, 20,
 				d.d, &tg->dialogs_hash,
 			 	NULL, 
 				&d,

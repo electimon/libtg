@@ -182,19 +182,24 @@ int main(int argc, char *argv[])
 	tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
 
-	tg_dialog_t d;
-	tg_get_dialogs_from_database(tg, &d, 
-			dialogs_callback);
+	tg_sync_dialogs_to_database(
+			tg, 
+			NULL, 
+			on_done);
+
+	//tg_dialog_t d;
+	//tg_get_dialogs_from_database(tg, &d, 
+			//dialogs_callback);
 
 	//tg_get_dialogs(tg, 1,
 			 //time(NULL),
 			 //NULL, NULL,
 			 //&d, dialogs_callback);
 
-	printf("NAME: %s\n", d.name);
-	printf("PEER ID: %.16lx\n", d.peer_id);
-	tg_peer_t peer = 
-	{d.peer_type, d.peer_id, d.access_hash};
+	//printf("NAME: %s\n", d.name);
+	//printf("PEER ID: %.16lx\n", d.peer_id);
+	//tg_peer_t peer = 
+	//{d.peer_type, d.peer_id, d.access_hash};
 
 	//char *image = tg_get_peer_photo_file(
 			//tg, 
