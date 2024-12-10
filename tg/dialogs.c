@@ -421,10 +421,9 @@ void tg_sync_dialogs_to_database(tg_t *tg,
 	.userdata = userdata,
   };
 
-  int ret = 20;
-  int date = time(NULL);
-  while (ret >= 20){
-	ret = tg_get_dialogs(tg, 20,
+  int ret = 10;
+  while (ret >= 10){
+	ret = tg_get_dialogs(tg, 10,
 				d.d, &tg->dialogs_hash,
 			 	NULL, 
 				&d,
@@ -435,10 +434,10 @@ void tg_sync_dialogs_to_database(tg_t *tg,
 	    d.tg, d.tg->dialogs_hash);
 
 	  // sleep
-	  sleep(1);
+	  sleep(2);
 	}
-   if (d.on_done)
-	   d.on_done(userdata);
+  if (d.on_done)
+	  d.on_done(userdata);
 }
 
 static void * _async_dialogs_thread(void * data)
