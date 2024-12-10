@@ -414,6 +414,26 @@ static int _sync_dialogs_update_dialog(
 void tg_sync_dialogs_to_database(tg_t *tg,
 		void *userdata, void (*on_done)(void *userdata))
 {
+	// create table
+	char sql[BUFSIZ] = 
+		"CREATE TABLE IF NOT EXISTS dialogs (id INT, peer_id INT UNIQUE);\n";
+	ON_LOG(tg, "%s", sql);
+	tg_sqlite3_exec(tg, sql);	
+	
+	#define TG_DIALOG_ARG(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
+				"\'" name "\' " type ";\n");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	#define TG_DIALOG_STR(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
+				"\'" name "\' " type ";\n");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	TG_DIALOG_ARGS
+	#undef TG_DIALOG_ARG
+	#undef TG_DIALOG_STR
+
   struct _sync_dialogs_update_dialog_t d = {
 	.d = time(NULL),
 	.tg = tg,
@@ -466,26 +486,6 @@ void tg_async_dialogs_to_database(tg_t *tg,
 	// open socket
 	tg->sync_dialogs_sockfd = 
 		tg_net_open_port(tg, 80);
-
-	// create table
-	char sql[BUFSIZ] = 
-		"CREATE TABLE IF NOT EXISTS dialogs (id INT, peer_id INT UNIQUE);\n";
-	ON_LOG(tg, "%s", sql);
-	tg_sqlite3_exec(tg, sql);	
-	
-	#define TG_DIALOG_ARG(t, n, type, name) \
-		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
-				"\'" name "\' " type ";\n");\
-		ON_LOG(tg, "%s", sql);\
-		tg_sqlite3_exec(tg, sql);	
-	#define TG_DIALOG_STR(t, n, type, name) \
-		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
-				"\'" name "\' " type ";\n");\
-		ON_LOG(tg, "%s", sql);\
-		tg_sqlite3_exec(tg, sql);	
-	TG_DIALOG_ARGS
-	#undef TG_DIALOG_ARG
-	#undef TG_DIALOG_STR
 
 	// set data
 	struct _sync_dialogs_update_dialog_t *d = 
