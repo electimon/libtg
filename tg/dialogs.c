@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 10.12.2024
+ * Last Modified Date: 12.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -411,7 +411,7 @@ static int _sync_dialogs_update_dialog(
 	return 0;
 }
 
-void tg_sync_dialogs_to_database(tg_t *tg,
+void tg_sync_dialogs_to_database(tg_t *tg, int limit, int date,
 		void *userdata, void (*on_done)(void *userdata))
 {
 	// create table
@@ -435,15 +435,15 @@ void tg_sync_dialogs_to_database(tg_t *tg,
 	#undef TG_DIALOG_STR
 
   struct _sync_dialogs_update_dialog_t d = {
-	.d = time(NULL),
+	.d = date,
 	.tg = tg,
 	.on_done = on_done,
 	.userdata = userdata,
   };
 
-  int ret = 10;
-  while (ret >= 10){
-	ret = tg_get_dialogs(tg, 10,
+  int ret = limit;
+  while (ret >= limit){
+		ret = tg_get_dialogs(tg, limit>0 ? limit : 10,
 				d.d, &tg->dialogs_hash,
 			 	NULL, 
 				&d,
@@ -453,8 +453,11 @@ void tg_sync_dialogs_to_database(tg_t *tg,
 	  dialogs_hash_to_database(
 	    d.tg, d.tg->dialogs_hash);
 
+		if (limit > 0)
+			break;
+
 	  // sleep
-	  sleep(2);
+		sleep(2);
 	}
   if (d.on_done)
 	  d.on_done(userdata);
@@ -466,7 +469,9 @@ static void * _async_dialogs_thread(void * data)
 	ON_LOG(d->tg, "%s: start", __func__);
 
 	ON_LOG(d->tg, "%s: updating dialogs...", __func__);	
-	tg_sync_dialogs_to_database(d->tg, d->userdata, d->on_done);
+	tg_sync_dialogs_to_database(
+			d->tg, 0, time(NULL),
+			d->userdata, d->on_done);
 
 	d->tg->sync_dialogs = false;
 

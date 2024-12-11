@@ -78,7 +78,8 @@ tl_t * tg_send_query_to_net(
 #define ON_ERR(tg, tl, ...)\
 	({if (tg->on_err){ \
 		struct str _s; str_init(&_s); str_appendf(&_s, __VA_ARGS__);\
-		tg->on_err(tg->on_err_data, tl, _s.str); \
+		if (!strstr(_s.str, "duplicate column name:")) \
+			tg->on_err(tg->on_err_data, tl, _s.str); \
 		free(_s.str);\
 	 }\
 	})

@@ -51,8 +51,8 @@ int tg_get_dialogs(
 		int (*callback)(void *data, 
 			const tg_dialog_t *dialog));
 
-/* load all dialogs to database */
-void tg_sync_dialogs_to_database(tg_t *tg,
+/* load dialogs to database - set limit to 0 to load all */
+void tg_sync_dialogs_to_database(tg_t *tg, int limit, int date,
 		void *userdata, void (*on_done)(void *userdata));
 
 /* load all dialogs to database in thread */

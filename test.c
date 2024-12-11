@@ -183,7 +183,8 @@ int main(int argc, char *argv[])
 	tg_set_on_error  (tg, NULL, on_err);
 
 	tg_sync_dialogs_to_database(
-			tg, 
+			tg,
+		  10, time(NULL),	
 			NULL, 
 			on_done);
 

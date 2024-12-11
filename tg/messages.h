@@ -30,7 +30,7 @@
 	TG_MESSAGE_SPA(uint32_t, photo_date, "INT", "photo_date") \
 	TG_MESSAGE_SPS(char*,    photo_file_reference, "TEXT", "photo_file_reference") \
 
-typedef struct tg_message_t {
+typedef struct tg_message_ {
 	#define TG_MESSAGE_ARG(t, arg, ...) t arg;
 	#define TG_MESSAGE_STR(t, arg, ...) t arg;
 	#define TG_MESSAGE_PER(t, arg, ...) t arg; int type_##arg; 
