@@ -204,6 +204,8 @@ void tg_get_file(
 
 static int get_photo_callback(void *d, const tg_file_t *p)
 {
+	printf("%s\n", __func__);
+
 	char **photo = d;
 	if (p->bytes_)
 		*photo = strdup(p->bytes_);
@@ -270,7 +272,7 @@ char *tg_get_peer_photo_file(tg_t *tg,
 			get_photo_callback, 
 			NULL, 
 			NULL);
-
+	
 	 if (photo && !big_photo)
 		 peer_photo_to_database(
 				 tg, peer->id, photo_id, photo);

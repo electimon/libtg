@@ -383,6 +383,7 @@ int peer_photo_to_database(tg_t *tg,
 		uint64_t peer_id, uint64_t photo_id,
 		const char *data)
 {
+	printf("%s\n", __func__);
 	tg_sqlite3_exec(tg, 
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'data\' TEXT; "
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'peer_id\' INT; "
