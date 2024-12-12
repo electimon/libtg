@@ -252,6 +252,7 @@ char *tg_get_peer_photo_file(tg_t *tg,
 		bool big_photo,
 		uint64_t photo_id)
 {
+	printf("%s\n", __func__);
 	char *photo = NULL;
 	if (!big_photo){
 		photo = peer_photo_file_from_database(
