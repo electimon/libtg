@@ -96,14 +96,8 @@ int database_init(tg_t *tg, const char *database_path)
 	}
 	sqlite3_close(db);
 
-	char *errmsg = NULL;
-	//sqlite3_exec(db, "PRAGMA journal_mode=wal", 
-			//NULL, NULL, &errmsg);
-	//if (errmsg){
-		//ON_ERR(tg, NULL, "%s", errmsg);
-		//sqlite3_free(errmsg);
-		//errmsg = NULL;
-	//}
+	// set multiple read
+	tg_sqlite3_exec(tg, "PRAGMA journal_mode=wal");
 
 	// create tables
 	char sql[] = 
@@ -117,14 +111,7 @@ int database_init(tg_t *tg, const char *database_path)
 		"CREATE TABLE IF NOT EXISTS dialogs (id INT, peer_id INT UNIQUE); "
 		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE); ";
 
-	sqlite3_exec(db, sql, 
-			NULL, NULL, &errmsg);
-
-	if (errmsg){
-		ON_ERR(tg, NULL, "%s", errmsg);
-		sqlite3_free(errmsg);
-		errmsg = NULL;
-	}
+	tg_sqlite3_exec(tg, sql);
 
 	return 0;
 }
