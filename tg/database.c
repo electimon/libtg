@@ -403,8 +403,7 @@ int peer_photo_to_database(tg_t *tg,
 	str_appendf(&sql, "\' WHERE peer_id = "_LD_";"
 			, peer_id);
 
-	printf("%s: %d\n", __func__, __LINE__);
-	printf("%s\n", sql.str);
+	fprintf(stderr, "%s: %d\n", __func__, __LINE__);
 	int ret = tg_sqlite3_exec(tg, sql.str);
 	free(sql.str);
 	return ret;
