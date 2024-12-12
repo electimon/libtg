@@ -10,6 +10,7 @@
 
 static void tg_file_from_tl(tg_file_t *f, tl_t *tl)
 {
+	printf("%s\n", __func__);
 	if (!tl || tl->_id != id_upload_file)
 		return;
 
@@ -33,6 +34,7 @@ void tg_get_file(
 		void (*progress)(void *progressp, int down, int total))	
 {
 	// download files on 443 port
+	printf("%s\n", __func__);
 	int sockfd = tg_net_open_port(tg, 443);
 	if (sockfd < 0)
 		return;
