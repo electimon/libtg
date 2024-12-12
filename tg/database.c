@@ -334,18 +334,23 @@ char *photo_file_from_database(tg_t *tg, uint64_t photo_id)
 
 int photo_to_database(tg_t *tg, uint64_t photo_id, const char *data)
 {
+	tg_sqlite3_exec(tg, 
+			"ALTER TABLE \'photos\' ADD COLUMN \'data\' TEXT; "
+			"ALTER TABLE \'photos\' ADD COLUMN \'photo_id\' INT; "
+			);
+
 	struct str sql;
 	str_init(&sql);
 	str_appendf(&sql, 
-			"ALTER TABLE \'photos\' ADD COLUMN \'data\' TEXT; "
-			"ALTER TABLE \'photos\' ADD COLUMN \'photo_id\' INT; "
 			"INSERT INTO \'photos\' (\'photo_id\') "
 			"SELECT "_LD_" "
-			"WHERE NOT EXISTS (SELECT 1 FROM photos WHERE photo_id = "_LD_"); "
+			"WHERE NOT EXISTS (SELECT 1 FROM photos "
+			"WHERE photo_id = "_LD_"); "
 			"UPDATE \'photos\' SET \'photo_id\' = "_LD_", id = %d, data = \'"
 		,photo_id, photo_id, photo_id, tg->id);
 	str_append(&sql, data, strlen(data));
-	str_appendf(&sql, "\';");
+	str_appendf(&sql, "\' WHERE photo_id = "_LD_";"
+			, photo_id);
 	
 	int ret = tg_sqlite3_exec(tg, sql.str);
 	free(sql.str);
@@ -378,21 +383,27 @@ int peer_photo_to_database(tg_t *tg,
 		uint64_t peer_id, uint64_t photo_id,
 		const char *data)
 {
-	struct str sql;
-	str_init(&sql);
-	str_appendf(&sql, 
+	tg_sqlite3_exec(tg, 
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'data\' TEXT; "
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'peer_id\' INT; "
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'photo_id\' INT; "
+			);
+	
+	struct str sql;
+	str_init(&sql);
+	str_appendf(&sql, 
 			"INSERT INTO \'peer_photos\' (\'peer_id\') "
 			"SELECT "_LD_" "
-			"WHERE NOT EXISTS (SELECT 1 FROM peer_photos WHERE peer_id = "_LD_" AND photo_id = "_LD_"); "
-			"UPDATE \'peer_photos\' SET \'peer_id\' = "_LD_", id = %d, "
-			"\'photo_id\' = "_LD_", data = \'"
-		,photo_id, peer_id, photo_id, peer_id, tg->id, photo_id);
+			"WHERE NOT EXISTS (SELECT 1 FROM peer_photos WHERE peer_id = "_LD_"); "
+			"UPDATE \'peer_photos\' SET id = %d, \'photo_id\' = "_LD_", "
+			"data = \'"
+		,peer_id, peer_id, tg->id, photo_id);
 	str_append(&sql, data, strlen(data));
-	str_appendf(&sql, "\';");
-	
+	str_appendf(&sql, "\' WHERE peer_id = "_LD_";"
+			, peer_id);
+
+	printf("%s: %d\n", __func__, __LINE__);
+	printf("%s\n", sql.str);
 	int ret = tg_sqlite3_exec(tg, sql.str);
 	free(sql.str);
 	return ret;

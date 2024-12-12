@@ -32,8 +32,8 @@ void tg_get_file(
 		void *progressp,
 		void (*progress)(void *progressp, int down, int total))	
 {
-	// download files on 80 port
-	int sockfd = tg_net_open_port(tg, 80);
+	// download files on 443 port
+	int sockfd = tg_net_open_port(tg, 443);
 	if (sockfd < 0)
 		return;
 
@@ -273,7 +273,7 @@ char *tg_get_peer_photo_file(tg_t *tg,
 
 	 if (photo && !big_photo)
 		 peer_photo_to_database(
-				 tg, photo_id, photo_id, photo);
+				 tg, peer->id, photo_id, photo);
 	 
 	 return photo;
 }

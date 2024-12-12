@@ -126,14 +126,32 @@ void on_log(void *d, const char *msg){
 
 int dialogs_callback(void *data, const tg_dialog_t *d)
 {
-	printf("%s\n", d->name);
-	tg_dialog_t *dialog = data;
-	dialog->name = strdup(d->name);
-	dialog->peer_id = d->peer_id;
-	dialog->peer_type = d->peer_type;
-	dialog->access_hash = d->access_hash;
-	dialog->photo_id = d->photo_id;
-	return 1;
+	tg_t *tg = data;
+	printf("%ld: %ld\n", d->peer_id, d->photo_id);
+	//tg_dialog_t *dialog = data;
+	//dialog->name = strdup(d->name);
+	//dialog->peer_id = d->peer_id;
+	//dialog->peer_type = d->peer_type;
+	//dialog->access_hash = d->access_hash;
+	//dialog->photo_id = d->photo_id;
+	
+	tg_peer_t peer = {
+				.id =  d->peer_id,
+				.type = d->peer_type,
+				.access_hash = d->access_hash,
+	};
+	char *photo = tg_get_peer_photo_file(
+			tg,
+			&peer, 
+			false, 
+			d->photo_id);
+
+	if (photo)
+		printf("PHOTO OK\n");
+	else
+		printf("PHOTO ERR\n");
+
+	return 0;
 }
 
 int messages_callback(void *data, const tg_message_t *m)
@@ -179,14 +197,14 @@ int main(int argc, char *argv[])
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
 	
-	tg_set_on_log  (tg, NULL, on_log);
+	//tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
 
-	tg_sync_dialogs_to_database(
-			tg,
-		  10, time(NULL),	
-			NULL, 
-			on_done);
+	//tg_sync_dialogs_to_database(
+			//tg,
+			//10, time(NULL),	
+			//NULL, 
+			//on_done);
 
 	//tg_dialog_t d;
 	//tg_get_dialogs_from_database(tg, &d, 
@@ -263,10 +281,10 @@ int main(int argc, char *argv[])
 	
 	/*buf_dump(location);*/
 
-	tg_sync_dialogs_to_database(tg,  10, time(NULL), NULL, on_done);
+	//tg_sync_dialogs_to_database(tg,  10, time(NULL), NULL, on_done);
 
-	//tg_get_dialogs_from_database(tg, NULL, 
-			//dialogs_callback);
+	tg_get_dialogs_from_database(tg, tg, 
+			dialogs_callback);
 	
 	//buf_t peer_ = tg_inputPeer(peer);
 	// download photo
