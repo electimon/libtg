@@ -76,8 +76,6 @@ void tg_get_file(
 		goto tg_get_file_thow_error;
 	buf_free(t);
 	
-	perror("KJJJJJJJJ");
-
 	// net receive
 	tg_get_file_net_receive:;
 	buf_t buf = buf_new();
