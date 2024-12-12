@@ -249,12 +249,12 @@ char *tg_get_peer_photo_file(tg_t *tg,
 		uint64_t photo_id)
 {
 	char *photo = NULL;
-	//if (!big_photo){
-		//photo = peer_photo_file_from_database(
-				//tg, peer->id, photo_id);
-		//if (photo)
-			//return photo;
-	//}
+	if (!big_photo){
+		photo = peer_photo_file_from_database(
+				tg, peer->id, photo_id);
+		if (photo)
+			return photo;
+	}
 	buf_t peer_ = tg_inputPeer(*peer);
 	InputFileLocation location = 
 		tl_inputPeerPhotoFileLocation(
