@@ -384,10 +384,7 @@ static int _sync_messages_update_message(
 }
 
 static void create_table(tg_t *tg){
-	char sql[BUFSIZ] = 
-		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE);";
-	ON_LOG(tg, "%s", sql);
-	tg_sqlite3_exec(tg, sql);	
+	char sql[BUFSIZ]; 
 	
 	#define TG_MESSAGE_ARG(t, n, type, name) \
 		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\

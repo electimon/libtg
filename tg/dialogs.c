@@ -415,10 +415,7 @@ void tg_sync_dialogs_to_database(tg_t *tg, int limit, int date,
 		void *userdata, void (*on_done)(void *userdata))
 {
 	// create table
-	char sql[BUFSIZ] = 
-		"CREATE TABLE IF NOT EXISTS dialogs (id INT, peer_id INT UNIQUE);\n";
-	ON_LOG(tg, "%s", sql);
-	tg_sqlite3_exec(tg, sql);	
+	char sql[BUFSIZ]; 
 	
 	#define TG_DIALOG_ARG(t, n, type, name) \
 		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\

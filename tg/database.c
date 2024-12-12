@@ -101,6 +101,28 @@ int database_init(tg_t *tg, const char *database_path)
 	if (errmsg){
 		ON_ERR(tg, NULL, "%s", errmsg);
 		sqlite3_free(errmsg);
+		errmsg = NULL;
+	}
+
+	// create tables
+	char sql[] = 
+		"CREATE TABLE IF NOT EXISTS phone_numbers (id INT); "
+		"CREATE TABLE IF NOT EXISTS auth_tokens (id INT); "
+		"CREATE TABLE IF NOT EXISTS auth_keys (id INT); "
+		"CREATE TABLE IF NOT EXISTS dialogs_hash (id INT); "
+		"CREATE TABLE IF NOT EXISTS messages_hash (id INT); "
+		"CREATE TABLE IF NOT EXISTS photos (id INT); "
+		"CREATE TABLE IF NOT EXISTS peer_photos (id INT); "
+		"CREATE TABLE IF NOT EXISTS dialogs (id INT, peer_id INT UNIQUE); "
+		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE); ";
+
+	sqlite3_exec(db, sql, 
+			NULL, NULL, &errmsg);
+
+	if (errmsg){
+		ON_ERR(tg, NULL, "%s", errmsg);
+		sqlite3_free(errmsg);
+		errmsg = NULL;
 	}
 
 	return 0;
@@ -145,7 +167,6 @@ int phone_number_to_database(
 	char sql[BUFSIZ];
 
 	sprintf(sql, 
-			"CREATE TABLE IF NOT EXISTS phone_numbers (id INT); "
 			"ALTER TABLE \'phone_numbers\' ADD COLUMN \'phone_number\' TEXT; "
 			"INSERT INTO \'phone_numbers\' (\'id\') "
 			"SELECT %d "
@@ -193,7 +214,6 @@ int auth_token_to_database(
 	char sql[BUFSIZ];
 
 	sprintf(sql, 
-			"CREATE TABLE IF NOT EXISTS auth_tokens (id INT); "
 			"ALTER TABLE \'auth_tokens\' ADD COLUMN \'auth_token\' TEXT; "
 			"INSERT INTO \'auth_tokens\' (id, \'auth_token\') VALUES (%d, \'%s\'); "
 		, tg->id, auth_token);
@@ -205,7 +225,6 @@ int auth_key_to_database(
 {
 	char sql[BUFSIZ];
 	sprintf(sql, 
-			"CREATE TABLE IF NOT EXISTS auth_keys (id INT); "
 			"ALTER TABLE \'auth_keys\' ADD COLUMN \'auth_key\' BLOB; "
 			"INSERT INTO \'auth_keys\' (id) "
 			"SELECT %d "
@@ -265,7 +284,6 @@ int dialogs_hash_to_database(tg_t *tg, uint64_t hash)
 {
 	char sql[BUFSIZ];
 	sprintf(sql, 
-			"CREATE TABLE IF NOT EXISTS dialogs_hash (id INT); "
 			"ALTER TABLE \'dialogs_hash\' ADD COLUMN \'hash\' INT; "
 			"INSERT INTO \'dialogs_hash\' (\'id\') "
 			"SELECT %d "
@@ -294,7 +312,6 @@ int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash)
 {
 	char sql[BUFSIZ];
 	sprintf(sql, 
-			"CREATE TABLE IF NOT EXISTS messages_hash (id INT); "
 			"ALTER TABLE \'messages_hash\' ADD COLUMN \'hash\' INT; "
 			"ALTER TABLE \'messages_hash\' ADD COLUMN \'peer_id\' INT; "
 			"INSERT INTO \'messages_hash\' (\'peer_id\') "
@@ -333,7 +350,6 @@ int photo_to_database(tg_t *tg, uint64_t photo_id, const char *data)
 	struct str sql;
 	str_init(&sql);
 	str_appendf(&sql, 
-			"CREATE TABLE IF NOT EXISTS photos (id INT); "
 			"ALTER TABLE \'photos\' ADD COLUMN \'data\' TEXT; "
 			"ALTER TABLE \'photos\' ADD COLUMN \'photo_id\' INT; "
 			"INSERT INTO \'photos\' (\'photo_id\') "
@@ -378,7 +394,6 @@ int peer_photo_to_database(tg_t *tg,
 	struct str sql;
 	str_init(&sql);
 	str_appendf(&sql, 
-			"CREATE TABLE IF NOT EXISTS peer_photos (id INT); "
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'data\' TEXT; "
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'peer_id\' INT; "
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'photo_id\' INT; "
