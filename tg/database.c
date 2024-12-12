@@ -90,6 +90,7 @@ int database_init(tg_t *tg, const char *database_path)
 			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX, 
 			NULL);
 	if (err){
+		perror("database init");
 		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(db));
 		return 1;
 	}
