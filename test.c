@@ -127,7 +127,7 @@ void on_log(void *d, const char *msg){
 int dialogs_callback(void *data, const tg_dialog_t *d)
 {
 	tg_t *tg = data;
-	printf("%ld: %ld\n", d->peer_id, d->photo_id);
+	printf("%lld: %lld\n", d->peer_id, d->photo_id);
 	//tg_dialog_t *dialog = data;
 	//dialog->name = strdup(d->name);
 	//dialog->peer_id = d->peer_id;
@@ -136,8 +136,8 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 	//dialog->photo_id = d->photo_id;
 	
 	tg_peer_t peer = {
-				.id =  d->peer_id,
 				.type = d->peer_type,
+				.id =  d->peer_id,
 				.access_hash = d->access_hash,
 	};
 	char *photo = tg_get_peer_photo_file(
