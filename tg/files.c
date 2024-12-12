@@ -10,7 +10,7 @@
 
 static void tg_file_from_tl(tg_file_t *f, tl_t *tl)
 {
-	printf("%s\n", __func__);
+	fprintf(stderr, "%s\n", __func__);
 	if (!tl || tl->_id != id_upload_file)
 		return;
 
@@ -34,7 +34,7 @@ void tg_get_file(
 		void (*progress)(void *progressp, int down, int total))	
 {
 	// download files on 443 port
-	printf("%s\n", __func__);
+	fprintf(stderr, "%s\n", __func__);
 	int sockfd = tg_net_open_port(tg, 443);
 	if (sockfd < 0)
 		return;
@@ -206,7 +206,7 @@ void tg_get_file(
 
 static int get_photo_callback(void *d, const tg_file_t *p)
 {
-	printf("%s\n", __func__);
+	fprintf(stderr, "%s\n", __func__);
 
 	char **photo = d;
 	if (p->bytes_)
@@ -252,7 +252,7 @@ char *tg_get_peer_photo_file(tg_t *tg,
 		bool big_photo,
 		uint64_t photo_id)
 {
-	printf("%s\n", __func__);
+	fprintf(stderr, "%s\n", __func__);
 	char *photo = NULL;
 	if (!big_photo){
 		photo = peer_photo_file_from_database(
