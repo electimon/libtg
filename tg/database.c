@@ -96,7 +96,6 @@ int database_init(tg_t *tg, const char *database_path)
 	}
 	sqlite3_close(db);
 
-	// set multiple read
 	tg_sqlite3_exec(tg, "PRAGMA journal_mode=wal");
 
 	// create tables

@@ -51,8 +51,8 @@ int tg_get_dialogs(
 {
 	int i, k;
 	uint64_t h = 0;
-	if (hash)
-		h = *hash;
+	/*if (hash)*/
+		/*h = *hash;*/
 
 	//InputPeer inputPeer = tl_inputPeerSelf();
 	InputPeer inputPeer = tl_inputPeerEmpty();
