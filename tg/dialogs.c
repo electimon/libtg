@@ -528,7 +528,8 @@ int tg_get_dialogs_from_database(
 	
 	str_appendf(&s, 
 			"id FROM dialogs WHERE id = %d " 
-			"ORDER BY \'pinned\' DESC, \'top_message_date\' DESC;", tg->id);
+			//"ORDER BY \'pinned\' DESC, \'top_message_date\' DESC;", tg->id);
+			"ORDER BY \'top_message_date\' DESC;", tg->id);
 		
 	tg_sqlite3_for_each(tg, s.str, stmt){
 		tg_dialog_t d;
