@@ -71,7 +71,8 @@ void tg_get_file(
 	buf_free(getFile);
 
 	// net send
-	tg_net_send(tg, sockfd, t);
+	if (tg_net_send(tg, sockfd, t))
+		goto tg_get_file_thow_error;
 	buf_free(t);
 	
 	// net receive

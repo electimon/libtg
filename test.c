@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
 	
 	/*buf_dump(location);*/
 
-	//tg_sync_dialogs_to_database(tg, NULL, on_done);
+	tg_sync_dialogs_to_database(tg,  10, time(NULL), NULL, on_done);
 
 	//tg_get_dialogs_from_database(tg, NULL, 
 			//dialogs_callback);

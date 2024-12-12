@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 06.12.2024
+ * Last Modified Date: 12.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -65,7 +65,7 @@ void tg_net_close(tg_t *tg, int sockfd)
   close(sockfd);
 }
 
-void tg_net_send(tg_t *tg, int sockfd, const buf_t buf)
+int tg_net_send(tg_t *tg, int sockfd, const buf_t buf)
 {
   //ON_LOG_BUF(tg, buf, "%s: ", __func__);
   int32_t n = (int32_t)send(
@@ -77,6 +77,8 @@ void tg_net_send(tg_t *tg, int sockfd, const buf_t buf)
   if (n < 0) {
     ON_LOG(tg, "%s: can't write to socket", __func__);
   }
+
+	return n<0?1:0;
 }
 
 buf_t tg_net_receive(tg_t *tg, int sockfd)
