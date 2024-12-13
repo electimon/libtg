@@ -52,6 +52,8 @@ void tg_message_from_tl(
 void tg_message_from_database(
 		tg_t*, tg_message_t*, uint32_t msg_id);
 
+int tg_message_to_database(tg_t *tg, const tg_message_t *m);
+
 int tg_messages_getHistory(
 		tg_t *tg,
 		tg_peer_t peer,

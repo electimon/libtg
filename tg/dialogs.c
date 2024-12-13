@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 12.12.2024
+ * Last Modified Date: 13.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -21,6 +21,7 @@
 #include "../transport/net.h"
 #include <string.h>
 #include "peer.h"
+#include "messages.h"
 
 // #include <stdint.h>
 #if INTPTR_MAX == INT32_MAX
@@ -289,6 +290,12 @@ int tg_get_dialogs(
 					tl_message_t *message = 
 						(tl_message_t *)md.messages_[k];
 					if (message->id_ == d.top_message_id){
+						// save message to database
+						tg_message_t tgm;
+						tg_message_from_tl(tg, &tgm, message);
+						tg_message_to_database(tg, &tgm);
+
+						// update dialog
 						d.top_message_date = message->date_;
 						d.top_message_text = BUF2STR(message->message_);
 						/*

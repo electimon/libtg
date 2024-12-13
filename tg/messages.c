@@ -316,17 +316,8 @@ struct _sync_messages_update_message_t{
   void (*on_done)(void *userdata);
 };
 
-static int _sync_messages_update_message(
-		void *data, 
-		const tg_message_t *m)
+int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 {
-	if (!m)
-		return 0;
-
-	struct _sync_messages_update_message_t *d = data;
-
-	ON_LOG(d->tg, "%s: %d", __func__, m->date_);
-
 	// save message to database
 	struct str s;
 	str_init(&s);
@@ -371,14 +362,30 @@ static int _sync_messages_update_message(
 	#undef TG_MESSAGE_SPS
 
 	str_appendf(&s, "id = %d WHERE msg_id = %d;\n"
-			, d->tg->id, m->id_);
+			, tg->id, m->id_);
 	
 	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
-	if (tg_sqlite3_exec(d->tg, s.str) == 0){
+	int ret = tg_sqlite3_exec(tg, s.str);
+	
+	free(s.str);
+	
+	return ret;
+}
+
+static int _sync_messages_update_message(
+		void *data, 
+		const tg_message_t *m)
+{
+	if (!m)
+		return 0;
+
+	struct _sync_messages_update_message_t *d = data;
+
+	ON_LOG(d->tg, "%s: %d", __func__, m->date_);
+	if (tg_message_to_database(d->tg, m) == 0){
 		// update hash
 		update_hash(d->hash, m->id_);
 	}
-	free(s.str);
 
 	return 0;
 }
