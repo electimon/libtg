@@ -1046,7 +1046,7 @@ int append_methods(
 			// handle flags
 			fputs(STR(buf, BLEN,
 					"\tuint32_t *flag%d = (uint32_t *)(&buf.data[buf.size]);\n"
-					"\tbuf = buf_cat(buf, buf_add_ui32(0));\n"
+					"\tbuf = buf_cat_ui32(buf, 0);\n"
 					, ++nflag)
 				,g->methods_c);
 
@@ -1078,13 +1078,13 @@ int append_methods(
 			if (m->args[i].flagn != 0)
 				fputs(
 						STR(buf, BLEN, 
-							"\t\tbuf = buf_cat(buf, buf_add_ui32(*%s_));\n", 
+							"\t\tbuf = buf_cat_ui32(buf, *%s_);\n", 
 							m->args[i].name), 
 						g->methods_c);
 			else
 				fputs(
 						STR(buf, BLEN, 
-							"\t\tbuf = buf_cat(buf, buf_add_ui32(%s_));\n", 
+							"\t\tbuf = buf_cat_ui32(buf, %s_);\n", 
 							m->args[i].name), 
 						g->methods_c);
 
@@ -1160,13 +1160,13 @@ int append_methods(
 			if (m->args[i].flagn != 0)
 				fputs(
 						STR(buf, BLEN, 
-							"\t\tbuf = buf_cat(buf, buf_add_ui64(*%s_));\n", 
+							"\t\tbuf = buf_cat_ui64(buf, *%s_);\n", 
 							m->args[i].name), 
 						g->methods_c);
 			else
 				fputs(
 						STR(buf, BLEN, 
-							"\t\tbuf = buf_cat(buf, buf_add_ui64(%s_));\n", 
+							"\t\tbuf = buf_cat_ui64(buf, %s_);\n", 
 							m->args[i].name), 
 						g->methods_c);
 
@@ -1274,7 +1274,7 @@ int append_methods(
 			fputs(
 					STR(buf, BLEN, 
 						"\t\tbuf = buf_cat(buf, tl_vector());\n"
-						"\t\tbuf = buf_cat(buf, buf_add_ui32(%s_len));\n"
+						"\t\tbuf = buf_cat_ui32(buf, %s_len);\n"
 						"\t\tint i;\n"
 						"\t\tfor (i=0; i<%s_len; ++i){\n"
 						, m->args[i].name, m->args[i].name), 
@@ -1298,7 +1298,7 @@ int append_methods(
 			         strcmp(type, "bool") == 0) 
 				fputs(
 						STR(buf, BLEN, 
-							"\t\t\tbuf = buf_cat(buf, buf_add_ui32(%s_[i]));\n", 
+							"\t\t\tbuf = buf_cat_ui32(buf, %s_[i]);\n", 
 							m->args[i].name), 
 						g->methods_c);
 			
@@ -1306,7 +1306,7 @@ int append_methods(
 			         strcmp(type, "double") == 0) 
 				fputs(
 						STR(buf, BLEN, 
-							"\t\t\tbuf = buf_cat(buf, buf_add_ui64(%s_[i]));\n", 
+							"\t\t\tbuf = buf_cat_ui64(buf, %s_[i]);\n", 
 							m->args[i].name), 
 						g->methods_c);
 

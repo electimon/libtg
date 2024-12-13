@@ -2,7 +2,7 @@
  * File              : buf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 07.12.2024
+ * Last Modified Date: 13.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef TL_BUF_H
@@ -13,8 +13,8 @@
 
 typedef	struct buf_ {
 	unsigned char * data;
-	int   size;
-	int   asize;
+	uint32_t   size;
+	uint32_t   asize;
 	void  *aptr;
 } buf_t;
 
