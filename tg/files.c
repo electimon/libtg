@@ -220,9 +220,12 @@ char *tg_get_photo_file(tg_t *tg,
 		const char *photo_size)
 {
 	char *photo = NULL;
-	photo = photo_file_from_database(tg, photo_id);
-	if (photo)
-		return photo;
+
+	if (strcmp(photo_size, "s") == 0){
+		photo = photo_file_from_database(tg, photo_id);
+		if (photo)
+			return photo;
+	}
 
 	buf_t fr = buf_from_base64(photo_file_reference);
 	InputFileLocation location = 
@@ -241,7 +244,7 @@ char *tg_get_photo_file(tg_t *tg,
 			NULL, 
 			NULL);
 
-	 if (photo)
+	 if (photo && strcmp(photo_size, "s") == 0)
 		 photo_to_database(tg, photo_id, photo);
 
 	 return photo;
