@@ -29,6 +29,49 @@
 	TG_MESSAGE_SPA(uint32_t, photo_dc_id, "INT", "photo_dc_id") \
 	TG_MESSAGE_SPA(uint32_t, photo_date, "INT", "photo_date") \
 	TG_MESSAGE_SPS(char*,    photo_file_reference, "TEXT", "photo_file_reference") \
+	TG_MESSAGE_SPA(uint64_t, geo_long, "INT", "geo_long") \
+	TG_MESSAGE_SPA(uint64_t, geo_lat, "INT", "geo_lat") \
+	TG_MESSAGE_SPA(uint64_t, geo_access_hash, "INT", "geo_access_hash") \
+	TG_MESSAGE_SPA(uint32_t, geo_accuracy_radius, "INT", "geo_accuracy_radius") \
+	TG_MESSAGE_SPA(bool,     doc_isVideo, "INT", "doc_isVideo") \
+	TG_MESSAGE_SPA(bool,     doc_isRound, "INT", "doc_isRound") \
+	TG_MESSAGE_SPA(bool,     doc_isVoice, "INT", "doc_isVoice") \
+	TG_MESSAGE_SPA(uint64_t, doc_id, "INT", "doc_id") \
+	TG_MESSAGE_SPA(uint64_t, doc_access_hash, "INT", "doc_access_hash") \
+	TG_MESSAGE_SPS(char*,    doc_file_reference, "TEXT", "doc_file_reference") \
+	TG_MESSAGE_SPA(uint32_t, doc_date, "INT", "doc_date") \
+	TG_MESSAGE_SPS(char*,    doc_mime_type, "TEXT", "doc_mime_type") \
+	TG_MESSAGE_SPA(uint64_t, doc_size, "INT", "doc_size") \
+	TG_MESSAGE_SPS(char*,    doc_thumbs, "TEXT", "doc_thumbs") \
+	TG_MESSAGE_SPS(char*,    doc_video_thumbs, "TEXT", "doc_video_thumbs") \
+	TG_MESSAGE_SPA(uint32_t, doc_dc_id, "INT", "doc_dc_id") \
+	TG_MESSAGE_SPS(char*,    doc_file_name, "TEXT", "doc_file_name") \
+	TG_MESSAGE_SPA(uint32_t, doc_w, "INT", "doc_w") \
+	TG_MESSAGE_SPA(uint32_t, doc_h, "INT", "doc_h") \
+	TG_MESSAGE_SPA(uint32_t, doc_vw, "INT", "doc_vw") \
+	TG_MESSAGE_SPA(uint32_t, doc_vh, "INT", "doc_vh") \
+	TG_MESSAGE_SPA(uint64_t, doc_aduration, "INT", "doc_aduration") \
+	TG_MESSAGE_SPA(uint64_t, doc_vduration, "INT", "doc_vduration") \
+	TG_MESSAGE_SPS(char*,    doc_title, "TEXT", "doc_title") \
+	TG_MESSAGE_SPA(uint64_t, web_id, "INT", "web_id") \
+	TG_MESSAGE_SPS(char*,    web_url, "TEXT", "web_url") \
+	TG_MESSAGE_SPS(char*,    web_display_url, "TEXT", "web_display_url") \
+	TG_MESSAGE_SPA(uint32_t, web_hash, "INT", "web_hash") \
+	TG_MESSAGE_SPS(char*,    web_type, "TEXT", "web_type") \
+	TG_MESSAGE_SPS(char*,    web_site_name, "TEXT", "web_site_name") \
+	TG_MESSAGE_SPS(char*,    web_title, "TEXT", "web_title") \
+	TG_MESSAGE_SPS(char*,    web_description, "TEXT", "web_description") \
+	TG_MESSAGE_SPA(uint64_t, web_photo_id, "INT", "web_photo_id") \
+	TG_MESSAGE_SPA(uint64_t, web_photo_access_hash, "INT", "web_photo_access_hash") \
+	TG_MESSAGE_SPA(uint32_t, web_photo_dc_id, "INT", "web_photo_dc_id") \
+	TG_MESSAGE_SPA(uint32_t, web_photo_date, "INT", "web_photo_date") \
+	TG_MESSAGE_SPS(char*,    web_photo_file_reference, "TEXT", "web_photo_file_reference") \
+	TG_MESSAGE_SPS(char*,    contact_phone_number, "TEXT", "contact_phone_number") \
+	TG_MESSAGE_SPS(char*,    contact_first_name, "TEXT", "contact_first_name") \
+	TG_MESSAGE_SPS(char*,    contact_last_name, "TEXT", "contact_last_name") \
+	TG_MESSAGE_SPS(char*,    contact_vcard, "TEXT", "contact_vcard") \
+	TG_MESSAGE_SPA(uint64_t, contact_user_id, "INT", "contact_user_id") \
+
 
 typedef struct tg_message_ {
 	#define TG_MESSAGE_ARG(t, arg, ...) t arg;

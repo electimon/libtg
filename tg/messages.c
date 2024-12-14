@@ -130,6 +130,150 @@ void tg_message_from_tl(
 					}
 				}
 				break;
+			case id_messageMediaGeo:
+				{
+					tl_messageMediaGeo_t *mmp = 
+						(tl_messageMediaGeo_t *)tlm->media_;
+					if (mmp->geo_ && mmp->geo_->_id == id_geoPoint)
+					{
+						tl_geoPoint_t *geo       = (tl_geoPoint_t *)mmp->geo_;
+						tgm->geo_long            = (uint64_t)geo->long_;
+						tgm->geo_lat             = (uint64_t)geo->lat_;
+						tgm->geo_access_hash     = geo->access_hash_;
+						tgm->geo_accuracy_radius = geo->accuracy_radius_;
+					}
+				}
+				break;
+			case id_messageMediaDocument:
+				{
+					tl_messageMediaDocument_t *mmp = 
+						(tl_messageMediaDocument_t *)tlm->media_;
+					if (mmp->document_ && mmp->document_->_id == id_document)
+					{
+						tgm->doc_isVoice = mmp->video_;
+						tgm->doc_isRound = mmp->round_;
+						tgm->doc_isVoice = mmp->voice_;
+						
+						tl_document_t *doc = (tl_document_t *)mmp->document_;
+						tgm->doc_id = doc->id_;
+						tgm->doc_access_hash = doc->access_hash_;
+						tgm->doc_file_reference =
+							buf_to_base64(doc->file_reference_);
+						tgm->doc_date = doc->date_;
+						tgm->doc_size = doc->size_;
+						tgm->doc_dc_id = doc->dc_id_;
+
+						int i;
+						// todo get thumbs
+						for (i = 0; i < doc->thumbs_len; ++i) {
+									
+						}
+						
+						for (i = 0; i < doc->video_thumbs_len; ++i) {
+							
+						}
+
+						// get attributes
+						for (i = 0; i < doc->attributes_len; ++i) {
+							tl_t *attr = doc->attributes_[i];
+							if (!attr)
+								continue;
+
+							switch (attr->_id) {
+								case id_documentAttributeImageSize:
+									{
+										tl_documentAttributeImageSize_t *a =
+											(tl_documentAttributeImageSize_t *)attr;
+										tgm->doc_w = a->w_;
+										tgm->doc_h = a->h_;
+									}
+									break;
+								case id_documentAttributeVideo:
+									{
+										tl_documentAttributeVideo_t *a =
+											(tl_documentAttributeVideo_t *)attr;
+										tgm->doc_vw = a->w_;
+										tgm->doc_vh = a->h_;
+										tgm->doc_vduration = a->duration_;
+									}
+									break;
+								case id_documentAttributeAudio:
+									{
+										tl_documentAttributeAudio_t *a =
+											(tl_documentAttributeAudio_t *)attr;
+										tgm->doc_title =
+											buf_to_base64(a->title_);
+										tgm->doc_aduration = a->duration_;
+									}
+									break;
+								case id_documentAttributeFilename:
+									{
+										tl_documentAttributeFilename_t *a =
+											(tl_documentAttributeFilename_t *)attr;
+										tgm->doc_file_name =
+											buf_to_base64(a->file_name_);
+
+									}
+								
+								default:
+									break;	
+							}
+						}
+					}
+				}
+				break;
+			case id_messageMediaWebPage:
+				{
+					tl_messageMediaWebPage_t *mmp = 
+						(tl_messageMediaWebPage_t *)tlm->media_;
+					if (mmp->webpage_ && mmp->webpage_->_id == id_webPage)
+					{
+						tl_webPage_t *web = (tl_webPage_t *)mmp->webpage_;
+						tgm->web_id = web->id_;
+						tgm->web_url =
+							buf_to_base64(web->url_);
+						tgm->web_display_url =
+							buf_to_base64(web->display_url_);
+						tgm->web_hash = web->hash_;
+						tgm->web_type =
+							buf_to_base64(web->type_);
+						tgm->web_site_name =
+							buf_to_base64(web->site_name_);
+						tgm->web_title =
+							buf_to_base64(web->title_);
+						tgm->web_description =
+							buf_to_base64(web->description_);
+
+						if (web->photo_ && web->photo_->_id == id_photo)
+						{
+							tl_photo_t *photo = (tl_photo_t *)web->photo_;
+							tgm->web_photo_id = photo->id_;
+							tgm->web_photo_access_hash = photo->access_hash_;
+							tgm->web_photo_dc_id = photo->dc_id_;
+							tgm->web_photo_date = photo->date_;
+							tgm->web_photo_file_reference =
+								buf_to_base64(photo->file_reference_);
+						}
+					}
+				}
+				break;
+			case id_messageMediaContact:
+				{					
+					tl_messageMediaContact_t *mmp = 
+						(tl_messageMediaContact_t *)tlm->media_;
+					
+					tgm->contact_phone_number = 
+							buf_to_base64(mmp->phone_number_);
+					tgm->contact_first_name = 
+							buf_to_base64(mmp->first_name_);
+					tgm->contact_last_name = 
+							buf_to_base64(mmp->last_name_);
+					tgm->contact_vcard = 
+							buf_to_base64(mmp->vcard_);
+					tgm->contact_user_id = mmp->user_id_;
+				}
+				break;
+			
 			default:
 				break;
 		}

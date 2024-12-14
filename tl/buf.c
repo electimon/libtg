@@ -293,6 +293,8 @@ char* buf_to_base64(buf_t b){
 buf_t buf_from_base64(const char *s){
 	buf_t b;
 	buf_init(&b);
+	if (!s)
+		return b;
 	uint64_t l = 0;
 	void * data = base64_decode(
 			s, 
