@@ -113,6 +113,7 @@ void tg_message_from_tl(
 
 	// handle with media
 	if (tlm->media_){
+		tgm->media_type = tlm->media_->_id;
 		switch (tlm->media_->_id) {
 			case id_messageMediaPhoto:
 				{

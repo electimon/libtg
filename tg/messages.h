@@ -24,6 +24,7 @@
 	TG_MESSAGE_PER(uint64_t, saved_peer_id_, "INT", "saved_peer_id") \
 	TG_MESSAGE_ARG(uint32_t, date_, "INT", "date") \
 	TG_MESSAGE_STR(char*,    message_, "TEXT", "message") \
+	TG_MESSAGE_SPA(uint32_t, media_type, "INT", "media_type") \
 	TG_MESSAGE_SPA(uint64_t, photo_id, "INT", "photo_id") \
 	TG_MESSAGE_SPA(uint64_t, photo_access_hash, "INT", "photo_access_hash") \
 	TG_MESSAGE_SPA(uint32_t, photo_dc_id, "INT", "photo_dc_id") \
