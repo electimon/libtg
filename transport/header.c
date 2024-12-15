@@ -117,7 +117,6 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 		
 		// seq_no
 		uint32_t seq_no = deserialize_ui32(&b);
-		ON_LOG(tg, "%s: SEQ_NO: %d", __func__, seq_no);
 
 		// data len
 		uint32_t msg_data_len = deserialize_ui32(&b);

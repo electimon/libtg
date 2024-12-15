@@ -254,7 +254,7 @@ int tg_send_query2_on_done(void *p, const buf_t r){
 	}
 
 	if (tl){
-		ON_LOG(s->tg, "%s: received %s (%.8x)", 
+		ON_LOG(s->tg, "%s: received tl_%s_t (%.8x)", 
 				__func__, TL_NAME_FROM_ID(tl->_id), tl->_id);
 	} else {
 		ON_ERR(s->tg, "%s: can't deserialize message", __func__); 
@@ -265,6 +265,8 @@ int tg_send_query2_on_done(void *p, const buf_t r){
 		int i;
 		for (i = 0; i < vector->len_; ++i) {
 			tl_t *tl = tl_deserialize(&vector->data_);
+			ON_LOG(s->tg, "%s: vector item: tl_%s_t (%.8x)", 
+				__func__, TL_NAME_FROM_ID(tl->_id), tl->_id);
 			if (s->callback)
 				if (s->callback(s->userdata, tl))
 					break;	

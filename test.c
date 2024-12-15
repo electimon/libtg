@@ -195,7 +195,7 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 				.id =  d->peer_id,
 				.access_hash = d->access_hash,
 	};
-	tg_get_peer_photo_file2(
+	tg_get_peer_photo_file(
 			tg,
 			&peer, 
 			false, 
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 		-5244509236001112417,
 	};
 
-	tg_get_peer_photo_file2(
+	tg_get_peer_photo_file(
 			tg, 
 			&peer, 
 			true, 

@@ -42,17 +42,14 @@ void tg_get_file(
 		void *progressp,
 		void (*progress)(void *progressp, int down, int total));	
 
-char *tg_get_photo_file(tg_t *tg, 
+void tg_get_photo_file(tg_t *tg, 
 		uint64_t photo_id, uint64_t photo_access_hash, 
 		const char *photo_file_reference,
-		const char *photo_size);
+		const char *photo_size,
+		void *userdata,
+		int (*callback)(void *userdata, char *photo));
 
-char *tg_get_peer_photo_file(tg_t *tg, 
-		tg_peer_t *peer, 
-		bool big_photo,
-		uint64_t photo_id);
-
-void tg_get_peer_photo_file2(tg_t *tg, 
+void tg_get_peer_photo_file(tg_t *tg, 
 		tg_peer_t *peer, 
 		bool big_photo,
 		uint64_t photo_id, 
