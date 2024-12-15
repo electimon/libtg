@@ -35,7 +35,7 @@ void tg_get_file(
 {
 	// download files on 443 port
 	fprintf(stderr, "%s\n", __func__);
-	int sockfd = tg_net_open_port(tg, 443);
+	int sockfd = tg_net_open_port(tg, 80);
 	if (sockfd < 0)
 		return;
 
