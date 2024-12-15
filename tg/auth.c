@@ -180,6 +180,10 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 		// save auth_key_id 
 		auth_key_to_database(tg, tg->key);
 
+		// close port
+		tg_net_close(tg, tg->sockfd);
+		tg->net = false;
+
 		return (tl_user_t *)auth->user_;
 	}
 
