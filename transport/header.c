@@ -88,7 +88,7 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc)
 buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 {
 	if (!b.size){
-		ON_ERR(tg, NULL, "%s: got nothing", __func__);
+		ON_ERR(tg, "%s: got nothing", __func__);
 		return b;
 	}
 
@@ -108,7 +108,7 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 		uint64_t ssid = deserialize_ui64(&b);
 		// check ssid
 		if (ssid != buf_get_ui64(tg->ssid)){
-			ON_ERR(tg, NULL, "%s: session id mismatch!", __func__);
+			ON_ERR(tg, "%s: session id mismatch!", __func__);
 		}
 
 		// message_id
@@ -133,7 +133,7 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 		// auth_key_id
 		uint64_t auth_key_id = buf_get_ui64(b);
 		if (auth_key_id != 0){
-			ON_ERR(tg, NULL, 
+			ON_ERR(tg, 
 					"%s: auth_key_id is not 0 for unencrypted message", __func__);
 			return b;
 		}

@@ -45,7 +45,7 @@ buf_t tg_detransport(tg_t *tg, buf_t a)
 	uint32_t len = deserialize_ui32(&a);
 	
 	if (len == -404 || buf_get_ui32(a) == 0xfffffe6c) {
-    ON_ERR(tg, NULL, "%s: 404", __func__);
+    ON_ERR(tg, "%s: 404", __func__);
 		b = buf_cat_ui32(b, 0xfffffe6c);
 		return b;
 	}

@@ -23,7 +23,7 @@ void tg_message_from_database(
 		tg_t *tg, tg_message_t *m, uint32_t msg_id)
 {
 	if (!m){
-		ON_ERR(tg, NULL, "TG_MESSAGE IS NULL");
+		ON_ERR(tg, "TG_MESSAGE IS NULL");
 		return;
 	}
 	memset(m, 0, sizeof(tg_message_t));
@@ -409,7 +409,7 @@ int tg_messages_getHistory(
 tg_messeges_get_history_thow_error:;
 	// throw error
 	char *err = tg_strerr(tl); 
-	ON_ERR(tg, tl, "%s", err);
+	ON_ERR(tg, "%s", err);
 	free(err);
 
 tg_messeges_get_history_finish:;
@@ -659,7 +659,7 @@ void tg_async_messages_to_database(
 			NULL, 
 			_sync_messages_thread, 
 			d))
-		ON_ERR(tg, NULL, "%s: can't create thread", __func__);
+		ON_ERR(tg, "%s: can't create thread", __func__);
 }
 
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,

@@ -8,7 +8,7 @@
 #include "../tl/alloc.h"
 #include "tg.h"
 
-static void tg_file_from_tl(tg_file_t *f, tl_t *tl)
+static void tg_file_from_tl(tg_file_t *f, const tl_t *tl)
 {
 	fprintf(stderr, "%s\n", __func__);
 	if (!tl || tl->_id != id_upload_file)
@@ -70,7 +70,7 @@ void tg_get_file(
 			offset, 
 			limit);
 		
-	buf_t t = tg_serialize_query(tg, getFile, true);	
+	buf_t t = tg_prepare_query(tg, getFile, true);	
 	buf_free(getFile);
 
 	// net send
@@ -109,7 +109,7 @@ void tg_get_file(
 					offset, 
 					limit);
 		
-			buf_t t = tg_serialize_query(tg, getFile, true);	
+			buf_t t = tg_prepare_query(tg, getFile, true);	
 			buf_free(getFile);
 			
 			// net send
@@ -176,7 +176,7 @@ void tg_get_file(
 				break;
 			
 			default:
-				tl = tg_handle_deserialized_message(tg, tl, sockfd);
+				tl = tg_handle_deserialized_message(tg, tl);
 				break;
 		}
 	
@@ -196,7 +196,7 @@ void tg_get_file(
 		if (tl)
 			printf("ID: %.8x\n", tl->_id);
 		char *err = tg_strerr(tl); 
-		ON_ERR(tg, tl, "%s", err);
+		ON_ERR(tg, "%s", err);
 		free(err);
 	
 	tg_get_file_finish:;
@@ -207,8 +207,7 @@ void tg_get_file(
 struct tg_get_file_t{
 	tg_t *tg;
 	uint32_t limit;
-	uint64_t offset;
-	InputFileLocation *location;
+	InputFileLocation location;
 	void *data;
 	int (*callback)(void *data, const tg_file_t *file);
 	void *progressp;
@@ -216,6 +215,21 @@ struct tg_get_file_t{
 };
 
 int tg_get_file2_cb(void *userdata, const tl_t *tl){
+	struct tg_get_file_t *s = userdata;
+	if (tl && tl->_id == id_upload_file){
+			tg_file_t file;
+			memset(&file, 0, sizeof(file));
+			tg_file_from_tl(&file, tl);
+			if (s->callback)
+				s->callback(s->data, &file);
+	} else {
+	// throw error
+		if (tl)
+			printf("ID: %.8x\n", tl->_id);
+		char *err = tg_strerr(tl); 
+		ON_ERR(s->tg, "%s", err);
+		free(err);
+	}
 
 	return 0;
 }
@@ -223,18 +237,16 @@ int tg_get_file2_cb(void *userdata, const tl_t *tl){
 buf_t tg_get_file2_chunk(void *chunkp, uint32_t received, uint32_t total)
 {
 	struct tg_get_file_t *s = chunkp;
+	if (s->progress)
+		s->progress(s->progressp, received, total);
 	
 	buf_t getFile = tl_upload_getFile(
 					NULL, 
 					NULL, 
-					s->location, 
+					&s->location, 
 					received, 
 					s->limit);
-		
-	buf_t t = tg_serialize_query(s->tg, getFile, true);	
-	buf_free(getFile);
-
-	return t;
+	return getFile;
 }
 
 void tg_get_file2(
@@ -245,6 +257,7 @@ void tg_get_file2(
 		void *progressp,
 		void (*progress)(void *progressp, int down, int total))	
 {
+	printf("%s start\n", __func__);
 	/* If precise flag is not specified, then
 
 		• The parameter offset must be divisible by 4 KB.
@@ -265,13 +278,12 @@ void tg_get_file2(
 
 	struct tg_get_file_t *s = 
 		NEW(struct tg_get_file_t, 
-				ON_ERR(tg, NULL, "%s: can't allocate memory", __func__);
+				ON_ERR(tg, "%s: can't allocate memory", __func__);
 				return);
 
 	s->tg = tg;
 	s->limit  = 1048576;
-	s->offset = 0;
-	s->location = location;
+	s->location = *location;
 	s->data = data;
 	s->callback = callback;
 	s->progressp = progressp;
@@ -284,11 +296,11 @@ void tg_get_file2(
 			NULL, 
 			NULL, 
 			location, 
-			s->offset, 
+			0, 
 			s->limit);
 		
 	// net send
-	tg_send_query2(
+	tg_queue_manager_send_query(
 			tg, 
 			getFile,
 			s,
@@ -436,7 +448,7 @@ void tg_get_peer_photo_file2(tg_t *tg,
 	s->userdata = userdata;
 	s->callback = callback;
 
-	tg_get_file(
+	tg_get_file2(
 			tg, 
 			&location, 
 			s, 

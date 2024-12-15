@@ -28,7 +28,7 @@ sqlite3 * tg_sqlite3_open(tg_t *tg)
 			SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, 
 			NULL);
 	if (err){
-		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(db));
+		ON_ERR(tg, "%s", (char *)sqlite3_errmsg(db));
 		return NULL;
 	}
 
@@ -46,7 +46,7 @@ int tg_sqlite3_prepare(
 		 	NULL);
 	if (res != SQLITE_OK){
 		// parse error
-		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(db));
+		ON_ERR(tg, "%s", sqlite3_errmsg(db));
 		return 1;
 	}	
 
@@ -66,14 +66,14 @@ int tg_sqlite3_exec(
 		sqlite3_exec(db, sql, NULL, NULL, &errmsg);
 	if (errmsg){
 		// parse error
-		ON_ERR(tg, NULL, "%s", errmsg);
+		ON_ERR(tg, "%s", errmsg);
 		sqlite3_free(errmsg);	
 		sqlite3_close(db);
 		return 1;
 	}	
 	if (res != SQLITE_OK){
 		// parse error
-		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(db));
+		ON_ERR(tg, "%s", sqlite3_errmsg(db));
 		sqlite3_close(db);
 		return 1;
 	}
@@ -91,7 +91,7 @@ int database_init(tg_t *tg, const char *database_path)
 			NULL);
 	if (err){
 		perror("database init");
-		ON_ERR(tg, NULL, "%s", (char *)sqlite3_errmsg(db));
+		ON_ERR(tg, "%s", (char *)sqlite3_errmsg(db));
 		return 1;
 	}
 	sqlite3_close(db);
@@ -222,7 +222,7 @@ int auth_key_to_database(
 	char *errmsg = NULL;
 	int res = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
 	if (errmsg) {
-		ON_ERR(tg, NULL, "%s", errmsg);
+		ON_ERR(tg, "%s", errmsg);
 		free(errmsg);
 		sqlite3_close(db);
 		return 1;
@@ -235,7 +235,7 @@ int auth_key_to_database(
 	sqlite3_stmt *stmt;
 	res = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
-		ON_ERR(tg, NULL, "%s", errmsg);
+		ON_ERR(tg, "%s", errmsg);
 		free(errmsg);
 		sqlite3_close(db);
 		return 1;
@@ -243,7 +243,7 @@ int auth_key_to_database(
 
 	res = sqlite3_bind_blob(stmt, 1, auth_key.data, auth_key.size, SQLITE_TRANSIENT);
 	if (res != SQLITE_OK) {
-		ON_ERR(tg, NULL, "%s", sqlite3_errmsg(db));
+		ON_ERR(tg, "%s", sqlite3_errmsg(db));
 	}	
 	
 	sqlite3_step(stmt);

@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 13.12.2024
+ * Last Modified Date: 15.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -351,7 +351,7 @@ int tg_get_dialogs(
 	} else { // not dialogs or dialogsSlice
 		// throw error
 		char *err = tg_strerr(tl); 
-		ON_ERR(tg, tl, "%s", err);
+		ON_ERR(tg, "%s", err);
 		free(err);
 		// free tl
 		/* TODO:  <29-11-24, yourname> */
@@ -510,7 +510,7 @@ void tg_async_dialogs_to_database(tg_t *tg,
 			NULL, 
 			_async_dialogs_thread, 
 			d))
-		ON_ERR(tg, NULL, "%s: can't create thread", __func__);
+		ON_ERR(tg, "%s: can't create thread", __func__);
 }
 
 int tg_get_dialogs_from_database(

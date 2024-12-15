@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 tg_queue_node_t *
-tg_queue_node_new(uint64_t id, const buf_t data, 
+tg_queue_node_new(const buf_t msg, 
 	void *on_donep,
 	int (*on_done)(void *userdata, const buf_t data),
 	void *chunkp, 
@@ -17,8 +17,7 @@ tg_queue_node_new(uint64_t id, const buf_t data,
 			return NULL;
 			});
 
-	n->msg_id = id;
-	n->msg_data = buf_add_buf(data);
+	n->msg = buf_add_buf(msg);
 	n->on_donep = on_donep;
 	n->on_done = on_done;
 	n->chunkp = chunkp;
@@ -29,7 +28,7 @@ tg_queue_node_new(uint64_t id, const buf_t data,
 void tg_queue_node_free(tg_queue_node_t *node)
 {
 	if (node){
-		buf_free(node->msg_data);
+		buf_free(node->msg);
 		free(node);
 	}
 }
@@ -39,7 +38,7 @@ static void * _tg_socket_datemon(void * data)
 	tg_t *tg = data;
 	ON_LOG(tg, "%s: start", __func__);
 
-	while (1) {
+	while (tg->queue_manager) {
 		tg_net_send_queue_node(tg);
 		usleep(100000); // in microseconds
 	}
@@ -47,11 +46,9 @@ static void * _tg_socket_datemon(void * data)
 	pthread_exit(0);	
 }
 
-int tg_socket_daemon(tg_t *tg){
-	// open socket
-	tg->sockfd = tg_net_open(tg);
-	if (tg->sockfd < 0)
-		return 1;
+int tg_start_queue_manager(tg_t *tg){
+
+	tg->queue_manager = 1;
 
 	// start thread
 	if (pthread_create(
@@ -60,7 +57,7 @@ int tg_socket_daemon(tg_t *tg){
 			_tg_socket_datemon, 
 			tg))
 	{
-		ON_ERR(tg, NULL, "%s: can't create thread", __func__);
+		ON_ERR(tg, "%s: can't create thread", __func__);
 		return 1;
 	}
 

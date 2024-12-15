@@ -123,7 +123,7 @@ buf_t tg_decrypt(tg_t *tg, buf_t m, bool enc)
 		buf_t key_hash = tg_hsh_sha1(tg->key);
 		buf_t auth_key_id_ = buf_add(key_hash.data + 12, 8);
 		if (auth_key_id != buf_get_ui64(auth_key_id_)){
-			ON_ERR(tg, NULL, "%s: auth_key_id mismatch", __func__);
+			ON_ERR(tg, "%s: auth_key_id mismatch", __func__);
 			buf_free(auth_key_id_);
 			return d;
 		}
@@ -135,7 +135,7 @@ buf_t tg_decrypt(tg_t *tg, buf_t m, bool enc)
 		
 		// check encrypted_data size
 		if (m.size % 16 != 0){
-			ON_ERR(tg, NULL, "(length %% AES_BLOCK_SIZE) != 0");	
+			ON_ERR(tg, "(length %% AES_BLOCK_SIZE) != 0");	
 			return d;
 		}
 		// encrypted_data

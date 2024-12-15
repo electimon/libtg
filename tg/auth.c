@@ -64,14 +64,14 @@ tg_is_authorized(tg_t *tg)
 		}
 		// throw error
 		char *err = tg_strerr(tl); 
-		ON_ERR(tg, tl, "%s", err);
+		ON_ERR(tg, "%s", err);
 		free(err);
 		// free tl
 		/* TODO:  <14-11-24, kuzmich> */
 		return NULL;
 	}
 
-	ON_ERR(tg, NULL, "NEED_TO_AUTHORIZE");
+	ON_ERR(tg, "NEED_TO_AUTHORIZE");
 	return NULL;
 }
 
@@ -136,7 +136,7 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 	}
 	// throw error
 	char *err = tg_strerr(tl); 
-	ON_ERR(tg, tl, "%s", err);
+	ON_ERR(tg, "%s", err);
 	free(err);
 	// free tl
 	/* TODO:  <14-11-24, kuzmich> */
@@ -164,7 +164,7 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 
 		if (auth->setup_password_required_){
 			// throw error
-			ON_ERR(tg, tl, "SESSION_PASSWORD_NEEDED");
+			ON_ERR(tg, "SESSION_PASSWORD_NEEDED");
 			return NULL;
 		}
 		
@@ -185,7 +185,7 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 
 	// throw error
 	char *err = tg_strerr(tl); 
-	ON_ERR(tg, tl, "%s", err);
+	ON_ERR(tg, "%s", err);
 	free(err);
 	// free tl
 	/* TODO:  <14-11-24, kuzmich> */

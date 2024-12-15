@@ -1,3 +1,4 @@
+2024-12-15 queue manager to send/receive via socket
 2024-12-14 message media support
 2024-12-06 tg_get_file - download file
 2024-12-02 messages_getHistory

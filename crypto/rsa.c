@@ -15,7 +15,7 @@ static RSA *read_pubkey(tg_t *tg)
 {
 	FILE * pub = fopen(tg->pubkey, "r");
   if (pub == NULL) {
-    ON_ERR(tg, NULL,
+    ON_ERR(tg,
 				"%s: can not read public key from file: '%s'",
 				 __func__, tg->pubkey);
 		return NULL;
@@ -26,7 +26,7 @@ static RSA *read_pubkey(tg_t *tg)
   if (!rsa) {
 		fclose(pub);
     RSA_free(rsa);
-    ON_ERR(tg, NULL,
+    ON_ERR(tg,
 				"%s: PEM_read_RSAPublicKey: '%s' returns NULL",
 				__func__, tg->pubkey);
 		return NULL;

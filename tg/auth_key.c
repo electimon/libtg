@@ -21,7 +21,7 @@ int tg_new_auth_key(tg_t *tg)
 	app_t app = api.app.open();
 	// check if has key
 	if (!shared_rc.key.size){
-		ON_ERR(tg, NULL, "%s: can't generate new auth key", __func__);
+		ON_ERR(tg, "%s: can't generate new auth key", __func__);
 		api.app.close(app);
 		return 1;
 	}
@@ -108,7 +108,7 @@ int tg_new_auth_key1(tg_t *tg)
 				}
 		}
 		if (nfpt == -1){
-			ON_ERR(tg, NULL, 
+			ON_ERR(tg, 
 					"%s: no server RSA public key matching", __func__);
 			return 1;
 		}
@@ -178,7 +178,7 @@ int tg_new_auth_key1(tg_t *tg)
 		*     be encrypted as before. One has to check that
 		*     data is not longer than 144 bytes. */
 		if (data.size > 144*8){
-			ON_ERR(tg, NULL, 
+			ON_ERR(tg,  
 					"%s: data len is longer 144 bytes: %d",
 				 	__func__, data.size);
 			return 1;
@@ -209,7 +209,7 @@ generation_new_random_temp_key:;
 					data_pad_reversed, 
 					tg_hsh_sha256(temp_key_data_with_padding));
 		if (data_with_hash.size != 224*8){
-			ON_ERR(tg, NULL, 
+			ON_ERR(tg, 
 					"%s: data_with_hash len is longer 244 bytes: %d",
 				 	__func__, data_with_hash.size);
 			 return 1;
@@ -230,7 +230,7 @@ generation_new_random_temp_key:;
 		buf_t key_aes_encrypted = 
 			buf_add_bufs(2, temp_key_xor, aes_encrypted);
 		 if (key_aes_encrypted.size != 256*8){
-			ON_ERR(tg, NULL, 
+			ON_ERR(tg, 
 					"%s: key_aes_encrypted len mismatch: expexted 2048: has: %d",
 				 	__func__, key_aes_encrypted.size);
 			 return 1;
@@ -317,7 +317,7 @@ generation_new_random_temp_key:;
 
 	// throw error
 	char *err = tg_strerr(tl); 
-	ON_ERR(tg, tl, "%s", err);
+	ON_ERR(tg, "%s", err);
 	free(err);
 
 	return 1;
@@ -359,7 +359,7 @@ int tg_new_auth_key2(tg_t *tg)
 				}
 		}
 		if (nfpt == -1){
-			ON_ERR(tg, NULL, 
+			ON_ERR(tg, 
 					"%s: no server RSA public key matching", __func__);
 			return 1;
 		}
@@ -426,7 +426,7 @@ int tg_new_auth_key2(tg_t *tg)
 	
 	// throw error
 	char *err = tg_strerr(tl); 
-	ON_ERR(tg, tl, "%s", err);
+	ON_ERR(tg, "%s", err);
 	free(err);
 
 	return 1;

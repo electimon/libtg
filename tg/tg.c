@@ -2,6 +2,7 @@
 #include "../tl/alloc.h"
 #include "tg.h"
 #include "../transport/net.h"
+#include "../transport/queue.h"
 #include "../crypto/cry.h"
 #include "../crypto/hsh.h"
 #include <stdint.h>
@@ -59,7 +60,11 @@ tg_t *tg_new(
 
 	// load dialogs hash
 	tg->dialogs_hash = dialogs_hash_from_database(tg);
-	
+
+	// start queue manager
+	if (tg_start_queue_manager(tg))
+		return NULL;
+
 	return tg;
 }
 
@@ -76,7 +81,7 @@ void tg_close(tg_t *tg)
 
 void tg_set_on_error(tg_t *tg,
 		void *on_err_data,
-		void (*on_err)(void *on_err_data, tl_t *tl, const char *err))
+		void (*on_err)(void *on_err_data, const char *err))
 {
 	if (tg){
 		tg->on_err = on_err;

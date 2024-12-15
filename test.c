@@ -118,7 +118,7 @@ char * callback(
 	return NULL;
 }
 
-void on_err(void *d, tl_t *tl, const char *err){
+void on_err(void *d, const char *err){
 	printf("!!!ERR: %s\n", err);
 }
 
@@ -224,17 +224,30 @@ int main(int argc, char *argv[])
 	tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
 
-	tg_net_close(tg, tg->sockfd);
-
-	// start daemon
-	tg_socket_daemon(tg);
-
 	InputUser iuser = tl_inputUserSelf();
 		buf_t getUsers = 
 			tl_users_getUsers(&iuser, 1);	
 
-	tg_send_query2(tg, getUsers, NULL, query_cb, NULL, NULL);
+	tg_queue_manager_send_query(
+			tg, getUsers, 
+			NULL, query_cb, 
+			NULL, NULL);
 
+
+		tg_peer_t peer = {
+		TG_PEER_TYPE_CHANNEL,
+		1326223284,
+		-5244509236001112417,
+	};
+
+	tg_get_peer_photo_file2(
+			tg, 
+			&peer, 
+			true, 
+			5379844007854718198, 
+			NULL, photo_callback2);
+
+	
 	//buf_t h = tg_header(tg, getUsers, true);
 	//buf_t e = tg_encrypt(tg, h, true);
 	//buf_t t = tg_transport(tg, e);
@@ -250,9 +263,9 @@ int main(int argc, char *argv[])
 			//NULL, 
 			//on_done);
 
-	tg_dialog_t d;
-	tg_get_dialogs_from_database(tg, &d, 
-			dialogs_callback);
+	/*tg_dialog_t d;*/
+	/*tg_get_dialogs_from_database(tg, &d, */
+			/*dialogs_callback);*/
 
 	//tg_get_dialogs(tg, 1,
 			 //time(NULL),

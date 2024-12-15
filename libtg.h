@@ -19,7 +19,7 @@ tg_t * tg_new(
 /* set on_error callback */
 void tg_set_on_error(tg_t *tg,
 		void *on_err_data,
-		void (*on_err)(void *on_err_data, tl_t *tl, const char *err));
+		void (*on_err)(void *on_err_data, const char *err));
 
 /* set on_log callback */
 void tg_set_on_log(tg_t *tg,
@@ -33,11 +33,21 @@ void tg_set_server_address(tg_t *tg, const char *ip, int port);
 void tg_close(tg_t *tg);
 
 /* return allocated string with error from tl object */
-char * tg_strerr(tl_t *tl);
+char * tg_strerr(const tl_t *tl);
 
 /* send TL query to server and return answer */
 tl_t * tg_send_query(tg_t *tg, buf_t query);
-void tg_send_query2(tg_t *tg, buf_t query,
+
+/* send TL query via queue manager in thread and run
+ * callback on done.
+ * set callback return to non-null to resend query
+ * when transfer big data as chunks (like upload.getFile)
+ * you need to handle chunk callback, where you set new 
+ * portion of TL query to be send as chunk callback return
+ * value 
+ * you may handle upload/download progress via chunk
+ * callback */
+void tg_queue_manager_send_query(tg_t *tg, buf_t query,
 		void *userdata,
 		int (*callback)(void *userdata, const tl_t *tl),
 		void *chunkp, 

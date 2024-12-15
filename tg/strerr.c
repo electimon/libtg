@@ -2,7 +2,7 @@
 #include <string.h>
 
 char *
-tg_strerr(tl_t *tl)
+tg_strerr(const tl_t *tl)
 {
 	if (tl == NULL)
 		return strdup("OBJECT_IS_NULL");

@@ -19,9 +19,11 @@ struct tg_ {
 	int sockfd;
 	bool net;
 	list_t *queue;
+	int queue_sockfd;
 	bool queue_lock;
+	bool queue_manager;
 	void *on_err_data;
-	void (*on_err)(void *on_err_data, tl_t *tl, const char *err);
+	void (*on_err)(void *on_err_data, const char *err);
 	void *on_log_data;
 	void (*on_log)(void *on_log_data, const char *msg);
 	int seqn;
@@ -78,11 +80,11 @@ tl_t * tg_send_query_(tg_t *tg, buf_t s, bool encrypt);
 tl_t * tg_send_query_to_net(
 		tg_t *tg, buf_t query, bool enc, int sockfd);
 
-#define ON_ERR(tg, tl, ...)\
+#define ON_ERR(tg, ...)\
 	({if (tg->on_err){ \
 		struct str _s; str_init(&_s); str_appendf(&_s, __VA_ARGS__);\
 		if (!strstr(_s.str, "duplicate column name:")) \
-			tg->on_err(tg->on_err_data, tl, _s.str); \
+			tg->on_err(tg->on_err_data, _s.str); \
 		free(_s.str);\
 	 }\
 	})
