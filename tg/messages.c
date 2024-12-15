@@ -737,3 +737,52 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 	free(s.str);
 	return 0;
 }
+
+tg_message_t *tg_message_get(tg_t *tg, uint32_t msg_id){
+	InputMessage im = tl_inputMessageID(msg_id);
+	buf_t messages_getMessages = 
+		tl_messages_getMessages(&im, 1); 
+	
+	tl_t *tl = tg_send_query(tg, messages_getMessages);
+	if (tl && tl->_id == id_messages_messages){
+		tg_message_t *tgm = 
+			NEW(tg_message_t, 
+					ON_ERR(tg, "%s: can't allocate memory", __func__);
+					return NULL;);
+		tl_messages_messages_t *mm = 
+			(tl_messages_messages_t *)tl;
+		int i;
+		for (i = 0; i < mm->messages_len; ++i) {
+			// handle messages
+			if (!mm->messages_[i])
+				continue;
+
+			tl_message_t *m = (tl_message_t *)mm->messages_[i];	
+			tg_message_from_tl(tg, tgm, m);
+			tg_message_to_database(tg, tgm);
+			// free tl
+			break;
+		}
+
+		for (i = 0; i < mm->users_len; ++i) {
+			// hanlde users
+			/* TODO:  <16-12-24, yourname> */	
+		}
+
+		for (i = 0; i < mm->chats_len; ++i) {
+			// handle chats
+			/* TODO:  <16-12-24, yourname> */	
+		}
+
+		return tgm;
+	}
+
+	// throw error
+	char *err = tg_strerr(tl); 
+	ON_ERR(tg, "%s", err);
+	free(err);
+	// free tl
+	/* TODO:  <29-11-24, yourname> */
+
+	return NULL;
+}

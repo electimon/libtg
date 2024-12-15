@@ -193,7 +193,7 @@ tl_t * tg_send_query_to_net(
 tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 {
 	if (!tg->net){
-		tg->sockfd = tg_net_open(tg);
+		tg->sockfd = tg_net_open_port(tg, 80);
 		tg->net = true;
 	}
 	return tg_send_query_to_net(tg, query, enc, tg->sockfd);
