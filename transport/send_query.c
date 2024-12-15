@@ -199,6 +199,8 @@ tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 	// close socket
 	tg_net_close(tg, tg->sockfd);
 	tg->net = false;
+
+	return tl;
 }
 
 tl_t * tg_send_query(tg_t *tg, buf_t s)
