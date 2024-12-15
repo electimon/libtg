@@ -52,5 +52,12 @@ char *tg_get_peer_photo_file(tg_t *tg,
 		bool big_photo,
 		uint64_t photo_id);
 
+void tg_get_peer_photo_file2(tg_t *tg, 
+		tg_peer_t *peer, 
+		bool big_photo,
+		uint64_t photo_id, 
+		void *userdata,
+		int (*callback)(void *userdata, char *photo));
+
 
 #endif /* ifndef TG_FILES_H */

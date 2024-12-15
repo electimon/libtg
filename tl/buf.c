@@ -48,13 +48,18 @@ char * tl_log_hex(unsigned char * a, uint32_t s)
 	return str.str;
 }
 
-void buf_init(buf_t *buf)
+int buf_init(buf_t *buf)
 {
 	buf->aptr = malloc(BUFSIZ + 1); 
+	if (!buf->aptr){
+		perror("malloc");
+		return 1;
+	}
 	buf->asize = BUFSIZ;
 	buf->size = 0;
 	buf->data = buf->aptr;
 	memset(buf->aptr, 0, buf->asize + 1);
+	return 0;
 }
 
 buf_t buf_new(){
@@ -63,19 +68,22 @@ buf_t buf_new(){
 	return b;
 }
 
-void buf_realloc(buf_t *buf, uint32_t size)
+int buf_realloc(buf_t *buf, uint32_t size)
 {
 	long offset = (void *)buf->data - buf->aptr;
 	if (size > buf->asize){
 		void *ptr = realloc(buf->data, size + 1);
-		if (ptr){
-			buf->aptr = ptr;
-			buf->data = buf->aptr + offset;
-			memset(&buf->aptr[buf->asize], 0,
-				 	size - buf->asize + 1);
-			buf->asize = size;
+		if (!ptr){
+			perror("realloc");
+			return 1;
 		}
+		buf->aptr = ptr;
+		buf->data = buf->aptr + offset;
+		memset(&buf->aptr[buf->asize], 0,
+				size - buf->asize + 1);
+		buf->asize = size;
 	}
+	return 0;
 }
 
 buf_t buf_add(uint8_t *data, uint32_t size)

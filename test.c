@@ -24,6 +24,8 @@
 #include "api_id.h"
 #include "tl/tl.h"
 #include "transport/net.h"
+#include "transport/queue.h"
+#include "transport/transport.h"
 
 char * callback(
 			void *userdata,
@@ -124,36 +126,6 @@ void on_log(void *d, const char *msg){
 	printf("%s\n", msg);
 }
 
-int dialogs_callback(void *data, const tg_dialog_t *d)
-{
-	tg_t *tg = data;
-	printf("%lld: %lld\n", d->peer_id, d->photo_id);
-	//tg_dialog_t *dialog = data;
-	//dialog->name = strdup(d->name);
-	//dialog->peer_id = d->peer_id;
-	//dialog->peer_type = d->peer_type;
-	//dialog->access_hash = d->access_hash;
-	//dialog->photo_id = d->photo_id;
-	
-	tg_peer_t peer = {
-				.type = d->peer_type,
-				.id =  d->peer_id,
-				.access_hash = d->access_hash,
-	};
-	char *photo = tg_get_peer_photo_file(
-			tg,
-			&peer, 
-			false, 
-			d->photo_id);
-
-	if (photo)
-		printf("PHOTO OK\n");
-	else
-		printf("PHOTO ERR\n");
-
-	return 0;
-}
-
 int messages_callback(void *data, const tg_message_t *m)
 {
 	printf("%d: %s\n", m->id_, m->message_);
@@ -183,6 +155,58 @@ void on_done (void *d){
 	printf("ON_DONE!\n");
 }
 
+int query_cb(void *d, const tl_t *tl){
+	if (!tl){
+		printf("got nothing\n");
+		return 0;
+	}
+
+	if (tl && tl->_id == id_user){
+		tl_user_t *user = (tl_user_t *)tl;
+		printf("USERNAME: %s\n", user->last_name_.data);
+	}
+		
+	return 0;
+}
+
+int photo_callback2(void *data, char *photo)
+{
+	if (photo)
+		printf("PHOTO OK\n");
+	else
+		printf("PHOTO ERR\n");
+
+	return 0;
+}
+
+int dialogs_callback(void *data, const tg_dialog_t *d)
+{
+	tg_t *tg = data;
+	printf("%lld: %lld\n", d->peer_id, d->photo_id);
+	//tg_dialog_t *dialog = data;
+	//dialog->name = strdup(d->name);
+	//dialog->peer_id = d->peer_id;
+	//dialog->peer_type = d->peer_type;
+	//dialog->access_hash = d->access_hash;
+	//dialog->photo_id = d->photo_id;
+	
+	tg_peer_t peer = {
+				.type = d->peer_type,
+				.id =  d->peer_id,
+				.access_hash = d->access_hash,
+	};
+	tg_get_peer_photo_file2(
+			tg,
+			&peer, 
+			false, 
+			d->photo_id,
+			NULL, 
+			photo_callback2);
+
+		return 0;
+}
+
+
 int main(int argc, char *argv[])
 {
 	int SETUP_API_ID(apiId)
@@ -197,8 +221,28 @@ int main(int argc, char *argv[])
 	if (tg_connect(tg, NULL, callback))
 		return 1;	
 	
-	//tg_set_on_log  (tg, NULL, on_log);
+	tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
+
+	tg_net_close(tg, tg->sockfd);
+
+	// start daemon
+	tg_socket_daemon(tg);
+
+	InputUser iuser = tl_inputUserSelf();
+		buf_t getUsers = 
+			tl_users_getUsers(&iuser, 1);	
+
+	tg_send_query2(tg, getUsers, NULL, query_cb, NULL, NULL);
+
+	//buf_t h = tg_header(tg, getUsers, true);
+	//buf_t e = tg_encrypt(tg, h, true);
+	//buf_t t = tg_transport(tg, e);
+		
+	//tg_net_add_query(tg, t, 0, 
+			//NULL, NULL, 
+			//NULL, NULL);
+
 
 	//tg_sync_dialogs_to_database(
 			//tg,
@@ -206,9 +250,9 @@ int main(int argc, char *argv[])
 			//NULL, 
 			//on_done);
 
-	//tg_dialog_t d;
-	//tg_get_dialogs_from_database(tg, &d, 
-			//dialogs_callback);
+	tg_dialog_t d;
+	tg_get_dialogs_from_database(tg, &d, 
+			dialogs_callback);
 
 	//tg_get_dialogs(tg, 1,
 			 //time(NULL),
@@ -283,8 +327,8 @@ int main(int argc, char *argv[])
 
 	//tg_sync_dialogs_to_database(tg,  10, time(NULL), NULL, on_done);
 
-	tg_get_dialogs_from_database(tg, tg, 
-			dialogs_callback);
+	//tg_get_dialogs_from_database(tg, tg, 
+			//dialogs_callback);
 	
 	//buf_t peer_ = tg_inputPeer(peer);
 	// download photo

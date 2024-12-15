@@ -2,7 +2,7 @@
  * File              : buf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 13.12.2024
+ * Last Modified Date: 15.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef TL_BUF_H
@@ -19,8 +19,8 @@ typedef	struct buf_ {
 } buf_t;
 
 extern buf_t    buf_new();
-extern void     buf_init(buf_t *buf);
-extern void     buf_realloc(buf_t *buf, uint32_t size);
+extern int      buf_init(buf_t *buf);
+extern int      buf_realloc(buf_t *buf, uint32_t size);
 extern buf_t    buf_add(uint8_t *data, uint32_t size);
 extern buf_t    buf_add_buf(buf_t);
 extern buf_t    buf_add_bufs(int n, ...);

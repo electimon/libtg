@@ -204,6 +204,99 @@ void tg_get_file(
 	/* TODO:  <29-11-24, yourname> */
 }	
 
+struct tg_get_file_t{
+	tg_t *tg;
+	uint32_t limit;
+	uint64_t offset;
+	InputFileLocation *location;
+	void *data;
+	int (*callback)(void *data, const tg_file_t *file);
+	void *progressp;
+	void (*progress)(void *progressp, int down, int total);
+};
+
+int tg_get_file2_cb(void *userdata, const tl_t *tl){
+
+	return 0;
+}
+
+buf_t tg_get_file2_chunk(void *chunkp, uint32_t received, uint32_t total)
+{
+	struct tg_get_file_t *s = chunkp;
+	
+	buf_t getFile = tl_upload_getFile(
+					NULL, 
+					NULL, 
+					s->location, 
+					received, 
+					s->limit);
+		
+	buf_t t = tg_serialize_query(s->tg, getFile, true);	
+	buf_free(getFile);
+
+	return t;
+}
+
+void tg_get_file2(
+		tg_t *tg, 
+		InputFileLocation *location,
+	  void *data,
+	  int (*callback)(void *data, const tg_file_t *file),
+		void *progressp,
+		void (*progress)(void *progressp, int down, int total))	
+{
+	/* If precise flag is not specified, then
+
+		• The parameter offset must be divisible by 4 KB.
+		• The parameter limit must be divisible by 4 KB.
+		• 1048576 (1 MB) must be divisible by limit.
+
+		 If precise is specified, then
+
+		• The parameter offset must be divisible by 1 KB.
+		• The parameter limit must be divisible by 1 KB.
+		• limit must not exceed 1048576 (1 MB).
+	 */
+
+	/* In any case the requested part should be within 
+	 * one 1 MB chunk from the beginning of the file, i. e.
+   • offset / (1024 * 1024) == (offset + limit - 1) / (1024 * 1024).
+	 */
+
+	struct tg_get_file_t *s = 
+		NEW(struct tg_get_file_t, 
+				ON_ERR(tg, NULL, "%s: can't allocate memory", __func__);
+				return);
+
+	s->tg = tg;
+	s->limit  = 1048576;
+	s->offset = 0;
+	s->location = location;
+	s->data = data;
+	s->callback = callback;
+	s->progressp = progressp;
+	s->progress = progress;
+
+	tl_t *tl = NULL;
+	
+	// download parts of file
+	buf_t getFile = tl_upload_getFile(
+			NULL, 
+			NULL, 
+			location, 
+			s->offset, 
+			s->limit);
+		
+	// net send
+	tg_send_query2(
+			tg, 
+			getFile,
+			s,
+			tg_get_file2_cb,
+			s, 
+			tg_get_file2_chunk);
+}
+
 static int get_photo_callback(void *d, const tg_file_t *p)
 {
 	fprintf(stderr, "%s\n", __func__);
@@ -284,4 +377,70 @@ char *tg_get_peer_photo_file(tg_t *tg,
 				 tg, peer->id, photo_id, photo);
 	 
 	 return photo;
+}
+
+struct photo2_t {
+	tg_t *tg;
+	bool big_photo;
+	uint64_t peer_id; 
+	uint64_t photo_id; 
+	void *userdata;
+	int (*callback)(void *userdata, char *photo);
+};
+
+static int get_photo_callback2(void *d, const tg_file_t *p)
+{
+	struct photo2_t *s = d;
+	if (p && !s->big_photo)
+		 peer_photo_to_database(
+				 s->tg, s->peer_id,
+				 s->photo_id, p->bytes_);
+	if (p && s->callback)
+		s->callback(s->userdata, p->bytes_);
+
+	return 0;
+}
+
+void tg_get_peer_photo_file2(tg_t *tg, 
+		tg_peer_t *peer, 
+		bool big_photo,
+		uint64_t photo_id, 
+		void *userdata,
+		int (*callback)(void *userdata, char *photo))
+{
+	fprintf(stderr, "%s\n", __func__);
+	char *photo = NULL;
+	if (!big_photo){
+		photo = peer_photo_file_from_database(
+				tg, peer->id, photo_id);
+		if (photo){
+			if (callback)
+				callback(userdata, photo);
+			return;
+		}
+	}
+	buf_t peer_ = tg_inputPeer(*peer);
+	InputFileLocation location = 
+		tl_inputPeerPhotoFileLocation(
+				true, 
+				&peer_, 
+				photo_id);
+	buf_free(peer_);
+
+
+	struct photo2_t *s = NEW(struct photo2_t, return);
+	s->tg = tg;
+	s->big_photo = big_photo;
+	s->peer_id = peer->id;
+	s->photo_id = photo_id;
+	s->userdata = userdata;
+	s->callback = callback;
+
+	tg_get_file(
+			tg, 
+			&location, 
+			s, 
+			get_photo_callback2, 
+			NULL, 
+			NULL);
 }

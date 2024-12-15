@@ -6,6 +6,7 @@
 #include <string.h>
 #include "../libtg.h"
 #include "../tl/str.h"
+#include "list.h"
 
 struct tg_ {
 	int id;
@@ -17,6 +18,8 @@ struct tg_ {
 	int port;
 	int sockfd;
 	bool net;
+	list_t *queue;
+	bool queue_lock;
 	void *on_err_data;
 	void (*on_err)(void *on_err_data, tl_t *tl, const char *err);
 	void *on_log_data;

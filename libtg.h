@@ -36,7 +36,12 @@ void tg_close(tg_t *tg);
 char * tg_strerr(tl_t *tl);
 
 /* send TL query to server and return answer */
-tl_t *tg_send_query(tg_t *tg, buf_t query);
+tl_t * tg_send_query(tg_t *tg, buf_t query);
+void tg_send_query2(tg_t *tg, buf_t query,
+		void *userdata,
+		int (*callback)(void *userdata, const tl_t *tl),
+		void *chunkp, 
+		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total));
 
 /* return true if has auth key */
 bool tg_has_auth_key(tg_t *tg); 
