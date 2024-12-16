@@ -181,7 +181,8 @@ int photo_callback2(void *data, char *photo)
 
 int dialogs_callback(void *data, const tg_dialog_t *d)
 {
-	tg_t *tg = data;
+	printf("DIALOG: %s\n", d->name);
+	/*tg_t *tg = data;*/
 	//printf("%lld: %lld\n", d->peer_id, d->photo_id);
 	//tg_dialog_t *dialog = data;
 	//dialog->name = strdup(d->name);
@@ -190,14 +191,14 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 	//dialog->access_hash = d->access_hash;
 	//dialog->photo_id = d->photo_id;
 	
-	tg_message_t *msg = 
-		tg_message_get(tg, d->top_message_id);
+	/*tg_message_t *msg = */
+		/*tg_message_get(tg, d->top_message_id);*/
 
-	if (msg){
-		printf("GOT MESSAGE\n");
-	} else {
-		printf("NO MESSAGE\n");
-	}
+	/*if (msg){*/
+		/*printf("GOT MESSAGE\n");*/
+	/*} else {*/
+		/*printf("NO MESSAGE\n");*/
+	/*}*/
 	
 	//tg_peer_t peer = {
 				//.type = d->peer_type,
@@ -249,12 +250,12 @@ int main(int argc, char *argv[])
 		-5244509236001112417,
 	};
 
-	tg_get_peer_photo_file(
-			tg, 
-			&peer, 
-			true, 
-			5379844007854718198, 
-			NULL, photo_callback2);
+	/*tg_get_peer_photo_file(*/
+			/*tg, */
+			/*&peer, */
+			/*true, */
+			/*5379844007854718198, */
+			/*NULL, photo_callback2);*/
 
 	
 	//buf_t h = tg_header(tg, getUsers, true);
@@ -273,13 +274,13 @@ int main(int argc, char *argv[])
 			//on_done);
 
 	//tg_dialog_t d;
-	tg_get_dialogs_from_database(tg, tg, 
-			dialogs_callback);
+	/*tg_get_dialogs_from_database(tg, tg, */
+			/*dialogs_callback);*/
 
-	//tg_get_dialogs(tg, 1,
-			 //time(NULL),
-			 //NULL, NULL,
-			 //&d, dialogs_callback);
+	tg_get_dialogs(tg, 40,
+			 time(NULL),
+			 NULL, NULL,
+			 NULL, dialogs_callback);
 
 	//printf("NAME: %s\n", d.name);
 	//printf("PEER ID: %.16lx\n", d.peer_id);

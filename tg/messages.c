@@ -536,7 +536,7 @@ static int _sync_messages_update_message(
 	return 0;
 }
 
-static void create_table(tg_t *tg){
+void tg_messages_create_table(tg_t *tg){
 	char sql[BUFSIZ]; 
 	
 	#define TG_MESSAGE_ARG(t, n, type, name) \
@@ -583,9 +583,6 @@ void tg_sync_messages_to_database(
 		int limit,
 		void *userdata, void (*on_done)(void *userdata))
 {
-	// create table
-	create_table(tg);
-
 	uint64_t hash = 0;
   //uint64_t hash = messages_hash_from_database(tg, peer.id);
   	struct _sync_messages_update_message_t d = {

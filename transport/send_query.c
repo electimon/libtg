@@ -88,7 +88,15 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 				char *err = tg_strerr(tl);
 				ON_ERR(tg, "%s", err);
 				free(err);
-				return tl;
+				return NULL;
+			}
+			break;
+		case id_rpc_error:
+			{
+				char *err = tg_strerr(tl);
+				ON_ERR(tg, "%s", err);
+				free(err);
+				return NULL;
 			}
 			break;
 
@@ -245,7 +253,10 @@ int tg_send_query2_on_done(void *p, const buf_t r){
 	//buf_free(d);
 
 	tl_t *tl = tg_handle_serialized_message(s->tg, msg);
-	if (tl && tl->_id == id_bad_server_salt) {
+	if (!tl)
+		return 0;
+
+	if (tl->_id == id_bad_server_salt) {
 		// resend message
 		tg_queue_manager_send_query(s->tg, s->query,
 			 	s->userdata, s->callback,
@@ -253,7 +264,7 @@ int tg_send_query2_on_done(void *p, const buf_t r){
 		return 0;
 	}
 	
-	if (tl && tl->_id == id_msgs_ack) {
+	if (tl->_id == id_msgs_ack) {
 		// get one more message
 		return 1;
 	}
@@ -265,7 +276,7 @@ int tg_send_query2_on_done(void *p, const buf_t r){
 		ON_ERR(s->tg, "%s: can't deserialize message", __func__); 
 	}
 
-	if (tl && tl->_id == id_vector) {
+	if (tl->_id == id_vector) {
 		tl_vector_t *vector = (tl_vector_t *)tl;
 		int i;
 		for (i = 0; i < vector->len_; ++i) {

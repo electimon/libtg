@@ -96,6 +96,7 @@ void tg_message_from_tl(
 void tg_message_from_database(
 		tg_t*, tg_message_t*, uint32_t msg_id);
 
+void tg_messages_create_table(tg_t *tg);
 int tg_message_to_database(tg_t *tg, const tg_message_t *m);
 
 tg_message_t *tg_message_get(tg_t *tg, uint32_t msg_id);

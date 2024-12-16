@@ -1,3 +1,4 @@
+#include "messages.h"
 #include "tg.h"
 #include "../tl/str.h"
 #include <stdint.h>
@@ -111,6 +112,10 @@ int database_init(tg_t *tg, const char *database_path)
 		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE); ";
 
 	tg_sqlite3_exec(tg, sql);
+
+	//
+	tg_messages_create_table(tg);
+	
 
 	return 0;
 }

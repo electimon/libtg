@@ -41,7 +41,7 @@ typedef struct tg_dialog_ {
  * set folder_id NULL to get all folders, pointer to 0 for 
  * non-hidden dialogs, pointer to 1 for hidden dialogs 
  * return number of dialogs*/ 
-int tg_get_dialogs(
+void tg_get_dialogs(
 		tg_t *tg, 
 		int limit,
 		time_t date, 

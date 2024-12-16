@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 15.12.2024
+ * Last Modified Date: 16.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -183,10 +183,12 @@ buf_t tg_net_receive2(tg_t *tg, void *chunkp,
 				// receive more data
 				continue;
 			}
-			// handle error
-			ON_ERR(tg, "%s: expected size: %d, but received: %d", 
-					__func__, len, received);
-			return buf;
+			
+			ON_LOG(tg, "%s: expected size: %d, received: %d (%d%%)", 
+					__func__, len, received, received*100/len);
+			
+			// receive more data
+			continue;
 		}
 		break;
 	}
