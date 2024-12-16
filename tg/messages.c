@@ -90,11 +90,12 @@ void tg_message_from_database(
 void tg_message_from_tl(
 		tg_t *tg, tg_message_t *tgm, tl_message_t *tlm)
 {
+	ON_LOG(tg, "%s: start...", __func__);
 	memset(tgm, 0, sizeof(tg_message_t));
 	#define TG_MESSAGE_ARG(t, arg, ...) \
 		tgm->arg = tlm->arg;
 	#define TG_MESSAGE_STR(t, arg, ...) \
-	if (tlm->arg.size > 0)\
+	if (tlm->arg.data && tlm->arg.size > 0)\
 		tgm->arg = strndup((char*)tlm->arg.data, tlm->arg.size);
 	#define TG_MESSAGE_PER(t, arg, ...) \
 	if (tlm->arg){\
@@ -739,6 +740,9 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 }
 
 tg_message_t *tg_message_get(tg_t *tg, uint32_t msg_id){
+	ON_LOG(tg, "%s: start...", __func__);
+	ON_ERR(tg, "%s: not working function", __func__);
+	return NULL;
 	InputMessage im = tl_inputMessageID(msg_id);
 	buf_t messages_getMessages = 
 		tl_messages_getMessages(&im, 1); 

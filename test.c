@@ -182,7 +182,7 @@ int photo_callback2(void *data, char *photo)
 int dialogs_callback(void *data, const tg_dialog_t *d)
 {
 	tg_t *tg = data;
-	printf("%lld: %lld\n", d->peer_id, d->photo_id);
+	//printf("%lld: %lld\n", d->peer_id, d->photo_id);
 	//tg_dialog_t *dialog = data;
 	//dialog->name = strdup(d->name);
 	//dialog->peer_id = d->peer_id;
@@ -190,18 +190,27 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 	//dialog->access_hash = d->access_hash;
 	//dialog->photo_id = d->photo_id;
 	
-	tg_peer_t peer = {
-				.type = d->peer_type,
-				.id =  d->peer_id,
-				.access_hash = d->access_hash,
-	};
-	tg_get_peer_photo_file(
-			tg,
-			&peer, 
-			false, 
-			d->photo_id,
-			NULL, 
-			photo_callback2);
+	tg_message_t *msg = 
+		tg_message_get(tg, d->top_message_id);
+
+	if (msg){
+		printf("GOT MESSAGE\n");
+	} else {
+		printf("NO MESSAGE\n");
+	}
+	
+	//tg_peer_t peer = {
+				//.type = d->peer_type,
+				//.id =  d->peer_id,
+				//.access_hash = d->access_hash,
+	//};
+	//tg_get_peer_photo_file(
+			//tg,
+			//&peer, 
+			//false, 
+			//d->photo_id,
+			//NULL, 
+			//photo_callback2);
 
 		return 0;
 }
@@ -263,9 +272,9 @@ int main(int argc, char *argv[])
 			//NULL, 
 			//on_done);
 
-	/*tg_dialog_t d;*/
-	/*tg_get_dialogs_from_database(tg, &d, */
-			/*dialogs_callback);*/
+	//tg_dialog_t d;
+	tg_get_dialogs_from_database(tg, tg, 
+			dialogs_callback);
 
 	//tg_get_dialogs(tg, 1,
 			 //time(NULL),
