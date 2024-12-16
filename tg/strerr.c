@@ -36,7 +36,12 @@ tg_strerr(const tl_t *tl)
 			break;
 		
 		default:
-			str = strdup("UNKNOWN_ERROR");
+			{
+				char err[256];
+				sprintf(err, "UMANAGED TL: tl_%s_t (%.8x)",
+						TL_NAME_FROM_ID(tl->_id), tl->_id);
+				str = strdup(err);
+			}
 			break;
 	}
 	return str;
