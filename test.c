@@ -129,12 +129,24 @@ void on_log(void *d, const char *msg){
 int messages_callback(void *data, const tg_message_t *m)
 {
 	printf("%d: %s\n", m->id_, m->message_);
-	if (m->photo_id){
-		printf("HAS PHOTO!\n");
-		tg_message_t *msg = data;
-		*msg = *m;
-		return 1;
-	}
+	//if (m->photo_id){
+		//printf("HAS PHOTO!\n");
+		//tg_message_t *msg = data;
+		//*msg = *m;
+		//return 1;
+	//}
+	return 0;
+}
+
+int messages_callback2(void *data, int c, const tg_message_t *m)
+{
+	printf("%d: %s\n", m->id_, m->message_);
+	//if (m->photo_id){
+		//printf("HAS PHOTO!\n");
+		//tg_message_t *msg = data;
+		//*msg = *m;
+		//return 1;
+	//}
 	return 0;
 }
 
@@ -294,12 +306,12 @@ int main(int argc, char *argv[])
 			//d.photo_id);
 	//printf("IMAGE: %s\n", image);
 
-	//tg_message_t m;
-	//tg_get_messages_from_database(
-			//tg, 
-			//peer, 
-			//&m, 
-			//messages_callback);
+	tg_message_t m;
+	tg_get_messages_from_database(
+			tg, 
+			peer, 
+			&m, 
+			messages_callback);
 
 	//char *image = tg_get_photo_file(
 			//tg, 
@@ -319,19 +331,19 @@ int main(int argc, char *argv[])
 	//tg_async_dialogs_to_database(tg, 40);
 	//sleep(10);
 	
-	/*tg_message_t m;*/
-	/*tg_messages_getHistory(*/
-			/*tg,*/
-			 /*&peer, */
-			/*0, */
-			/*time(NULL), */
-			/*0, */
-			/*20, */
-			/*0, */
-			/*0, */
-			/*NULL, */
-			/*&m, */
-			/*messages_callback);*/
+	//tg_message_t m;
+	tg_messages_getHistory(
+			tg,
+			peer, 
+			0, 
+			time(NULL), 
+			0, 
+			20, 
+			0, 
+			0, 
+			NULL, 
+			NULL, 
+			messages_callback2);
 
 	/*printf("MESSAGE: %s\n", m.message_);*/
 	/*printf("file reference: %s\n", m.photo_file_reference);*/

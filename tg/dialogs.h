@@ -35,12 +35,18 @@ typedef struct tg_dialog_ {
 	#undef TG_DIALOG_STR
 } tg_dialog_t;
 
+/* used by tg init to create database table */
+void tg_dialogs_create_table(tg_t *tg);
+
+/* saves dialog in database */
+int tg_dialog_to_database(tg_t *tg, const tg_dialog_t *d);
+
 /* get %limit number of dialogs older then %date and
  * %top_msg_id, callback dialogs array and update messages
  * %hash (if not NULL) 
  * set folder_id NULL to get all folders, pointer to 0 for 
  * non-hidden dialogs, pointer to 1 for hidden dialogs 
- * return number of dialogs*/ 
+ * all loaded dialogs saves to database */ 
 void tg_get_dialogs(
 		tg_t *tg, 
 		int limit,
@@ -50,14 +56,6 @@ void tg_get_dialogs(
 		void *data,
 		int (*callback)(void *data, 
 			const tg_dialog_t *dialog));
-
-/* load dialogs to database - set limit to 0 to load all */
-void tg_sync_dialogs_to_database(tg_t *tg, int limit, int date,
-		void *userdata, void (*on_done)(void *userdata));
-
-/* load all dialogs to database in thread */
-void tg_async_dialogs_to_database(tg_t *tg,
-		void *userdata, void (*on_done)(void *userdata));
 
 int tg_get_dialogs_from_database(tg_t *tg, void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));

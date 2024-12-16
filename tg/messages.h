@@ -92,16 +92,20 @@ typedef struct tg_message_ {
 void tg_message_from_tl(
 		tg_t*, tg_message_t*, tl_message_t*);
 
-/* get message from database */
-void tg_message_from_database(
-		tg_t*, tg_message_t*, uint32_t msg_id);
-
+/* used by tg int functions */
 void tg_messages_create_table(tg_t *tg);
+
+/* add/update message to database, return non-null on error */
 int tg_message_to_database(tg_t *tg, const tg_message_t *m);
 
-tg_message_t *tg_message_get(tg_t *tg, uint32_t msg_id);
-
-int tg_messages_getHistory(
+/* upload messages and save them in local database
+ * use peer, offset_id, offset_date, add_offset for
+ * pagination
+ * you may use dialogs_hash_from_database() and add hash
+ * as argument to function for skipping not-midified
+ * dialogs 
+ * return non-null in callback to stop function execution */ 
+void tg_messages_getHistory(
 		tg_t *tg,
 		tg_peer_t peer,
 		int offset_id,
@@ -111,27 +115,17 @@ int tg_messages_getHistory(
 		int max_id,
 		int min_id,
 		uint64_t *hash,
-		void *data,
-		int (*callback)(void *data, const tg_message_t *message));
+		void *userdata,
+		int (*callback)(void *data, int msgsc, const tg_message_t *msg));
 
-void tg_sync_messages_to_database(
-		tg_t *tg,
-		tg_peer_t peer,
-		int offset,
-		int limit,
-		void *userdata, void (*on_done)(void *userdata));
-
-void tg_async_messages_to_database(
-		tg_t *tg,
-		tg_peer_t peer,
-		int offset,
-		int limit,
-		void *userdata, void (*on_done)(void *userdata));
-
-
+/* get messeges from database, return number of messages
+ * return non-null in callback to stop function execution */ 
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		int (*callback)(void *data, const tg_message_t *message));
 
-int tg_send_message(tg_t *tg, tg_peer_t peer, const char *message);
+/* send text message and update local database */
+void tg_send_message(tg_t *tg, tg_peer_t peer, 
+		const char *message, void *userdata, 
+		void (*on_done)(void *userdata, bool out));
 
 #endif /* ifndef TG_MESSAGES_H */		

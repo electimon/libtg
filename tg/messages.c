@@ -1,4 +1,5 @@
 #include "messages.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
@@ -18,80 +19,12 @@
     #error "Environment not 32 or 64-bit."
 #endif
 
-
-void tg_message_from_database(
-		tg_t *tg, tg_message_t *m, uint32_t msg_id)
-{
-	if (!m){
-		ON_ERR(tg, "TG_MESSAGE IS NULL");
-		return;
-	}
-	memset(m, 0, sizeof(tg_message_t));
-
-	struct str s;
-	str_init(&s);
-	str_appendf(&s, "SELECT ");
-	
-	#define TG_MESSAGE_ARG(t, n, type, name) \
-		str_appendf(&s, name ", ");
-	#define TG_MESSAGE_STR(t, n, type, name) \
-		str_appendf(&s, name ", ");
-	#define TG_MESSAGE_PER(t, n, type, name) \
-		str_appendf(&s, name ", type_%s, ", name);
-	#define TG_MESSAGE_SPA(t, n, type, name) \
-		str_appendf(&s, name ", ");
-	#define TG_MESSAGE_SPS(t, n, type, name) \
-		str_appendf(&s, name ", ");
-	TG_MESSAGE_ARGS
-	#undef TG_MESSAGE_ARG
-	#undef TG_MESSAGE_STR
-	#undef TG_MESSAGE_PER
-	#undef TG_MESSAGE_SPA
-	#undef TG_MESSAGE_SPS
-	
-	str_appendf(&s, 
-			"id FROM messages WHERE msg_id = %d AND id = %d;"
-			, msg_id, tg->id);
-		
-	tg_sqlite3_for_each(tg, s.str, stmt){
-		int col = 0;
-		#define TG_MESSAGE_ARG(t, n, type, name) \
-			m->n = sqlite3_column_int64(stmt, col++);
-		#define TG_MESSAGE_STR(t, n, type, name) \
-			if (sqlite3_column_bytes(stmt, col) > 0){ \
-				m->n = strndup(\
-					(char *)sqlite3_column_text(stmt, col),\
-					sqlite3_column_bytes(stmt, col));\
-			}\
-			col++;
-		#define TG_MESSAGE_PER(t, n, type, name) \
-			m->n = sqlite3_column_int64(stmt, col); \
-			m->type_##n = sqlite3_column_int64(stmt, col); \
-			col++; col++;
-		#define TG_MESSAGE_SPA(t, n, type, name) \
-			m->n = sqlite3_column_int64(stmt, col++);
-		#define TG_MESSAGE_SPS(t, n, type, name) \
-			if (sqlite3_column_bytes(stmt, col) > 0){ \
-				m->n = strndup(\
-					(char *)sqlite3_column_text(stmt, col),\
-					sqlite3_column_bytes(stmt, col));\
-			}\
-			col++;
-		
-		TG_MESSAGE_ARGS
-		#undef TG_MESSAGE_ARG
-		#undef TG_MESSAGE_STR
-		#undef TG_MESSAGE_PER
-		#undef TG_MESSAGE_SPA
-		#undef TG_MESSAGE_SPS
-	}
-}
-
 void tg_message_from_tl(
 		tg_t *tg, tg_message_t *tgm, tl_message_t *tlm)
 {
 	ON_LOG(tg, "%s: start...", __func__);
 	memset(tgm, 0, sizeof(tg_message_t));
+	
 	#define TG_MESSAGE_ARG(t, arg, ...) \
 		tgm->arg = tlm->arg;
 	#define TG_MESSAGE_STR(t, arg, ...) \
@@ -282,36 +215,117 @@ void tg_message_from_tl(
 	}
 }
 
-static void parse_msg(
-		int *c, tg_t *tg, tg_message_t *tgm, void *tlm_)
-{
-	printf("%s\n",__func__);
-	tg_message_from_tl(tg, tgm, tlm_);
-	*c += 1;
-}
-
 static void parse_msgs(
-		tg_t *tg, int *c, 
+		tg_t *tg, uint64_t peer_id, int *c, 
 		int argc, tl_t **argv,
 		void *data,
-		int (*callback)(void *data, 
-			const tg_message_t *message))
+		int (*callback)(void *, int, const tg_message_t*))
 {
-	printf("%s\n",__func__);
 	int i;
 	for (i = 0; i < argc; ++i) {
 		if (!argv[i] || argv[i]->_id != id_message)
 			continue;
 				
 		tg_message_t m;
-		parse_msg(c, tg, &m, argv[i]);
+		tg_message_from_tl(tg, &m, (tl_message_t *)argv[i]);
+		
+		// save message to database
+		if (tg_message_to_database(tg, &m) == 0){
+			// update hash
+			uint64_t hash = 
+				messages_hash_from_database(tg, peer_id);
+			update_hash(&hash, m.id_);
+			messages_hash_to_database(tg, peer_id, hash);
+		}
+
+		// callback
 		if (callback)
-			if (callback(data, &m))
+			if (callback(data, *c, &m))
 				break;
+		
+		// iterate
+		c[0]++;
+		
 	}
 }	
 
-int tg_messages_getHistory(
+struct tg_messages_get_history_t {
+	tg_t *tg;
+	uint64_t peer_id;
+	void *userdata;
+	int (*callback)(void *, int, const tg_message_t *);
+};
+
+static int tg_messages_get_history_cb(void *data, const tl_t *tl)
+{
+	struct tg_messages_get_history_t *s = data; 
+	if (!tl){
+		free(s);
+		return 0;
+	}
+	ON_LOG(s->tg, "%s: recived id: %.8x", __func__, tl->_id);
+
+	int i, k, c = 0;
+
+	switch (tl->_id) {
+		case id_messages_channelMessages:
+			{
+				tl_messages_channelMessages_t *msgs = 
+					(tl_messages_channelMessages_t *)tl;
+				
+				parse_msgs(
+						s->tg, s->peer_id, &c, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						s->userdata, 
+						s->callback);
+
+				goto tg_messeges_get_history_finish;
+			}
+			break;
+			
+		case id_messages_messages:
+			{
+				tl_messages_messages_t *msgs = 
+					(tl_messages_messages_t *)tl;
+				
+				parse_msgs(
+						s->tg, s->peer_id, &c, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						s->userdata, 
+						s->callback);
+
+				goto tg_messeges_get_history_finish;
+			}
+			break;
+			
+		case id_messages_messagesSlice:
+			{
+				tl_messages_messagesSlice_t *msgs = 
+					(tl_messages_messagesSlice_t *)tl;
+				
+				parse_msgs(
+						s->tg, s->peer_id, &c, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						s->userdata, 
+						s->callback);
+
+				goto tg_messeges_get_history_finish;
+			}
+			break;
+			
+		default:
+			break;
+	}
+	
+tg_messeges_get_history_finish:;
+	free(s);
+	return 0;
+}
+
+void tg_messages_getHistory(
 		tg_t *tg,
 		tg_peer_t peer_,
 		int offset_id,
@@ -321,12 +335,9 @@ int tg_messages_getHistory(
 		int max_id,
 		int min_id,
 		uint64_t *hash,
-		void *data,
-		int (*callback)(void *data, 
-			const tg_message_t *message))
+		void *userdata,
+		int (*callback)(void *, int, const tg_message_t *))
 {
-	tl_t *tl = NULL;
-
 	int i, k, c = 0;
 	uint64_t h = 0;
 	if (hash)
@@ -344,83 +355,68 @@ int tg_messages_getHistory(
 				max_id, 
 				min_id, 
 				h);
-
 	buf_free(peer);
 
-	tl = tg_send_query(tg, getHistory); 
-	buf_free(getHistory);
+	struct tg_messages_get_history_t *s = 
+		NEW(struct tg_messages_get_history_t, 
+			ON_ERR(tg, "%s: can't allocate memory", __func__);
+			return);
+	s->tg = tg;
+	s->peer_id = peer_.id;
+	s->userdata = userdata;
+	s->callback = callback;
 
-	ON_LOG(tg, "%s: recived id: %.8x", __func__, tl->_id);
-	if (!tl)
-		goto tg_messeges_get_history_thow_error;
-
-	switch (tl->_id) {
-		case id_messages_channelMessages:
-			{
-				tl_messages_channelMessages_t *msgs = 
-					(tl_messages_channelMessages_t *)tl;
-				
-				parse_msgs(
-						tg, &c, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						data, 
-						callback);
-
-				goto tg_messeges_get_history_finish;
-			}
-			break;
-			
-		case id_messages_messages:
-			{
-				tl_messages_messages_t *msgs = 
-					(tl_messages_messages_t *)tl;
-				
-				parse_msgs(
-						tg, &c, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						data, 
-						callback);
-
-				goto tg_messeges_get_history_finish;
-			}
-			break;
-			
-		case id_messages_messagesSlice:
-			{
-				tl_messages_messagesSlice_t *msgs = 
-					(tl_messages_messagesSlice_t *)tl;
-				
-				parse_msgs(
-						tg, &c, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						data, 
-						callback);
-
-				goto tg_messeges_get_history_finish;
-			}
-			break;
-			
-		default:
-			break;
-	}
-	
-tg_messeges_get_history_thow_error:;
-	// throw error
-	char *err = tg_strerr(tl); 
-	ON_ERR(tg, "%s", err);
-	free(err);
-
-tg_messeges_get_history_finish:;
-	// free tl
-	/* TODO:  <29-11-24, yourname> */
-
-	return c;
+	tg_queue_manager_send_query(
+			tg, getHistory, 
+			s, tg_messages_get_history_cb, 
+			NULL, NULL);
 }
 
-int tg_send_message(tg_t *tg, tg_peer_t peer_, const char *message)
+struct tg_send_message_t {
+	tg_t *tg;
+	void *userdata; 
+	void (*on_done)(void *userdata, bool out);
+};
+
+static int _tg_send_message_cb(void *data, const tl_t *tl)
+{
+	struct tg_send_message_t *s = data;
+	if (!tl){
+		free(s);
+		return 0;
+	}
+	
+	switch (tl->_id) {
+		case id_updatesTooLong: case id_updateShortMessage:
+		case id_updateShortChatMessage: case id_updateShort:
+			/* ???:  <16-12-24, yourname> */
+			break;
+
+		case id_updateShortSentMessage:
+			{
+				tl_updateShortSentMessage_t *usm =
+					(tl_updateShortSentMessage_t *)tl;
+				if (usm->out_){
+					if (s->on_done)
+						s->on_done(s->userdata, true);
+				} else {
+					if (s->on_done)
+						s->on_done(s->userdata, false);
+				}
+			}	
+			break;
+
+		default:
+			break;
+	}	
+
+	free(s);
+	return 0;
+}
+
+void tg_send_message(tg_t *tg, tg_peer_t peer_,
+		const char *message, void *userdata, 
+		void (*on_done)(void *userdata, bool out))
 {
 	buf_t peer = tg_inputPeer(peer_); 
 	buf_t random_id = buf_rand(8);
@@ -446,21 +442,18 @@ int tg_send_message(tg_t *tg, tg_peer_t peer_, const char *message)
 	buf_free(peer);
 	buf_free(random_id);
 
-	tg_send_query(tg, m);
-	buf_free(m);
+	struct tg_send_message_t *s = NEW(struct tg_send_message_t, 
+			ON_ERR(tg, "%s: can't allocate memory", __func__);
+			return);
+	s->tg = tg;
+	s->userdata = userdata;
+	s->on_done = on_done;
 
-	return 0;
+	tg_queue_manager_send_query(
+			tg, m, 
+			s, _tg_send_message_cb, 
+			NULL, NULL);
 }
-
-struct _sync_messages_update_message_t{
-	tg_t *tg;
-	int offset;
-	int limit;
-	uint64_t *hash;
-	tg_peer_t peer;
-	void *userdata;
-  void (*on_done)(void *userdata);
-};
 
 int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 {
@@ -518,26 +511,13 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 	return ret;
 }
 
-static int _sync_messages_update_message(
-		void *data, 
-		const tg_message_t *m)
-{
-	if (!m)
-		return 0;
-
-	struct _sync_messages_update_message_t *d = data;
-
-	ON_LOG(d->tg, "%s: %d", __func__, m->date_);
-	if (tg_message_to_database(d->tg, m) == 0){
-		// update hash
-		update_hash(d->hash, m->id_);
-	}
-
-	return 0;
-}
-
 void tg_messages_create_table(tg_t *tg){
 	char sql[BUFSIZ]; 
+	
+	sprintf(sql,
+		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE); ");
+	ON_LOG(tg, "%s", sql);
+	tg_sqlite3_exec(tg, sql);	
 	
 	#define TG_MESSAGE_ARG(t, n, type, name) \
 		sprintf(sql, "ALTER TABLE \'messages\' ADD COLUMN "\
@@ -576,90 +556,6 @@ void tg_messages_create_table(tg_t *tg){
 	#undef TG_MESSAGE_SPS
 } 
 
-void tg_sync_messages_to_database(
-		tg_t *tg,
-		tg_peer_t peer,
-		int offset,
-		int limit,
-		void *userdata, void (*on_done)(void *userdata))
-{
-	uint64_t hash = 0;
-  //uint64_t hash = messages_hash_from_database(tg, peer.id);
-  	struct _sync_messages_update_message_t d = {
-	  .offset = offset,
-	  .hash = &hash,
-		.peer = peer,
-	  .tg =tg,
-		.limit = limit,
-	  .on_done = on_done,
-	  .userdata = userdata,
-	};
-	
-		tg_messages_getHistory(
-			tg, 
-			peer, 
-			0, 
-			time(NULL), 
-			offset, 
-			limit, 
-			0, 
-			0, 
-			&hash, 
-			&d,
-			_sync_messages_update_message);
-	
-		messages_hash_to_database(
-				tg, peer.id, hash);
-
-	if (on_done)
-		on_done(userdata);
-}
-
-static void * _sync_messages_thread(void * data)
-{
-	struct _sync_messages_update_message_t *d = data;
-	ON_LOG(d->tg, "%s: start", __func__);
-
-	ON_LOG(d->tg, "%s: updating messages...", __func__);	
-	tg_sync_messages_to_database(
-								 d->tg,
-								 d->peer,
-								 d->offset,
-								 d->limit, 
-								 d->userdata, 
-								 d->on_done);
-
-	free(d);
-
-	pthread_exit(0);	
-}
-
-void tg_async_messages_to_database(
-		tg_t *tg,
-		tg_peer_t peer,
-		int offset,
-		int limit,
-		void *userdata, void (*on_done)(void *userdata))
-{
-	// set data
-	struct _sync_messages_update_message_t *d = 
-		NEW(struct _sync_messages_update_message_t, return);
-	d->tg = tg;
-	d->offset  = offset;
-	d->userdata = userdata;
-	d->on_done = on_done;
-	d->peer = peer;
-	d->limit = limit;
-	
-	//create new thread
-	if (pthread_create(
-			&(tg->sync_dialogs_tid), 
-			NULL, 
-			_sync_messages_thread, 
-			d))
-		ON_ERR(tg, "%s: can't create thread", __func__);
-}
-
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		int (*callback)(void *data, const tg_message_t *message))
 {
@@ -688,10 +584,11 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 			"id FROM messages WHERE id = %d AND peer_id = "_LD_" "
 			"ORDER BY \'date\' DESC;", tg->id, peer.id);
 
+	int i = 0;
 	tg_sqlite3_for_each(tg, s.str, stmt){
 		tg_message_t m;
 		memset(&m, 0, sizeof(m));
-
+		
 		int col = 0;
 		#define TG_MESSAGE_ARG(t, n, type, name) \
 			m.n = sqlite3_column_int64(stmt, col++);
@@ -723,67 +620,17 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		#undef TG_MESSAGE_SPA
 		#undef TG_MESSAGE_SPS
 
+		i++;
+		
 		if (callback){
 			int ret = callback(data, &m);
 			if (ret){
 				sqlite3_close(db);
-				return ret;
+				return i;
 			}
 		}
 	}	
 	
 	free(s.str);
-	return 0;
-}
-
-tg_message_t *tg_message_get(tg_t *tg, uint32_t msg_id){
-	ON_LOG(tg, "%s: start...", __func__);
-	ON_ERR(tg, "%s: not working function", __func__);
-	return NULL;
-	InputMessage im = tl_inputMessageID(msg_id);
-	buf_t messages_getMessages = 
-		tl_messages_getMessages(&im, 1); 
-	
-	tl_t *tl = tg_send_query(tg, messages_getMessages);
-	if (tl && tl->_id == id_messages_messages){
-		tg_message_t *tgm = 
-			NEW(tg_message_t, 
-					ON_ERR(tg, "%s: can't allocate memory", __func__);
-					return NULL;);
-		tl_messages_messages_t *mm = 
-			(tl_messages_messages_t *)tl;
-		int i;
-		for (i = 0; i < mm->messages_len; ++i) {
-			// handle messages
-			if (!mm->messages_[i])
-				continue;
-
-			tl_message_t *m = (tl_message_t *)mm->messages_[i];	
-			tg_message_from_tl(tg, tgm, m);
-			tg_message_to_database(tg, tgm);
-			// free tl
-			break;
-		}
-
-		for (i = 0; i < mm->users_len; ++i) {
-			// hanlde users
-			/* TODO:  <16-12-24, yourname> */	
-		}
-
-		for (i = 0; i < mm->chats_len; ++i) {
-			// handle chats
-			/* TODO:  <16-12-24, yourname> */	
-		}
-
-		return tgm;
-	}
-
-	// throw error
-	char *err = tg_strerr(tl); 
-	ON_ERR(tg, "%s", err);
-	free(err);
-	// free tl
-	/* TODO:  <29-11-24, yourname> */
-
-	return NULL;
+	return i;
 }

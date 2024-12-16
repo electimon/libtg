@@ -1,3 +1,4 @@
+#include "dialogs.h"
 #include "messages.h"
 #include "tg.h"
 #include "../tl/str.h"
@@ -108,13 +109,13 @@ int database_init(tg_t *tg, const char *database_path)
 		"CREATE TABLE IF NOT EXISTS messages_hash (id INT); "
 		"CREATE TABLE IF NOT EXISTS photos (id INT); "
 		"CREATE TABLE IF NOT EXISTS peer_photos (id INT); "
-		"CREATE TABLE IF NOT EXISTS dialogs (id INT, peer_id INT UNIQUE); "
-		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE); ";
-
+	;
+	
 	tg_sqlite3_exec(tg, sql);
 
 	//
 	tg_messages_create_table(tg);
+	tg_dialogs_create_table(tg);
 	
 
 	return 0;

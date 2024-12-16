@@ -47,9 +47,9 @@ struct tg_get_dialogs_t {
 };
 
 static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
-	if (!tl){
+	if (!tl)
 		return 0;
-	}
+	
 	struct tg_get_dialogs_t *s = data;
 	
 	if (tl->_id == id_messages_dialogsNotModified){
@@ -319,6 +319,10 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 						__func__, peer->_id, peer->chat_id_);
 				continue;
 			}
+			// save dialog to database
+			tg_dialog_to_database(s->tg, &d);
+
+			// callback dialog
 			if (s->callback)
 				if (s->callback(data, &d))
 					break;;
@@ -385,25 +389,30 @@ void tg_get_dialogs(
 			NULL, NULL);
 }
 
-struct _sync_dialogs_update_dialog_t{
-	tg_t *tg;
-	int d;
-	void *userdata;
-  void (*on_done)(void *userdata);
-};
+void tg_dialogs_create_table(tg_t *tg){
+	// create table
+	char sql[BUFSIZ]; 
+	sprintf(sql, 
+		"CREATE TABLE IF NOT EXISTS dialogs (id INT, peer_id INT UNIQUE);");
+		ON_LOG(tg, "%s", sql);
+		tg_sqlite3_exec(tg, sql);	
+	
+	#define TG_DIALOG_ARG(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
+				"\'" name "\' " type ";\n");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	#define TG_DIALOG_STR(t, n, type, name) \
+		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
+				"\'" name "\' " type ";\n");\
+		ON_LOG(tg, "%s", sql);\
+		tg_sqlite3_exec(tg, sql);	
+	TG_DIALOG_ARGS
+	#undef TG_DIALOG_ARG
+	#undef TG_DIALOG_STR
+}
 
-static int _sync_dialogs_update_dialog(
-		void *data, 
-		const tg_dialog_t *dialog)
-{
-	if (!dialog)
-		return 0;
-
-	struct _sync_dialogs_update_dialog_t *d = data;
-	d->d = dialog->top_message_date; 
-
-	ON_LOG(d->tg, "%s: %s", __func__, dialog->name);
-
+int tg_dialog_to_database(tg_t *tg, const tg_dialog_t *d){
 	// save dialog to database
 	struct str s;
 	str_init(&s);
@@ -412,132 +421,36 @@ static int _sync_dialogs_update_dialog(
 		"INSERT INTO \'dialogs\' (\'peer_id\') "
 		"SELECT  "_LD_" "
 		"WHERE NOT EXISTS (SELECT 1 FROM dialogs WHERE peer_id = "_LD_");\n"
-		, dialog->peer_id, dialog->peer_id);
+		, d->peer_id, d->peer_id);
 
 	str_appendf(&s, "UPDATE \'dialogs\' SET ");
 	
 	#define TG_DIALOG_STR(t, n, type, name) \
-	if (dialog->n){\
+	if (d->n){\
 		str_appendf(&s, "\'" name "\'" " = \'"); \
-		str_append(&s, (char*)dialog->n, strlen((char*)dialog->n)); \
+		str_append(&s, (char*)d->n, strlen((char*)d->n)); \
 		str_appendf(&s, "\', "); \
 	}
 		
 	#define TG_DIALOG_ARG(t, n, type, name) \
-		str_appendf(&s, "\'" name "\'" " = "_LD_", ", (uint64_t)dialog->n);
+		str_appendf(&s, "\'" name "\'" " = "_LD_", ", (uint64_t)d->n);
 	
 	TG_DIALOG_ARGS
 	#undef TG_DIALOG_ARG
 	#undef TG_DIALOG_STR
 	
 	str_appendf(&s, "id = %d WHERE peer_id = "_LD_";\n"
-			, d->tg->id, dialog->peer_id);
+			, tg->id, d->peer_id);
 	
 	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
-	if (tg_sqlite3_exec(d->tg, s.str) == 0){
+	if (tg_sqlite3_exec(tg, s.str) == 0){
 		// update hash
-		update_hash(&d->tg->dialogs_hash, 
-				        dialog->top_message_id);
+		//update_hash(&d->tg->dialogs_hash, 
+								//dialog->top_message_id);
 	}
 	free(s.str);
 
 	return 0;
-}
-
-void tg_sync_dialogs_to_database(tg_t *tg, int limit, int date,
-		void *userdata, void (*on_done)(void *userdata))
-{
-	// create table
-	char sql[BUFSIZ]; 
-	
-	#define TG_DIALOG_ARG(t, n, type, name) \
-		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
-				"\'" name "\' " type ";\n");\
-		ON_LOG(tg, "%s", sql);\
-		tg_sqlite3_exec(tg, sql);	
-	#define TG_DIALOG_STR(t, n, type, name) \
-		sprintf(sql, "ALTER TABLE \'dialogs\' ADD COLUMN "\
-				"\'" name "\' " type ";\n");\
-		ON_LOG(tg, "%s", sql);\
-		tg_sqlite3_exec(tg, sql);	
-	TG_DIALOG_ARGS
-	#undef TG_DIALOG_ARG
-	#undef TG_DIALOG_STR
-
-  struct _sync_dialogs_update_dialog_t d = {
-	.d = date,
-	.tg = tg,
-	.on_done = on_done,
-	.userdata = userdata,
-  };
-
-  int ret = limit;
-  //while (ret >= limit){
-		//ret = tg_get_dialogs(tg, limit>0 ? limit : 10,
-		tg_get_dialogs(tg, limit>0 ? limit : 10,
-				d.d, &tg->dialogs_hash,
-			 	NULL, 
-				&d,
-			 	_sync_dialogs_update_dialog);
-		
-	  // update hash
-	  dialogs_hash_to_database(
-	    d.tg, d.tg->dialogs_hash);
-
-		//if (limit > 0)
-			//break;
-
-	  // sleep
-		sleep(2);
-	//}
-  if (d.on_done)
-	  d.on_done(userdata);
-}
-
-static void * _async_dialogs_thread(void * data)
-{
-	struct _sync_dialogs_update_dialog_t *d = data;
-	ON_LOG(d->tg, "%s: start", __func__);
-
-	ON_LOG(d->tg, "%s: updating dialogs...", __func__);	
-	tg_sync_dialogs_to_database(
-			d->tg, 0, time(NULL),
-			d->userdata, d->on_done);
-
-	d->tg->sync_dialogs = false;
-
-	free(d);
-
-	pthread_exit(0);	
-}
-
-void tg_async_dialogs_to_database(tg_t *tg,
-		void *userdata, void (*on_done)(void *userdata))
-{
-	if (tg->sync_dialogs)
-		return;
-
-	tg->sync_dialogs = true;
-
-	// open socket
-	tg->sync_dialogs_sockfd = 
-		tg_net_open_port(tg, 80);
-
-	// set data
-	struct _sync_dialogs_update_dialog_t *d = 
-		NEW(struct _sync_dialogs_update_dialog_t, return);
-	d->tg = tg;
-	d->d = time(NULL);
-	d->userdata = userdata;
-	d->on_done = on_done;
-	
-	//create new thread
-	if (pthread_create(
-			&(tg->sync_dialogs_tid), 
-			NULL, 
-			_async_dialogs_thread, 
-			d))
-		ON_ERR(tg, "%s: can't create thread", __func__);
 }
 
 int tg_get_dialogs_from_database(
