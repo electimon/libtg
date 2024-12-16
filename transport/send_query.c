@@ -173,6 +173,11 @@ tl_t * tg_send_query_to_net(
 		return tl;
 	}
 
+	if (msg.size == 4 && buf_get_ui32(msg) == -505){
+		// resend query
+		return tg_send_query_to_net(tg, query, enc, sockfd);
+	}
+
 	tl_t *tl = tg_handle_serialized_message(tg, msg);
 
 	if (tl && tl->_id == id_bad_server_salt) // resend message

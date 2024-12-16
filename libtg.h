@@ -35,7 +35,8 @@ void tg_close(tg_t *tg);
 /* return allocated string with error from tl object */
 char * tg_strerr(const tl_t *tl);
 
-/* send TL query to server and return answer */
+/* send TL query to server and return answer 
+ * for multythreading this function is bad - use queue_manager*/
 tl_t * tg_send_query(tg_t *tg, buf_t query);
 
 /* send TL query via queue manager in thread and run
