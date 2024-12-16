@@ -54,8 +54,8 @@ void tg_get_dialogs(
 		uint64_t * hash, 
 		uint32_t *folder_id, 
 		void *data,
-		int (*callback)(void *data, 
-			const tg_dialog_t *dialog));
+		int (*callback)(void *data, const tg_dialog_t *dialog),
+		void (*on_done)(void *data));
 
 int tg_get_dialogs_from_database(tg_t *tg, void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));

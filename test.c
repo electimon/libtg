@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
 	tg_get_dialogs(tg, 40,
 			 time(NULL),
 			 NULL, NULL,
-			 NULL, dialogs_callback);
+			 NULL, dialogs_callback, NULL);
 
 	//printf("NAME: %s\n", d.name);
 	//printf("PEER ID: %.16lx\n", d.peer_id);

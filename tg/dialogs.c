@@ -44,6 +44,7 @@ struct tg_get_dialogs_t {
 	tg_t *tg;
 	void *data;
 	int (*callback)(void *data, const tg_dialog_t *dialog);
+	void (*on_done)(void *data);
 };
 
 static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
@@ -330,6 +331,9 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 			// free dialog
 			free(d.name);
 		} // done dialogs
+
+		if (s->on_done)
+			s->on_done(s->data);
 		
 		// free tl
 		/* TODO:  <29-11-24, yourname> */
@@ -357,7 +361,8 @@ void tg_get_dialogs(
 		uint64_t * hash, 
 		uint32_t *folder_id, 
 		void *data,
-		int (*callback)(void *data, const tg_dialog_t *dialog))
+		int (*callback)(void *data, const tg_dialog_t *dialog),
+		void (*on_done)(void *data))
 {
 	int i, k;
 	uint64_t h = 0;
@@ -382,6 +387,7 @@ void tg_get_dialogs(
 	s->tg = tg;
 	s->data = data;
 	s->callback = callback;
+	s->on_done = on_done;
 
 	tg_queue_manager_send_query(
 			tg, getDialogs, 
