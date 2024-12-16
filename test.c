@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
 	//sleep(10);
 	
 	//tg_message_t m;
-	tg_messages_getHistory(
+	tg_messages_get_history(
 			tg,
 			peer, 
 			0, 
@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
 			0, 
 			NULL, 
 			NULL, 
-			messages_callback2);
+			messages_callback, on_done);
 
 	/*printf("MESSAGE: %s\n", m.message_);*/
 	/*printf("file reference: %s\n", m.photo_file_reference);*/

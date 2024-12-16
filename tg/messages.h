@@ -105,7 +105,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m);
  * as argument to function for skipping not-midified
  * dialogs 
  * return non-null in callback to stop function execution */ 
-void tg_messages_getHistory(
+void tg_messages_get_history(
 		tg_t *tg,
 		tg_peer_t peer,
 		int offset_id,
@@ -116,7 +116,8 @@ void tg_messages_getHistory(
 		int min_id,
 		uint64_t *hash,
 		void *userdata,
-		int (*callback)(void *data, int msgsc, const tg_message_t *msg));
+		int (*callback)(void *userdata, const tg_message_t *msg),
+		void (*on_done)(void *userdata));
 
 /* get messeges from database, return number of messages
  * return non-null in callback to stop function execution */ 

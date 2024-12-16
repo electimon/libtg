@@ -216,10 +216,10 @@ void tg_message_from_tl(
 }
 
 static void parse_msgs(
-		tg_t *tg, uint64_t peer_id, int *c, 
+		tg_t *tg, uint64_t peer_id, 
 		int argc, tl_t **argv,
 		void *data,
-		int (*callback)(void *, int, const tg_message_t*))
+		int (*callback)(void *, const tg_message_t*))
 {
 	int i;
 	for (i = 0; i < argc; ++i) {
@@ -240,12 +240,8 @@ static void parse_msgs(
 
 		// callback
 		if (callback)
-			if (callback(data, *c, &m))
+			if (callback(data, &m))
 				break;
-		
-		// iterate
-		c[0]++;
-		
 	}
 }	
 
@@ -253,7 +249,8 @@ struct tg_messages_get_history_t {
 	tg_t *tg;
 	uint64_t peer_id;
 	void *userdata;
-	int (*callback)(void *, int, const tg_message_t *);
+	int (*callback)(void *, const tg_message_t *);
+	void (*on_done)(void *userdata);
 };
 
 static int tg_messages_get_history_cb(void *data, const tl_t *tl)
@@ -265,7 +262,7 @@ static int tg_messages_get_history_cb(void *data, const tl_t *tl)
 	}
 	ON_LOG(s->tg, "%s: recived id: %.8x", __func__, tl->_id);
 
-	int i, k, c = 0;
+	int i, k;
 
 	switch (tl->_id) {
 		case id_messages_channelMessages:
@@ -274,7 +271,7 @@ static int tg_messages_get_history_cb(void *data, const tl_t *tl)
 					(tl_messages_channelMessages_t *)tl;
 				
 				parse_msgs(
-						s->tg, s->peer_id, &c, 
+						s->tg, s->peer_id, 
 						msgs->messages_len, 
 						msgs->messages_, 
 						s->userdata, 
@@ -290,7 +287,7 @@ static int tg_messages_get_history_cb(void *data, const tl_t *tl)
 					(tl_messages_messages_t *)tl;
 				
 				parse_msgs(
-						s->tg, s->peer_id, &c, 
+						s->tg, s->peer_id, 
 						msgs->messages_len, 
 						msgs->messages_, 
 						s->userdata, 
@@ -306,7 +303,7 @@ static int tg_messages_get_history_cb(void *data, const tl_t *tl)
 					(tl_messages_messagesSlice_t *)tl;
 				
 				parse_msgs(
-						s->tg, s->peer_id, &c, 
+						s->tg, s->peer_id, 
 						msgs->messages_len, 
 						msgs->messages_, 
 						s->userdata, 
@@ -321,11 +318,13 @@ static int tg_messages_get_history_cb(void *data, const tl_t *tl)
 	}
 	
 tg_messeges_get_history_finish:;
+	if (s->on_done)
+		s->on_done(s->userdata);
 	free(s);
 	return 0;
 }
 
-void tg_messages_getHistory(
+void tg_messages_get_history(
 		tg_t *tg,
 		tg_peer_t peer_,
 		int offset_id,
@@ -336,7 +335,8 @@ void tg_messages_getHistory(
 		int min_id,
 		uint64_t *hash,
 		void *userdata,
-		int (*callback)(void *, int, const tg_message_t *))
+		int (*callback)(void *, const tg_message_t *),
+		void (*on_done)(void *))
 {
 	int i, k, c = 0;
 	uint64_t h = 0;
@@ -365,6 +365,7 @@ void tg_messages_getHistory(
 	s->peer_id = peer_.id;
 	s->userdata = userdata;
 	s->callback = callback;
+	s->on_done = on_done;
 
 	tg_queue_manager_send_query(
 			tg, getHistory, 
