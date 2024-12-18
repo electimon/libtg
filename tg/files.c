@@ -141,7 +141,7 @@ struct photo_file_t {
 	uint64_t photo_access_hash;
 	char photo_size[2];
 	void *userdata;
-	int (*callback)(void *userdata, char *photo);
+	int (*callback)(void *userdata, const char *photo);
 };
 
 static int get_photo_callback(void *d, const tg_file_t *p)
@@ -150,6 +150,7 @@ static int get_photo_callback(void *d, const tg_file_t *p)
 	if (!p){
 		if (s->callback)
 			s->callback(s->userdata, NULL);
+		return 0;
 	}
 
 	// save photo to base
@@ -177,7 +178,7 @@ void tg_get_photo_file(tg_t *tg,
 		const char *photo_file_reference,
 		const char *photo_size,
 		void *userdata,
-		int (*callback)(void *userdata, char *photo))
+		int (*callback)(void *userdata, const char *photo))
 {
 	char *photo = NULL;
 	if (strcmp(photo_size, "s") == 0){
@@ -223,7 +224,7 @@ void tg_get_peer_photo_file(tg_t *tg,
 		bool big_photo,
 		uint64_t photo_id, 
 		void *userdata,
-		int (*callback)(void *userdata, char *photo))
+		int (*callback)(void *userdata, const char *photo))
 {
 	fprintf(stderr, "%s\n", __func__);
 	char *photo = NULL;

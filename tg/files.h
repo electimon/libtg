@@ -47,14 +47,14 @@ void tg_get_photo_file(tg_t *tg,
 		const char *photo_file_reference,
 		const char *photo_size,
 		void *userdata,
-		int (*callback)(void *userdata, char *photo));
+		int (*callback)(void *userdata, const char *photo));
 
 void tg_get_peer_photo_file(tg_t *tg, 
 		tg_peer_t *peer, 
 		bool big_photo,
 		uint64_t photo_id, 
 		void *userdata,
-		int (*callback)(void *userdata, char *photo));
+		int (*callback)(void *userdata, const char *photo));
 
 
 #endif /* ifndef TG_FILES_H */
