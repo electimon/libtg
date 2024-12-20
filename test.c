@@ -262,23 +262,23 @@ int main(int argc, char *argv[])
 		buf_t getUsers = 
 			tl_users_getUsers(&iuser, 1);	
 
-	tg_queue_manager_send_query(
-			tg, getUsers, 
-			tg, query_cb, 
-			NULL, NULL);
+	//tg_queue_manager_send_query(
+			//tg, getUsers, 
+			//tg, query_cb, 
+			//NULL, NULL);
 
-		tg_peer_t peer = {
-		TG_PEER_TYPE_CHANNEL,
-		1326223284,
-		-5244509236001112417,
-	};
+		//tg_peer_t peer = {
+		//TG_PEER_TYPE_CHANNEL,
+		//1326223284,
+		//-5244509236001112417,
+	//};
 
-	tg_get_peer_photo_file(
-			tg, 
-			&peer, 
-			true, 
-			5379844007854718198, 
-			NULL, photo_callback2);
+	//tg_get_peer_photo_file(
+			//tg, 
+			//&peer, 
+			//true, 
+			//5379844007854718198, 
+			//NULL, photo_callback2);
 
 	
 	//buf_t h = tg_header(tg, getUsers, true);

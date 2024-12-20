@@ -238,6 +238,7 @@ int tg_net_send_queue_node(tg_t *tg){
 	//printf("%s\n", __func__);
 	int ret = 1, sockfd = -1;
 	while (tg->queue_lock) {
+		printf("%s: queue is locked...\n", __func__);
 		usleep(1000); // in microseconds
 	}
 	tg->queue_lock = 1;
@@ -255,7 +256,7 @@ int tg_net_send_queue_node(tg_t *tg){
 		ON_LOG(tg, "%s: send: %s", __func__, buf_sdump(n->msg));
 		int s = -1;
 		while (s < 0){
-			s = send(tg->sockfd, n->msg.data,
+			s = send(sockfd, n->msg.data,
 			 	n->msg.size, 0);
 			if (s < 0){
 				// handle error
