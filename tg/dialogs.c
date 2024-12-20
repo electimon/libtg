@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 16.12.2024
+ * Last Modified Date: 20.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -48,16 +48,22 @@ struct tg_get_dialogs_t {
 };
 
 static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
-	if (!tl)
-		return 0;
-	
 	struct tg_get_dialogs_t *s = data;
+	if (!tl){
+		if (s->on_done)
+			s->on_done(s->data);
+		free(s);
+		return 0;
+	}
 	
 	if (tl->_id == id_messages_dialogsNotModified){
 		ON_LOG(s->tg, "%s: dialogs not modified", __func__);
 		tl_messages_dialogsNotModified_t *dnm =
 			(tl_messages_dialogsNotModified_t *)tl;
-		return dnm->count_;
+		if (s->on_done)
+			s->on_done(s->data);
+		free(s);
+		return 0;
 	}
 
 	if ((tl->_id == id_messages_dialogsSlice) ||
@@ -346,6 +352,10 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 		char *err = tg_strerr(tl); 
 		ON_ERR(s->tg, "%s", err);
 		free(err);
+		// on_done
+		if (s->on_done)
+			s->on_done(s->data);
+
 		// free tl
 		/* TODO:  <29-11-24, yourname> */
 	}
