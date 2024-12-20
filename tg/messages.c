@@ -635,3 +635,57 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 	free(s.str);
 	return i;
 }
+
+struct tg_messages_set_typing_t {
+	tg_t *tg;
+	void *userdata;
+	void (*on_done)(void *userdata, bool ack);
+};
+
+static int tg_messages_set_typing_cb(void *data, const tl_t *tl)
+{
+	struct tg_messages_set_typing_t *s = data;
+	if (!tl){
+		if (s->on_done)
+			s->on_done(s->userdata, false);
+		free(s);
+		return 0;
+	}
+
+	if (s->on_done)
+		s->on_done(s->userdata, tl->_id == id_true?true:false);
+
+	free(s);
+	return 0;
+}
+
+void tg_messages_set_typing(tg_t *tg, tg_peer_t peer_,
+		bool typing, void *userdata, 
+		void (*on_done)(void *userdata, bool ack))
+{
+	Peer peer = tg_inputPeer(peer_); 
+	SendMessageAction action;
+	if (typing){
+		action = tl_sendMessageTypingAction();
+	} else {
+		action = tl_sendMessageCancelAction();
+	}
+
+	buf_t setTyping = tl_messages_setTyping(
+			&peer,
+			NULL,
+			&action);
+	buf_free(peer);
+	buf_free(action);
+
+	struct tg_messages_set_typing_t *s = NEW(
+			struct tg_messages_set_typing_t, 
+			ON_ERR(tg, "%s: can't allocate memory", __func__);
+			return;);
+
+	tg_queue_manager_send_query(
+			tg, 
+			setTyping, 
+			s, tg_messages_set_typing_cb, 
+			NULL, NULL);
+}

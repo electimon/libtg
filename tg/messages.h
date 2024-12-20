@@ -129,4 +129,8 @@ void tg_send_message(tg_t *tg, tg_peer_t peer,
 		const char *message, void *userdata, 
 		void (*on_done)(void *userdata, bool out));
 
+void tg_messages_set_typing(tg_t *tg, tg_peer_t peer,
+		bool typing, void *userdata, 
+		void (*on_done)(void *userdata, bool ack));
+
 #endif /* ifndef TG_MESSAGES_H */		
