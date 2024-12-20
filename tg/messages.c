@@ -381,6 +381,7 @@ struct tg_send_message_t {
 
 static int _tg_send_message_cb(void *data, const tl_t *tl)
 {
+	printf("%s\n", __func__);
 	struct tg_send_message_t *s = data;
 	if (!tl){
 		if (s->on_done)
@@ -398,7 +399,24 @@ static int _tg_send_message_cb(void *data, const tl_t *tl)
 			{
 				tl_updateShort_t *us =
 					(tl_updateShort_t *)tl;
+
+				printf("UPDATE: %s (%.8x)\n",
+						TL_NAME_FROM_ID(us->update_->_id), us->update_->_id);
 			
+				if (s->on_done)
+					s->on_done(s->userdata, true);
+			}
+			break;
+		case id_updates:
+			{
+				tl_updates_t *us =
+					(tl_updates_t *)tl;
+				int i;
+				for (i = 0; i < us->updates_len; ++i) {
+					printf("UPDATE: %s (%.8x)\n",
+							TL_NAME_FROM_ID(us->updates_[i]->_id), 
+							us->updates_[i]->_id);
+				}
 				if (s->on_done)
 					s->on_done(s->userdata, true);
 			}
@@ -431,6 +449,7 @@ void tg_send_message(tg_t *tg, tg_peer_t peer_,
 		const char *message, void *userdata, 
 		void (*on_done)(void *userdata, bool out))
 {
+	printf("TO SEND MESSAGE: %s\n", message);
 	buf_t peer = tg_inputPeer(peer_); 
 	buf_t random_id = buf_rand(8);
 	buf_t m = tl_messages_sendMessage(

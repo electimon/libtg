@@ -12,6 +12,7 @@ tg_queue_node_new(const buf_t msg,
 	void *chunkp, 
 	buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total))
 {
+	printf("%s\n", __func__);
 	tg_queue_node_t *n = NEW(tg_queue_node_t, {
 			perror("malloc");
 			return NULL;

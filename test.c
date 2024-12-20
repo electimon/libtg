@@ -176,6 +176,18 @@ int query_cb(void *d, const tl_t *tl){
 	if (tl && tl->_id == id_user){
 		tl_user_t *user = (tl_user_t *)tl;
 		printf("USERNAME: %s\n", user->last_name_.data);
+
+		tg_peer_t peer = {
+			TG_PEER_TYPE_USER,
+			user->id_,
+			user->access_hash_
+		}; 
+		tg_t *tg = d;
+		tg_send_message(
+				tg, 
+				peer, 
+				"hello world", 
+				NULL, NULL);
 	}
 		
 	return 0;
@@ -252,15 +264,14 @@ int main(int argc, char *argv[])
 
 	tg_queue_manager_send_query(
 			tg, getUsers, 
-			NULL, query_cb, 
+			tg, query_cb, 
 			NULL, NULL);
 
-
-		tg_peer_t peer = {
-		TG_PEER_TYPE_CHANNEL,
-		1326223284,
-		-5244509236001112417,
-	};
+		/*tg_peer_t peer = {*/
+		/*TG_PEER_TYPE_CHANNEL,*/
+		/*1326223284,*/
+		/*-5244509236001112417,*/
+	/*};*/
 
 	/*tg_get_peer_photo_file(*/
 			/*tg, */
@@ -289,10 +300,10 @@ int main(int argc, char *argv[])
 	/*tg_get_dialogs_from_database(tg, tg, */
 			/*dialogs_callback);*/
 
-	tg_get_dialogs(tg, 40,
-			 time(NULL),
-			 NULL, NULL,
-			 NULL, dialogs_callback, NULL);
+	/*tg_get_dialogs(tg, 40,*/
+			 /*time(NULL),*/
+			 /*NULL, NULL,*/
+			 /*NULL, dialogs_callback, NULL);*/
 
 	//printf("NAME: %s\n", d.name);
 	//printf("PEER ID: %.16lx\n", d.peer_id);
@@ -306,12 +317,12 @@ int main(int argc, char *argv[])
 			//d.photo_id);
 	//printf("IMAGE: %s\n", image);
 
-	tg_message_t m;
-	tg_get_messages_from_database(
-			tg, 
-			peer, 
-			&m, 
-			messages_callback);
+	/*tg_message_t m;*/
+	/*tg_get_messages_from_database(*/
+			/*tg, */
+			/*peer, */
+			/*&m, */
+			/*messages_callback);*/
 
 	//char *image = tg_get_photo_file(
 			//tg, 
@@ -332,18 +343,18 @@ int main(int argc, char *argv[])
 	//sleep(10);
 	
 	//tg_message_t m;
-	tg_messages_get_history(
-			tg,
-			peer, 
-			0, 
-			time(NULL), 
-			0, 
-			20, 
-			0, 
-			0, 
-			NULL, 
-			NULL, 
-			messages_callback, on_done);
+	/*tg_messages_get_history(*/
+			/*tg,*/
+			/*peer, */
+			/*0, */
+			/*time(NULL), */
+			/*0, */
+			/*20, */
+			/*0, */
+			/*0, */
+			/*NULL, */
+			/*NULL, */
+			/*messages_callback, on_done);*/
 
 	/*printf("MESSAGE: %s\n", m.message_);*/
 	/*printf("file reference: %s\n", m.photo_file_reference);*/

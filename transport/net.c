@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 16.12.2024
+ * Last Modified Date: 20.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -211,10 +211,11 @@ int tg_net_add_query(tg_t *tg, const buf_t buf, uint64_t msg_id,
 		void *chunkp, 
 		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total))
 {
+	printf("%s\n", __func__);
 	// wait to queue unlock
-	while (tg->queue_lock) {
-		usleep(1000); // in microseconds
-	}
+	//while (tg->queue_lock) {
+		//usleep(1000); // in microseconds
+	//}
 	tg->queue_lock = 1;
 
 	tg_queue_node_t *n = 
