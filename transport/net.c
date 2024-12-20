@@ -120,7 +120,7 @@ buf_t tg_net_receive(tg_t *tg, int sockfd)
   return data;
 }
 
-buf_t tg_net_receive2(tg_t *tg, void *chunkp,
+buf_t tg_net_receive2(tg_t *tg, int sockfd, void *chunkp,
 		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total))
 {
 	buf_t buf;
@@ -128,7 +128,7 @@ buf_t tg_net_receive2(tg_t *tg, void *chunkp,
 
 	// get length of the package
 	uint32_t len;
-	recv(tg->sockfd, &len, 4, 0);
+	recv(sockfd, &len, 4, 0);
 	ON_LOG(tg, "%s: prepare to receive len: %d", __func__, len);
 	if (len < 0) {
 		// this is error - report it
@@ -149,7 +149,7 @@ buf_t tg_net_receive2(tg_t *tg, void *chunkp,
 	uint32_t received = 0; 
 	while (received < len){
 		received += 
-			recv(tg->sockfd, &buf.data[received], len, 0);	
+			recv(sockfd, &buf.data[received], len, 0);	
 		ON_LOG(tg, "%s: received chunk: %d", __func__, received);
 		
 		if (received < 0){
@@ -172,7 +172,7 @@ buf_t tg_net_receive2(tg_t *tg, void *chunkp,
 				
 				// send
 				int s = 
-					send(tg->sockfd, buf.data, buf.size, 0);
+					send(sockfd, buf.data, buf.size, 0);
 				if (s < 0){
 					// handle send error
 					ON_ERR(tg, "%s: socket error: %d", 
@@ -236,9 +236,7 @@ int tg_net_add_query(tg_t *tg, const buf_t buf, uint64_t msg_id,
 
 int tg_net_send_queue_node(tg_t *tg){
 	//printf("%s\n", __func__);
-	tg->queue_sockfd = -1;
-	
-	int ret = 1;
+	int ret = 1, sockfd = -1;
 	while (tg->queue_lock) {
 		usleep(1000); // in microseconds
 	}
@@ -248,9 +246,9 @@ int tg_net_send_queue_node(tg_t *tg){
 	tg->queue_lock = 0;
 	if (n){
 		// open socket
-		while (tg->queue_sockfd < 0) {
-			tg->queue_sockfd = tg_net_open(tg);
-			usleep(100000); // in microseconds
+		sockfd = tg_net_open(tg);
+		if (sockfd < 0){
+			goto tg_net_send_queue_node_finish;
 		}
 
 		// send query
@@ -277,7 +275,7 @@ int tg_net_send_queue_node(tg_t *tg){
 		// receive data
 		while (1) {
 			buf_t buf = tg_net_receive2(
-					tg, n->chunkp, n->chunk);
+					tg, sockfd, n->chunkp, n->chunk);
 			
 			if (buf.size > 0)
 				ret = 0;
@@ -297,7 +295,7 @@ tg_net_send_queue_node_finish:;
 	if (n){
 		tg_queue_node_free(n);
 	}
-	if (tg->queue_sockfd > 0)
-		tg_net_close(tg, tg->queue_sockfd);
+	if (sockfd >= 0)
+		tg_net_close(tg, sockfd);
 	return ret;
 }

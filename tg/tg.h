@@ -19,7 +19,6 @@ struct tg_ {
 	int sockfd;
 	bool net;
 	list_t *queue;
-	int queue_sockfd;
 	bool queue_lock;
 	bool queue_manager;
 	void *on_err_data;
