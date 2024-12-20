@@ -212,39 +212,40 @@ int tg_net_add_query(tg_t *tg, const buf_t buf, uint64_t msg_id,
 		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total))
 {
 	printf("%s\n", __func__);
-	// wait to queue unlock
-	//while (tg->queue_lock) {
-		//usleep(1000); // in microseconds
-	//}
-	tg->queue_lock = 1;
 
 	tg_queue_node_t *n = 
 		tg_queue_node_new(buf, on_donep, on_done, chunkp, chunk);
 	if (!n){
 		ON_ERR(tg, "tg_queue_node_new error");
-		tg->queue_lock = 0;
 		return 1;
 	}
-	list_append(&tg->queue, n,
-			ON_ERR(tg, "list_append"); 
-			tg->queue_lock = 0;
-			return 1);
-		
-	tg->queue_lock = 0;
-	return 0;
-}
 
-int tg_net_send_queue_node(tg_t *tg){
-	int ret = 1;
 	// wait to queue unlock
 	while (tg->queue_lock) {
 		usleep(1000); // in microseconds
 	}
 	tg->queue_lock = 1;
+	list_append(&tg->queue, n,
+			ON_ERR(tg, "list_append"); 
+			tg->queue_lock = 0;
+			return 1);
 	
+	tg->queue_lock = 0;
+	return 0;
+}
+
+int tg_net_send_queue_node(tg_t *tg){
+	//printf("%s\n", __func__);
+	
+	int ret = 1;
+	while (tg->queue_lock) {
+		usleep(1000); // in microseconds
+	}
+	tg->queue_lock = 1;
 	tg->queue_sockfd = -1;
 	
-	tg_queue_node_t *n = list_at(tg->queue, 0); 
+	tg_queue_node_t *n = list_remove(&tg->queue, 0); 
+	tg->queue_lock = 0;
 	if (n){
 		// open socket
 		while (tg->queue_sockfd < 0) {
@@ -294,11 +295,9 @@ int tg_net_send_queue_node(tg_t *tg){
 	
 tg_net_send_queue_node_finish:;
 	if (n){
-		list_remove(&tg->queue, 0);			
 		tg_queue_node_free(n);
 	}
 	if (tg->queue_sockfd > 0)
 		tg_net_close(tg, tg->queue_sockfd);
-	tg->queue_lock = 0;
 	return ret;
 }
