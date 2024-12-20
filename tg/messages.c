@@ -383,16 +383,26 @@ static int _tg_send_message_cb(void *data, const tl_t *tl)
 {
 	struct tg_send_message_t *s = data;
 	if (!tl){
+		if (s->on_done)
+			s->on_done(s->userdata, false);
 		free(s);
 		return 0;
 	}
 	
 	switch (tl->_id) {
 		case id_updatesTooLong: case id_updateShortMessage:
-		case id_updateShortChatMessage: case id_updateShort:
+		case id_updateShortChatMessage: 
 			/* ???:  <16-12-24, yourname> */
 			break;
-
+		case id_updateShort:
+			{
+				tl_updateShort_t *us =
+					(tl_updateShort_t *)tl;
+			
+				if (s->on_done)
+					s->on_done(s->userdata, true);
+			}
+			break;
 		case id_updateShortSentMessage:
 			{
 				tl_updateShortSentMessage_t *usm =
@@ -408,6 +418,8 @@ static int _tg_send_message_cb(void *data, const tl_t *tl)
 			break;
 
 		default:
+			if (s->on_done)
+				s->on_done(s->userdata, false);
 			break;
 	}	
 
