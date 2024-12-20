@@ -193,7 +193,7 @@ int query_cb(void *d, const tl_t *tl){
 	return 0;
 }
 
-int photo_callback2(void *data, char *photo)
+int photo_callback2(void *data, const char *photo)
 {
 	if (photo)
 		printf("PHOTO OK\n");
@@ -267,18 +267,18 @@ int main(int argc, char *argv[])
 			tg, query_cb, 
 			NULL, NULL);
 
-		/*tg_peer_t peer = {*/
-		/*TG_PEER_TYPE_CHANNEL,*/
-		/*1326223284,*/
-		/*-5244509236001112417,*/
-	/*};*/
+		tg_peer_t peer = {
+		TG_PEER_TYPE_CHANNEL,
+		1326223284,
+		-5244509236001112417,
+	};
 
-	/*tg_get_peer_photo_file(*/
-			/*tg, */
-			/*&peer, */
-			/*true, */
-			/*5379844007854718198, */
-			/*NULL, photo_callback2);*/
+	tg_get_peer_photo_file(
+			tg, 
+			&peer, 
+			true, 
+			5379844007854718198, 
+			NULL, photo_callback2);
 
 	
 	//buf_t h = tg_header(tg, getUsers, true);
@@ -300,10 +300,10 @@ int main(int argc, char *argv[])
 	/*tg_get_dialogs_from_database(tg, tg, */
 			/*dialogs_callback);*/
 
-	/*tg_get_dialogs(tg, 40,*/
-			 /*time(NULL),*/
-			 /*NULL, NULL,*/
-			 /*NULL, dialogs_callback, NULL);*/
+	tg_get_dialogs(tg, 40,
+			 time(NULL),
+			 NULL, NULL,
+			 NULL, dialogs_callback, NULL);
 
 	//printf("NAME: %s\n", d.name);
 	//printf("PEER ID: %.16lx\n", d.peer_id);

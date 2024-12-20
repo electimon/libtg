@@ -236,13 +236,13 @@ int tg_net_add_query(tg_t *tg, const buf_t buf, uint64_t msg_id,
 
 int tg_net_send_queue_node(tg_t *tg){
 	//printf("%s\n", __func__);
+	tg->queue_sockfd = -1;
 	
 	int ret = 1;
 	while (tg->queue_lock) {
 		usleep(1000); // in microseconds
 	}
 	tg->queue_lock = 1;
-	tg->queue_sockfd = -1;
 	
 	tg_queue_node_t *n = list_remove(&tg->queue, 0); 
 	tg->queue_lock = 0;
