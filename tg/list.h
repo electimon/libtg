@@ -2,7 +2,7 @@
  * File              : list.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 23.03.2022
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 20.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -104,7 +104,8 @@ typedef struct list {
 ({ \
 	void *data = NULL; \
 	list_t *l = *listp; \
-	if (index == 0 ){\
+	if (!l){ \
+	} else if (index == 0 ){\
 		data = l->data;\
 		*listp = l->next;\
 		free(l);\
