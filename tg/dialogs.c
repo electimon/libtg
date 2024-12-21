@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 20.12.2024
+ * Last Modified Date: 21.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -60,6 +60,7 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 		ON_LOG(s->tg, "%s: dialogs not modified", __func__);
 		tl_messages_dialogsNotModified_t *dnm =
 			(tl_messages_dialogsNotModified_t *)tl;
+		/* TODO:  <21-12-24, yourname> */
 		if (s->on_done)
 			s->on_done(s->data);
 		free(s);
@@ -101,6 +102,9 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 
 			tl_dialog_t dialog;
 			memset(&d, 0, sizeof(tl_dialog_t));
+
+			tl_peerChat_t *peer = NULL;
+			tl_peerNotifySettings_t *pns = NULL; 
 			
 			if (md.dialogs_[i]->_id == id_dialogFolder){
 				tl_dialogFolder_t *df = 
@@ -111,13 +115,20 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 				dialog.peer_ = df->peer_;
 				dialog.top_message_ = df->top_message_;
 				dialog.pinned_ = df->pinned_;
+				dialog.unread_count_ = df->unread_unmuted_messages_count_;
+				dialog.folder_id_ = folder->id_;
+				peer = (tl_peerChat_t *)df->peer_;
 
 			} else if (md.dialogs_[i]->_id != id_dialog){
 				ON_LOG(s->tg, "%s: unknown dialog type: %.8x",
 						__func__, md.dialogs_[i]->_id);
 				continue;
+			
+			} else {
+				dialog = *(tl_dialog_t *)md.dialogs_[i];	
+				peer = (tl_peerChat_t *)dialog.peer_;
+				pns = (tl_peerNotifySettings_t *)dialog.notify_settings_;
 			}
-			dialog = *(tl_dialog_t *)md.dialogs_[i];	
 
 			d.top_message_id = dialog.top_message_;
 			
@@ -130,13 +141,10 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 			d.unread_reactions_count = dialog.unread_reactions_count_;
 			d.folder_id = dialog.folder_id_;
 			
-			tl_peerChat_t *peer = (tl_peerChat_t *)dialog.peer_;
 			if (peer){
 				d.peer_id = peer->chat_id_;
 			}
 
-			tl_peerNotifySettings_t *pns = 
-				(tl_peerNotifySettings_t *)dialog.notify_settings_;
 			if (pns){
 				d.silent = pns->silent_;
 				d.mute_until = pns->mute_until_;
@@ -319,7 +327,6 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 				}
 			} // done messages 
 
-			// callback dialog
 			if (d.peer_type == TG_PEER_TYPE_NULL) {
 				ON_LOG(s->tg, "%s: can't find dialog data "
 						"for peer: %.8x: %ld",
@@ -332,34 +339,24 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 			// callback dialog
 			if (s->callback)
 				if (s->callback(data, &d))
-					break;;
+					break;
 
 			// free dialog
 			free(d.name);
+		
 		} // done dialogs
-
-		if (s->on_done)
-			s->on_done(s->data);
-		
-		// free tl
-		/* TODO:  <29-11-24, yourname> */
-		
-		free(s);
-		return 0;
 
 	} else { // not dialogs or dialogsSlice
 		// throw error
 		char *err = tg_strerr(tl); 
 		ON_ERR(s->tg, "%s", err);
 		free(err);
-		// on_done
-		if (s->on_done)
-			s->on_done(s->data);
-
-		// free tl
-		/* TODO:  <29-11-24, yourname> */
 	}
 
+	// free tl
+	/* TODO:  <29-11-24, yourname> */
+	if (s->on_done)
+		s->on_done(s->data);
 	free(s);
 	return 0;
 } 
