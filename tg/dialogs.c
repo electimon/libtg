@@ -338,7 +338,7 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 
 			// callback dialog
 			if (s->callback)
-				if (s->callback(data, &d))
+				if (s->callback(s->data, &d))
 					break;
 
 			// free dialog
