@@ -108,9 +108,9 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 }
 
 
-buf_t tg_prepare_query(tg_t *tg, buf_t query, bool enc)
+buf_t tg_prepare_query(tg_t *tg, buf_t query, bool enc, uint64_t *msgid)
 {
-	buf_t h = tg_header(tg, query, enc);
+	buf_t h = tg_header(tg, query, enc, true, msgid);
 	
 	buf_t e = tg_encrypt(tg, h, enc);
 	buf_free(h);
@@ -167,7 +167,7 @@ tl_t * tg_send_query_to_net(
 		ON_LOG(tg, "%s: new session...", __func__);
 	}
 		
-	buf_t t = tg_prepare_query(tg, query, enc);	
+	buf_t t = tg_prepare_query(tg, query, enc, NULL);	
 	tg_net_send(tg, tg->sockfd, t);
 	buf_free(t);
 	
@@ -269,6 +269,13 @@ int tg_send_query2_on_done(void *p, const buf_t r){
 		return 1;
 	}
 
+	if (tl->_id == id_msg_detailed_info ||
+			tl->_id == id_msg_new_detailed_info) 
+	{
+		// get one more message
+		return 1;
+	}
+
 	if (tl){
 		ON_LOG(s->tg, "%s: received tl_%s_t (%.8x)", 
 				__func__, TL_NAME_FROM_ID(tl->_id), tl->_id);
@@ -312,7 +319,8 @@ void tg_queue_manager_send_query(tg_t *tg, buf_t query,
 		ON_LOG(tg, "%s: new session...", __func__);
 	}
 
-	buf_t msg = tg_prepare_query(tg, query, true);	
+	uint64_t msgid = 0;
+	buf_t msg = tg_prepare_query(tg, query, true, &msgid);	
 	struct sq2 *s = NEW(struct sq2, return);
 	s->tg = tg;
 	s->query = query;
@@ -321,7 +329,7 @@ void tg_queue_manager_send_query(tg_t *tg, buf_t query,
 	s->chunkp = chunkp;
 	s->chunk = chunk;
 
-	tg_net_add_query(tg, msg, 0, 
+	tg_net_add_query(tg, msg, msgid, 
 			s, tg_send_query2_on_done, 
 			chunkp, chunk);
 }

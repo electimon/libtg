@@ -1,4 +1,5 @@
 #include "../tg/tg.h"
+#include <stdbool.h>
 #include <time.h>
 #include <assert.h>
 #ifdef __APPLE__
@@ -25,12 +26,67 @@ static long long tg_get_current_time()
 				tg_get_utime(CLOCK_REALTIME)) & -4;
 }
 
-buf_t tg_header(tg_t *tg, buf_t b, bool enc)
+buf_t tg_mtp_message(tg_t *tg, buf_t payload, bool content){
+	//message msg_id:long seqno:int bytes:int body:Object = Message;
+  buf_t msg = buf_new();
+	
+	// msg_id
+	msg = buf_cat_ui64(msg, tg_get_current_time());	
+
+	// seqno
+	/* The seqno of a content-related message is thus
+	  * msg.seqNo = (current_seqno*2)+1 (and after generating
+	  * it, the local current_seqno counter must be
+	  * incremented by
+	  * 1), the seqno of a non-content related message is
+	  * msg.seqNo = (current_seqno*2) (current_seqno must not
+	  * be incremented by 1 after generation).*/
+	if (content)
+		msg = buf_cat_ui32(msg, tg->seqn++ * 2 + 1);
+	else {
+		msg = buf_cat_ui32(msg, tg->seqn * 2);
+	}
+
+	// bytes
+	msg = buf_cat_ui32(msg, payload.size);	
+
+	// body
+	msg = buf_cat(msg, payload);
+
+	return msg;
+}
+
+buf_t tg_header(tg_t *tg, buf_t b, bool enc, 
+		bool content, uint64_t *msgid)
 {
   buf_t s = {};
 	buf_init(&s);
 
   if (enc) {
+	/* When receiving an MTProto message that is marked 
+	 * as content-related by setting the least-significant 
+	 * bit of the seqno, the receiving party must acknowledge 
+	 * it in some way.
+	 *
+	 * When the receiving party is the client, this must 
+	 * be done through msgs_ack constructors.
+	 * 
+	 * When the receiving party is the server, this is 
+	 * usually done through msgs_ack constructors, but may 
+	 * also be done using the reply of a method, or an 
+	 * error, or some other way, as specified by the 
+	 * documentation of each method or constructor.
+	 *
+	 * When a TCP transport is used, the content-relatedness 
+	 * of constructors affects the server's behavior: the 
+	 * server will resend not-yet acknowledged content-related 
+	 * messages to a new connection if the current 
+	 * connection is closed and then re-opened.
+	 */
+		/*if (tg->msgids[0]){ // need to add acknolege*/
+			/*content = false;*/
+			/*b = tg_ack(tg, b);*/
+		/*}*/
 		// salt  session_id message_id seq_no message_data_length  message_data padding12..1024
 		// int64 int64      int64      int32  int32                bytes        bytes
 		
@@ -41,7 +97,10 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc)
 		s = buf_cat(s, tg->ssid);
 		
 		//message_id
-		s = buf_cat_ui64(s, tg_get_current_time());
+		uint64_t _msgid = tg_get_current_time();
+		s = buf_cat_ui64(s, _msgid);
+		if (msgid)
+			*msgid = _msgid;
 		
 	 /* The seqno of a content-related message is thus
 	  * msg.seqNo = (current_seqno*2)+1 (and after generating
@@ -52,8 +111,12 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc)
 	  * be incremented by 1 after generation).*/
 		//seq_no
 		//s = buf_cat_ui32(s, tg->seqn);
-		s = buf_cat_ui32(s, tg->seqn++ * 2 + 1);
-		
+		if (content)
+			s = buf_cat_ui32(s, tg->seqn++ * 2 + 1);
+		else {
+			s = buf_cat_ui32(s, tg->seqn * 2);
+		}
+
 		//message_data_length
 		s = buf_cat_ui32(s, b.size);
 		

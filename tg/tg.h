@@ -18,9 +18,14 @@ struct tg_ {
 	int port;
 	int sockfd;
 	bool net;
-	list_t *queue;
-	bool queue_lock;
-	bool queue_manager;
+	list_t *send_queue;
+	bool send_queue_lock;
+	bool send_queue_manager;
+	pthread_t send_queue_tid;
+	list_t *receive_queue;
+	bool receive_queue_lock;
+	bool receive_queue_manager;
+	pthread_t receive_queue_tid;
 	void *on_err_data;
 	void (*on_err)(void *on_err_data, const char *err);
 	void *on_log_data;

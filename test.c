@@ -262,25 +262,24 @@ int main(int argc, char *argv[])
 		buf_t getUsers = 
 			tl_users_getUsers(&iuser, 1);	
 
-	//tg_queue_manager_send_query(
-			//tg, getUsers, 
-			//tg, query_cb, 
-			//NULL, NULL);
+	tg_queue_manager_send_query(
+			tg, getUsers, 
+			tg, query_cb, 
+			NULL, NULL);
 
-		//tg_peer_t peer = {
-		//TG_PEER_TYPE_CHANNEL,
-		//1326223284,
-		//-5244509236001112417,
-	//};
+		tg_peer_t peer = {
+		TG_PEER_TYPE_CHANNEL,
+		1326223284,
+		-5244509236001112417,
+	};
 
-	//tg_get_peer_photo_file(
-			//tg, 
-			//&peer, 
-			//true, 
-			//5379844007854718198, 
-			//NULL, photo_callback2);
+	tg_get_peer_photo_file(
+			tg, 
+			&peer, 
+			true, 
+			5379844007854718198, 
+			NULL, photo_callback2);
 
-	
 	//buf_t h = tg_header(tg, getUsers, true);
 	//buf_t e = tg_encrypt(tg, h, true);
 	//buf_t t = tg_transport(tg, e);
@@ -290,12 +289,6 @@ int main(int argc, char *argv[])
 			//NULL, NULL);
 
 
-	//tg_sync_dialogs_to_database(
-			//tg,
-			//10, time(NULL),	
-			//NULL, 
-			//on_done);
-
 	//tg_dialog_t d;
 	/*tg_get_dialogs_from_database(tg, tg, */
 			/*dialogs_callback);*/
@@ -304,6 +297,7 @@ int main(int argc, char *argv[])
 			 time(NULL),
 			 NULL, NULL,
 			 NULL, dialogs_callback, NULL);
+
 
 	//printf("NAME: %s\n", d.name);
 	//printf("PEER ID: %.16lx\n", d.peer_id);

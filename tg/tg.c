@@ -62,7 +62,9 @@ tg_t *tg_new(
 	tg->dialogs_hash = dialogs_hash_from_database(tg);
 
 	// start queue manager
-	if (tg_start_queue_manager(tg))
+	if (tg_start_send_queue_manager(tg))
+		return NULL;
+	if (tg_start_receive_queue_manager(tg))
 		return NULL;
 
 	return tg;

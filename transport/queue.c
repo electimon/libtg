@@ -7,6 +7,7 @@
 
 tg_queue_node_t *
 tg_queue_node_new(const buf_t msg, 
+	uint64_t msgid,
 	void *on_donep,
 	int (*on_done)(void *userdata, const buf_t data),
 	void *chunkp, 
@@ -19,6 +20,7 @@ tg_queue_node_new(const buf_t msg,
 			});
 
 	n->msg = buf_add_buf(msg);
+	n->msgid =msgid;
 	n->on_donep = on_donep;
 	n->on_done = on_done;
 	n->chunkp = chunkp;
@@ -34,12 +36,12 @@ void tg_queue_node_free(tg_queue_node_t *node)
 	}
 }
 
-static void * _tg_socket_datemon(void * data)
+static void * _tg_send_daemon(void * data)
 {
 	tg_t *tg = data;
 	ON_LOG(tg, "%s: start", __func__);
 
-	while (tg->queue_manager) {
+	while (tg->send_queue_manager) {
 		tg_net_send_queue_node(tg);
 		usleep(100000); // in microseconds
 	}
@@ -47,15 +49,50 @@ static void * _tg_socket_datemon(void * data)
 	pthread_exit(0);	
 }
 
-int tg_start_queue_manager(tg_t *tg){
+int tg_start_send_queue_manager(tg_t *tg){
 
-	tg->queue_manager = 1;
+	tg->send_queue_manager = 1;
 
 	// start thread
 	if (pthread_create(
-			&(tg->sync_dialogs_tid), 
+				&(tg->send_queue_tid), 
 			NULL, 
-			_tg_socket_datemon, 
+			_tg_send_daemon, 
+			tg))
+	{
+		ON_ERR(tg, "%s: can't create thread", __func__);
+		return 1;
+	}
+
+	return 0;
+}
+
+static void * _tg_receive_daemon(void * data)
+{
+	tg_t *tg = data;
+	ON_LOG(tg, "%s: start", __func__);
+
+	while (tg->receive_queue_manager) {
+		// receive
+		usleep(100000); // in microseconds
+		int sockfd = tg_net_open(tg);
+		if (sockfd < 0)
+			continue;
+		tg_net_queue_receive(tg, sockfd);
+	}
+
+	pthread_exit(0);	
+}
+
+int tg_start_receive_queue_manager(tg_t *tg){
+
+	tg->receive_queue_manager = 1;
+
+	// start thread
+	if (pthread_create(
+			&(tg->receive_queue_tid), 
+			NULL, 
+			_tg_receive_daemon, 
 			tg))
 	{
 		ON_ERR(tg, "%s: can't create thread", __func__);
