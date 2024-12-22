@@ -383,7 +383,7 @@ void tg_get_dialogs(
 				NULL,
 				folder_id, 
 				date,
-				0, 
+				-1, 
 				&inputPeer, 
 				limit,
 				h);
