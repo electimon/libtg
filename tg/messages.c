@@ -720,3 +720,49 @@ void tg_messages_set_typing(tg_t *tg, tg_peer_t peer_,
 			s, tg_messages_set_typing_cb, 
 			NULL, NULL);
 }
+
+struct tg_messages_set_read_t {
+	tg_t *tg;
+	void *userdata;
+	void (*on_done)(void *userdata);
+};
+
+static int tg_messages_set_read_cb(void *data, const tl_t *tl)
+{
+	struct tg_messages_set_read_t *s = data;
+	if (!tl){
+		if (s->on_done)
+			s->on_done(s->userdata);
+		free(s);
+		return 0;
+	}
+
+	/* TODO: messages.AffectedMessages */
+	if (s->on_done)
+		s->on_done(s->userdata);
+
+	free(s);
+	return 0;
+}
+
+void tg_messages_set_read(tg_t *tg, tg_peer_t peer_,
+		uint32_t max_id, void *userdata, 
+		void (*on_done)(void *userdata))
+{
+	Peer peer = tg_inputPeer(peer_); 
+
+	buf_t readHistory = tl_messages_readHistory(
+			&peer, max_id);
+	buf_free(peer);
+
+	struct tg_messages_set_typing_t *s = NEW(
+			struct tg_messages_set_typing_t, 
+			ON_ERR(tg, "%s: can't allocate memory", __func__);
+			return;);
+
+	tg_queue_manager_send_query(
+			tg, 
+			readHistory, 
+			s, tg_messages_set_typing_cb, 
+			NULL, NULL);
+}

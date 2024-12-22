@@ -133,4 +133,9 @@ void tg_messages_set_typing(tg_t *tg, tg_peer_t peer,
 		bool typing, void *userdata, 
 		void (*on_done)(void *userdata, bool ack));
 
+void tg_messages_set_read(tg_t *tg, tg_peer_t peer,
+		uint32_t max_id, void *userdata, 
+		void (*on_done)(void *userdata));
+
+
 #endif /* ifndef TG_MESSAGES_H */		
