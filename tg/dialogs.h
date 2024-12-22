@@ -50,7 +50,7 @@ int tg_dialog_to_database(tg_t *tg, const tg_dialog_t *d);
 void tg_get_dialogs(
 		tg_t *tg, 
 		int limit,
-		time_t date, 
+		uint32_t msg_id, 
 		uint64_t * hash, 
 		uint32_t *folder_id, 
 		void *data,

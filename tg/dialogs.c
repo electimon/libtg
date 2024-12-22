@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 21.12.2024
+ * Last Modified Date: 22.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -364,7 +364,7 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 void tg_get_dialogs(
 		tg_t *tg, 
 		int limit, 
-		time_t date, 
+		uint32_t msg_id, 
 		uint64_t * hash, 
 		uint32_t *folder_id, 
 		void *data,
@@ -382,8 +382,8 @@ void tg_get_dialogs(
 		tl_messages_getDialogs(
 				NULL,
 				folder_id, 
-				date,
-				-1, 
+				0,
+				msg_id, 
 				&inputPeer, 
 				limit,
 				h);
