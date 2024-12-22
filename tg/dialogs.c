@@ -364,7 +364,7 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 void tg_get_dialogs(
 		tg_t *tg, 
 		int limit, 
-		uint32_t date, 
+		time_t date, 
 		uint64_t * hash, 
 		uint32_t *folder_id, 
 		void *data,
