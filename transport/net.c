@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 22.12.2024
+ * Last Modified Date: 23.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -242,7 +242,7 @@ buf_t tg_net_receive2(tg_t *tg, int sockfd, void *chunkp,
 	uint32_t received = 0; 
 	while (received < len){
 		received += 
-			recv(sockfd, &buf.data[received], len, 0);	
+			recv(sockfd, &buf.data[received], len - received, 0);	
 		ON_LOG(tg, "%s: received chunk: %d", __func__, received);
 		
 		if (received < 0){
