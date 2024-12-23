@@ -182,9 +182,8 @@ void tg_get_photo_file(tg_t *tg,
 		void *userdata,
 		int (*callback)(void *userdata, const char *photo))
 {
-	char *photo = NULL;
 	if (strcmp(photo_size, "s") == 0){
-		photo = photo_file_from_database(tg, photo_id);
+		char *photo = photo_file_from_database(tg, photo_id);
 		if (photo){
 			if (callback)
 				callback(userdata, photo);
@@ -230,13 +229,13 @@ void tg_get_peer_photo_file(tg_t *tg,
 		int (*callback)(void *userdata, const char *photo))
 {
 	fprintf(stderr, "%s\n", __func__);
-	char *photo = NULL;
 	if (!big_photo){
-		photo = peer_photo_file_from_database(
+		char *photo = peer_photo_file_from_database(
 				tg, peer->id, photo_id);
 		if (photo){
 			if (callback)
 				callback(userdata, photo);
+			free(photo);
 			return;
 		}
 	}
