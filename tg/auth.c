@@ -55,6 +55,8 @@ tg_is_authorized(tg_t *tg)
 		
 		tl_t *tl = 
 			tg_send_query(tg, _init(tg, getUsers)); 
+		buf_free(iuser);
+		buf_free(getUsers);
 		
 		if (tl && tl->_id == id_vector){
 			tl_t *user = tl_deserialize(&((tl_vector_t *)tl)->data_);

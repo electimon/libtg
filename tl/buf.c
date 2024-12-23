@@ -72,7 +72,7 @@ int buf_realloc(buf_t *buf, uint32_t size)
 {
 	long offset = (void *)buf->data - buf->aptr;
 	if (size > buf->asize){
-		void *ptr = realloc(buf->data, size + 1);
+		void *ptr = realloc(buf->aptr, size + 1);
 		if (!ptr){
 			perror("realloc");
 			return 1;
