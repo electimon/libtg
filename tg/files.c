@@ -106,7 +106,7 @@ void tg_get_file(
 
 	s->tg = tg;
 	s->limit  = 1048576;
-	s->location = *location;
+	s->location = buf_add_buf(*location);
 	s->data = data;
 	s->callback = callback;
 	s->progressp = progressp;

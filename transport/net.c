@@ -257,16 +257,16 @@ buf_t tg_net_receive2(tg_t *tg, int sockfd, void *chunkp,
 			if (chunk){
 				// get new chunk query
 				buf_t c = chunk(chunkp, received, len);
-				printf("CHUNK\n");
-				buf_dump(c);
+				//printf("CHUNK\n");
+				//buf_dump(c);
 				
-				buf_t buf = 
+				buf_t b = 
 					tg_prepare_query(tg, c, true, NULL);
 				buf_free(c);
 				
 				// send
 				int s = 
-					send(sockfd, buf.data, buf.size, 0);
+					send(sockfd, b.data, b.size, 0);
 				if (s < 0){
 					// handle send error
 					ON_ERR(tg, "%s: socket error: %d", 
