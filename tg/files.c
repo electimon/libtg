@@ -144,17 +144,18 @@ struct photo_file_t {
 	int (*callback)(void *userdata, const char *photo);
 };
 
-static int get_photo_callback(void *d, const tg_file_t *p)
+static int _get_photo_callback(void *d, const tg_file_t *p)
 {
 	struct photo_file_t *s = d;
 	if (!p){
 		if (s->callback)
 			s->callback(s->userdata, NULL);
+		free(s);
 		return 0;
 	}
 
 	// save photo to base
-	if ((!s->big_photo) || 
+	if ((s->is_peer_photo && !s->big_photo) || 
 			 strcmp(s->photo_size, "s") == 0)
 	{
 		if (s->is_peer_photo){
@@ -214,7 +215,7 @@ void tg_get_photo_file(tg_t *tg,
 			tg, 
 			&location, 
 			&photo, 
-			get_photo_callback, 
+			_get_photo_callback, 
 			NULL, 
 			NULL);
 }
@@ -261,7 +262,7 @@ void tg_get_peer_photo_file(tg_t *tg,
 			tg, 
 			&location, 
 			s, 
-			get_photo_callback, 
+			_get_photo_callback, 
 			NULL, 
 			NULL);
 }
