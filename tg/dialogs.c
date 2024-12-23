@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 23.12.2024
+ * Last Modified Date: 24.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -66,8 +66,7 @@ int tg_get_dialogs(
 				limit,
 				h);
 
-	tl_t *tl = tg_send_api(
-			tg, &getDialogs, NULL, NULL);
+	tl_t *tl = tg_run_api(tg, &getDialogs);
 	buf_free(getDialogs);
 	if (!tl){
 		return 0;

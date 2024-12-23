@@ -18,42 +18,20 @@ static void tg_file_from_tl(tg_file_t *f, const tl_t *tl)
 	
 	#define TG_FILE_TYP(t, arg, ...) f->arg = uf->arg->_id;
 	#define TG_FILE_ARG(t, arg, ...) f->arg = uf->arg;
-	#define TG_FILE_STR(t, arg, ...) f->arg = buf_to_base64(uf->arg); 
+	#define TG_FILE_BUF(t, arg, ...) f->arg = buf_add_buf(uf->arg);
 	TG_FILE_ARGS
 	#undef TG_FILE_TYP
 	#undef TG_FILE_ARG
-	#undef TG_FILE_STR
+	#undef TG_FILE_BUF
 }
 
-struct tg_get_file_t{
-	tg_t *tg;
-	uint32_t limit;
-	InputFileLocation location;
-	void *progressp;
-	void (*progress)(void *progressp, int down, int total);
-};
-
-static buf_t _tg_get_file_chunk(
-		void *chunkp, uint32_t received, uint32_t total)
-{
-	struct tg_get_file_t *s = chunkp;
-	if (s->progress)
-		s->progress(s->progressp, received, total);
-	
-	buf_t getFile = tl_upload_getFile(
-					NULL, 
-					NULL, 
-					&s->location, 
-					received, 
-					s->limit);
-	return getFile;
-}
-
-tg_file_t * tg_get_file(
+int tg_get_file(
 		tg_t *tg, 
 		InputFileLocation *location,
-		void *progressp,
-		void (*progress)(void *progressp, int down, int total))	
+		int size,
+		void *userdata,
+		int (*callback)(
+			void *userdata, const tg_file_t *file))
 {
 	printf("%s start\n", __func__);
 	/* If precise flag is not specified, then
@@ -74,46 +52,54 @@ tg_file_t * tg_get_file(
    • offset / (1024 * 1024) == (offset + limit - 1) / (1024 * 1024).
 	 */
 
-	struct tg_get_file_t *s = 
-		NEW(struct tg_get_file_t, 
-				ON_ERR(tg, "%s: can't allocate memory", __func__);
-				return NULL);
+	/*int i, limit = 1024*4, offset = 0; // for testing */
+	int i, limit = 1048576, offset = 0;
 
-	s->tg = tg;
-	s->limit  = 1048576;
-	s->location = buf_add_buf(*location);
-	s->progressp = progressp;
-	s->progress = progress;
+	for (i = 0; size>0?offset<size:1; ++i) 
+	{
+		// download parts of file
+		buf_t getFile = tl_upload_getFile(
+				NULL, 
+				NULL, 
+				location, 
+				offset, 
+				limit);
+			
+		// net send
+		tl_t *tl = tg_run_api(tg, &getFile);
+		buf_free(getFile);
 
-	// download parts of file
-	buf_t getFile = tl_upload_getFile(
-			NULL, 
-			NULL, 
-			location, 
-			0, 
-			s->limit);
+		if (tl == NULL)
+			return offset;
+
+		if (tl->_id != id_upload_file){
+			ON_ERR(tg, "%s: exceed upload_file but got: %s", 
+					__func__, TL_NAME_FROM_ID(tl->_id));
+			return offset;
+		}
 		
-	// net send
-	tl_t *tl = tg_send_api(
-			tg, &getFile, 
-			s, _tg_get_file_chunk);
-	buf_free(getFile);
+		tg_file_t file;
+		memset(&file, 0, sizeof(file));
+		tg_file_from_tl(&file, tl);
+		
+		// add offset
+		offset += file.bytes_.size;
 
-	if (tl == NULL)
-		return NULL;
-	
-	if (tl->_id != id_upload_file){
-		ON_ERR(tg, "%s: exceed upload_file but got: %s", 
-				__func__, TL_NAME_FROM_ID(tl->_id));
-		return NULL;
+		printf("FILE TYPE: %s\n", TL_NAME_FROM_ID(file.type_));
+		if (callback)
+			if (callback(userdata, &file))
+				break;
 	}
 
-	tg_file_t *file = NEW(tg_file_t, 
-			ON_ERR(tg, "%s: can't allocate memory", __func__);
-			return NULL);
-	tg_file_from_tl(file, tl);
-	free(s);
-	return file;
+	/*return file;*/
+	return offset;
+}
+
+static int _photo_file_cb(void *userdata, const tg_file_t *file)
+{
+	char **photo = userdata;
+	*photo = buf_to_base64(file->bytes_); 
+	return 1;
 }
 
 char * tg_get_photo_file(tg_t *tg, 
@@ -121,8 +107,10 @@ char * tg_get_photo_file(tg_t *tg,
 		const char *photo_file_reference,
 		const char *photo_size)
 {
+	char *photo = NULL;
+	
 	if (strcmp(photo_size, "s") == 0){
-		char *photo = photo_file_from_database(tg, photo_id);
+		photo = photo_file_from_database(tg, photo_id);
 		if (photo){
 			return photo;
 		}
@@ -137,22 +125,20 @@ char * tg_get_photo_file(tg_t *tg,
 							photo_size);
 	buf_free(fr);
 
-	tg_file_t *file = tg_get_file(
+	tg_get_file(
 			tg, 
 			&location, 
-			NULL, 
-			NULL);
+			0,
+			&photo, 
+			_photo_file_cb);
 	buf_free(location);
 	
-	if (file == NULL)
+	if (photo == NULL)
 		return NULL;
 
 	if (strcmp(photo_size, "s") == 0)
-		photo_to_database(tg, photo_id, file->bytes_);
+		photo_to_database(tg, photo_id, photo);
 
-	char *photo = file->bytes_;
-	free(file);
-	
 	return photo;
 }
 
@@ -162,8 +148,11 @@ char * tg_get_peer_photo_file(tg_t *tg,
 		uint64_t photo_id) 
 {
 	fprintf(stderr, "%s\n", __func__);
+	
+	char *photo = NULL;
+	
 	if (!big_photo){
-		char *photo = peer_photo_file_from_database(
+		photo = peer_photo_file_from_database(
 				tg, peer->id, photo_id);
 		if (photo){
 			return photo;
@@ -177,22 +166,20 @@ char * tg_get_peer_photo_file(tg_t *tg,
 				photo_id);
 	buf_free(peer_);
 
-	tg_file_t *file = tg_get_file(
+	tg_get_file(
 			tg, 
 			&location, 
-			NULL, 
-			NULL);
+			0,
+			&photo, 
+			_photo_file_cb);
 	buf_free(location);
 	
-	if (file == NULL)
+	if (photo == NULL)
 		return NULL;
 	
 	if (!big_photo)
 		peer_photo_to_database(tg, peer->id, 
-				photo_id, file->bytes_);
+				photo_id, photo);
 
-	char *photo = file->bytes_;
-	free(file);
-	
 	return photo;
 }

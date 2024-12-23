@@ -72,27 +72,52 @@ tl_t *tg_result(tg_t *tg, tl_t *result)
 	tl_t *tl = result;
 	printf("%s: handle result with tl: %s\n", 
 			__func__, TL_NAME_FROM_ID(result->_id));
-	if (result->_id == id_gzip_packed){
-		// handle gzip
-		tl_gzip_packed_t *obj =
-			(tl_gzip_packed_t *)result;
+	switch (result->_id) {
+		case id_gzip_packed:
+			{
+				// handle gzip
+				tl_gzip_packed_t *obj =
+					(tl_gzip_packed_t *)result;
 
-		buf_t buf;
-		int _e = gunzip_buf(&buf, obj->packed_data_);
-		if (_e)
-		{
-			char *err = gunzip_buf_err(_e);
-			ON_ERR(tg, "%s: %s", __func__, err);
-			free(err);
-		}
-		tl = tg_deserialize(tg, &buf);
+				buf_t buf;
+				int _e = gunzip_buf(&buf, obj->packed_data_);
+				if (_e)
+				{
+					char *err = gunzip_buf_err(_e);
+					ON_ERR(tg, "%s: %s", __func__, err);
+					free(err);
+				}
+				tl = tg_deserialize(tg, &buf);
+			}
+			break;
+		case id_bad_msg_notification:
+			{
+				tl_bad_msg_notification_t *obj = 
+					(tl_bad_msg_notification_t *)tl;
+				// handle bad msg notification
+				char *err = tg_strerr(tl);
+				ON_ERR(tg, "%s", err);
+				free(err);
+				return NULL;
+			}
+			break;
+		case id_rpc_error:
+			{
+				char *err = tg_strerr(tl);
+				ON_ERR(tg, "%s", err);
+				free(err);
+				return NULL;
+			}
+			break;
+
+		default:
+			break;
 	}
+
 	return tl;
 }
 
-tl_t *tg_send_api(tg_t *tg, buf_t *query,
-	  void *chunkp, 
-		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total))
+tl_t *tg_run_api(tg_t *tg, buf_t *query)
 {
 	int i;
 	tl_t *tl = NULL;
@@ -112,12 +137,12 @@ tl_t *tg_send_api(tg_t *tg, buf_t *query,
 	buf_t b = tg_prepare_query(
 			tg, *query, true, &msgid);
 	if (!b.size)
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 
 	// open socket
 	int sockfd = tg_net_open(tg);
 	if (sockfd < 0)
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 
 	// send ACK
 	if (tg->msgids[0]){
@@ -127,7 +152,7 @@ tl_t *tg_send_api(tg_t *tg, buf_t *query,
 		buf_free(ack);
 		if (s < 0){
 			ON_ERR(tg, "%s: socket error: %d", __func__, s);
-			goto tg_send_api_end;
+			goto tg_run_api_end;
 		}
 	}
 
@@ -137,11 +162,11 @@ tl_t *tg_send_api(tg_t *tg, buf_t *query,
 		send(sockfd, b.data, b.size, 0);
 	if (s < 0){
 		ON_ERR(tg, "%s: socket error: %d", __func__, s);
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 	}
 
 	// receive data
-tg_send_api_receive_data:;
+tg_run_api_receive_data:;
 	buf_t r = buf_new();
 	// get length of the package
 	uint32_t len;
@@ -151,7 +176,7 @@ tg_send_api_receive_data:;
 		// this is error - report it
 		ON_ERR(tg, "%s: received wrong length: %d", __func__, len);
 		buf_free(r);
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 	}
 
 	// realloc buf to be enough size
@@ -159,7 +184,7 @@ tg_send_api_receive_data:;
 		// handle error
 		ON_ERR(tg, "%s: error buf realloc to size: %d", __func__, len);
 		buf_free(r);
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 	}
 
 	// get data
@@ -170,7 +195,7 @@ tg_send_api_receive_data:;
 		if (s<0){
 			ON_ERR(tg, "%s: socket error: %d", __func__, s);
 			buf_free(r);
-			goto tg_send_api_end;
+			goto tg_run_api_end;
 		}
 		ON_LOG(tg, "%s: received chunk: %d", __func__, s);
 
@@ -178,31 +203,6 @@ tg_send_api_receive_data:;
 		
 		// ask to send new chunk
 		if (received < len){
-			if (chunk){
-				// get new chunk query
-				buf_t c = chunk(chunkp, received, len);
-				//printf("CHUNK\n");
-				//buf_dump(c);
-				
-				buf_t b = 
-					tg_prepare_query(tg, c, true, NULL);
-				buf_free(c);
-				
-				// send
-				int s = 
-					send(sockfd, b.data, b.size, 0);
-				if (s < 0){
-					// handle send error
-					ON_ERR(tg, "%s: socket error: %d", __func__, s);
-					buf_free(r);
-					buf_free(b);
-					goto tg_send_api_end;
-				}
-				
-				// receive more data
-				continue;
-			}
-			
 			ON_LOG(tg, "%s: expected size: %d, received: %d (%d%%)", 
 					__func__, len, received, received*100/len);
 			
@@ -212,31 +212,34 @@ tg_send_api_receive_data:;
 		break;
 	}
 
+	ON_LOG(tg, "%s: expected size: %d, received: %d (%d%%)", 
+			__func__, len, received, received*100/len);
+
 	if (received < len){
 		// some error
 		ON_ERR(tg, "%s: can't receive data", __func__);
 		buf_free(r);
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 	}
 
 	// get payload 
 	r.size = len;
 	if (r.size == 4 && buf_get_ui32(r) == 0xfffffe6c){
 		buf_free(r);
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 	}
 
 	buf_t d = tg_decrypt(tg, r, true);
 	if (!d.size){
 		buf_free(r);
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 	}
 	buf_free(r);
 
 	buf_t msg = tg_deheader(tg, d, true);
 	if (!msg.size){
 		buf_free(d);
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 	}
 	buf_free(d);
 
@@ -246,13 +249,13 @@ tg_send_api_receive_data:;
 	
 	// handle tl
 	if (tl == NULL)
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 
 	if (tl->_id != id_rpc_result){
 		ON_LOG(tg, "%s: expected rpc_result, but got: %s", 
 				__func__, TL_NAME_FROM_ID(tl->_id));
 		// receive data again
-		goto tg_send_api_receive_data;
+		goto tg_run_api_receive_data;
 	} 
 	
 	// check msgid
@@ -262,7 +265,7 @@ tg_send_api_receive_data:;
 		// free tl
 		/* TODO:  <24-12-24, yourname> */
 		tl = NULL;
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 	}
 	// handle result
 	if (result->result_ == NULL){
@@ -270,11 +273,11 @@ tg_send_api_receive_data:;
 		// free tl
 		/* TODO:  <24-12-24, yourname> */
 		tl = NULL;
-		goto tg_send_api_end;
+		goto tg_run_api_end;
 	}
 	tl = tg_result(tg, result->result_);
 
-tg_send_api_end:;
+tg_run_api_end:;
 	buf_free(b);
 	tg->send_lock = false;
 	return tl;	

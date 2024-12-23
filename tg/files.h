@@ -7,7 +7,7 @@
 #define TG_FILE_ARGS\
 	TG_FILE_TYP(uint32_t, type_,  "INT",  "type") \
 	TG_FILE_ARG(uint32_t, mtime_, "INT",  "mtime") \
-	TG_FILE_STR(char*,    bytes_, "TEXT", "bytes") \
+	TG_FILE_BUF(buf_t,    bytes_, "TEXT", "bytes") \
 
 
 typedef enum {
@@ -27,18 +27,20 @@ typedef enum {
 typedef struct tg_file_ {
 	#define TG_FILE_TYP(t, arg, ...) t arg;
 	#define TG_FILE_ARG(t, arg, ...) t arg;
-	#define TG_FILE_STR(t, arg, ...) t arg; 
+	#define TG_FILE_BUF(t, arg, ...) t arg; 
 	TG_FILE_ARGS
 	#undef TG_FILE_TYP
 	#undef TG_FILE_ARG
-	#undef TG_FILE_STR
+	#undef TG_FILE_BUF
 } tg_file_t;
 
-tg_file_t * tg_get_file(
+int tg_get_file(
 		tg_t *tg, 
 		InputFileLocation *location,
-		void *progressp,
-		void (*progress)(void *progressp, int down, int total));	
+		int total,
+		void *userdata,
+		int (*callback)(
+			void *userdata, const tg_file_t *file));	
 
 char * tg_get_photo_file(tg_t *tg, 
 		uint64_t photo_id, uint64_t photo_access_hash, 

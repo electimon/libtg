@@ -138,24 +138,20 @@ int messages_callback(void *data, const tg_message_t *m)
 	return 0;
 }
 
-int messages_callback2(void *data, int c, const tg_message_t *m)
+int messages_callback_photo(void *data, const tg_message_t *m)
 {
 	printf("%d: %s\n", m->id_, m->message_);
-	//if (m->photo_id){
-		//printf("HAS PHOTO!\n");
-		//tg_message_t *msg = data;
-		//*msg = *m;
-		//return 1;
-	//}
+	if (m->photo_id){
+		printf("HAS PHOTO!\n");
+		tg_message_t *msg = data;
+		*msg = *m;
+		return 1;
+	}
 	return 0;
 }
 
 int file_cb(void *d, const tg_file_t *f){
-	int len = 0;
-	if (f->bytes_)
-		len = strlen(f->bytes_);
-	printf("FILE type: %.8x, len: %d\n", f->type_, len);
-
+	printf("FILE type: %.8x, len: %d\n", f->type_, f->bytes_.size);
 	return 0;
 }
 
@@ -261,8 +257,7 @@ int main(int argc, char *argv[])
 	buf_t getUsers = 
 		tl_users_getUsers(&iuser, 1);	
 
-	tl_t *tl = tg_send_api(tg, &getUsers, 
-			NULL, NULL);
+	tl_t *tl = tg_run_api(tg, &getUsers);
 
 	printf("GOT: %s\n", TL_NAME_FROM_ID(tl->_id));
 
@@ -278,12 +273,11 @@ int main(int argc, char *argv[])
 		-5244509236001112417,
 	};
 
-	/*tg_get_peer_photo_file(*/
-			/*tg, */
-			/*&peer, */
-			/*true, */
-			/*5379844007854718198, */
-			/*NULL, photo_callback2);*/
+	//tg_get_peer_photo_file(
+			//tg, 
+			//&peer, 
+			//true, 
+			//5379844007854718198);
 
 	//buf_t h = tg_header(tg, getUsers, true);
 	//buf_t e = tg_encrypt(tg, h, true);
@@ -298,11 +292,11 @@ int main(int argc, char *argv[])
 	/*tg_get_dialogs_from_database(tg, tg, */
 			/*dialogs_callback);*/
 
-	int count = tg_get_dialogs(tg, 40,
-			 time(NULL),
-			 NULL, NULL,
-			 NULL, dialogs_callback);
-	printf("GOT %d dialogs\n", count);
+	//int count = tg_get_dialogs(tg, 40,
+			 //time(NULL),
+			 //NULL, NULL,
+			 //NULL, dialogs_callback);
+	//printf("GOT %d dialogs\n", count);
 
 
 	//printf("NAME: %s\n", d.name);
@@ -317,19 +311,32 @@ int main(int argc, char *argv[])
 			//d.photo_id);
 	//printf("IMAGE: %s\n", image);
 
-	/*tg_message_t m;*/
+	tg_message_t m;
 	/*tg_get_messages_from_database(*/
 			/*tg, */
 			/*peer, */
 			/*&m, */
 			/*messages_callback);*/
 
-	//char *image = tg_get_photo_file(
-			//tg, 
-			//m.photo_id, 
-			//m.photo_access_hash, 
-			//m.photo_file_reference, 
-			//"s");
+	int mmm = tg_messages_get_history(
+			tg,
+			peer, 
+			0, 
+			time(NULL), 
+			0, 
+			20, 
+			0, 
+			0, 
+			NULL, 
+			&m, 
+			messages_callback_photo);
+
+	char *image = tg_get_photo_file(
+			tg, 
+			m.photo_id, 
+			m.photo_access_hash, 
+			m.photo_file_reference, 
+			"m");
 	//printf("IMAGE: %s\n", image);
 
 	//tg_sync_messages_to_database(
@@ -343,19 +350,19 @@ int main(int argc, char *argv[])
 	//sleep(10);
 	
 	//tg_message_t m;
-	int mmm = tg_messages_get_history(
-			tg,
-			peer, 
-			0, 
-			time(NULL), 
-			0, 
-			20, 
-			0, 
-			0, 
-			NULL, 
-			NULL, 
-			messages_callback);
-	printf("GOT %d MESSAGES\n", mmm);
+	//int mmm = tg_messages_get_history(
+			//tg,
+			//peer, 
+			//0, 
+			//time(NULL), 
+			//0, 
+			//20, 
+			//0, 
+			//0, 
+			//NULL, 
+			//NULL, 
+			//messages_callback);
+	//printf("GOT %d MESSAGES\n", mmm);
 
 	/*printf("MESSAGE: %s\n", m.message_);*/
 	/*printf("file reference: %s\n", m.photo_file_reference);*/

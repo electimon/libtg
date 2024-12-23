@@ -279,9 +279,8 @@ int tg_messages_get_history(
 				h);
 	buf_free(peer_);
 
-	tl_t * tl = tg_send_api(
-			tg, &getHistory, 
-			NULL, NULL);
+	tl_t * tl = tg_run_api(tg, &getHistory);
+	buf_free(getHistory);
 
 	if (tl ==  NULL)
 		return 0;
@@ -368,8 +367,8 @@ int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 	buf_free(peer);
 	buf_free(random_id);
 
-	tl_t *tl = tg_send_api(
-			tg, &m, NULL, NULL);
+	tl_t *tl = tg_run_api(tg, &m);
+	buf_free(m);
 
 	if (tl == NULL)
 		return 0;
@@ -617,8 +616,7 @@ bool tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
 	buf_free(peer);
 	buf_free(action);
 
-	tl_t *tl = tg_send_api(
-			tg, &setTyping, NULL, NULL);
+	tl_t *tl = tg_run_api(tg, &setTyping);
 	buf_free(setTyping);
 	if (tl == NULL)
 		return false;
@@ -634,8 +632,7 @@ int tg_messages_set_read(tg_t *tg, tg_peer_t peer_, uint32_t max_id)
 			&peer, max_id);
 	buf_free(peer);
 	
-	tl_t *tl = tg_send_api(
-			tg, &readHistory, NULL, NULL);
+	tl_t *tl = tg_run_api(tg, &readHistory);
 	buf_free(readHistory);
 	
 	if (tl == NULL)

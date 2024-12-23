@@ -98,8 +98,6 @@ int tg_connect(
 
 
 
-tl_t *tg_send_api(tg_t *tg, buf_t *query,
-	  void *chunkp, 
-		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total));
+tl_t *tg_run_api(tg_t *tg, buf_t *query);
 
 #endif /* ifndef LIBTG_H */
