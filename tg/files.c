@@ -57,7 +57,8 @@ static int _tg_get_file_cb(void *userdata, const tl_t *tl){
 	return 0;
 }
 
-static buf_t _tg_get_file_chunk(void *chunkp, uint32_t received, uint32_t total)
+static buf_t _tg_get_file_chunk(
+		void *chunkp, uint32_t received, uint32_t total)
 {
 	struct tg_get_file_t *s = chunkp;
 	if (s->progress)
@@ -187,6 +188,7 @@ void tg_get_photo_file(tg_t *tg,
 		if (photo){
 			if (callback)
 				callback(userdata, photo);
+			free(photo);
 			return;
 		}
 	}
@@ -214,7 +216,7 @@ void tg_get_photo_file(tg_t *tg,
 	 tg_get_file(
 			tg, 
 			&location, 
-			&photo, 
+			s, 
 			_get_photo_callback, 
 			NULL, 
 			NULL);
