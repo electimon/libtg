@@ -1,5 +1,5 @@
-#ifndef SYMBOL
-#define SYMBOL
+#ifndef LIBTG_H
+#define LIBTG_H
 
 #include "tl/buf.h"
 #include  "tl/libtl.h"
@@ -96,4 +96,10 @@ int tg_connect(
 			const tl_t *tl,
 			const char *msg));
 
-#endif /* ifndef SYMBOL */
+
+
+tl_t *tg_send_api(tg_t *tg, buf_t *query,
+	  void *chunkp, 
+		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total));
+
+#endif /* ifndef LIBTG_H */

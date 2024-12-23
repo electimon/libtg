@@ -215,7 +215,7 @@ void tg_message_from_tl(
 	}
 }
 
-static void parse_msgs(
+static int parse_msgs(
 		tg_t *tg, uint64_t peer_id, 
 		int argc, tl_t **argv,
 		void *data,
@@ -243,90 +243,13 @@ static void parse_msgs(
 			if (callback(data, &m))
 				break;
 	}
+
+	return i;
 }	
 
-struct tg_messages_get_history_t {
-	tg_t *tg;
-	uint64_t peer_id;
-	void *userdata;
-	int (*callback)(void *, const tg_message_t *);
-	void (*on_done)(void *userdata);
-};
-
-static int tg_messages_get_history_cb(void *data, const tl_t *tl)
-{
-	struct tg_messages_get_history_t *s = data; 
-	if (!tl){
-		free(s);
-		return 0;
-	}
-	ON_LOG(s->tg, "%s: recived id: %.8x", __func__, tl->_id);
-
-	int i, k;
-
-	switch (tl->_id) {
-		case id_messages_channelMessages:
-			{
-				tl_messages_channelMessages_t *msgs = 
-					(tl_messages_channelMessages_t *)tl;
-				
-				parse_msgs(
-						s->tg, s->peer_id, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						s->userdata, 
-						s->callback);
-
-				goto tg_messeges_get_history_finish;
-			}
-			break;
-			
-		case id_messages_messages:
-			{
-				tl_messages_messages_t *msgs = 
-					(tl_messages_messages_t *)tl;
-				
-				parse_msgs(
-						s->tg, s->peer_id, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						s->userdata, 
-						s->callback);
-
-				goto tg_messeges_get_history_finish;
-			}
-			break;
-			
-		case id_messages_messagesSlice:
-			{
-				tl_messages_messagesSlice_t *msgs = 
-					(tl_messages_messagesSlice_t *)tl;
-				
-				parse_msgs(
-						s->tg, s->peer_id, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						s->userdata, 
-						s->callback);
-
-				goto tg_messeges_get_history_finish;
-			}
-			break;
-			
-		default:
-			break;
-	}
-	
-tg_messeges_get_history_finish:;
-	if (s->on_done)
-		s->on_done(s->userdata);
-	free(s);
-	return 0;
-}
-
-void tg_messages_get_history(
+int tg_messages_get_history(
 		tg_t *tg,
-		tg_peer_t peer_,
+		tg_peer_t peer,
 		int offset_id,
 		int offset_date,
 		int add_offset,
@@ -335,19 +258,18 @@ void tg_messages_get_history(
 		int min_id,
 		uint64_t *hash,
 		void *userdata,
-		int (*callback)(void *, const tg_message_t *),
-		void (*on_done)(void *))
+		int (*callback)(void *, const tg_message_t *))
 {
 	int i, k, c = 0;
 	uint64_t h = 0;
 	if (hash)
 		h = *hash;
 
-	buf_t peer = tg_inputPeer(peer_); 
+	buf_t peer_ = tg_inputPeer(peer); 
 
 	buf_t getHistory = 
 		tl_messages_getHistory(
-				&peer, 
+				&peer_, 
 				offset_id, 
 				offset_date, 
 				add_offset, 
@@ -355,99 +277,71 @@ void tg_messages_get_history(
 				max_id, 
 				min_id, 
 				h);
-	buf_free(peer);
+	buf_free(peer_);
 
-	struct tg_messages_get_history_t *s = 
-		NEW(struct tg_messages_get_history_t, 
-			ON_ERR(tg, "%s: can't allocate memory", __func__);
-			return);
-	s->tg = tg;
-	s->peer_id = peer_.id;
-	s->userdata = userdata;
-	s->callback = callback;
-	s->on_done = on_done;
-
-	tg_queue_manager_send_query(
-			tg, getHistory, 
-			s, tg_messages_get_history_cb, 
+	tl_t * tl = tg_send_api(
+			tg, &getHistory, 
 			NULL, NULL);
-}
 
-struct tg_send_message_t {
-	tg_t *tg;
-	void *userdata; 
-	void (*on_done)(void *userdata, bool out);
-};
-
-static int _tg_send_message_cb(void *data, const tl_t *tl)
-{
-	printf("%s\n", __func__);
-	struct tg_send_message_t *s = data;
-	if (!tl){
-		if (s->on_done)
-			s->on_done(s->userdata, false);
-		free(s);
+	if (tl ==  NULL)
 		return 0;
+
+
+	printf("GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
+
+	switch (tl->_id) {
+		case id_messages_channelMessages:
+			{
+				tl_messages_channelMessages_t *msgs = 
+					(tl_messages_channelMessages_t *)tl;
+				
+				c = parse_msgs(
+						tg, peer.id, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						userdata, 
+						callback);
+
+			}
+			break;
+			
+		case id_messages_messages:
+			{
+				tl_messages_messages_t *msgs = 
+					(tl_messages_messages_t *)tl;
+				
+				c = parse_msgs(
+						tg, peer.id, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						userdata, 
+						callback);
+
+			}
+			break;
+			
+		case id_messages_messagesSlice:
+			{
+				tl_messages_messagesSlice_t *msgs = 
+					(tl_messages_messagesSlice_t *)tl;
+				
+				c = parse_msgs(
+						tg, peer.id, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						userdata, 
+						callback);
+			}
+			break;
+			
+		default:
+			break;
 	}
 	
-	switch (tl->_id) {
-		case id_updatesTooLong: case id_updateShortMessage:
-		case id_updateShortChatMessage: 
-			/* ???:  <16-12-24, yourname> */
-			break;
-		case id_updateShort:
-			{
-				tl_updateShort_t *us =
-					(tl_updateShort_t *)tl;
-
-				printf("UPDATE: %s (%.8x)\n",
-						TL_NAME_FROM_ID(us->update_->_id), us->update_->_id);
-			
-				if (s->on_done)
-					s->on_done(s->userdata, true);
-			}
-			break;
-		case id_updates:
-			{
-				tl_updates_t *us =
-					(tl_updates_t *)tl;
-				int i;
-				for (i = 0; i < us->updates_len; ++i) {
-					printf("UPDATE: %s (%.8x)\n",
-							TL_NAME_FROM_ID(us->updates_[i]->_id), 
-							us->updates_[i]->_id);
-				}
-				if (s->on_done)
-					s->on_done(s->userdata, true);
-			}
-			break;
-		case id_updateShortSentMessage:
-			{
-				tl_updateShortSentMessage_t *usm =
-					(tl_updateShortSentMessage_t *)tl;
-				if (usm->out_){
-					if (s->on_done)
-						s->on_done(s->userdata, true);
-				} else {
-					if (s->on_done)
-						s->on_done(s->userdata, false);
-				}
-			}	
-			break;
-
-		default:
-			if (s->on_done)
-				s->on_done(s->userdata, false);
-			break;
-	}	
-
-	free(s);
-	return 0;
+	return c;
 }
 
-void tg_send_message(tg_t *tg, tg_peer_t peer_,
-		const char *message, void *userdata, 
-		void (*on_done)(void *userdata, bool out))
+int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 {
 	printf("TO SEND MESSAGE: %s\n", message);
 	buf_t peer = tg_inputPeer(peer_); 
@@ -474,17 +368,56 @@ void tg_send_message(tg_t *tg, tg_peer_t peer_,
 	buf_free(peer);
 	buf_free(random_id);
 
-	struct tg_send_message_t *s = NEW(struct tg_send_message_t, 
-			ON_ERR(tg, "%s: can't allocate memory", __func__);
-			return);
-	s->tg = tg;
-	s->userdata = userdata;
-	s->on_done = on_done;
+	tl_t *tl = tg_send_api(
+			tg, &m, NULL, NULL);
 
-	tg_queue_manager_send_query(
-			tg, m, 
-			s, _tg_send_message_cb, 
-			NULL, NULL);
+	if (tl == NULL)
+		return 0;
+
+	switch (tl->_id) {
+		case id_updatesTooLong: case id_updateShortMessage:
+		case id_updateShortChatMessage: 
+			/* ???:  <16-12-24, yourname> */
+			break;
+		case id_updateShort:
+			{
+				tl_updateShort_t *us =
+					(tl_updateShort_t *)tl;
+
+				printf("UPDATE: %s (%.8x)\n",
+						TL_NAME_FROM_ID(us->update_->_id), us->update_->_id);
+			
+			}
+			break;
+		case id_updates:
+			{
+				tl_updates_t *us =
+					(tl_updates_t *)tl;
+				int i;
+				for (i = 0; i < us->updates_len; ++i) {
+					printf("UPDATE: %s (%.8x)\n",
+							TL_NAME_FROM_ID(us->updates_[i]->_id), 
+							us->updates_[i]->_id);
+				}
+			}
+			break;
+		case id_updateShortSentMessage:
+			{
+				tl_updateShortSentMessage_t *usm =
+					(tl_updateShortSentMessage_t *)tl;
+				if (usm->out_){
+
+				} else {
+
+				}
+			}	
+			break;
+
+		default:
+			break;
+	}	
+
+	return 0;
 }
 
 int tg_message_to_database(tg_t *tg, const tg_message_t *m)
@@ -667,32 +600,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 	return i;
 }
 
-struct tg_messages_set_typing_t {
-	tg_t *tg;
-	void *userdata;
-	void (*on_done)(void *userdata, bool ack);
-};
-
-static int tg_messages_set_typing_cb(void *data, const tl_t *tl)
-{
-	struct tg_messages_set_typing_t *s = data;
-	if (!tl){
-		if (s->on_done)
-			s->on_done(s->userdata, false);
-		free(s);
-		return 0;
-	}
-
-	if (s->on_done)
-		s->on_done(s->userdata, tl->_id == id_true?true:false);
-
-	free(s);
-	return 0;
-}
-
-void tg_messages_set_typing(tg_t *tg, tg_peer_t peer_,
-		bool typing, void *userdata, 
-		void (*on_done)(void *userdata, bool ack))
+bool tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
 {
 	Peer peer = tg_inputPeer(peer_); 
 	SendMessageAction action;
@@ -709,60 +617,31 @@ void tg_messages_set_typing(tg_t *tg, tg_peer_t peer_,
 	buf_free(peer);
 	buf_free(action);
 
-	struct tg_messages_set_typing_t *s = NEW(
-			struct tg_messages_set_typing_t, 
-			ON_ERR(tg, "%s: can't allocate memory", __func__);
-			return;);
-
-	tg_queue_manager_send_query(
-			tg, 
-			setTyping, 
-			s, tg_messages_set_typing_cb, 
-			NULL, NULL);
+	tl_t *tl = tg_send_api(
+			tg, &setTyping, NULL, NULL);
+	buf_free(setTyping);
+	if (tl == NULL)
+		return false;
+	
+	return tl->_id == id_true;
 }
 
-struct tg_messages_set_read_t {
-	tg_t *tg;
-	void *userdata;
-	void (*on_done)(void *userdata);
-};
-
-static int tg_messages_set_read_cb(void *data, const tl_t *tl)
-{
-	struct tg_messages_set_read_t *s = data;
-	if (!tl){
-		if (s->on_done)
-			s->on_done(s->userdata);
-		free(s);
-		return 0;
-	}
-
-	/* TODO: messages.AffectedMessages */
-	if (s->on_done)
-		s->on_done(s->userdata);
-
-	free(s);
-	return 0;
-}
-
-void tg_messages_set_read(tg_t *tg, tg_peer_t peer_,
-		uint32_t max_id, void *userdata, 
-		void (*on_done)(void *userdata))
+int tg_messages_set_read(tg_t *tg, tg_peer_t peer_, uint32_t max_id)
 {
 	Peer peer = tg_inputPeer(peer_); 
 
 	buf_t readHistory = tl_messages_readHistory(
 			&peer, max_id);
 	buf_free(peer);
-
-	struct tg_messages_set_typing_t *s = NEW(
-			struct tg_messages_set_typing_t, 
-			ON_ERR(tg, "%s: can't allocate memory", __func__);
-			return;);
-
-	tg_queue_manager_send_query(
-			tg, 
-			readHistory, 
-			s, tg_messages_set_typing_cb, 
-			NULL, NULL);
+	
+	tl_t *tl = tg_send_api(
+			tg, &readHistory, NULL, NULL);
+	buf_free(readHistory);
+	
+	if (tl == NULL)
+		return 1;
+	
+	/* TODO: messages.AffectedMessages */
+	
+	return 0;
 }

@@ -34,27 +34,20 @@ typedef struct tg_file_ {
 	#undef TG_FILE_STR
 } tg_file_t;
 
-void tg_get_file(
+tg_file_t * tg_get_file(
 		tg_t *tg, 
 		InputFileLocation *location,
-	  void *data,
-	  int (*callback)(void *data, const tg_file_t *file),
 		void *progressp,
 		void (*progress)(void *progressp, int down, int total));	
 
-void tg_get_photo_file(tg_t *tg, 
+char * tg_get_photo_file(tg_t *tg, 
 		uint64_t photo_id, uint64_t photo_access_hash, 
 		const char *photo_file_reference,
-		const char *photo_size,
-		void *userdata,
-		int (*callback)(void *userdata, const char *photo));
+		const char *photo_size);
 
-void tg_get_peer_photo_file(tg_t *tg, 
+char * tg_get_peer_photo_file(tg_t *tg, 
 		tg_peer_t *peer, 
 		bool big_photo,
-		uint64_t photo_id, 
-		void *userdata,
-		int (*callback)(void *userdata, const char *photo));
-
+		uint64_t photo_id); 
 
 #endif /* ifndef TG_FILES_H */

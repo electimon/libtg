@@ -29,33 +29,9 @@ struct tg_get_file_t{
 	tg_t *tg;
 	uint32_t limit;
 	InputFileLocation location;
-	void *data;
-	int (*callback)(void *data, const tg_file_t *file);
 	void *progressp;
 	void (*progress)(void *progressp, int down, int total);
 };
-
-static int _tg_get_file_cb(void *userdata, const tl_t *tl){
-	struct tg_get_file_t *s = userdata;
-	if (tl && tl->_id == id_upload_file){
-			tg_file_t file;
-			memset(&file, 0, sizeof(file));
-			tg_file_from_tl(&file, tl);
-			if (s->callback)
-				s->callback(s->data, &file);
-	} else {
-	// throw error
-		if (tl)
-			printf("ID: %.8x\n", tl->_id);
-		char *err = tg_strerr(tl); 
-		ON_ERR(s->tg, "%s", err);
-		free(err);
-		if (s->callback)
-			s->callback(s->data, NULL);
-	}
-
-	return 0;
-}
 
 static buf_t _tg_get_file_chunk(
 		void *chunkp, uint32_t received, uint32_t total)
@@ -73,11 +49,9 @@ static buf_t _tg_get_file_chunk(
 	return getFile;
 }
 
-void tg_get_file(
+tg_file_t * tg_get_file(
 		tg_t *tg, 
 		InputFileLocation *location,
-	  void *data,
-	  int (*callback)(void *data, const tg_file_t *file),
 		void *progressp,
 		void (*progress)(void *progressp, int down, int total))	
 {
@@ -103,18 +77,14 @@ void tg_get_file(
 	struct tg_get_file_t *s = 
 		NEW(struct tg_get_file_t, 
 				ON_ERR(tg, "%s: can't allocate memory", __func__);
-				return);
+				return NULL);
 
 	s->tg = tg;
 	s->limit  = 1048576;
 	s->location = buf_add_buf(*location);
-	s->data = data;
-	s->callback = callback;
 	s->progressp = progressp;
 	s->progress = progress;
 
-	tl_t *tl = NULL;
-	
 	// download parts of file
 	buf_t getFile = tl_upload_getFile(
 			NULL, 
@@ -124,71 +94,37 @@ void tg_get_file(
 			s->limit);
 		
 	// net send
-	tg_queue_manager_send_query(
-			tg, 
-			getFile,
-			s,
-			_tg_get_file_cb,
-			s, 
-			_tg_get_file_chunk);
-}
+	tl_t *tl = tg_send_api(
+			tg, &getFile, 
+			s, _tg_get_file_chunk);
+	buf_free(getFile);
 
-struct photo_file_t {
-	tg_t *tg;
-	bool is_peer_photo;
-	bool big_photo;
-	uint64_t peer_id; 
-	uint64_t photo_id; 
-	uint64_t photo_access_hash;
-	char photo_size[2];
-	void *userdata;
-	int (*callback)(void *userdata, const char *photo);
-};
-
-static int _get_photo_callback(void *d, const tg_file_t *p)
-{
-	struct photo_file_t *s = d;
-	if (!p){
-		if (s->callback)
-			s->callback(s->userdata, NULL);
-		free(s);
-		return 0;
+	if (tl == NULL)
+		return NULL;
+	
+	if (tl->_id != id_upload_file){
+		ON_ERR(tg, "%s: exceed upload_file but got: %s", 
+				__func__, TL_NAME_FROM_ID(tl->_id));
+		return NULL;
 	}
 
-	// save photo to base
-	if ((s->is_peer_photo && !s->big_photo) || 
-			 strcmp(s->photo_size, "s") == 0)
-	{
-		if (s->is_peer_photo){
-			 peer_photo_to_database(
-					 s->tg, s->peer_id,
-					 s->photo_id, p->bytes_);
-		} else {
-			photo_to_database(s->tg, 
-					s->photo_id, p->bytes_);
-		}
-	}
-	if (s->callback)
-		s->callback(s->userdata, p->bytes_);
-
+	tg_file_t *file = NEW(tg_file_t, 
+			ON_ERR(tg, "%s: can't allocate memory", __func__);
+			return NULL);
+	tg_file_from_tl(file, tl);
 	free(s);
-	return 0;
+	return file;
 }
 
-void tg_get_photo_file(tg_t *tg, 
+char * tg_get_photo_file(tg_t *tg, 
 		uint64_t photo_id, uint64_t photo_access_hash, 
 		const char *photo_file_reference,
-		const char *photo_size,
-		void *userdata,
-		int (*callback)(void *userdata, const char *photo))
+		const char *photo_size)
 {
 	if (strcmp(photo_size, "s") == 0){
 		char *photo = photo_file_from_database(tg, photo_id);
 		if (photo){
-			if (callback)
-				callback(userdata, photo);
-			free(photo);
-			return;
+			return photo;
 		}
 	}
 
@@ -201,42 +137,36 @@ void tg_get_photo_file(tg_t *tg,
 							photo_size);
 	buf_free(fr);
 
-	struct photo_file_t *s = 
-		NEW(struct photo_file_t, 
-				ON_ERR(tg, "%s: can't allocate memory", __func__); return);
-
-	s->tg = tg;
-	s->is_peer_photo = false;
-	s->photo_id = photo_id;
-	s->userdata = userdata;
-	s->callback = callback;
-	strncpy(s->photo_size, photo_size, 1);
-
-	 tg_get_file(
+	tg_file_t *file = tg_get_file(
 			tg, 
 			&location, 
-			s, 
-			_get_photo_callback, 
 			NULL, 
 			NULL);
+	buf_free(location);
+	
+	if (file == NULL)
+		return NULL;
+
+	if (strcmp(photo_size, "s") == 0)
+		photo_to_database(tg, photo_id, file->bytes_);
+
+	char *photo = file->bytes_;
+	free(file);
+	
+	return photo;
 }
 
-void tg_get_peer_photo_file(tg_t *tg, 
+char * tg_get_peer_photo_file(tg_t *tg, 
 		tg_peer_t *peer, 
 		bool big_photo,
-		uint64_t photo_id, 
-		void *userdata,
-		int (*callback)(void *userdata, const char *photo))
+		uint64_t photo_id) 
 {
 	fprintf(stderr, "%s\n", __func__);
 	if (!big_photo){
 		char *photo = peer_photo_file_from_database(
 				tg, peer->id, photo_id);
 		if (photo){
-			if (callback)
-				callback(userdata, photo);
-			free(photo);
-			return;
+			return photo;
 		}
 	}
 	buf_t peer_ = tg_inputPeer(*peer);
@@ -247,23 +177,22 @@ void tg_get_peer_photo_file(tg_t *tg,
 				photo_id);
 	buf_free(peer_);
 
-	struct photo_file_t *s = 
-		NEW(struct photo_file_t, 
-				ON_ERR(tg, "%s: can't allocate memory", __func__); return);
-
-	s->tg = tg;
-	s->is_peer_photo = true;
-	s->big_photo = big_photo;
-	s->peer_id = peer->id;
-	s->photo_id = photo_id;
-	s->userdata = userdata;
-	s->callback = callback;
-
-	tg_get_file(
+	tg_file_t *file = tg_get_file(
 			tg, 
 			&location, 
-			s, 
-			_get_photo_callback, 
 			NULL, 
 			NULL);
+	buf_free(location);
+	
+	if (file == NULL)
+		return NULL;
+	
+	if (!big_photo)
+		peer_photo_to_database(tg, peer->id, 
+				photo_id, file->bytes_);
+
+	char *photo = file->bytes_;
+	free(file);
+	
+	return photo;
 }

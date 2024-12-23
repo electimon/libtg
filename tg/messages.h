@@ -101,11 +101,12 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m);
 /* upload messages and save them in local database
  * use peer, offset_id, offset_date, add_offset for
  * pagination
- * you may use dialogs_hash_from_database() and add hash
+ * you may use messages_hash_from_database() and add hash
  * as argument to function for skipping not-midified
- * dialogs 
- * return non-null in callback to stop function execution */ 
-void tg_messages_get_history(
+ * messages 
+ * return non-null in callback to stop function execution 
+ * return number of messages */ 
+int tg_messages_get_history(
 		tg_t *tg,
 		tg_peer_t peer,
 		int offset_id,
@@ -116,26 +117,20 @@ void tg_messages_get_history(
 		int min_id,
 		uint64_t *hash,
 		void *userdata,
-		int (*callback)(void *userdata, const tg_message_t *msg),
-		void (*on_done)(void *userdata));
+		int (*callback)(void *userdata, const tg_message_t *msg));
 
 /* get messeges from database, return number of messages
  * return non-null in callback to stop function execution */ 
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		int (*callback)(void *data, const tg_message_t *message));
 
-/* send text message and update local database */
-void tg_send_message(tg_t *tg, tg_peer_t peer, 
-		const char *message, void *userdata, 
-		void (*on_done)(void *userdata, bool out));
+/* send text message and update local database 
+ * return non-null on error */
+int tg_message_send(tg_t *tg, tg_peer_t peer, const char *message);
 
-void tg_messages_set_typing(tg_t *tg, tg_peer_t peer,
-		bool typing, void *userdata, 
-		void (*on_done)(void *userdata, bool ack));
+bool tg_messages_set_typing(tg_t *tg, tg_peer_t peer, bool typing);
 
-void tg_messages_set_read(tg_t *tg, tg_peer_t peer,
-		uint32_t max_id, void *userdata, 
-		void (*on_done)(void *userdata));
+int tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id);
 
 
 #endif /* ifndef TG_MESSAGES_H */		

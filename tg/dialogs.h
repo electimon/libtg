@@ -46,16 +46,16 @@ int tg_dialog_to_database(tg_t *tg, const tg_dialog_t *d);
  * %hash (if not NULL) 
  * set folder_id NULL to get all folders, pointer to 0 for 
  * non-hidden dialogs, pointer to 1 for hidden dialogs 
- * all loaded dialogs saves to database */ 
-void tg_get_dialogs(
+ * all loaded dialogs saves to database 
+ * return number of dialogs */ 
+int tg_get_dialogs(
 		tg_t *tg, 
 		int limit,
 		time_t date, 
 		uint64_t * hash, 
 		uint32_t *folder_id, 
 		void *data,
-		int (*callback)(void *data, const tg_dialog_t *dialog),
-		void (*on_done)(void *data));
+		int (*callback)(void *data, const tg_dialog_t *dialog));
 
 int tg_get_dialogs_from_database(tg_t *tg, void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));

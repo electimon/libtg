@@ -18,6 +18,7 @@ struct tg_ {
 	int port;
 	int sockfd;
 	bool net;
+	bool send_lock;
 	list_t *send_queue;
 	bool send_queue_lock;
 	bool send_queue_manager;

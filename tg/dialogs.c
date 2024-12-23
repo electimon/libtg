@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 22.12.2024
+ * Last Modified Date: 23.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -40,30 +40,44 @@
 	({buf_t i = image_from_photo_stripped(_b); \
 	 buf_to_base64(i);}) 
 
-struct tg_get_dialogs_t {
-	tg_t *tg;
-	void *data;
-	int (*callback)(void *data, const tg_dialog_t *dialog);
-	void (*on_done)(void *data);
-};
+int tg_get_dialogs(
+		tg_t *tg, 
+		int limit, 
+		time_t date, 
+		uint64_t * hash, 
+		uint32_t *folder_id, 
+		void *data,
+		int (*callback)(void *data, const tg_dialog_t *dialog))
+{
+	int i = 0, k;
+	uint64_t h = 0;
+	/*if (hash)*/
+		/*h = *hash;*/
 
-static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
-	struct tg_get_dialogs_t *s = data;
+	InputPeer inputPeer = tl_inputPeerSelf();
+
+	buf_t getDialogs = 
+		tl_messages_getDialogs(
+				NULL,
+				folder_id, 
+				date,
+				-1, 
+				&inputPeer, 
+				limit,
+				h);
+
+	tl_t *tl = tg_send_api(
+			tg, &getDialogs, NULL, NULL);
+	buf_free(getDialogs);
 	if (!tl){
-		if (s->on_done)
-			s->on_done(s->data);
-		free(s);
 		return 0;
 	}
-	
+
 	if (tl->_id == id_messages_dialogsNotModified){
-		ON_LOG(s->tg, "%s: dialogs not modified", __func__);
+		ON_LOG(tg, "%s: dialogs not modified", __func__);
 		tl_messages_dialogsNotModified_t *dnm =
 			(tl_messages_dialogsNotModified_t *)tl;
 		/* TODO:  <21-12-24, yourname> */
-		if (s->on_done)
-			s->on_done(s->data);
-		free(s);
 		return 0;
 	}
 
@@ -91,10 +105,9 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 			md = *(tl_messages_dialogs_t *)tl;
 		}
 		
-		ON_LOG(s->tg, "%s: got %d dialogs", 
+		ON_LOG(tg, "%s: got %d dialogs", 
 				__func__, md.dialogs_len);
 
-		int i;
 		for (i = 0; i < md.dialogs_len; ++i) {
 			// handle dialogs
 			tg_dialog_t d;
@@ -120,7 +133,7 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 				peer = (tl_peerChat_t *)df->peer_;
 
 			} else if (md.dialogs_[i]->_id != id_dialog){
-				ON_LOG(s->tg, "%s: unknown dialog type: %.8x",
+				ON_LOG(tg, "%s: unknown dialog type: %.8x",
 						__func__, md.dialogs_[i]->_id);
 				continue;
 			
@@ -290,8 +303,8 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 						
 						// save message to database
 						tg_message_t tgm;
-						tg_message_from_tl(s->tg, &tgm, message);
-						tg_message_to_database(s->tg, &tgm);
+						tg_message_from_tl(tg, &tgm, message);
+						tg_message_to_database(tg, &tgm);
 
 						// update dialog
 						d.top_message_date = message->date_;
@@ -328,17 +341,17 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 			} // done messages 
 
 			if (d.peer_type == TG_PEER_TYPE_NULL) {
-				ON_LOG(s->tg, "%s: can't find dialog data "
+				ON_LOG(tg, "%s: can't find dialog data "
 						"for peer: %.8x: %ld",
 						__func__, peer->_id, peer->chat_id_);
 				continue;
 			}
 			// save dialog to database
-			tg_dialog_to_database(s->tg, &d);
+			tg_dialog_to_database(tg, &d);
 
 			// callback dialog
-			if (s->callback)
-				if (s->callback(s->data, &d))
+			if (callback)
+				if (callback(data, &d))
 					break;
 
 			// free dialog
@@ -349,57 +362,14 @@ static int _tg_get_dialogs_cb(void *data, const tl_t *tl){
 	} else { // not dialogs or dialogsSlice
 		// throw error
 		char *err = tg_strerr(tl); 
-		ON_ERR(s->tg, "%s", err);
+		ON_ERR(tg, "%s", err);
 		free(err);
+		return 0;
 	}
 
 	// free tl
 	/* TODO:  <29-11-24, yourname> */
-	if (s->on_done)
-		s->on_done(s->data);
-	free(s);
-	return 0;
-} 
-
-void tg_get_dialogs(
-		tg_t *tg, 
-		int limit, 
-		time_t date, 
-		uint64_t * hash, 
-		uint32_t *folder_id, 
-		void *data,
-		int (*callback)(void *data, const tg_dialog_t *dialog),
-		void (*on_done)(void *data))
-{
-	int i, k;
-	uint64_t h = 0;
-	/*if (hash)*/
-		/*h = *hash;*/
-
-	InputPeer inputPeer = tl_inputPeerSelf();
-
-	buf_t getDialogs = 
-		tl_messages_getDialogs(
-				NULL,
-				folder_id, 
-				date,
-				-1, 
-				&inputPeer, 
-				limit,
-				h);
-
-	struct tg_get_dialogs_t *s = NEW(struct tg_get_dialogs_t,
-			ON_ERR(tg, "%s: can't allocate memory", __func__);
-			return;);
-	s->tg = tg;
-	s->data = data;
-	s->callback = callback;
-	s->on_done = on_done;
-
-	tg_queue_manager_send_query(
-			tg, getDialogs, 
-			s, _tg_get_dialogs_cb, 
-			NULL, NULL);
+	return i;
 }
 
 void tg_dialogs_create_table(tg_t *tg){

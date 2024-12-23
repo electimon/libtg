@@ -11,7 +11,7 @@ struct tg_connect_t {
 	char error[BUFSIZ];
 };
 
-static void on_err(void *d, tl_t *tl, const char *err)
+static void on_err(void *d, const char *err)
 {
 	struct tg_connect_t *t = d;
 	if (err)
@@ -20,7 +20,7 @@ static void on_err(void *d, tl_t *tl, const char *err)
 		t->error[0] = 0;
 
 	if (t->callback)
-		t->callback(t->userdata, TG_AUTH_ERROR, tl, err);
+		t->callback(t->userdata, TG_AUTH_ERROR, NULL, err);
 }
 
 #define _TG_CB(auth, tl, ...)\
