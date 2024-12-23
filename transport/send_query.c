@@ -269,6 +269,11 @@ int tg_send_query2_on_done(void *p, const buf_t r){
 		return 1;
 	}
 
+	if (tl->_id == id_updateShort) {
+		// get one more message
+		return 1;
+	}
+
 	if (tl->_id == id_new_session_created) {
 		// get one more message
 		return 1;
