@@ -3,6 +3,7 @@
 
 #include "tg.h"
 #include "peer.h"
+#include <bits/types/FILE.h>
 
 #define TG_FILE_ARGS\
 	TG_FILE_TYP(uint32_t, type_,  "INT",  "type") \
@@ -51,5 +52,15 @@ char * tg_get_peer_photo_file(tg_t *tg,
 		tg_peer_t *peer, 
 		bool big_photo,
 		uint64_t photo_id); 
+
+void tg_get_document(tg_t *tg, 
+		uint64_t id, 
+		uint64_t size, 
+		uint64_t access_hash, 
+		const char * file_reference, 
+		const char * thumb_size,
+		void *userdata,
+		int (*callback)(
+			void *userdata, const tg_file_t *file));	
 
 #endif /* ifndef TG_FILES_H */

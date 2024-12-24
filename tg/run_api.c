@@ -245,7 +245,6 @@ tg_run_api_receive_data:;
 
 	// deserialize 
 	tl = tg_deserialize(tg, &msg);
-	buf_free(r);
 	
 	// handle tl
 	if (tl == NULL)

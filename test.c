@@ -150,6 +150,18 @@ int messages_callback_photo(void *data, const tg_message_t *m)
 	return 0;
 }
 
+int messages_callback_document(void *data, const tg_message_t *m)
+{
+	printf("%d: %s\n", m->id_, m->message_);
+	if (m->doc_id){
+		printf("HAS DOCUMENT!\n");
+		tg_message_t *msg = data;
+		*msg = *m;
+		return 1;
+	}
+	return 0;
+}
+
 int file_cb(void *d, const tg_file_t *f){
 	printf("FILE type: %.8x, len: %d\n", f->type_, f->bytes_.size);
 	return 0;
@@ -235,6 +247,12 @@ int dialogs_callback(void *data, const tg_dialog_t *d)
 		return 0;
 }
 
+static int file_write(void *d, const tg_file_t *file)
+{
+	FILE *fp = d;
+	fwrite(file->bytes_.data, file->bytes_.size, 1, fp);
+	return 0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -329,18 +347,28 @@ int main(int argc, char *argv[])
 			0, 
 			NULL, 
 			&m, 
-			messages_callback_photo);
+			messages_callback_document);
 
-	printf("MESSAGE WITH PHOTO:\n");
-	printf("%.8x:\n", m.id_);
+	//printf("MESSAGE WITH PHOTO:\n");
+	//printf("%.8x:\n", m.id_);
 
-	char *image = tg_get_photo_file(
-			tg, 
-			m.photo_id, 
-			m.photo_access_hash, 
-			m.photo_file_reference, 
-			"m");
+	//char *image = tg_get_photo_file(
+			//tg, 
+			//m.photo_id, 
+			//m.photo_access_hash, 
+			//m.photo_file_reference, 
+			//"m");
 	//printf("IMAGE: %s\n", image);
+	
+	FILE *fp = fopen("/home/kuzmich/ttt", "w");
+	tg_get_document(
+			tg, m.doc_id, 
+			m.doc_size, 
+			m.doc_access_hash, 
+			m.doc_file_reference, 
+			"", fp, file_write);
+	
+	fclose(fp);
 	
 	//tg_sync_messages_to_database(
 			//tg, 

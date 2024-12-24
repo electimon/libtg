@@ -59,6 +59,8 @@ int tg_get_file(
 
 	for (i = 0; size>0?offset<size:1; ++i) 
 	{
+		printf("%s: download total: %d with offset: %d (%d%%)\n",
+				__func__, size, offset, offset/size);
 		// download parts of file
 		buf_t getFile = tl_upload_getFile(
 				NULL, 
@@ -91,11 +93,10 @@ int tg_get_file(
 		if (callback)
 			if (callback(userdata, &file))
 				break;
+		
+		// free tl
+		tl_free(tl);
 	}
-	
-	// free tl
-	//if (tl)
-		//tl_free(tl);
 	
 	/*return file;*/
 	return offset;
@@ -189,3 +190,32 @@ char * tg_get_peer_photo_file(tg_t *tg,
 
 	return photo;
 }
+
+void tg_get_document(tg_t *tg, 
+		uint64_t id, 
+		uint64_t size, 
+		uint64_t access_hash, 
+		const char * file_reference, 
+		const char * thumb_size,
+		void *userdata,
+		int (*callback)(
+			void *userdata, const tg_file_t *file))	
+{
+	buf_t fr = buf_from_base64(file_reference);
+	InputFileLocation location =
+		tl_inputDocumentFileLocation(
+				id, 
+				access_hash, 
+				&fr, 
+				thumb_size?thumb_size:"");
+	buf_free(fr);
+
+	tg_get_file(
+			tg, 
+			&location, 
+			size,
+			userdata, 
+			callback);
+
+	buf_free(location);
+}	
