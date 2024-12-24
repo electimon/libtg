@@ -480,6 +480,12 @@ int tg_get_dialogs_from_database(
 				break;
 			}
 		}
+		// free data
+		#define TG_DIALOG_ARG(t, n, type, name)
+		#define TG_DIALOG_STR(t, n, type, name) free(d.n);
+		TG_DIALOG_ARGS
+		#undef TG_DIALOG_ARG
+		#undef TG_DIALOG_STR
 	}	
 	
 	free(s.str);

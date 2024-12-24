@@ -164,8 +164,8 @@ void tl_free(tl_t *tl)
 	if (tl == NULL)
 		return;
 
-	fprintf(stderr, "%s: %s\n", 
-			__func__, TL_NAME_FROM_ID(tl->_id));
+	//fprintf(stderr, "%s: %s\n", 
+			//__func__, TL_NAME_FROM_ID(tl->_id));
 	
 	// find id in free table
 	tl_free_function *fun = get_free_fun(tl->_id);
