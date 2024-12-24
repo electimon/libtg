@@ -245,7 +245,7 @@ tg_run_api_receive_data:;
 
 	// deserialize 
 	tl = tg_deserialize(tg, &msg);
-	//buf_free(r);
+	buf_free(r);
 	
 	// handle tl
 	if (tl == NULL)
@@ -263,7 +263,7 @@ tg_run_api_receive_data:;
 	if (msgid != result->req_msg_id_){
 		ON_ERR(tg, "%s: rpc result with wrong msg id", __func__);
 		// free tl
-		/* TODO:  <24-12-24, yourname> */
+		tl_free(tl);
 		tl = NULL;
 		goto tg_run_api_end;
 	}
@@ -271,7 +271,7 @@ tg_run_api_receive_data:;
 	if (result->result_ == NULL){
 		ON_ERR(tg, "%s: rpc result is NULL", __func__);
 		// free tl
-		/* TODO:  <24-12-24, yourname> */
+		tl_free(tl);
 		tl = NULL;
 		goto tg_run_api_end;
 	}

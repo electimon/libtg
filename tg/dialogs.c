@@ -367,7 +367,7 @@ int tg_get_dialogs(
 	}
 
 	// free tl
-	/* TODO:  <29-11-24, yourname> */
+	tl_free(tl);
 	return i;
 }
 

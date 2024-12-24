@@ -54,6 +54,8 @@ int tg_get_file(
 
 	/*int i, limit = 1024*4, offset = 0; // for testing */
 	int i, limit = 1048576, offset = 0;
+		
+	tl_t *tl = NULL;
 
 	for (i = 0; size>0?offset<size:1; ++i) 
 	{
@@ -66,7 +68,7 @@ int tg_get_file(
 				limit);
 			
 		// net send
-		tl_t *tl = tg_run_api(tg, &getFile);
+		tl = tg_run_api(tg, &getFile);
 		buf_free(getFile);
 
 		if (tl == NULL)
@@ -90,7 +92,11 @@ int tg_get_file(
 			if (callback(userdata, &file))
 				break;
 	}
-
+	
+	// free tl
+	//if (tl)
+		//tl_free(tl);
+	
 	/*return file;*/
 	return offset;
 }

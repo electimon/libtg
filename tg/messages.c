@@ -285,7 +285,6 @@ int tg_messages_get_history(
 	if (tl ==  NULL)
 		return 0;
 
-
 	printf("GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
 
 	switch (tl->_id) {
@@ -336,6 +335,9 @@ int tg_messages_get_history(
 		default:
 			break;
 	}
+
+	// free tl
+	tl_free(tl);
 	
 	return c;
 }
@@ -416,6 +418,9 @@ int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 			break;
 	}	
 
+	// free tl
+	tl_free(tl);
+	
 	return 0;
 }
 
@@ -620,8 +625,13 @@ bool tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
 	buf_free(setTyping);
 	if (tl == NULL)
 		return false;
+
+	bool ret = (tl->_id == id_true);
 	
-	return tl->_id == id_true;
+	// free tl
+	tl_free(tl);
+	
+	return ret;
 }
 
 int tg_messages_set_read(tg_t *tg, tg_peer_t peer_, uint32_t max_id)
@@ -639,6 +649,9 @@ int tg_messages_set_read(tg_t *tg, tg_peer_t peer_, uint32_t max_id)
 		return 1;
 	
 	/* TODO: messages.AffectedMessages */
+	
+	// free tl
+	tl_free(tl);
 	
 	return 0;
 }

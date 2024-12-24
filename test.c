@@ -331,6 +331,9 @@ int main(int argc, char *argv[])
 			&m, 
 			messages_callback_photo);
 
+	printf("MESSAGE WITH PHOTO:\n");
+	printf("%.8x:\n", m.id_);
+
 	char *image = tg_get_photo_file(
 			tg, 
 			m.photo_id, 
@@ -338,7 +341,7 @@ int main(int argc, char *argv[])
 			m.photo_file_reference, 
 			"m");
 	//printf("IMAGE: %s\n", image);
-
+	
 	//tg_sync_messages_to_database(
 			//tg, 
 			//time(NULL), 

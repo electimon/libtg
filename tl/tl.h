@@ -16,4 +16,5 @@ typedef struct mtp_message_ {
 	buf_t body;
 } mtp_message_t; 
 
+void tl_free(tl_t *tl);
 #endif /* ifndef TL_H_ */
