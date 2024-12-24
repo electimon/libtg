@@ -3,7 +3,6 @@
 
 #include "tg.h"
 #include "peer.h"
-#include <bits/types/FILE.h>
 
 #define TG_FILE_ARGS\
 	TG_FILE_TYP(uint32_t, type_,  "INT",  "type") \
