@@ -35,6 +35,8 @@ typedef struct tg_dialog_ {
 	#undef TG_DIALOG_STR
 } tg_dialog_t;
 
+void tg_dialog_free(tg_dialog_t*);
+
 /* used by tg init to create database table */
 void tg_dialogs_create_table(tg_t *tg);
 

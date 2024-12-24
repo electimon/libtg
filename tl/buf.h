@@ -2,7 +2,7 @@
  * File              : buf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 15.12.2024
+ * Last Modified Date: 25.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef TL_BUF_H
@@ -42,5 +42,7 @@ extern buf_t    buf_xor(buf_t, buf_t);
 extern void     buf_free(buf_t);
 extern char*    buf_to_base64(buf_t);
 extern buf_t    buf_from_base64(const char*);
+
+#define buf_strdup(__b) strndup((char *)__b.data, __b.size)
 
 #endif

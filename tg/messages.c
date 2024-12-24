@@ -29,7 +29,7 @@ void tg_message_from_tl(
 		tgm->arg = tlm->arg;
 	#define TG_MESSAGE_STR(t, arg, ...) \
 	if (tlm->arg.data && tlm->arg.size > 0)\
-		tgm->arg = strndup((char*)tlm->arg.data, tlm->arg.size);
+		tgm->arg = buf_strdup(tlm->arg);
 	#define TG_MESSAGE_PER(t, arg, ...) \
 	if (tlm->arg){\
 		tl_peerUser_t *peer = (tl_peerUser_t *)tlm->arg; \
@@ -38,12 +38,14 @@ void tg_message_from_tl(
 	}
 	#define TG_MESSAGE_SPA(...)
 	#define TG_MESSAGE_SPS(...)
+	#define TG_MESSAGE_SPB(...)
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
 	#undef TG_MESSAGE_SPA
 	#undef TG_MESSAGE_SPS
+	#undef TG_MESSAGE_SPB
 
 	// handle with media
 	if (tlm->media_){
@@ -136,8 +138,7 @@ void tg_message_from_tl(
 									{
 										tl_documentAttributeAudio_t *a =
 											(tl_documentAttributeAudio_t *)attr;
-										tgm->doc_title =
-											strndup((char*)a->title_.data, a->title_.size);
+										tgm->doc_title = buf_strdup(a->title_); 
 										tgm->doc_aduration = a->duration_;
 									}
 									break;
@@ -146,8 +147,7 @@ void tg_message_from_tl(
 										tl_documentAttributeFilename_t *a =
 											(tl_documentAttributeFilename_t *)attr;
 										tgm->doc_file_name =
-											strndup((char*)a->file_name_.data, a->file_name_.size);
-
+											buf_strdup(a->file_name_);
 									}
 								
 								default:
@@ -165,19 +165,13 @@ void tg_message_from_tl(
 					{
 						tl_webPage_t *web = (tl_webPage_t *)mmp->webpage_;
 						tgm->web_id = web->id_;
-						tgm->web_url =
-							buf_to_base64(web->url_);
-						tgm->web_display_url =
-							buf_to_base64(web->display_url_);
+						tgm->web_url = buf_strdup(web->url_);
+						tgm->web_display_url = buf_strdup(web->display_url_);
 						tgm->web_hash = web->hash_;
-						tgm->web_type =
-							buf_to_base64(web->type_);
-						tgm->web_site_name =
-							buf_to_base64(web->site_name_);
-						tgm->web_title =
-							buf_to_base64(web->title_);
-						tgm->web_description =
-							buf_to_base64(web->description_);
+						tgm->web_type = buf_strdup(web->type_);
+						tgm->web_site_name = buf_strdup(web->site_name_);
+						tgm->web_title = buf_strdup(web->title_);
+						tgm->web_description = buf_strdup(web->description_);
 
 						if (web->photo_ && web->photo_->_id == id_photo)
 						{
@@ -198,13 +192,13 @@ void tg_message_from_tl(
 						(tl_messageMediaContact_t *)tlm->media_;
 					
 					tgm->contact_phone_number = 
-							buf_to_base64(mmp->phone_number_);
+							buf_strdup(mmp->phone_number_);
 					tgm->contact_first_name = 
-							buf_to_base64(mmp->first_name_);
+							buf_strdup(mmp->first_name_);
 					tgm->contact_last_name = 
-							buf_to_base64(mmp->last_name_);
+							buf_strdup(mmp->last_name_);
 					tgm->contact_vcard = 
-							buf_to_base64(mmp->vcard_);
+							buf_strdup(mmp->vcard_);
 					tgm->contact_user_id = mmp->user_id_;
 				}
 				break;
@@ -242,6 +236,8 @@ static int parse_msgs(
 		if (callback)
 			if (callback(data, &m))
 				break;
+		
+		tg_message_free(&m);
 	}
 
 	return i;
@@ -525,6 +521,21 @@ void tg_messages_create_table(tg_t *tg){
 	#undef TG_MESSAGE_SPS
 } 
 
+void tg_message_free(tg_message_t *m)
+{
+	#define TG_MESSAGE_ARG(t, n, ...)
+	#define TG_MESSAGE_STR(t, n, ...) if (m->n) free(m->n);
+	#define TG_MESSAGE_PER(t, n, ...)
+	#define TG_MESSAGE_SPA(t, n, ...)
+	#define TG_MESSAGE_SPS(t, n, ...) if (m->n) free(m->n);
+	TG_MESSAGE_ARGS
+	#undef TG_MESSAGE_ARG
+	#undef TG_MESSAGE_STR
+	#undef TG_MESSAGE_PER
+	#undef TG_MESSAGE_SPA
+	#undef TG_MESSAGE_SPS
+}
+
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		int (*callback)(void *data, const tg_message_t *message))
 {
@@ -598,6 +609,8 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 				return i;
 			}
 		}
+		// free data
+		tg_message_free(&m);
 	}	
 	
 	free(s.str);

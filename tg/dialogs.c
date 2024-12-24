@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 24.12.2024
+ * Last Modified Date: 25.12.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "tg.h"
@@ -354,7 +354,7 @@ int tg_get_dialogs(
 					break;
 
 			// free dialog
-			free(d.name);
+			tg_dialog_free(&d);
 		
 		} // done dialogs
 
@@ -481,13 +481,18 @@ int tg_get_dialogs_from_database(
 			}
 		}
 		// free data
-		#define TG_DIALOG_ARG(t, n, type, name)
-		#define TG_DIALOG_STR(t, n, type, name) free(d.n);
-		TG_DIALOG_ARGS
-		#undef TG_DIALOG_ARG
-		#undef TG_DIALOG_STR
+		tg_dialog_free(&d);
 	}	
 	
 	free(s.str);
 	return 0;
+}
+
+void tg_dialog_free(tg_dialog_t *d)
+{
+	#define TG_DIALOG_ARG(...)
+	#define TG_DIALOG_STR(t, n, ...) if(d->n) free(d->n);
+	TG_DIALOG_ARGS
+	#undef TG_DIALOG_ARG
+	#undef TG_DIALOG_STR
 }

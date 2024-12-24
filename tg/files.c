@@ -96,6 +96,8 @@ int tg_get_file_with_progress(
 		if (callback)
 			if (callback(userdata, &file))
 				break;
+
+		tg_file_free(&file);
 		
 		// free tl
 		tl_free(tl);
@@ -135,14 +137,16 @@ char * tg_get_photo_file(tg_t *tg,
 		const char *photo_file_reference,
 		const char *photo_size)
 {
+	fprintf(stderr, "%s\n", __func__);
+	
 	char *photo = NULL;
 	
-	if (strcmp(photo_size, "s") == 0){
-		photo = photo_file_from_database(tg, photo_id);
-		if (photo){
-			return photo;
-		}
-	}
+	//if (strcmp(photo_size, "s") == 0){
+		//photo = photo_file_from_database(tg, photo_id);
+		//if (photo){
+			//return photo;
+		//}
+	//}
 
 	buf_t fr = buf_from_base64(photo_file_reference);
 	InputFileLocation location = 
@@ -161,11 +165,11 @@ char * tg_get_photo_file(tg_t *tg,
 			_photo_file_cb);
 	buf_free(location);
 	
-	if (photo == NULL)
-		return NULL;
+	//if (photo == NULL)
+		//return NULL;
 
-	if (strcmp(photo_size, "s") == 0)
-		photo_to_database(tg, photo_id, photo);
+	//if (strcmp(photo_size, "s") == 0)
+		//photo_to_database(tg, photo_id, photo);
 
 	return photo;
 }
@@ -179,13 +183,13 @@ char * tg_get_peer_photo_file(tg_t *tg,
 	
 	char *photo = NULL;
 	
-	if (!big_photo){
-		photo = peer_photo_file_from_database(
-				tg, peer->id, photo_id);
-		if (photo){
-			return photo;
-		}
-	}
+	//if (!big_photo){
+		//photo = peer_photo_file_from_database(
+				//tg, peer->id, photo_id);
+		//if (photo){
+			//return photo;
+		//}
+	//}
 	buf_t peer_ = tg_inputPeer(*peer);
 	InputFileLocation location = 
 		tl_inputPeerPhotoFileLocation(
@@ -202,12 +206,12 @@ char * tg_get_peer_photo_file(tg_t *tg,
 			_photo_file_cb);
 	buf_free(location);
 	
-	if (photo == NULL)
-		return NULL;
+	//if (photo == NULL)
+		//return NULL;
 	
-	if (!big_photo)
-		peer_photo_to_database(tg, peer->id, 
-				photo_id, photo);
+	//if (!big_photo)
+		//peer_photo_to_database(tg, peer->id, 
+				//photo_id, photo);
 
 	return photo;
 }
@@ -244,3 +248,13 @@ void tg_get_document(tg_t *tg,
 
 	buf_free(location);
 }	
+
+void tg_file_free(tg_file_t *f){
+	#define TG_FILE_TYP(...)
+	#define TG_FILE_ARG(...)
+	#define TG_FILE_BUF(t, n, ...) buf_free(f->n); 
+	TG_FILE_ARGS
+	#undef TG_FILE_TYP
+	#undef TG_FILE_ARG
+	#undef TG_FILE_BUF
+}

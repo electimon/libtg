@@ -88,6 +88,8 @@ typedef struct tg_message_ {
 	#undef TG_MESSAGE_SPS
 } tg_message_t;
 
+void tg_message_free(tg_message_t*);
+
 /* convert tl_message to tg_message */
 void tg_message_from_tl(
 		tg_t*, tg_message_t*, tl_message_t*);

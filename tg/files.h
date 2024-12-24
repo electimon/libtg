@@ -34,6 +34,8 @@ typedef struct tg_file_ {
 	#undef TG_FILE_BUF
 } tg_file_t;
 
+void tg_file_free(tg_file_t*);
+
 int tg_get_file(
 		tg_t *tg, 
 		InputFileLocation *location,
