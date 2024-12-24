@@ -137,7 +137,7 @@ void tg_message_from_tl(
 										tl_documentAttributeAudio_t *a =
 											(tl_documentAttributeAudio_t *)attr;
 										tgm->doc_title =
-											buf_to_base64(a->title_);
+											strndup((char*)a->title_.data, a->title_.size);
 										tgm->doc_aduration = a->duration_;
 									}
 									break;
@@ -146,7 +146,7 @@ void tg_message_from_tl(
 										tl_documentAttributeFilename_t *a =
 											(tl_documentAttributeFilename_t *)attr;
 										tgm->doc_file_name =
-											buf_to_base64(a->file_name_);
+											strndup((char*)a->file_name_.data, a->file_name_.size);
 
 									}
 								
