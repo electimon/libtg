@@ -25,13 +25,15 @@ static void tg_file_from_tl(tg_file_t *f, const tl_t *tl)
 	#undef TG_FILE_BUF
 }
 
-int tg_get_file(
+int tg_get_file_with_progress(
 		tg_t *tg, 
 		InputFileLocation *location,
 		int size,
 		void *userdata,
 		int (*callback)(
-			void *userdata, const tg_file_t *file))
+			void *userdata, const tg_file_t *file),
+		void *progressp,
+			int (*progress)(void *progressp, int size, int total))
 {
 	printf("%s start\n", __func__);
 	/* If precise flag is not specified, then
@@ -70,7 +72,8 @@ int tg_get_file(
 				limit);
 			
 		// net send
-		tl = tg_run_api(tg, &getFile);
+		tl = tg_run_api_with_progress(
+				tg, &getFile, progressp, progress);
 		buf_free(getFile);
 
 		if (tl == NULL)
@@ -100,6 +103,24 @@ int tg_get_file(
 	
 	/*return file;*/
 	return offset;
+}
+
+int tg_get_file(
+		tg_t *tg, 
+		InputFileLocation *location,
+		int size,
+		void *userdata,
+		int (*callback)(
+			void *userdata, const tg_file_t *file))
+{
+	return tg_get_file_with_progress(
+			tg, 
+			location, 
+			size, 
+			userdata, 
+			callback, 
+			NULL, 
+			NULL);
 }
 
 static int _photo_file_cb(void *userdata, const tg_file_t *file)
@@ -199,7 +220,9 @@ void tg_get_document(tg_t *tg,
 		const char * thumb_size,
 		void *userdata,
 		int (*callback)(
-			void *userdata, const tg_file_t *file))	
+			void *userdata, const tg_file_t *file),	
+		void *progressp,
+			int (*progress)(void *progressp, int size, int total))
 {
 	buf_t fr = buf_from_base64(file_reference);
 	InputFileLocation location =
@@ -210,12 +233,14 @@ void tg_get_document(tg_t *tg,
 				thumb_size?thumb_size:"");
 	buf_free(fr);
 
-	tg_get_file(
+	tg_get_file_with_progress(
 			tg, 
 			&location, 
 			size,
 			userdata, 
-			callback);
+			callback,
+			progressp,
+			progress);
 
 	buf_free(location);
 }	

@@ -60,6 +60,8 @@ void tg_get_document(tg_t *tg,
 		const char * thumb_size,
 		void *userdata,
 		int (*callback)(
-			void *userdata, const tg_file_t *file));	
+			void *userdata, const tg_file_t *file),	
+		void *progressp,
+			int (*progress)(void *progressp, int size, int total));
 
 #endif /* ifndef TG_FILES_H */
