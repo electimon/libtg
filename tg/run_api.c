@@ -117,7 +117,9 @@ tl_t *tg_result(tg_t *tg, tl_t *result)
 	return tl;
 }
 
-tl_t *tg_run_api(tg_t *tg, buf_t *query)
+tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query, 
+		void *progressp, 
+		int (*progress)(void *progressp, int size, int total))
 {
 	int i;
 	tl_t *tl = NULL;
@@ -205,6 +207,9 @@ tg_run_api_receive_data:;
 		if (received < len){
 			ON_LOG(tg, "%s: expected size: %d, received: %d (%d%%)", 
 					__func__, len, received, received*100/len);
+			if (progress)
+				if (progress(progressp, received, len))
+					break;
 			
 			// receive more data
 			continue;
@@ -280,4 +285,9 @@ tg_run_api_end:;
 	buf_free(b);
 	tg->send_lock = false;
 	return tl;	
+}
+
+tl_t *tg_run_api(tg_t *tg, buf_t *query){
+	return tg_run_api_with_progress(
+			tg, query, NULL, NULL);
 }

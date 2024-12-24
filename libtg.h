@@ -100,4 +100,8 @@ int tg_connect(
 
 tl_t *tg_run_api(tg_t *tg, buf_t *query);
 
+tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query, 
+		void *progressp, 
+		int (*progress)(void *progressp, int size, int total));
+
 #endif /* ifndef LIBTG_H */
