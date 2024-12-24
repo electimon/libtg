@@ -130,8 +130,6 @@ tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query,
 			break;
 		usleep(1000); // in microseconds
 	}
-	if (i>=100)
-		return tl;
 	tg->send_lock = true;
 
 	// prepare query
