@@ -65,7 +65,7 @@ void tg_get_document(tg_t *tg,
 		void *progressp,
 			int (*progress)(void *progressp, int size, int total));
 
-char * tg_get_document_get_thumb(tg_t *tg, 
+char * tg_get_document_thumb(tg_t *tg, 
 		uint64_t id, 
 		uint64_t size, 
 		uint64_t access_hash, 
