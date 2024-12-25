@@ -221,7 +221,6 @@ void tg_get_document(tg_t *tg,
 		uint64_t size, 
 		uint64_t access_hash, 
 		const char * file_reference, 
-		const char * thumb_size,
 		void *userdata,
 		int (*callback)(
 			void *userdata, const tg_file_t *file),	
@@ -234,7 +233,7 @@ void tg_get_document(tg_t *tg,
 				id, 
 				access_hash, 
 				&fr, 
-				thumb_size?thumb_size:"");
+				"");
 	buf_free(fr);
 
 	tg_get_file_with_progress(
@@ -248,6 +247,38 @@ void tg_get_document(tg_t *tg,
 
 	buf_free(location);
 }	
+
+char * tg_get_document_get_thumb(tg_t *tg, 
+		uint64_t id, 
+		uint64_t size, 
+		uint64_t access_hash, 
+		const char * file_reference, 
+		const char * thumb_size)
+{	
+	fprintf(stderr, "%s\n", __func__);
+	
+	char *photo = NULL;
+	
+	buf_t fr = buf_from_base64(file_reference);
+	InputFileLocation location =
+		tl_inputDocumentFileLocation(
+				id, 
+				access_hash, 
+				&fr, 
+				thumb_size);
+	buf_free(fr);
+
+	tg_get_file(
+			tg, 
+			&location, 
+			size,
+			&photo, 
+			_photo_file_cb);
+
+	buf_free(location);
+
+	return photo;
+}
 
 void tg_file_free(tg_file_t *f){
 	#define TG_FILE_TYP(...)

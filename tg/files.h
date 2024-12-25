@@ -59,11 +59,18 @@ void tg_get_document(tg_t *tg,
 		uint64_t size, 
 		uint64_t access_hash, 
 		const char * file_reference, 
-		const char * thumb_size,
 		void *userdata,
 		int (*callback)(
 			void *userdata, const tg_file_t *file),	
 		void *progressp,
 			int (*progress)(void *progressp, int size, int total));
+
+char * tg_get_document_get_thumb(tg_t *tg, 
+		uint64_t id, 
+		uint64_t size, 
+		uint64_t access_hash, 
+		const char * file_reference, 
+		const char * thumb_size);
+
 
 #endif /* ifndef TG_FILES_H */

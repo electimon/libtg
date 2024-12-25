@@ -366,7 +366,8 @@ int main(int argc, char *argv[])
 			m.doc_size, 
 			m.doc_access_hash, 
 			m.doc_file_reference, 
-			"", fp, file_write, NULL, NULL);
+			fp, file_write,
+		 	NULL, NULL);
 	
 	fclose(fp);
 	
