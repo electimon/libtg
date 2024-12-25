@@ -67,7 +67,6 @@ void tg_get_document(tg_t *tg,
 
 char * tg_get_document_thumb(tg_t *tg, 
 		uint64_t id, 
-		uint64_t size, 
 		uint64_t access_hash, 
 		const char * file_reference, 
 		const char * thumb_size);
