@@ -130,14 +130,6 @@ tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query,
 	int i;
 	tl_t *tl = NULL;
 
-	// wait to unlock
-	for (i=0; i<1000; ++i) {
-		if (!tg->send_lock)
-			break;
-		usleep(1000); // in microseconds
-	}
-	tg->send_lock = true;
-
 	// prepare query
 	uint64_t msgid = 0;
 	buf_t b = tg_prepare_query(
@@ -289,7 +281,6 @@ tg_run_api_receive_data:;
 
 tg_run_api_end:;
 	buf_free(b);
-	tg->send_lock = false;
 	return tl;	
 }
 
