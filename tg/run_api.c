@@ -117,6 +117,12 @@ tl_t *tg_result(tg_t *tg, tl_t *result)
 	return tl;
 }
 
+
+static void tg_handle_updates(tg_t *tg, tl_t *tl){
+	/* TODO: UPDATES */
+
+}
+
 tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query, 
 		void *progressp, 
 		int (*progress)(void *progressp, int size, int total))
@@ -125,7 +131,7 @@ tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query,
 	tl_t *tl = NULL;
 
 	// wait to unlock
-	for (i=0; i<100; ++i) {
+	for (i=0; i<1000; ++i) {
 		if (!tg->send_lock)
 			break;
 		usleep(1000); // in microseconds
@@ -256,6 +262,8 @@ tg_run_api_receive_data:;
 	if (tl->_id != id_rpc_result){
 		ON_LOG(tg, "%s: expected rpc_result, but got: %s", 
 				__func__, TL_NAME_FROM_ID(tl->_id));
+		// handle UPDATES
+		tg_handle_updates(tg, tl);
 		// receive data again
 		goto tg_run_api_receive_data;
 	} 
