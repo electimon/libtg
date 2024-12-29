@@ -45,6 +45,9 @@ AM_CONDITIONAL([WIN64],   [test "$build_windows" = "yes" -a "$build_x86_64" == "
 LT_INIT
 AC_CHECK_HEADER([sqlite3.h],[],[AC_MSG_ERROR([Please install sqlite3])],[])
 AC_CHECK_HEADER([openssl/ssl.h],[],[AC_MSG_ERROR([Please install openssl])],[])
+#AC_CHECK_HEADER([opus/opus.h],[],[AC_MSG_ERROR([Please install opus])],[])
+#AC_CHECK_HEADER([opus/opusenc.h],[],[AC_MSG_ERROR([Please install opusenc])],[])
+#AC_CHECK_HEADER([opus/opusfile.h],[],[AC_MSG_ERROR([Please install opusfile])],[])
 
 AC_CONFIG_FILES([
 Makefile
