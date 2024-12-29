@@ -71,5 +71,13 @@ char * tg_get_document_thumb(tg_t *tg,
 		const char * file_reference, 
 		const char * thumb_size);
 
+int tg_document_send(
+		tg_t *tg, tg_peer_t *peer, 
+		const char *filename,
+		const char *filepath,
+		bool isAnimation,
+		const char *mime_type,
+		const char *message,
+		void *progressp, int (*progress)(void *, int, int));
 
 #endif /* ifndef TG_FILES_H */
