@@ -456,58 +456,74 @@ tg_document_send_with_progress_saveFilePart:;
 				document->filename, 
 				md5_checksum);
 
-		// set attributes
-		DocumentAttribute attrs[8];
-		memset(attrs, 0, sizeof(DocumentAttribute)*8);
-		int attrs_len = 0;
-		if (document->filename[0]){
-			attrs[attrs_len++] = tl_documentAttributeFilename(
-					document->filename);
-		}
-		if (document->has_stickers){
-			attrs[attrs_len++] = tl_documentAttributeHasStickers();
-		}
-		switch (document->type) {
-			case DOCUMENT_TYPE_IMAGE:
-				attrs[attrs_len++] = tl_documentAttributeImageSize(
-						document->image_w, document->image_h);
-				break;
-			case DOCUMENT_TYPE_VIDEO:
-				attrs[attrs_len++] = tl_documentAttributeVideo(
-						false, 
-						document->video_supports_streaming, 
-						document->video_no_sound, 
-						document->video_duration, 
-						document->video_w, 
-						document->video_h, 
-						document->video_preload_prefix_size, 
-						document->video_start_ts);
-				break;
-			case DOCUMENT_TYPE_AUDIO:
-				attrs[attrs_len++] = tl_documentAttributeAudio(
-						document->audio_voice, 
-						document->audio_duration, 
-						document->audio_title, 
-						document->audio_perfomer, 
-						document->audio_waveform);
-				break;
-			
-			default:
-				break;
-		}
-	
-		InputMedia media = tl_inputMediaUploadedDocument(
-				document->no_sound_video, 
-				document->force_file, 
-				document->spoiler, 
-				&inputFile, 
-				NULL, 
-				document->mime_type, 
-				attrs, 
-				attrs_len, 
-				document->stickers, 
-				document->stickers_len, 
-				document->ttl_seconds);
+			InputMedia media;
+		if (document->type == DOCUMENT_TYPE_PHOTO) {
+			media = tl_inputMediaUploadedPhoto(
+					document->spoiler, 
+					&inputFile, 
+					document->stickers, 
+					document->stickers_len, 
+					document->ttl_seconds);
+
+		} else { // not a photo
+			// set attributes
+			DocumentAttribute attrs[8];
+			memset(attrs, 0, sizeof(DocumentAttribute)*8);
+			int attrs_len = 0;
+			if (document->filename[0]){
+				attrs[attrs_len++] = tl_documentAttributeFilename(
+						document->filename);
+			}
+			if (document->has_stickers){
+				attrs[attrs_len++] = tl_documentAttributeHasStickers();
+			}
+			switch (document->type) {
+				case DOCUMENT_TYPE_IMAGE:
+					attrs[attrs_len++] = tl_documentAttributeImageSize(
+							document->image_w, document->image_h);
+					break;
+				case DOCUMENT_TYPE_VIDEO:
+					attrs[attrs_len++] = tl_documentAttributeVideo(
+							false, 
+							document->video_supports_streaming, 
+							document->video_no_sound, 
+							document->video_duration, 
+							document->video_w, 
+							document->video_h, 
+							document->video_preload_prefix_size, 
+							document->video_start_ts);
+					break;
+				case DOCUMENT_TYPE_AUDIO:
+					attrs[attrs_len++] = tl_documentAttributeAudio(
+							document->audio_voice, 
+							document->audio_duration, 
+							document->audio_title, 
+							document->audio_perfomer, 
+							document->audio_waveform);
+					break;
+				
+				default:
+					break;
+			}
+		
+			media = tl_inputMediaUploadedDocument(
+					document->no_sound_video, 
+					document->force_file, 
+					document->spoiler, 
+					&inputFile, 
+					NULL, 
+					document->mime_type, 
+					attrs, 
+					attrs_len, 
+					document->stickers, 
+					document->stickers_len, 
+					document->ttl_seconds);
+			// free attrs
+			for (i = 0; i < attrs_len; ++i) {
+				buf_free(attrs[i]);
+			}
+		} // end if photo
+		
 		buf_free(inputFile);
 
 		buf_t peer_ = tg_inputPeer(*peer);
@@ -549,6 +565,18 @@ tg_document_send_with_progress_saveFilePart:;
 
 	return 0;
 }	
+
+tg_document_t *tg_photo(tg_t *tg, const char *filepath)
+{
+	assert(filepath);
+	tg_document_t *d = NEW(tg_document_t, 
+			ON_ERR(tg, "%s: can't allocate memory", __func__);
+			return NULL;);
+	strncpy(d->filepath, filepath,
+			 sizeof(d->filepath) - 1);
+	d->type = DOCUMENT_TYPE_PHOTO;
+	return d;
+}
 
 tg_document_t *tg_voice_message(tg_t *tg, const char *filepath)
 {

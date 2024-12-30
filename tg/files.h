@@ -75,6 +75,7 @@ char * tg_get_document_thumb(tg_t *tg,
 
 typedef enum {
 	DOCUMENT_TYPE_DEFAUL,
+	DOCUMENT_TYPE_PHOTO,
 	DOCUMENT_TYPE_IMAGE,
 	DOCUMENT_TYPE_VIDEO,
 	DOCUMENT_TYPE_AUDIO,
@@ -122,6 +123,7 @@ typedef struct {
 	int stickers_len;
 } tg_document_t;
 
+tg_document_t *tg_photo(tg_t *tg, const char *filepath);
 tg_document_t *tg_voice_message(tg_t *tg, const char *filepath);
 
 int tg_document_send(
