@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "api_id.h"
+#include "tl/struct.h"
 #include "tl/tl.h"
 #include "transport/net.h"
 #include "transport/queue.h"
@@ -191,10 +192,22 @@ int query_cb(void *d, const tl_t *tl){
 			user->access_hash_
 		}; 
 		tg_t *tg = d;
-		tg_message_send(
+		//tg_message_send(
+		//P
+				//tg, 
+				//peer, 
+				//"hello world");
+
+		tg_document_send(
 				tg, 
-				peer, 
-				"hello world");
+				&peer, 
+				"test document", 
+				"/home/kuzmich/2.ogg", 
+				false, 
+				"audio/ogg", 
+				"hello world!",
+			 	NULL, 
+				NULL);
 	}
 		
 	return 0;
@@ -278,18 +291,49 @@ int main(int argc, char *argv[])
 	tl_t *tl = tg_run_api(tg, &getUsers);
 
 	printf("GOT: %s\n", TL_NAME_FROM_ID(tl->_id));
+	if (!tl || tl->_id != id_vector)
+		return 1;
 
+	tl_vector_t *vector = (tl_vector_t *)tl;
+	tl = tl_deserialize(&vector->data_);
+	if (!tl || tl->_id != id_user)
+		return 1;
+	tl_user_t *user = (tl_user_t *)tl;
 
-	/*tg_queue_manager_send_query(*/
-			/*tg, getUsers, */
-			/*tg, query_cb, */
-			/*NULL, NULL);*/
+	printf("USERNAME: %s\n", (char *)user->username_.data);
 
-		tg_peer_t peer = {
-		TG_PEER_TYPE_CHANNEL,
-		1326223284,
-		-5244509236001112417,
-	};
+	tg_peer_t peer = {
+			TG_PEER_TYPE_USER,
+			user->id_,
+			user->access_hash_
+	}; 
+		//tg_message_send(
+		//P
+				//tg, 
+				//peer, 
+				//"hello world");
+
+	tg_document_send(
+			tg, 
+			&peer, 
+			"test document", 
+			"/home/kuzmich/2.ogg", 
+			false, 
+			"audio/ogg", 
+			"hello world!",
+			NULL, 
+			NULL);
+
+	//tg_queue_manager_send_query(
+			//tg, getUsers, 
+			//tg, query_cb, 
+			//NULL, NULL);
+
+		//tg_peer_t peer = {
+		//TG_PEER_TYPE_CHANNEL,
+		//1326223284,
+		//-5244509236001112417,
+	//};
 
 	//tg_get_peer_photo_file(
 			//tg, 
@@ -336,18 +380,18 @@ int main(int argc, char *argv[])
 			/*&m, */
 			/*messages_callback);*/
 
-	int mmm = tg_messages_get_history(
-			tg,
-			peer, 
-			0, 
-			time(NULL), 
-			0, 
-			20, 
-			0, 
-			0, 
-			NULL, 
-			&m, 
-			messages_callback_document);
+	//int mmm = tg_messages_get_history(
+			//tg,
+			//peer, 
+			//0, 
+			//time(NULL), 
+			//0, 
+			//20, 
+			//0, 
+			//0, 
+			//NULL, 
+			//&m, 
+			//messages_callback_document);
 
 	//printf("MESSAGE WITH PHOTO:\n");
 	//printf("%.8x:\n", m.id_);
@@ -360,16 +404,16 @@ int main(int argc, char *argv[])
 			//"m");
 	//printf("IMAGE: %s\n", image);
 	
-	FILE *fp = fopen("/home/kuzmich/ttt", "w");
-	tg_get_document(
-			tg, m.doc_id, 
-			m.doc_size, 
-			m.doc_access_hash, 
-			m.doc_file_reference, 
-			fp, file_write,
-		 	NULL, NULL);
+	//FILE *fp = fopen("/home/kuzmich/ttt", "w");
+	//tg_get_document(
+			//tg, m.doc_id, 
+			//m.doc_size, 
+			//m.doc_access_hash, 
+			//m.doc_file_reference, 
+			//fp, file_write,
+			 //NULL, NULL);
 	
-	fclose(fp);
+	//fclose(fp);
 	
 	//tg_sync_messages_to_database(
 			//tg, 

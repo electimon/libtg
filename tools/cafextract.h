@@ -1,6 +1,7 @@
 #ifndef CAF_EXTRACT_H
 #define CAF_EXTRACT_H
 
+#include <stdio.h>
 #include <stdint.h>
 
 struct CAFEAudioFormat {
@@ -28,15 +29,13 @@ enum {
 };
 
 enum {
- CE_OK,
- CE_READ_ERROR,
- CE_WRITE_ERROR,
- CE_FILE_CORRUPTED,
+	keCAFLinearPCMFormatFlagIsFloat         = (1L << 0),
+	keCAFLinearPCMFormatFlagIsLittleEndian  = (1L << 1)
 };
 
-int caf_extract(
+/* read caf header and return pointer to data FILE */
+FILE * caf_extract(
 		const char *caf, 
-		struct CAFEAudioFormat *format,
-		const char *extracted);
+		struct CAFEAudioFormat *format);
 
 #endif /* ifndef CAF_EXTRACT_H */

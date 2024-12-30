@@ -318,6 +318,8 @@ int tg_document_send(
 		const char *message,
 		void *progressp, int (*progress)(void *, int, int))
 {
+	int i;
+	ON_LOG(tg, "%s...", __func__);
 	FILE *fp = fopen(filepath, "r");
 	if (fp == NULL){
 		ON_ERR(tg, "%s: can't open file: %s", __func__, filepath);
@@ -325,7 +327,7 @@ int tg_document_send(
 	}
 	fseek(fp, 0, SEEK_END);
 	int size = ftell(fp);
-	fseek(fp, 0, SEEK_CUR);
+	fseek(fp, 0, SEEK_SET);
 
 	// Before transmitting the contents of the file itself, 
 	// the file has to be assigned a unique 64-bit 
@@ -369,6 +371,8 @@ int tg_document_send(
 	// the file is more than 10 MB and upload.saveFilePart 
 	// for smaller files.
 	buf_t buf = buf_new();
+	ON_LOG(tg, "%s: prepare file: %s with size: %d", 
+			__func__, filename, size);
 	if (size > 10485760){
 		// save big file
 		/* TODO:  <30-12-24, yourname> */
@@ -386,7 +390,7 @@ int tg_document_send(
 				 len = fread(bytes.data, 1, part_size, fp))
 		{
 			bytes.size = part_size;
-			buf_cat(buf, bytes);
+			buf = buf_cat(buf, bytes);
 			
 tg_document_send_with_progress_saveFilePart:;
 			ON_LOG(tg, "%s: upload %d part of file: %s", __func__, file_part, filepath);
@@ -407,7 +411,7 @@ tg_document_send_with_progress_saveFilePart:;
 					tg_document_send_with_progress_progress);
 			buf_free(saveFilePart);
 
-			if (tl == NULL || tl->_id != id_true){
+			if (tl == NULL || tl->_id != id_boolTrue){
 				ON_ERR(tg, "%s: expected tl_true but got: %s", 
 						__func__, TL_NAME_FROM_ID(tl->_id));
 				// retry
@@ -428,6 +432,11 @@ tg_document_send_with_progress_saveFilePart:;
 	// from the encrypted file). 
 	unsigned char md5[MD5_DIGEST_LENGTH];
 	assert(MD5(buf.data, buf.size, md5));
+	char md5_checksum[BUFSIZ] = {0};
+	for (i = 0; i < MD5_DIGEST_LENGTH; ++i) {
+		sprintf(md5_checksum, "%s%02x", md5_checksum, md5[i]); 
+	}
+	ON_LOG(tg, "%s: file MD5 hash: %s", __func__, md5_checksum);
 
 	// After the entire file is successfully saved, the final
 	// method may be called and passed the generated 
@@ -441,8 +450,8 @@ tg_document_send_with_progress_saveFilePart:;
 		buf_t inputFile = tl_inputFile(
 				file_id, 
 				file_part, 
-				filename, 
-				(char *)md5);
+				filename?filename:"", 
+				md5_checksum);
 	
 		InputMedia media = tl_inputMediaUploadedDocument(
 				false, 
@@ -450,7 +459,7 @@ tg_document_send_with_progress_saveFilePart:;
 				false, 
 				&inputFile, 
 				NULL, 
-				mime_type, 
+				mime_type?mime_type:"", 
 				NULL, 
 				0, 
 				NULL, 
@@ -458,7 +467,7 @@ tg_document_send_with_progress_saveFilePart:;
 				NULL);
 		buf_free(inputFile);
 
-		buf_t peer_ = tg_peer(*peer);
+		buf_t peer_ = tg_inputPeer(*peer);
 		buf_t random_id = buf_rand(8);
 
 		buf_t sendMedia = tl_messages_sendMedia(

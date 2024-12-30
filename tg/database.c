@@ -204,10 +204,11 @@ char * auth_tokens_from_database(tg_t *tg)
 int auth_token_to_database(
 		tg_t *tg, const char *auth_token)
 {
+	tg_sqlite3_exec(tg,
+"ALTER TABLE \'auth_tokens\' ADD COLUMN \'auth_token\' TEXT; ");
+	
 	char sql[BUFSIZ];
-
 	sprintf(sql, 
-			"ALTER TABLE \'auth_tokens\' ADD COLUMN \'auth_token\' TEXT; "
 			"INSERT INTO \'auth_tokens\' (id, \'auth_token\') VALUES (%d, \'%s\'); "
 		, tg->id, auth_token);
 	return tg_sqlite3_exec(tg, sql);
@@ -216,33 +217,28 @@ int auth_token_to_database(
 int auth_key_to_database(
 		tg_t *tg, buf_t auth_key)
 {
+	tg_sqlite3_exec(tg, 
+			"ALTER TABLE \'auth_keys\' ADD COLUMN \'auth_key\' BLOB; ");	
+	
 	char sql[BUFSIZ];
 	sprintf(sql, 
-			"ALTER TABLE \'auth_keys\' ADD COLUMN \'auth_key\' BLOB; "
 			"INSERT INTO \'auth_keys\' (id) "
 			"SELECT %d "
 			"WHERE NOT EXISTS (SELECT 1 FROM auth_keys WHERE id = %d); "
 			, tg->id, tg->id);
 	
-	sqlite3 *db = tg_sqlite3_open(tg);
-	char *errmsg = NULL;
-	int res = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
-	if (errmsg) {
-		ON_ERR(tg, "%s", errmsg);
-		free(errmsg);
-		sqlite3_close(db);
-		return 1;
-	}	
+	tg_sqlite3_exec(tg, sql);
 			
 	sprintf(sql, 
 			"UPDATE \'auth_keys\' SET \'auth_key\' = (?) "
 			"WHERE id = %d; ", tg->id);
 	
+	sqlite3 *db = tg_sqlite3_open(tg);
 	sqlite3_stmt *stmt;
-	res = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+	int res = sqlite3_prepare_v2(
+			db, sql, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
-		ON_ERR(tg, "%s", errmsg);
-		free(errmsg);
+		ON_ERR(tg, "%s", sqlite3_errmsg(db));
 		sqlite3_close(db);
 		return 1;
 	}	

@@ -127,6 +127,12 @@ tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query,
 		void *progressp, 
 		int (*progress)(void *progressp, int size, int total))
 {
+	// session id
+	if (!tg->ssid.size)
+		tg->ssid = buf_rand(8);
+	if (!tg->salt.size)
+		tg->salt = buf_rand(8);
+
 	int i;
 	tl_t *tl = NULL;
 
@@ -252,7 +258,15 @@ tg_run_api_receive_data:;
 		goto tg_run_api_end;
 
 	if (tl->_id != id_rpc_result){
-		ON_LOG(tg, "%s: expected rpc_result, but got: %s", 
+		
+		// BAD SERVER SALT
+		if (tl->_id == id_bad_server_salt){
+			// resend message
+			return tg_run_api_with_progress(
+					tg, query, progressp, progress);
+		}
+
+		ON_ERR(tg, "%s: expected rpc_result, but got: %s", 
 				__func__, TL_NAME_FROM_ID(tl->_id));
 		// handle UPDATES
 		tg_handle_updates(tg, tl);

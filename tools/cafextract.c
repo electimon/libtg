@@ -22,22 +22,17 @@ struct CAFChunkHeader {
 	int64_t   mChunkSize;
 };
 
-enum {
-	kCAFLinearPCMFormatFlagIsFloat         = (1L << 0),
-	kCAFLinearPCMFormatFlagIsLittleEndian  = (1L << 1)
-};
-
-int caf_extract(
+FILE * caf_extract(
 		const char *caf, 
-		struct CAFEAudioFormat *format,
-		const char *extracted)
+		struct CAFEAudioFormat *format)
 {
-	assert(caf && extracted);
+	assert(caf);
 	
 	// open file
 	FILE *in = fopen(caf, "r");
-	if (!in)
-		return CE_READ_ERROR;
+	if (!in){
+		return NULL;
+	}
 	
 	// read file header
 	struct CAFFileHeader fileHeader;
@@ -56,7 +51,7 @@ int caf_extract(
 		aChunkHeader.mChunkSize = bswap_64(aChunkHeader.mChunkSize);
 	}
 	if (aChunkHeader.mChunkType != 'desc'){
-		return CE_FILE_CORRUPTED;
+		return NULL;
 	}
 
 	// read audio description format
@@ -88,22 +83,5 @@ int caf_extract(
 	if (is_little_endian())
 		mEditCount = bswap_32(mEditCount);
 
-	// open out file and write data to it
-	FILE *out = fopen(extracted, "w");
-	if (!out){
-		fclose(in);
-		return CE_WRITE_ERROR;
-	}
-	char buf[BUFSIZ];
-	int read, total = 0;
-	for (read = fread(buf, 1, BUFSIZ, in); 
-			 dChunkHeader.mChunkSize == -1 ? 
-			 read : total < dChunkHeader.mChunkSize && read; 
-			 read = fread(buf, 1, BUFSIZ, in)) 
-	{
-		fwrite(buf, read, 1, out);
-	}
-	fclose(out);
-
-	return CE_OK;
+	return in;
 }	
