@@ -30,7 +30,6 @@ int pcm_to_opusogg(
 			&error);
   if (!enc) {
     ope_comments_destroy(comments);
-    fclose(fin);
 		return error;
   }
   while (1) {
