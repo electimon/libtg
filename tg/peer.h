@@ -19,4 +19,6 @@ typedef struct tg_peer_t_ {
 buf_t tg_inputPeer(tg_peer_t peer);
 buf_t tg_peer(tg_peer_t peer);
 
+tg_peer_t tg_peer_by_phone(tg_t *tg, const char *phone);
+
 #endif /* ifndef TG_PEER_H */
