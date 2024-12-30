@@ -3,7 +3,7 @@
 #include <opusenc.h>
 
 int pcm_to_opusogg(
-		const char *pcm_file_path, 
+		FILE *pcm, 
 		const char *ogg_file_path,
 		const char *artist,
 		const char *title,
@@ -11,11 +11,7 @@ int pcm_to_opusogg(
 		int channels,
 		int frame_size)
 {
-	assert(pcm_file_path && ogg_file_path);
-	FILE *fin = fopen(pcm_file_path, "r");
-	if (fin == NULL){
-		return 1;
-	}
+	assert(pcm && ogg_file_path);
 
 	OggOpusComments *comments = ope_comments_create();
 	if (artist)
@@ -43,7 +39,7 @@ int pcm_to_opusogg(
 				buf, 
 				channels*sizeof(short), 
 				frame_size, 
-				fin);
+				pcm);
     if (ret > 0) {
       ope_encoder_write(enc, buf, ret);
     } else break;
@@ -51,7 +47,6 @@ int pcm_to_opusogg(
   ope_encoder_drain(enc);
   ope_encoder_destroy(enc);
   ope_comments_destroy(comments);
-  fclose(fin);
 
 	return 0;
 }	

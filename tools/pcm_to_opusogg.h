@@ -1,7 +1,8 @@
 #ifndef PCM_TO_OPUSOGG_H
 #define PCM_TO_OPUSOGG_H
+#include <stdio.h>
 int pcm_to_opusogg(
-		const char *pcm_file_path, 
+		FILE *pcm, 
 		const char *ogg_file_path,
 		const char *artist,
 		const char *title,
