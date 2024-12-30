@@ -193,23 +193,11 @@ int query_cb(void *d, const tl_t *tl){
 		}; 
 		tg_t *tg = d;
 		//tg_message_send(
-		//P
 				//tg, 
 				//peer, 
 				//"hello world");
+		}
 
-		tg_document_send(
-				tg, 
-				&peer, 
-				"test document", 
-				"/home/kuzmich/2.ogg", 
-				false, 
-				"audio/ogg", 
-				"hello world!",
-			 	NULL, 
-				NULL);
-	}
-		
 	return 0;
 }
 
@@ -312,15 +300,20 @@ int main(int argc, char *argv[])
 				//tg, 
 				//peer, 
 				//"hello world");
+	tg_document_t d;
+	memset(&d, 0, sizeof(tg_document_t));
+	strcpy(d.filepath, "/home/kuzmich/2.ogg");
+	strcpy(d.filename, "2.ogg");
+	strcpy(d.mime_type, "audio/ogg");
+	d.type = DOCUMENT_TYPE_AUDIO;
+	d.audio_voice = true;
+	/*d.audio_duration = 10;*/
 
 	tg_document_send(
 			tg, 
 			&peer, 
-			"test document", 
-			"/home/kuzmich/2.ogg", 
-			false, 
-			"audio/ogg", 
-			"hello world!",
+			&d, 
+			"hello world!!!",
 			NULL, 
 			NULL);
 

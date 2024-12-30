@@ -3,6 +3,8 @@
 
 #include "tg.h"
 #include "peer.h"
+#include <stdio.h>
+#include <stdbool.h>
 
 #define TG_FILE_ARGS\
 	TG_FILE_TYP(uint32_t, type_,  "INT",  "type") \
@@ -71,12 +73,60 @@ char * tg_get_document_thumb(tg_t *tg,
 		const char * file_reference, 
 		const char * thumb_size);
 
+typedef enum {
+	DOCUMENT_TYPE_DEFAUL,
+	DOCUMENT_TYPE_IMAGE,
+	DOCUMENT_TYPE_VIDEO,
+	DOCUMENT_TYPE_AUDIO,
+
+} DOCUMENT_TYPE;
+
+typedef struct {
+	DOCUMENT_TYPE type;
+	char filepath[BUFSIZ];
+	char mime_type[256];
+	bool force_file;
+	bool spoiler;
+	bool no_sound_video; // (a GIF animation (even as MPEG4),for example)
+	uint32_t  *ttl_seconds;
+	// image attributes 
+	uint32_t image_w;
+	uint32_t image_h;
+	// stickers attributes 
+	char sticker_alt[7];
+	int sticker_set_type; // todo: sticker set types
+	uint64_t sricker_set_id;
+	uint64_t sricker_set_access_hash;
+	char sricker_set_short_name[32];
+	char sricker_set_emoticon[32];
+	// video attributes 
+	bool video_supports_streaming;
+	bool video_no_sound;
+	double video_duration;
+	uint32_t video_w;
+	uint32_t video_h;
+	uint32_t *video_preload_prefix_size;
+	double *video_start_ts;
+	// audio attributes 
+	bool audio_voice;
+	double audio_duration;
+	char audio_title[256];
+	char audio_perfomer[256];
+	buf_t *audio_waveform;
+	// filename attributes 
+	char filename[256];
+	// has_stickers attributes 
+	bool has_stickers;
+	// stickers
+	buf_t *stickers;
+	int stickers_len;
+} tg_document_t;
+
+tg_document_t *tg_voice_message(tg_t *tg, const char *filepath);
+
 int tg_document_send(
 		tg_t *tg, tg_peer_t *peer, 
-		const char *filename,
-		const char *filepath,
-		bool isAnimation,
-		const char *mime_type,
+		tg_document_t *document,
 		const char *message,
 		void *progressp, int (*progress)(void *, int, int));
 
