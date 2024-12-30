@@ -566,6 +566,23 @@ tg_document_send_with_progress_saveFilePart:;
 	return 0;
 }	
 
+tg_document_t *tg_document(tg_t *tg, const char *filepath,
+		const char *filename, const char *mime_type)
+{
+	assert(filepath);
+	tg_document_t *d = NEW(tg_document_t, 
+			ON_ERR(tg, "%s: can't allocate memory", __func__);
+			return NULL;);
+	strncpy(d->filepath, filepath,
+			 sizeof(d->filepath) - 1);
+	strncpy(d->mime_type, mime_type,
+			 sizeof(d->mime_type) - 1);
+	strncpy(d->filename, filename,
+			 sizeof(d->filename) - 1);
+	d->type = DOCUMENT_TYPE_DEFAUL;
+	return d;
+}
+
 tg_document_t *tg_photo(tg_t *tg, const char *filepath)
 {
 	assert(filepath);

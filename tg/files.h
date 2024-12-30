@@ -123,6 +123,8 @@ typedef struct {
 	int stickers_len;
 } tg_document_t;
 
+tg_document_t *tg_document(tg_t *tg, const char *filepath,
+		const char *filename, const char *mime_type);
 tg_document_t *tg_photo(tg_t *tg, const char *filepath);
 tg_document_t *tg_voice_message(tg_t *tg, const char *filepath);
 
