@@ -523,7 +523,7 @@ tg_document_send_with_progress_saveFilePart:;
 				&peer_, 
 				NULL, 
 				&media, 
-				message, 
+				message?message:"", 
 				buf_get_ui64(random_id), 
 				NULL, 
 				NULL, 
@@ -552,6 +552,7 @@ tg_document_send_with_progress_saveFilePart:;
 
 tg_document_t *tg_voice_message(tg_t *tg, const char *filepath)
 {
+	assert(filepath);
 	tg_document_t *d = NEW(tg_document_t, 
 			ON_ERR(tg, "%s: can't allocate memory", __func__);
 			return NULL;);
