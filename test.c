@@ -300,19 +300,12 @@ int main(int argc, char *argv[])
 				//tg, 
 				//peer, 
 				//"hello world");
-	tg_document_t d;
-	memset(&d, 0, sizeof(tg_document_t));
-	strcpy(d.filepath, "/home/kuzmich/2.ogg");
-	strcpy(d.filename, "2.ogg");
-	strcpy(d.mime_type, "audio/ogg");
-	d.type = DOCUMENT_TYPE_AUDIO;
-	d.audio_voice = true;
-	/*d.audio_duration = 10;*/
+	tg_document_t *d = tg_voice_message(tg, "/home/kuzmich/2.ogg");
 
 	tg_document_send(
 			tg, 
 			&peer, 
-			&d, 
+			d, 
 			"hello world!!!",
 			NULL, 
 			NULL);

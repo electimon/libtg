@@ -558,7 +558,7 @@ tg_document_t *tg_voice_message(tg_t *tg, const char *filepath)
 			return NULL;);
 	strcpy(d->mime_type, "audio/ogg");
 	strncpy(d->filepath, filepath,
-		 	strlen(d->filepath) - 1);
+			 sizeof(d->filepath) - 1);
 	d->type = DOCUMENT_TYPE_AUDIO;
 	d->audio_voice = true;
 	return d;
