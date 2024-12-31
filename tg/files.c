@@ -372,12 +372,65 @@ int tg_document_send(
 	buf_t buf = buf_new();
 	ON_LOG(tg, "%s: prepare file: %s with size: %d", 
 			__func__, document->filepath, size);
-	if (size > 10485760){
-		// save big file
-		ON_ERR(tg, "%s: big files(>10Mb) not supported yet", __func__);
-		return 1;
-		/* TODO:  <30-12-24, yourname> */
-	} else {
+	
+	if (size > 10485760){ // for files > 10Mb
+		// need filename for big files
+		if (document->filename[0] == 0) {
+			ON_ERR(tg, "%s: need filename for files > 10Mb", __func__);
+			return 1;
+		}
+		// save big file part
+		int file_total_parts = size / part_size + (size % part_size == 0 ? 0 : 1);
+		//
+		buf_t bytes = buf_new();
+		buf_realloc(&bytes, part_size);
+		
+		struct tg_document_send_with_progress_progress_t t =
+			{size, 0, progressp, progress};
+		
+		int len, current = 0, retry = 0;
+		for (len = fread(bytes.data, 1, part_size, fp);
+				 len > 0;
+				 len = fread(bytes.data, 1, part_size, fp))
+		{
+			bytes.size = len;
+			buf = buf_cat(buf, bytes);
+			
+tg_document_send_with_progress_saveBigFilePart:;
+			ON_LOG(tg, "%s: upload %d part of file: %s", __func__, 
+					file_part, document->filepath);
+			if (retry > 9)
+			{
+				ON_ERR(tg, "%s: can't upload file: %s (retries > 10)", __func__,
+					 	document->filepath);
+			}
+
+			buf_t saveFilePart = tl_upload_saveBigFilePart(
+					file_id, 
+					file_part,
+					file_total_parts,	
+					&bytes);
+
+			tl_t *tl = tg_run_api_with_progress(
+					tg, 
+					&saveFilePart, 
+					&t, 
+					tg_document_send_with_progress_progress);
+			buf_free(saveFilePart);
+
+			if (tl == NULL || tl->_id != id_boolTrue){
+				ON_ERR(tg, "%s: expected tl_true but got: %s", 
+						__func__, TL_NAME_FROM_ID(tl->_id));
+				// retry
+				retry++;
+				goto tg_document_send_with_progress_saveBigFilePart;
+			}
+
+			file_part++;
+		}	
+		buf_free(bytes);
+
+	} else {  // for files < 10Mb
 		// save file part
 		buf_t bytes = buf_new();
 		buf_realloc(&bytes, part_size);
@@ -446,17 +499,22 @@ tg_document_send_with_progress_saveFilePart:;
 	// inputFile object. In case the upload.saveBigFilePart 
 	// method is used, the inputFileBig constructor must 
 	// be passed, in other cases use inputFile.
+	buf_t inputFile;
 	if (size > 10485760){
-		/* TODO:  <30-12-24, yourname> */
+		inputFile = tl_inputFileBig(
+				file_id, 
+				file_part, 
+				document->filename);
+	
 	} else {
 		
-		buf_t inputFile = tl_inputFile(
+		inputFile = tl_inputFile(
 				file_id, 
 				file_part, 
 				document->filename, 
 				md5_checksum);
 
-			InputMedia media;
+		InputMedia media;
 		if (document->type == DOCUMENT_TYPE_PHOTO) {
 			media = tl_inputMediaUploadedPhoto(
 					document->spoiler, 
