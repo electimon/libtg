@@ -137,7 +137,7 @@ int tg_account_register_ios(tg_t *tg, const char *token)
 {
 	int ret = 1;
 	buf_t secret = buf_new();
-	buf_t app_sandbox = tl_boolTrue();
+	buf_t app_sandbox = tl_boolFalse();
 	buf_t query = tl_account_registerDevice(
 			NULL, 
 			1, 
