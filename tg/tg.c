@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "../tl/serialize.h"
 
 tg_t *tg_new(
 		const char *database_path,
@@ -134,64 +133,15 @@ void update_hash(uint64_t *hash, uint32_t msg_id){
 		*hash = h;
 }
 
-static buf_t 
-tl_account_registerDevice_(
-		bool no_muted_, 
-		uint32_t token_type_, 
-		unsigned char *token, 
-		int token_len,
-		Bool *app_sandbox_, 
-		buf_t *secret_, 
-		uint64_t *other_uids_, 
-		int other_uids_len)
-{
-	buf_t buf = buf_add_ui32(0xec86017a);
-	//parse argument flags ((null))
-	uint32_t *flag1 = (uint32_t *)(&buf.data[buf.size]);
-	buf = buf_cat_ui32(buf, 0);
-	//parse argument no_muted (true)
-	if (no_muted_)
-		*flag1 |= (1 << 0);
-	//parse argument token_type (int)
-	{
-		buf = buf_cat_ui32(buf, token_type_);
-	}
-	//parse argument token (string)
-	{
-		buf = buf_cat(buf, serialize_bytes(token, token_len));
-	}
-	//parse argument app_sandbox (Bool)
-	{
-		buf = buf_cat(buf, *app_sandbox_);
-	}
-	//parse argument secret (bytes)
-	{
-		buf = buf_cat(buf, serialize_bytes(secret_->data, secret_->size));
-	}
-	//parse argument other_uids (Vector<long>)
-	{
-		buf = buf_cat(buf, tl_vector());
-		buf = buf_cat_ui32(buf, other_uids_len);
-		int i;
-		for (i=0; i<other_uids_len; ++i){
-			buf = buf_cat_ui64(buf, other_uids_[i]);
-		}
-	}
-	return buf;
-}
-
-
-
-int tg_account_register_ios(tg_t *tg, unsigned char *token, int token_len)
+int tg_account_register_ios(tg_t *tg, const char *token)
 {
 	int ret = 1;
 	buf_t secret = buf_new();
-	buf_t app_sandbox = tl_boolFalse();
-	buf_t query = tl_account_registerDevice_(
+	buf_t app_sandbox = tl_boolTrue();
+	buf_t query = tl_account_registerDevice(
 			NULL, 
 			1, 
 			token, 
-			token_len,
 			&app_sandbox, 
 			&secret, 
 			NULL, 0); 
