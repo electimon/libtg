@@ -133,11 +133,11 @@ void update_hash(uint64_t *hash, uint32_t msg_id){
 		*hash = h;
 }
 
-int tg_account_register_ios(tg_t *tg, const char *token)
+int tg_account_register_ios(tg_t *tg, const char *token, bool development)
 {
 	int ret = 1;
 	buf_t secret = buf_new();
-	buf_t app_sandbox = tl_boolFalse();
+	buf_t app_sandbox = development?tl_boolTrue():tl_boolFalse();
 	buf_t query = tl_account_registerDevice(
 			NULL, 
 			1, 
