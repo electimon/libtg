@@ -4,6 +4,32 @@
 #include "tg.h"
 #include "peer.h"
 
+#define TG_MESSAGE_FWD_HEADER_ARGS\
+	TG_MESSAGE_FWD_HEADER_ARG(bool, imported_, "INT", "imported") \
+	TG_MESSAGE_FWD_HEADER_ARG(bool, saved_out_, "INT", "saved_out") \
+	TG_MESSAGE_FWD_HEADER_PER(uint64_t, from_id_, "INT", "from_id") \
+	TG_MESSAGE_FWD_HEADER_STR(char*, from_name_, "INT", "from_name") \
+	TG_MESSAGE_FWD_HEADER_ARG(uint32_t, date_, "INT", "date") \
+	TG_MESSAGE_FWD_HEADER_ARG(uint32_t, channel_post_, "INT", "channel_post") \
+	TG_MESSAGE_FWD_HEADER_STR(char*, post_author_, "INT", "post_author") \
+	TG_MESSAGE_FWD_HEADER_PER(uint64_t, saved_from_peer_, "INT", "saved_from_peer") \
+	TG_MESSAGE_FWD_HEADER_ARG(uint32_t, saved_from_msg_id_, "INT", "saved_from_msg_id") \
+	TG_MESSAGE_FWD_HEADER_PER(uint64_t, saved_from_id_, "INT", "saved_from_id") \
+	TG_MESSAGE_FWD_HEADER_STR(char*, saved_from_name_, "INT", "saved_from_name") \
+	TG_MESSAGE_FWD_HEADER_ARG(uint32_t, saved_date_, "INT", "saved_date") \
+	TG_MESSAGE_FWD_HEADER_STR(char*, psa_type_, "INT", "psa_type") \
+
+#define TG_MESSAGE_REPLY_HEADER_ARGS\
+	TG_MESSAGE_REPLY_HEADER_ARG(bool, reply_to_scheduled_, "INT", "reply_to_scheduled") \
+	TG_MESSAGE_REPLY_HEADER_ARG(bool, forum_topic_, "INT", "forum_topic") \
+	TG_MESSAGE_REPLY_HEADER_ARG(bool, quote_, "INT", "quote") \
+	TG_MESSAGE_REPLY_HEADER_ARG(uint32_t, reply_to_msg_id_, "INT", "reply_to_msg_id") \
+	TG_MESSAGE_REPLY_HEADER_PER(uint64_t, reply_to_peer_id_, "INT", "reply_to_peer_id") \
+	TG_MESSAGE_REPLY_HEADER_ARG(uint32_t, reply_to_top_id_, "INT", "reply_to_top_id") \
+	TG_MESSAGE_REPLY_HEADER_STR(char*, quote_text_, "INT", "quote_text") \
+	TG_MESSAGE_REPLY_HEADER_ARG(uint32_t, quote_offset_, "INT", "quote_offset") \
+	TG_MESSAGE_REPLY_HEADER_FWD(tg_message_fwd_header_t, reply_from_) \
+
 #define TG_MESSAGE_ARGS\
 	TG_MESSAGE_ARG(bool,     out_, "INT", "out") \
 	TG_MESSAGE_ARG(bool,     mentioned_, "INT", "mentioned") \
@@ -72,7 +98,31 @@
 	TG_MESSAGE_SPS(char*,    contact_last_name, "TEXT", "contact_last_name") \
 	TG_MESSAGE_SPS(char*,    contact_vcard, "TEXT", "contact_vcard") \
 	TG_MESSAGE_SPA(uint64_t, contact_user_id, "INT", "contact_user_id") \
+	TG_MESSAGE_SPA(bool,     is_service, "INT", "is_service") \
+	TG_MESSAGE_SPA(uint32_t, ttl_period_, "INT", "ttl_period") \
+	TG_MESSAGE_RPL(tg_message_reply_header_t, reply_to_) \
 
+typedef struct tg_message_FWD_header_ {
+	#define TG_MESSAGE_FWD_HEADER_ARG(t, arg, ...) t arg;
+	#define TG_MESSAGE_FWD_HEADER_STR(t, arg, ...) t arg;
+	#define TG_MESSAGE_FWD_HEADER_PER(t, arg, ...) t arg; int type_##arg; 
+	TG_MESSAGE_FWD_HEADER_ARGS
+	#undef TG_MESSAGE_FWD_HEADER_ARG
+	#undef TG_MESSAGE_FWD_HEADER_STR
+	#undef TG_MESSAGE_FWD_HEADER_PER
+} tg_message_fwd_header_t;
+
+typedef struct tg_message_reply_header_ {
+	#define TG_MESSAGE_REPLY_HEADER_ARG(t, arg, ...) t arg;
+	#define TG_MESSAGE_REPLY_HEADER_STR(t, arg, ...) t arg;
+	#define TG_MESSAGE_REPLY_HEADER_PER(t, arg, ...) t arg; int type_##arg; 
+	#define TG_MESSAGE_REPLY_HEADER_FWD(t, arg, ...) t arg;
+	TG_MESSAGE_REPLY_HEADER_ARGS
+	#undef TG_MESSAGE_REPLY_HEADER_ARG
+	#undef TG_MESSAGE_REPLY_HEADER_STR
+	#undef TG_MESSAGE_REPLY_HEADER_PER
+	#undef TG_MESSAGE_REPLY_HEADER_FWD
+} tg_message_reply_header_t;
 
 typedef struct tg_message_ {
 	#define TG_MESSAGE_ARG(t, arg, ...) t arg;
@@ -80,12 +130,14 @@ typedef struct tg_message_ {
 	#define TG_MESSAGE_PER(t, arg, ...) t arg; int type_##arg; 
 	#define TG_MESSAGE_SPA(t, arg, ...) t arg;
 	#define TG_MESSAGE_SPS(t, arg, ...) t arg;
+	#define TG_MESSAGE_RPL(t, arg, ...) t arg;
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
 	#undef TG_MESSAGE_SPA
 	#undef TG_MESSAGE_SPS
+	#undef TG_MESSAGE_RPL
 } tg_message_t;
 
 void tg_message_free(tg_message_t*);

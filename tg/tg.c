@@ -132,3 +132,33 @@ void update_hash(uint64_t *hash, uint32_t msg_id){
 	if (hash)
 		*hash = h;
 }
+
+int tg_account_register_device(tg_t *tg, const char *token)
+{
+	int ret = 1;
+	buf_t secret = buf_new();
+	buf_t True = tl_boolTrue();
+	buf_t query = tl_account_registerDevice(
+			NULL, 
+			1, 
+			token, 
+			&True, 
+			&secret, 
+			NULL, 0); 
+	buf_free(secret);
+	buf_free(True);
+	
+	tl_t *tl = tg_run_api(tg, &query);
+	buf_free(query);
+	
+	if (tl == NULL)
+		return 1;
+
+	if (tl->_id == id_boolTrue)
+		ret = 0;
+	
+	// free tl
+	tl_free(tl);
+	
+	return ret;
+}

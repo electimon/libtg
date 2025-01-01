@@ -19,6 +19,57 @@
     #error "Environment not 32 or 64-bit."
 #endif
 
+void tg_message_fwd(
+		tg_t *tg, tg_message_fwd_header_t *tgh, tl_messageFwdHeader_t *tlh)
+{
+	ON_LOG(tg, "%s: start...", __func__);
+	memset(tgh, 0, sizeof(tg_message_fwd_header_t));
+	#define TG_MESSAGE_FWD_HEADER_ARG(t, arg, ...) \
+		tgh->arg = tlh->arg;
+	#define TG_MESSAGE_FWD_HEADER_STR(t, arg, ...) \
+		if (tlh->arg.data && tlh->arg.size > 0)\
+			tgh->arg = buf_strdup(tlh->arg);
+	#define TG_MESSAGE_FWD_HEADER_PER(t, arg, ...) \
+	if (tlh->arg){\
+		tl_peerUser_t *peer = (tl_peerUser_t *)tlh->arg; \
+		tgh->arg = peer->user_id_;\
+		tgh->type_##arg = peer->_id;\
+	}
+	TG_MESSAGE_FWD_HEADER_ARGS
+	#undef TG_MESSAGE_FWD_HEADER_ARG
+	#undef TG_MESSAGE_FWD_HEADER_STR
+	#undef TG_MESSAGE_FWD_HEADER_PER
+}
+
+void tg_message_reply(
+		tg_t *tg, tg_message_reply_header_t *tgh, 
+		tl_messageReplyHeader_t *tlh)
+{
+	ON_LOG(tg, "%s: start...", __func__);
+	memset(tgh, 0, sizeof(tg_message_reply_header_t));
+	#define TG_MESSAGE_REPLY_HEADER_ARG(t, arg, ...) \
+		tgh->arg = tlh->arg;
+	#define TG_MESSAGE_REPLY_HEADER_STR(t, arg, ...) \
+		if (tlh->arg.data && tlh->arg.size > 0)\
+			tgh->arg = buf_strdup(tlh->arg);
+	#define TG_MESSAGE_REPLY_HEADER_PER(t, arg, ...) \
+	if (tlh->arg){\
+		tl_peerUser_t *peer = (tl_peerUser_t *)tlh->arg; \
+		tgh->arg = peer->user_id_;\
+		tgh->type_##arg = peer->_id;\
+	}
+	#define TG_MESSAGE_REPLY_HEADER_FWD(t, arg, ...) \
+	if (tlh->arg && tlh->arg->_id == id_messageFwdHeader){\
+		tl_messageFwdHeader_t *h = (tl_messageFwdHeader_t *)tlh->arg; \
+		tg_message_fwd(tg, &tgh->arg, h);\
+	}
+	TG_MESSAGE_REPLY_HEADER_ARGS
+	#undef TG_MESSAGE_REPLY_HEADER_ARG
+	#undef TG_MESSAGE_REPLY_HEADER_STR
+	#undef TG_MESSAGE_REPLY_HEADER_PER
+	#undef TG_MESSAGE_REPLY_HEADER_FWD
+}
+
 void tg_message_from_tl(
 		tg_t *tg, tg_message_t *tgm, tl_message_t *tlm)
 {
@@ -36,6 +87,11 @@ void tg_message_from_tl(
 		tgm->arg = peer->user_id_;\
 		tgm->type_##arg = peer->_id;\
 	}
+	#define TG_MESSAGE_RPL(t, arg) \
+	if (tlm->arg && tlm->arg->_id == id_messageReplyHeader){\
+		tl_messageReplyHeader_t *h = (tl_messageReplyHeader_t *)tlm->arg; \
+		tg_message_reply(tg, &tgm->arg, h);\
+	}
 	#define TG_MESSAGE_SPA(...)
 	#define TG_MESSAGE_SPS(...)
 	#define TG_MESSAGE_SPB(...)
@@ -46,6 +102,7 @@ void tg_message_from_tl(
 	#undef TG_MESSAGE_SPA
 	#undef TG_MESSAGE_SPS
 	#undef TG_MESSAGE_SPB
+	#undef TG_MESSAGE_RPL
 
 	// handle with media
 	if (tlm->media_){
@@ -208,6 +265,43 @@ void tg_message_from_tl(
 		}
 	}
 }
+
+void tg_message_from_tl_service(
+		tg_t *tg, tg_message_t *tgm, tl_messageService_t *tlm)
+{
+	ON_LOG(tg, "%s: start...", __func__);
+	memset(tgm, 0, sizeof(tg_message_t));
+
+	tgm->is_service = true;
+	tgm->out_ = tlm->out_;
+	tgm->mentioned_ = tlm->mentioned_;
+	tgm->media_unread_ = tlm->media_unread_;
+	tgm->silent_ = tlm->silent_;
+	tgm->post_ = tlm->post_;
+	tgm->legacy_ = tlm->legacy_;
+	tgm->id_ = tlm->id_;
+	if (tlm->from_id_){
+		tl_peerUser_t *peer = (tl_peerUser_t *)tlm->from_id_;
+		tgm->from_id_ = peer->user_id_;
+		tgm->type_from_id_ = peer->_id;
+	}
+	if (tlm->peer_id_){
+		tl_peerUser_t *peer = (tl_peerUser_t *)tlm->peer_id_;
+		tgm->peer_id_ = peer->user_id_;
+		tgm->type_peer_id_ = peer->_id;
+	}
+	if (tlm->reply_to_ && tlm->reply_to_->_id == id_messageReplyHeader){
+		tl_messageReplyHeader_t *h = 
+			(tl_messageReplyHeader_t *)tlm->reply_to_; 
+		tg_message_reply(tg, &tgm->reply_to_, h);
+	}
+	tgm->date_ = tlm->date_;
+
+	/* TODO: MESSAGE ACTION <01-01-25, yourname> */
+
+	tgm->ttl_period_ = tlm->ttl_period_;
+}
+
 
 static int parse_msgs(
 		tg_t *tg, uint64_t peer_id, 
@@ -457,6 +551,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 		str_append(&s, (char*)m->n, strlen((char*)m->n)); \
 		str_appendf(&s, "\', "); \
 	}
+	#define TG_MESSAGE_RPL(t, n)
 
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
@@ -464,6 +559,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 	#undef TG_MESSAGE_PER
 	#undef TG_MESSAGE_SPA
 	#undef TG_MESSAGE_SPS
+	#undef TG_MESSAGE_RPL
 
 	str_appendf(&s, "id = %d WHERE msg_id = %d;\n"
 			, tg->id, m->id_);
@@ -513,12 +609,14 @@ void tg_messages_create_table(tg_t *tg){
 				"\'" name "\' " type ";");\
 		ON_LOG(tg, "%s", sql);\
 		tg_sqlite3_exec(tg, sql);
+	#define TG_MESSAGE_RPL(t, n)
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
 	#undef TG_MESSAGE_SPA
 	#undef TG_MESSAGE_SPS
+	#undef TG_MESSAGE_RPL
 } 
 
 void tg_message_free(tg_message_t *m)
@@ -528,12 +626,14 @@ void tg_message_free(tg_message_t *m)
 	#define TG_MESSAGE_PER(t, n, ...)
 	#define TG_MESSAGE_SPA(t, n, ...)
 	#define TG_MESSAGE_SPS(t, n, ...) if (m->n) free(m->n);
+	#define TG_MESSAGE_RPL(t, n)
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
 	#undef TG_MESSAGE_SPA
 	#undef TG_MESSAGE_SPS
+	#undef TG_MESSAGE_RPL
 }
 
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
@@ -553,12 +653,14 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		str_appendf(&s, name ", ");
 	#define TG_MESSAGE_SPS(t, n, type, name) \
 		str_appendf(&s, name ", ");
+	#define TG_MESSAGE_RPL(t, n)
 	TG_MESSAGE_ARGS
 	#undef TG_MESSAGE_ARG
 	#undef TG_MESSAGE_STR
 	#undef TG_MESSAGE_PER
 	#undef TG_MESSAGE_SPA
 	#undef TG_MESSAGE_SPS
+	#undef TG_MESSAGE_RPL
 		
 	str_appendf(&s, 
 			"id FROM messages WHERE id = %d AND peer_id = "_LD_" "
@@ -592,6 +694,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 					sqlite3_column_bytes(stmt, col));\
 			}\
 			col++;
+		#define TG_MESSAGE_RPL(t, n)
 		TG_MESSAGE_ARGS
 
 		#undef TG_MESSAGE_ARG
@@ -599,6 +702,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		#undef TG_MESSAGE_PER
 		#undef TG_MESSAGE_SPA
 		#undef TG_MESSAGE_SPS
+		#undef TG_MESSAGE_RPL
 
 		i++;
 		
