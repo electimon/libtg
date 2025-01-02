@@ -1,6 +1,7 @@
 #ifndef TG_CHAT_T
 #define TG_CHAT_T
 
+#include <stdint.h>
 #include "tg.h"
 #include "peer.h"
 
@@ -20,8 +21,9 @@
 	TG_CHAT_ARG(uint32_t, participants_count_, "INT", "participants_count") \
 	TG_CHAT_ARG(uint32_t, date_, "INT", "date") \
 	TG_CHAT_ARG(uint32_t, version_, "INT", "version") \
-	TG_CHAT_ARG(uint64_t, migrated_to_channel_id, "INT", "migrated_to_channel_id") \
-	TG_CHAT_ARG(uint64_t, migrated_to_channel_access_hash, "INT", "migrated_to_channel_access_hash") \
+	TG_CHAT_SPA(uint64_t, migrated_to_channel_id, "INT", "migrated_to_channel_id") \
+	TG_CHAT_SPA(uint64_t, migrated_to_access_hash, "INT", "migrated_to_access_hash") \
+	TG_CHAT_SPA(uint64_t, migrated_to_channel_access_hash, "INT", "migrated_to_channel_access_hash") \
 	TG_CHAT_SPA(bool,     chat_admin_rights_change_info, "INT", "chat_admin_rights_change_info")  \
 	TG_CHAT_SPA(bool,     chat_admin_rights_post_messages, "INT", "chat_admin_rights_post_messages")  \
 	TG_CHAT_SPA(bool,     chat_admin_rights_edit_messages, "INT", "chat_admin_rights_edit_messages")  \
@@ -59,20 +61,22 @@
 	TG_CHAT_SPA(bool,     chat_default_banned_rights_send_plain, "INT", "chat_default_banned_rights_send_plain")  \
 	TG_CHAT_SPA(uint32_t, chat_default_banned_rights_until_date, "INT", "chat_default_banned_rights_until_date")  \
 
-
 typedef struct tg_chat_ {
 	#define TG_CHAT_ARG(t, arg, ...) t arg;
 	#define TG_CHAT_STR(t, arg, ...) t arg;
-	#define TG_CHAT_PER(t, arg, ...) t arg; int type_##arg; 
 	#define TG_CHAT_SPA(t, arg, ...) t arg;
 	#define TG_CHAT_SPS(t, arg, ...) t arg;
 	TG_CHAT_ARGS
 	#undef TG_CHAT_ARG
 	#undef TG_CHAT_STR
-	#undef TG_CHAT_PER
 	#undef TG_CHAT_SPA
 	#undef TG_CHAT_SPS
 } tg_chat_t;
 
+void tg_chat_from_tl(tg_t *tg, tg_chat_t *tgm, tl_chat_t *tlm);
+void tg_chat_create_table(tg_t *tg);
+void tg_chat_free(tg_chat_t *c);
+int tg_chat_save(tg_t *tg, const tg_chat_t *chat);
+tg_chat_t * tg_chat_get(tg_t *tg, uint64_t chat_id);
 
 #endif /* ifndef TG_CHAT_T */

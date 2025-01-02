@@ -1,5 +1,8 @@
 #include "dialogs.h"
+#include "user.h"
 #include "messages.h"
+#include "chat.h"
+#include "channel.h"
 #include "tg.h"
 #include "../tl/str.h"
 #include <stdint.h>
@@ -116,6 +119,9 @@ int database_init(tg_t *tg, const char *database_path)
 	//
 	tg_messages_create_table(tg);
 	tg_dialogs_create_table(tg);
+	tg_chat_create_table(tg);
+	tg_channel_create_table(tg);
+	tg_user_create_table(tg);
 	
 
 	return 0;

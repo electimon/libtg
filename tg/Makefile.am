@@ -11,6 +11,9 @@ libtg_la_SOURCES = tg.c \
 				   images.c \
 				   peer.c \
 				   files.c \
+				   chat.c \
+				   user.c \
+				   channel.c \
 				   run_api.c \
            ../crypto/hsh.c \
            ../crypto/aes.c \

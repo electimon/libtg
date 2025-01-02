@@ -300,15 +300,15 @@ int main(int argc, char *argv[])
 				//tg, 
 				//peer, 
 				//"hello world");
-	tg_document_t *d = tg_voice_message(tg, "/home/kuzmich/2.ogg");
+	//tg_document_t *d = tg_voice_message(tg, "/home/kuzmich/2.ogg");
 
-	tg_document_send(
-			tg, 
-			&peer, 
-			d, 
-			"hello world!!!",
-			NULL, 
-			NULL);
+	//tg_document_send(
+			//tg, 
+			//&peer, 
+			//d, 
+			//"hello world!!!",
+			//NULL, 
+			//NULL);
 
 	//tg_queue_manager_send_query(
 			//tg, getUsers, 
@@ -340,11 +340,11 @@ int main(int argc, char *argv[])
 	/*tg_get_dialogs_from_database(tg, tg, */
 			/*dialogs_callback);*/
 
-	//int count = tg_get_dialogs(tg, 40,
-			 //time(NULL),
-			 //NULL, NULL,
-			 //NULL, dialogs_callback);
-	//printf("GOT %d dialogs\n", count);
+	int count = tg_get_dialogs(tg, 40,
+			 time(NULL),
+			 NULL, NULL,
+			 NULL, dialogs_callback);
+	printf("GOT %d dialogs\n", count);
 
 
 	//printf("NAME: %s\n", d.name);

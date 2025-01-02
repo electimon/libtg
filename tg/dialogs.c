@@ -2,9 +2,12 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 25.12.2024
+ * Last Modified Date: 02.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
+#include "channel.h"
+#include "chat.h"
+#include "user.h"
 #include "tg.h"
 #include "../tl/id.h"
 #include "../mtx/include/net.h"
@@ -178,6 +181,13 @@ int tg_get_dialogs(
 							
 							if (d.peer_id == user->id_)
 							{
+								// save user to database
+								tg_user_t c;
+								tg_user_from_tl(tg, &c, user);
+								tg_user_save(tg, &c);
+								tg_user_free(&c);
+								//
+
 								d.access_hash = user->access_hash_;
 								d.peer_type = TG_PEER_TYPE_USER;
 								if (user->username_.size)
@@ -227,6 +237,12 @@ int tg_get_dialogs(
 								(tl_channel_t *)md.chats_[k];
 							if (d.peer_id == channel->id_)
 							{
+								// save channel to database
+								tg_channel_t c;
+								tg_channel_from_tl(tg, &c, channel);
+								tg_channel_save(tg, &c);
+								tg_channel_free(&c);
+								//
 								d.access_hash = channel->access_hash_;
 								d.peer_type = TG_PEER_TYPE_CHANNEL;
 								d.name = BUF2STR(channel->title_);
@@ -260,6 +276,12 @@ int tg_get_dialogs(
 								(tl_chat_t *)md.chats_[k];
 							if (d.peer_id == chat->id_)
 							{
+								// save chat to database
+								tg_chat_t c;
+								tg_chat_from_tl(tg, &c, chat);
+								tg_chat_save(tg, &c);
+								tg_chat_free(&c);
+								//
 								d.peer_type = TG_PEER_TYPE_CHAT;
 								d.name = BUF2STR(chat->title_);
 								if (chat->photo_ && 

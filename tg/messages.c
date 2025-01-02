@@ -529,7 +529,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 	str_appendf(&s, "UPDATE \'messages\' SET ");
 	
 	#define TG_MESSAGE_STR(t, n, type, name) \
-	if (m->n){\
+	if (m->n && m->n[0]){\
 		str_appendf(&s, "\'" name "\'" " = \'"); \
 		str_append(&s, (char*)m->n, strlen((char*)m->n)); \
 		str_appendf(&s, "\', "); \
@@ -546,7 +546,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 		str_appendf(&s, "\'" name "\'" " = "_LD_", ", (uint64_t)m->n);
 	
 	#define TG_MESSAGE_SPS(t, n, type, name) \
-	if (m->n){\
+	if (m->n && m->n[0]){\
 		str_appendf(&s, "\'" name "\'" " = \'"); \
 		str_append(&s, (char*)m->n, strlen((char*)m->n)); \
 		str_appendf(&s, "\', "); \
