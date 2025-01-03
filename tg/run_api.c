@@ -306,7 +306,8 @@ tg_run_api_receive_data:;
 		// free tl
 		tl_free(tl);
 		tl = NULL;
-		goto tg_run_api_end;
+		// receive data again
+		goto tg_run_api_receive_data;
 	}
 	// handle result
 	if (result->result_ == NULL){
