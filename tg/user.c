@@ -267,3 +267,65 @@ tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id)
 	free(s.str);
 	return m;
 }
+
+tg_user_t * tg_user_get_by_phone(tg_t *tg, const char *phone)
+{
+	struct str s;
+	str_init(&s);
+	str_appendf(&s, "SELECT ");
+	
+	#define TG_USER_ARG(t, n, type, name, ...) \
+		str_appendf(&s, name ", ");
+	#define TG_USER_STR(t, n, type, name, ...) \
+		str_appendf(&s, name ", ");
+	#define TG_USER_SPA(t, n, type, name, ...) \
+		str_appendf(&s, name ", ");
+	#define TG_USER_SPS(t, n, type, name, ...) \
+		str_appendf(&s, name ", ");
+	TG_USER_ARGS
+	#undef TG_USER_ARG
+	#undef TG_USER_STR
+	#undef TG_USER_SPA
+	#undef TG_USER_SPS
+		
+	str_appendf(&s, 
+			"id FROM users WHERE id = %d AND phone = \'%s\'"
+			"ORDER BY \'date\' DESC;", tg->id, phone);
+
+	tg_user_t *m = NEW(tg_user_t, 
+			ON_ERR(tg, "%s: can't allocate memory", __func__); return NULL;);
+	
+	tg_sqlite3_for_each(tg, s.str, stmt){
+		
+		int col = 0;
+		#define TG_USER_ARG(t, n, type, name, ...) \
+			m->n = sqlite3_column_int64(stmt, col++);
+		#define TG_USER_STR(t, n, type, name, ...) \
+			if (sqlite3_column_bytes(stmt, col) > 0){ \
+				m->n = strndup(\
+					(char *)sqlite3_column_text(stmt, col),\
+					sqlite3_column_bytes(stmt, col));\
+			}\
+			col++;
+		#define TG_USER_SPA(t, n, type, name, ...) \
+			m->n = sqlite3_column_int64(stmt, col++);
+		#define TG_USER_SPS(t, n, type, name, ...) \
+			if (sqlite3_column_bytes(stmt, col) > 0){ \
+				m->n = strndup(\
+					(char *)sqlite3_column_text(stmt, col),\
+					sqlite3_column_bytes(stmt, col));\
+			}\
+			col++;
+		TG_USER_ARGS
+
+		#undef TG_USER_ARG
+		#undef TG_USER_STR
+		#undef TG_USER_SPA
+		#undef TG_USER_SPS
+
+		break;
+	}	
+	
+	free(s.str);
+	return m;
+}
