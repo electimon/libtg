@@ -400,7 +400,7 @@ void tg_run_api_async_receive(tg_t *tg, tl_t *tl)
 	if (tl)
 		tl_free(tl);
 	
-	list_remove(&tg->receive_queue, index);
+	//list_remove(&tg->receive_queue, index);
 }
 
 void tg_run_api_async(tg_t *tg, buf_t *query,
