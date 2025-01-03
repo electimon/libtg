@@ -31,6 +31,8 @@ struct tg_ {
 	void (*on_err)(void *on_err_data, const char *err);
 	void *on_log_data;
 	void (*on_log)(void *on_log_data, const char *msg);
+	void *on_update_data;
+	void (*on_update)(void *on_update_data, int type, void *data);
 	int seqn;
 	buf_t key;
 	uint64_t key_id;
@@ -84,6 +86,12 @@ void tg_add_mgsid(tg_t*, uint64_t);
 tl_t * tg_send_query_(tg_t *tg, buf_t s, bool encrypt);
 tl_t * tg_send_query_to_net(
 		tg_t *tg, buf_t query, bool enc, int sockfd);
+
+#define ON_UPDATE(tg, type, data)\
+	({if (tg->on_update){ \
+		tg->on_update(tg->on_update_data, type, data); \
+	 }\
+	})
 
 #define ON_ERR(tg, ...)\
 	({if (tg->on_err){ \

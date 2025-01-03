@@ -1,6 +1,7 @@
 #include "tg.h"
 #include "../transport/transport.h"
 #include "../transport/net.h"
+#include "updates.h"
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -21,6 +22,8 @@ tl_t * tg_deserialize(tg_t *tg, buf_t *buf)
 				for (i = 0; i < obj->messages_len; ++i) {
 					mtp_message_t m = obj->messages_[i];
 					tl = tg_deserialize(tg, &m.body);	
+					if (tl && tl->_id == id_rpc_result)
+						return tl;
 				}
 			}
 			break;
@@ -115,12 +118,6 @@ tl_t *tg_result(tg_t *tg, tl_t *result)
 	}
 
 	return tl;
-}
-
-
-static void tg_handle_updates(tg_t *tg, tl_t *tl){
-	/* TODO: UPDATES */
-
 }
 
 tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query, 
@@ -261,15 +258,19 @@ tg_run_api_receive_data:;
 		
 		// BAD SERVER SALT
 		if (tl->_id == id_bad_server_salt){
+			// free tl
+			tl_free(tl);
 			// resend message
 			return tg_run_api_with_progress(
 					tg, query, progressp, progress);
 		}
 
-		ON_ERR(tg, "%s: expected rpc_result, but got: %s", 
-				__func__, TL_NAME_FROM_ID(tl->_id));
 		// handle UPDATES
-		tg_handle_updates(tg, tl);
+		if (tg_do_updates(tg, tl))
+			ON_ERR(tg, "%s: expected rpc_result, but got: %s", 
+				__func__, TL_NAME_FROM_ID(tl->_id));
+		// free tl
+		tl_free(tl);
 		// receive data again
 		goto tg_run_api_receive_data;
 	} 

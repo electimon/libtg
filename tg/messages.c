@@ -303,6 +303,18 @@ void tg_message_from_tl_service(
 }
 
 
+void tg_message_from_tl_unknown(
+		tg_t *tg, tg_message_t *tgm, tl_t *tlm)
+{
+	if (!tlm)
+		return;
+	if (tlm->_id == id_message)
+		return tg_message_from_tl(tg, tgm, (tl_message_t *)tlm);
+	if (tlm->_id == id_messageService)
+		return tg_message_from_tl_service(tg, tgm, (tl_messageService_t *)tlm);
+}
+
+
 static int parse_msgs(
 		tg_t *tg, uint64_t peer_id, 
 		int argc, tl_t **argv,

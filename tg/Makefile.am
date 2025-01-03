@@ -14,6 +14,7 @@ libtg_la_SOURCES = tg.c \
 				   chat.c \
 				   user.c \
 				   channel.c \
+				   updates.c \
 				   run_api.c \
            ../crypto/hsh.c \
            ../crypto/aes.c \

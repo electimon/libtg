@@ -146,6 +146,12 @@ void tg_message_free(tg_message_t*);
 void tg_message_from_tl(
 		tg_t*, tg_message_t*, tl_message_t*);
 
+void tg_message_from_tl_service(
+		tg_t *tg, tg_message_t *tgm, tl_messageService_t *tlm);
+
+void tg_message_from_tl_unknown(
+		tg_t *tg, tg_message_t *tgm, tl_t *tlm);
+
 /* used by tg int functions */
 void tg_messages_create_table(tg_t *tg);
 
