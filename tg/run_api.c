@@ -296,19 +296,19 @@ tg_run_api_receive_data:;
 		goto tg_run_api_receive_data;
 	} 
 
-	// close socket
-	tg_net_close(tg, sockfd);
-	
 	// check msgid
 	tl_rpc_result_t *result = (tl_rpc_result_t *)tl;
 	if (msgid != result->req_msg_id_){
 		ON_ERR(tg, "%s: rpc result with wrong msg id", __func__);
 		// free tl
 		tl_free(tl);
-		tl = NULL;
 		// receive data again
 		goto tg_run_api_receive_data;
 	}
+	
+	// close socket
+	tg_net_close(tg, sockfd);
+	
 	// handle result
 	if (result->result_ == NULL){
 		ON_ERR(tg, "%s: rpc result is NULL", __func__);
