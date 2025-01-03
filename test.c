@@ -272,29 +272,29 @@ int main(int argc, char *argv[])
 	tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
 
-	InputUser iuser = tl_inputUserSelf();
-	buf_t getUsers = 
-		tl_users_getUsers(&iuser, 1);	
+	//InputUser iuser = tl_inputUserSelf();
+	//buf_t getUsers = 
+		//tl_users_getUsers(&iuser, 1);	
 
-	tl_t *tl = tg_run_api(tg, &getUsers);
+	//tl_t *tl = tg_run_api(tg, &getUsers);
 
-	printf("GOT: %s\n", TL_NAME_FROM_ID(tl->_id));
-	if (!tl || tl->_id != id_vector)
-		return 1;
+	//printf("GOT: %s\n", TL_NAME_FROM_ID(tl->_id));
+	//if (!tl || tl->_id != id_vector)
+		//return 1;
 
-	tl_vector_t *vector = (tl_vector_t *)tl;
-	tl = tl_deserialize(&vector->data_);
-	if (!tl || tl->_id != id_user)
-		return 1;
-	tl_user_t *user = (tl_user_t *)tl;
+	//tl_vector_t *vector = (tl_vector_t *)tl;
+	//tl = tl_deserialize(&vector->data_);
+	//if (!tl || tl->_id != id_user)
+		//return 1;
+	//tl_user_t *user = (tl_user_t *)tl;
 
-	printf("USERNAME: %s\n", (char *)user->username_.data);
+	//printf("USERNAME: %s\n", (char *)user->username_.data);
 
-	tg_peer_t peer = {
-			TG_PEER_TYPE_USER,
-			user->id_,
-			user->access_hash_
-	}; 
+	/*tg_peer_t peer = {*/
+			/*TG_PEER_TYPE_USER,*/
+			/*user->id_,*/
+			/*user->access_hash_*/
+	/*}; */
 		//tg_message_send(
 		//P
 				//tg, 
@@ -315,11 +315,11 @@ int main(int argc, char *argv[])
 			//tg, query_cb, 
 			//NULL, NULL);
 
-		//tg_peer_t peer = {
-		//TG_PEER_TYPE_CHANNEL,
-		//1326223284,
-		//-5244509236001112417,
-	//};
+	tg_peer_t peer = {
+		TG_PEER_TYPE_CHANNEL,
+		1326223284,
+		-5244509236001112417,
+	};
 
 	//tg_get_peer_photo_file(
 			//tg, 
@@ -340,11 +340,11 @@ int main(int argc, char *argv[])
 	/*tg_get_dialogs_from_database(tg, tg, */
 			/*dialogs_callback);*/
 
-	int count = tg_get_dialogs(tg, 40,
-			 time(NULL),
-			 NULL, NULL,
-			 NULL, dialogs_callback);
-	printf("GOT %d dialogs\n", count);
+	/*int count = tg_get_dialogs(tg, 40,*/
+			 /*time(NULL),*/
+			 /*NULL, NULL,*/
+			 /*NULL, dialogs_callback);*/
+	/*printf("GOT %d dialogs\n", count);*/
 
 
 	//printf("NAME: %s\n", d.name);
@@ -378,6 +378,22 @@ int main(int argc, char *argv[])
 			//NULL, 
 			//&m, 
 			//messages_callback_document);
+
+	tg_messages_get_history_async(
+			tg,
+			peer, 
+			0, 
+			time(NULL), 
+			0, 
+			20, 
+			0, 
+			0, 
+			NULL, 
+			&m, 
+			messages_callback,
+			on_done);
+
+
 
 	//printf("MESSAGE WITH PHOTO:\n");
 	//printf("%.8x:\n", m.id_);

@@ -104,6 +104,9 @@ tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query,
 		void *progressp, 
 		int (*progress)(void *progressp, int size, int total));
 
+void tg_run_api_async(tg_t *tg, buf_t *query,
+		void *userdata, 
+		int (*callback)(void *userdata, tl_t *tl));
 
 int tg_account_register_ios(tg_t *tg, const char *token, bool development);
 

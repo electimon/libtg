@@ -2,7 +2,7 @@
  * File              : net.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.11.2024
- * Last Modified Date: 23.12.2024
+ * Last Modified Date: 03.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "../tg/tg.h"
@@ -307,98 +307,98 @@ int tg_net_add_query(tg_t *tg, const buf_t buf, uint64_t msg_id,
 {
 	printf("%s\n", __func__);
 
-	tg_queue_node_t *n = 
-		tg_queue_node_new(buf, msg_id, 
-				on_donep, on_done, chunkp, chunk);
-	if (!n){
-		ON_ERR(tg, "tg_queue_node_new error");
-		return 1;
-	}
+	/*tg_queue_node_t *n = */
+		/*tg_queue_node_new(buf, msg_id, */
+				/*on_donep, on_done, chunkp, chunk);*/
+	/*if (!n){*/
+		/*ON_ERR(tg, "tg_queue_node_new error");*/
+		/*return 1;*/
+	/*}*/
 
-	// wait to queue unlock
-	while (tg->send_queue_lock) {
-		usleep(1000); // in microseconds
-	}
-	tg->send_queue_lock = 1;
-	list_append(&tg->send_queue, n,
-			ON_ERR(tg, "list_append"); 
-			tg->send_queue_lock = 0;
-			return 1);
+	/*// wait to queue unlock*/
+	/*while (tg->send_queue_lock) {*/
+		/*usleep(1000); // in microseconds*/
+	/*}*/
+	/*tg->send_queue_lock = 1;*/
+	/*list_append(&tg->send_queue, n,*/
+			/*ON_ERR(tg, "list_append"); */
+			/*tg->send_queue_lock = 0;*/
+			/*return 1);*/
 	
-	tg->send_queue_lock = 0;
-	return 0;
-}
+	/*tg->send_queue_lock = 0;*/
+	/*return 0;*/
+/*}*/
 
-int tg_net_send_queue_node(tg_t *tg){
-	//printf("%s\n", __func__);
-	int ret = 1, sockfd = -1;
-	while (tg->send_queue_lock) {
-		printf("%s: queue is locked...\n", __func__);
-		usleep(1000); // in microseconds
-	}
-	tg->send_queue_lock = 1;
+/*int tg_net_send_queue_node(tg_t *tg){*/
+	/*//printf("%s\n", __func__);*/
+	/*int ret = 1, sockfd = -1;*/
+	/*while (tg->send_queue_lock) {*/
+		/*printf("%s: queue is locked...\n", __func__);*/
+		/*usleep(1000); // in microseconds*/
+	/*}*/
+	/*tg->send_queue_lock = 1;*/
 	
-	tg_queue_node_t *n = list_remove(&tg->send_queue, 0); 
-	tg->send_queue_lock = 0;
-	if (n){
-		// open socket
-		sockfd = tg_net_open(tg);
-		if (sockfd < 0){
-			goto tg_net_send_queue_node_finish;
-		}
+	/*tg_queue_node_t *n = list_remove(&tg->send_queue, 0); */
+	/*tg->send_queue_lock = 0;*/
+	/*if (n){*/
+		/*// open socket*/
+		/*sockfd = tg_net_open(tg);*/
+		/*if (sockfd < 0){*/
+			/*goto tg_net_send_queue_node_finish;*/
+		/*}*/
 
-		// send ACK
-		if (tg->msgids[0]){
-			buf_t ack = tg_ack(tg);
-			send(sockfd, ack.data, ack.size, 0);
-			buf_free(ack);
-		}
+		/*// send ACK*/
+		/*if (tg->msgids[0]){*/
+			/*buf_t ack = tg_ack(tg);*/
+			/*send(sockfd, ack.data, ack.size, 0);*/
+			/*buf_free(ack);*/
+		/*}*/
 
-		// send query
-		ON_LOG(tg, "%s: send: %s", __func__, buf_sdump(n->msg));
-		int s = -1;
-		while (s < 0){
-			s = send(sockfd, n->msg.data,
-			 	n->msg.size, 0);
-			if (s < 0){
-				// handle error
-				ON_ERR(tg, "%s: socket error: %d", 
-						__func__, s);
-				if (n->on_done){
-					// if user return non-null and s < 0 try to send again
-					if(n->on_done(n->on_donep, buf_new())){
-						usleep(100000); // in microseconds
-						continue;
-					}
-				}
-				goto tg_net_send_queue_node_finish;
-			}
-		}
+		/*// send query*/
+		/*ON_LOG(tg, "%s: send: %s", __func__, buf_sdump(n->msg));*/
+		/*int s = -1;*/
+		/*while (s < 0){*/
+			/*s = send(sockfd, n->msg.data,*/
+				 /*n->msg.size, 0);*/
+			/*if (s < 0){*/
+				/*// handle error*/
+				/*ON_ERR(tg, "%s: socket error: %d", */
+						/*__func__, s);*/
+				/*if (n->on_done){*/
+					/*// if user return non-null and s < 0 try to send again*/
+					/*if(n->on_done(n->on_donep, buf_new())){*/
+						/*usleep(100000); // in microseconds*/
+						/*continue;*/
+					/*}*/
+				/*}*/
+				/*goto tg_net_send_queue_node_finish;*/
+			/*}*/
+		/*}*/
 
-		// receive data
-		while (1) {
-			buf_t buf = tg_net_receive2(
-					tg, sockfd, n->chunkp, n->chunk);
+		/*// receive data*/
+		/*while (1) {*/
+			/*buf_t buf = tg_net_receive2(*/
+					/*tg, sockfd, n->chunkp, n->chunk);*/
 			
-			if (buf.size > 0)
-				ret = 0;
+			/*if (buf.size > 0)*/
+				/*ret = 0;*/
 			
-			if (n->on_done){
-				if (n->on_done(n->on_donep, buf)){
-					// receive again
-					continue;
-				};	
-			}
+			/*if (n->on_done){*/
+				/*if (n->on_done(n->on_donep, buf)){*/
+					/*// receive again*/
+					/*continue;*/
+				/*};	*/
+			/*}*/
 			
-			break;
-		}
-	}
+			/*break;*/
+		/*}*/
+	/*}*/
 	
-tg_net_send_queue_node_finish:;
-	if (n){
-		tg_queue_node_free(n);
-	}
-	if (sockfd >= 0)
-		tg_net_close(tg, sockfd);
-	return ret;
+/*tg_net_send_queue_node_finish:;*/
+	/*if (n){*/
+		/*tg_queue_node_free(n);*/
+	/*}*/
+	/*if (sockfd >= 0)*/
+		/*tg_net_close(tg, sockfd);*/
+	/*return ret;*/
 }

@@ -64,8 +64,9 @@ tg_t *tg_new(
 	// start queue manager
 	/*if (tg_start_send_queue_manager(tg))*/
 		/*return NULL;*/
-	/*if (tg_start_receive_queue_manager(tg))*/
-		/*return NULL;*/
+	if (tg_start_receive_queue_manager(tg))
+		return NULL;
+	tg->queue_sockfd = -1;
 
 	return tg;
 }

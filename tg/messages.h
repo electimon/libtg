@@ -179,6 +179,20 @@ int tg_messages_get_history(
 		void *userdata,
 		int (*callback)(void *userdata, const tg_message_t *msg));
 
+void tg_messages_get_history_async(
+		tg_t *tg,
+		tg_peer_t peer,
+		int offset_id,
+		int offset_date,
+		int add_offset,
+		int limit,
+		int max_id,
+		int min_id,
+		uint64_t *hash,
+		void *userdata,
+		int (*callback)(void *userdata, const tg_message_t *msg),
+		void (*on_done)(void *userdata));
+
 /* get messeges from database, return number of messages
  * return non-null in callback to stop function execution */ 
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,

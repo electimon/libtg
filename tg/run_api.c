@@ -1,9 +1,22 @@
+#include "list.h"
 #include "tg.h"
 #include "../transport/transport.h"
 #include "../transport/net.h"
 #include "updates.h"
+#include <stdint.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include "../tl/alloc.h"
+#if INTPTR_MAX == INT32_MAX
+    #define THIS_IS_32_BIT_ENVIRONMENT
+		#define _LD_ "%lld"
+#elif INTPTR_MAX == INT64_MAX
+    #define THIS_IS_64_BIT_ENVIRONMENT
+		#define _LD_ "%ld"
+#else
+    #error "Environment not 32 or 64-bit."
+#endif
+
 
 tl_t * tg_deserialize(tg_t *tg, buf_t *buf)
 {
@@ -223,6 +236,7 @@ tg_run_api_receive_data:;
 		// some error
 		ON_ERR(tg, "%s: can't receive data", __func__);
 		buf_free(r);
+		tg_net_close(tg, sockfd);
 		goto tg_run_api_end;
 	}
 
@@ -230,12 +244,14 @@ tg_run_api_receive_data:;
 	r.size = len;
 	if (r.size == 4 && buf_get_ui32(r) == 0xfffffe6c){
 		buf_free(r);
+		tg_net_close(tg, sockfd);
 		goto tg_run_api_end;
 	}
 
 	buf_t d = tg_decrypt(tg, r, true);
 	if (!d.size){
 		buf_free(r);
+		tg_net_close(tg, sockfd);
 		goto tg_run_api_end;
 	}
 	buf_free(r);
@@ -243,6 +259,7 @@ tg_run_api_receive_data:;
 	buf_t msg = tg_deheader(tg, d, true);
 	if (!msg.size){
 		buf_free(d);
+		tg_net_close(tg, sockfd);
 		goto tg_run_api_end;
 	}
 	buf_free(d);
@@ -251,8 +268,10 @@ tg_run_api_receive_data:;
 	tl = tg_deserialize(tg, &msg);
 	
 	// handle tl
-	if (tl == NULL)
+	if (tl == NULL){
+		tg_net_close(tg, sockfd);
 		goto tg_run_api_end;
+	}
 
 	if (tl->_id != id_rpc_result){
 		
@@ -260,13 +279,15 @@ tg_run_api_receive_data:;
 		if (tl->_id == id_bad_server_salt){
 			// free tl
 			tl_free(tl);
+			// close socket
+			tg_net_close(tg, sockfd);
 			// resend message
 			return tg_run_api_with_progress(
 					tg, query, progressp, progress);
 		}
 
 		// handle UPDATES
-		if (tg_do_updates(tg, tl))
+		//if (tg_do_updates(tg, tl))
 			ON_ERR(tg, "%s: expected rpc_result, but got: %s", 
 				__func__, TL_NAME_FROM_ID(tl->_id));
 		// free tl
@@ -274,6 +295,9 @@ tg_run_api_receive_data:;
 		// receive data again
 		goto tg_run_api_receive_data;
 	} 
+
+	// close socket
+	tg_net_close(tg, sockfd);
 	
 	// check msgid
 	tl_rpc_result_t *result = (tl_rpc_result_t *)tl;
@@ -302,4 +326,153 @@ tg_run_api_end:;
 tl_t *tg_run_api(tg_t *tg, buf_t *query){
 	return tg_run_api_with_progress(
 			tg, query, NULL, NULL);
+}
+
+struct run_api {
+	uint64_t msgid;	
+	void *userdata;
+	int (*callback)(void *userdata, tl_t *tl);
+};
+
+void tg_run_api_async_receive(tg_t *tg, tl_t *tl) 
+{
+	// handle tl
+	if (tl->_id != id_rpc_result){
+		
+		// BAD SERVER SALT
+		if (tl->_id == id_bad_server_salt){
+			// free tl
+			tl_free(tl);
+			// resend message
+			return;
+		}
+
+		// handle UPDATES
+		if (tg_do_updates(tg, tl))
+			ON_ERR(tg, "%s: expected rpc_result, but got: %s", 
+				__func__, TL_NAME_FROM_ID(tl->_id));
+		// free tl
+		tl_free(tl);
+		return;
+	} 
+	
+	// check msgid
+	tl_rpc_result_t *result = (tl_rpc_result_t *)tl;
+	uint64_t msgid = result->req_msg_id_;
+
+	// find api in queue
+	struct run_api *api = NULL;
+	int i, index = -1;
+	list_for_each(tg->receive_queue, api){
+		if (api->msgid == msgid){
+			index = i;
+			break;
+		}
+		i++;
+	};
+	if (index == -1){
+		ON_ERR(tg, "%s: can't find api for msg_id: "_LD_"", 
+				__func__, msgid);
+		tl_free(tl);
+		return;
+	}
+
+	// get api
+	if (api == NULL){
+		ON_ERR(tg, "%s: list_remove error", __func__);
+		tl_free(tl);
+		return;
+	}
+	
+	// handle result
+	if (result->result_ == NULL){
+		ON_ERR(tg, "%s: rpc result is NULL", __func__);
+		// free tl
+		tl_free(tl);
+		return;
+	}
+
+	tl = tg_result(tg, result->result_);
+	if (api->callback)
+		api->callback(api->userdata, tl);
+
+	// free
+	if (tl)
+		tl_free(tl);
+	
+	list_remove(&tg->receive_queue, index);
+}
+
+void tg_run_api_async(tg_t *tg, buf_t *query,
+		void *userdata, 
+		int (*callback)(void *userdata, tl_t *tl))
+{
+	// session id
+	if (!tg->ssid.size)
+		tg->ssid = buf_rand(8);
+	if (!tg->salt.size)
+		tg->salt = buf_rand(8);
+
+	int i;
+	tl_t *tl = NULL;
+
+	// prepare query
+	uint64_t msgid = 0;
+	buf_t b = tg_prepare_query(
+			tg, *query, true, &msgid);
+	if (!b.size)
+	{
+		ON_ERR(tg, "%s: can't prepare query", __func__);
+		buf_free(b);
+		return;
+	}
+
+	// open socket
+	int sockfd = tg_net_open(tg);
+	tg->queue_sockfd = sockfd;
+	if (sockfd < 0)
+	{
+		ON_ERR(tg, "%s: can't open socket", __func__);
+		buf_free(b);
+		return;
+	}
+
+	// send ACK
+	if (tg->msgids[0]){
+		buf_t ack = tg_ack(tg);
+		int s = 
+			send(sockfd, ack.data, ack.size, 0);
+		buf_free(ack);
+		if (s < 0){
+			ON_ERR(tg, "%s: socket error: %d", __func__, s);
+			buf_free(b);
+			return;
+		}
+	}
+
+	// add api to queue list
+	struct run_api *api = NEW(struct run_api, 
+			ON_ERR(tg, "%s: can't allocate memory", __func__);
+			return;);
+	api->msgid = msgid;
+	api->callback = callback;
+	api->userdata = userdata;
+
+	list_append(&tg->receive_queue, api, 
+			ON_ERR(tg, "%s: list_append error", __func__);
+			return;);
+
+	// send query
+	ON_LOG(tg, "%s: msgid: "_LD_", send: %s", 
+			__func__, msgid, buf_sdump(b));
+	int s = 
+		send(sockfd, b.data, b.size, 0);
+	if (s < 0){
+		ON_ERR(tg, "%s: socket error: %d", __func__, s);
+		buf_free(b);
+		return;
+	}
+
+	// close socket
+	//tg_net_close(tg, sockfd);
 }

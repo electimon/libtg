@@ -23,6 +23,7 @@ struct tg_ {
 	bool send_queue_lock;
 	bool send_queue_manager;
 	pthread_t send_queue_tid;
+	int queue_sockfd;
 	list_t *receive_queue;
 	bool receive_queue_lock;
 	bool receive_queue_manager;
@@ -123,4 +124,7 @@ tl_t * tg_send_query_to_net(
 
 buf_t image_from_photo_stripped(buf_t photoStreppedData);
 
+tl_t * tg_deserialize(tg_t *tg, buf_t *buf);
+
+void tg_run_api_async_receive(tg_t *tg, tl_t *tl); 
 #endif /* ifndef TG_H_ */

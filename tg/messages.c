@@ -1,4 +1,5 @@
 #include "messages.h"
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -442,6 +443,136 @@ int tg_messages_get_history(
 	tl_free(tl);
 	
 	return c;
+}
+
+struct tg_messages_get_history_async_t {
+	tg_t *tg;
+	tg_peer_t peer;
+	void *userdata;
+	int (*callback)(void *userdata, const tg_message_t *msg);
+	void (*on_done)(void *userdata);
+}; 
+
+int tg_messages_get_history_async_cb(void *userdata, tl_t *tl)
+{
+	assert(userdata);
+	struct tg_messages_get_history_async_t *t = userdata;
+	
+	if (tl ==  NULL){
+		if (t->on_done)
+			t->on_done(t->userdata);
+		return 0;
+	}
+
+	printf("GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
+
+	switch (tl->_id) {
+		case id_messages_channelMessages:
+			{
+				tl_messages_channelMessages_t *msgs = 
+					(tl_messages_channelMessages_t *)tl;
+				
+				parse_msgs(
+						t->tg, t->peer.id, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						t->userdata, 
+						t->callback);
+
+			}
+			break;
+			
+		case id_messages_messages:
+			{
+				tl_messages_messages_t *msgs = 
+					(tl_messages_messages_t *)tl;
+				
+				parse_msgs(
+						t->tg, t->peer.id, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						t->userdata, 
+						t->callback);
+
+			}
+			break;
+			
+		case id_messages_messagesSlice:
+			{
+				tl_messages_messagesSlice_t *msgs = 
+					(tl_messages_messagesSlice_t *)tl;
+				
+				parse_msgs(
+						t->tg, t->peer.id, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						t->userdata, 
+						t->callback);
+			}
+			break;
+			
+		default:
+			break;
+	}
+
+	// free tl
+	tl_free(tl);
+
+	if (t->on_done)
+		t->on_done(t->userdata);
+
+	free(t);
+}	
+
+void tg_messages_get_history_async(
+		tg_t *tg,
+		tg_peer_t peer,
+		int offset_id,
+		int offset_date,
+		int add_offset,
+		int limit,
+		int max_id,
+		int min_id,
+		uint64_t *hash,
+		void *userdata,
+		int (*callback)(void *userdata, const tg_message_t *msg),
+		void (*on_done)(void *userdata))
+{
+	int i, k, c = 0;
+	uint64_t h = 0;
+	if (hash)
+		h = *hash;
+
+	buf_t peer_ = tg_inputPeer(peer); 
+
+	buf_t getHistory = 
+		tl_messages_getHistory(
+				&peer_, 
+				offset_id, 
+				offset_date, 
+				add_offset, 
+				limit, 
+				max_id, 
+				min_id, 
+				h);
+	buf_free(peer_);
+
+	struct tg_messages_get_history_async_t *t = 
+		NEW(struct tg_messages_get_history_async_t, 
+				ON_ERR(tg, "%s: can't allocate memory", __func__);
+				return;);
+	t->tg = tg;
+	t->peer = peer;
+	t->userdata = userdata;
+	t->callback = callback;
+	t->on_done = on_done;
+
+	tg_run_api_async(
+			tg,
+		 	&getHistory, 
+			t, 
+			tg_messages_get_history_async_cb);
+	buf_free(getHistory);
 }
 
 int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
