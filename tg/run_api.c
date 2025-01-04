@@ -392,7 +392,7 @@ void tg_run_api_async_receive(tg_t *tg, tl_t *tl)
 		}
 
 		// handle UPDATES
-		if (tg_do_updates(tg, tl))
+		//if (tg_do_updates(tg, tl))
 			ON_ERR(tg, "%s: expected rpc_result, but got: %s", 
 				__func__, TL_NAME_FROM_ID(tl->_id));
 		// free tl
