@@ -309,50 +309,6 @@ static uint64_t message_update(tg_t *tg,
 	return chat_id;
 }
 
-static void users_update(tg_t *tg, int count, tl_t **array)
-{
-	int i;
-	for (i = 0; i < count; ++i) {
-		if (array == NULL || 
-				array[i] == NULL ||
-				array[i]->_id != id_user)
-			continue;
-
-		tl_user_t *user = (tl_user_t *)array[i];
-		tg_user_t tgm;	
-		tg_user_from_tl(tg, &tgm, user);
-		tg_user_save(tg, &tgm);
-		tg_user_free(&tgm);
-	}
-}
-
-static void chats_update(tg_t *tg, int count, tl_t **array)
-{
-	int i;
-	for (i = 0; i < count; ++i) {
-		if (array == NULL || 
-				array[i] == NULL ||
-				(array[i]->_id != id_chat && 
-				 array[i]->_id != id_channel))
-			continue;
-
-		if (array[i]->_id == id_chat){
-			tl_chat_t *c = (tl_chat_t *)array[i];
-			tg_chat_t tgm;	
-			tg_chat_from_tl(tg, &tgm, c);
-			tg_chat_save(tg, &tgm);
-			tg_chat_free(&tgm);
-		} else if (array[i]->_id == id_channel){
-			tl_channel_t *c = (tl_channel_t *)array[i];
-			tg_channel_t tgm;	
-			tg_channel_from_tl(tg, &tgm, c);
-			tg_channel_save(tg, &tgm);
-			tg_channel_free(&tgm);
-		}
-	}
-}
-
-
 int tg_do_updates(tg_t *tg, tl_t *tl)
 {
 	if (!tl)
@@ -409,10 +365,10 @@ int tg_do_updates(tg_t *tg, tl_t *tl)
 				tl_updatesCombined_t *up = (tl_updatesCombined_t *)tl; 
 				
 				// handle users
-				users_update(tg, up->users_len, up->users_);
+				tg_users_save(tg, up->users_len, up->users_);
 				
 				// handle chats
-				chats_update(tg, up->chats_len, up->chats_);
+				tg_chats_save(tg, up->chats_len, up->chats_);
 
 				// handle updates
 				for (i = 0; i < up->updates_len; ++i) {
@@ -430,10 +386,10 @@ int tg_do_updates(tg_t *tg, tl_t *tl)
 				tl_updates_t *up = (tl_updates_t *)tl; 
 				
 				// handle users
-				users_update(tg, up->users_len, up->users_);
+				tg_users_save(tg, up->users_len, up->users_);
 				
 				// handle chats
-				chats_update(tg, up->chats_len, up->chats_);
+				tg_chats_save(tg, up->chats_len, up->chats_);
 
 				// handle updates
 				for (i = 0; i < up->updates_len; ++i) {

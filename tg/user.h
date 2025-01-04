@@ -78,6 +78,7 @@ void tg_user_from_tl(tg_t *tg, tg_user_t *tgm, tl_user_t *tlm);
 void tg_user_create_table(tg_t *tg);
 void tg_user_free(tg_user_t *c);
 int tg_user_save(tg_t *tg, const tg_user_t *user);
+void tg_users_save(tg_t *tg, int count, tl_t **array);
 tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id);
 tg_user_t * tg_user_get_by_phone(tg_t *tg, const char *phone);
 

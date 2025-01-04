@@ -1,4 +1,5 @@
 #include "chat.h"
+#include "channel.h"
 #include "database.h"
 #include "tg.h"
 #include "../tl/alloc.h"
@@ -271,4 +272,30 @@ tg_chat_t * tg_chat_get(tg_t *tg, uint64_t chat_id)
 	
 	free(s.str);
 	return m;
+}
+
+void tg_chats_save(tg_t *tg, int count, tl_t **array)
+{
+	int i;
+	for (i = 0; i < count; ++i) {
+		if (array == NULL || 
+				array[i] == NULL ||
+				(array[i]->_id != id_chat && 
+				 array[i]->_id != id_channel))
+			continue;
+
+		if (array[i]->_id == id_chat){
+			tl_chat_t *c = (tl_chat_t *)array[i];
+			tg_chat_t tgm;	
+			tg_chat_from_tl(tg, &tgm, c);
+			tg_chat_save(tg, &tgm);
+			tg_chat_free(&tgm);
+		} else if (array[i]->_id == id_channel){
+			tl_channel_t *c = (tl_channel_t *)array[i];
+			tg_channel_t tgm;	
+			tg_channel_from_tl(tg, &tgm, c);
+			tg_channel_save(tg, &tgm);
+			tg_channel_free(&tgm);
+		}
+	}
 }

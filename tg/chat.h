@@ -77,6 +77,7 @@ void tg_chat_from_tl(tg_t *tg, tg_chat_t *tgm, tl_chat_t *tlm);
 void tg_chat_create_table(tg_t *tg);
 void tg_chat_free(tg_chat_t *c);
 int tg_chat_save(tg_t *tg, const tg_chat_t *chat);
+void tg_chats_save(tg_t *tg, int count, tl_t **array);
 tg_chat_t * tg_chat_get(tg_t *tg, uint64_t chat_id);
 
 #endif /* ifndef TG_CHAT_T */

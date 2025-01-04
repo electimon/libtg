@@ -329,3 +329,20 @@ tg_user_t * tg_user_get_by_phone(tg_t *tg, const char *phone)
 	free(s.str);
 	return m;
 }
+
+void tg_users_save(tg_t *tg, int count, tl_t **array)
+{
+	int i;
+	for (i = 0; i < count; ++i) {
+		if (array == NULL || 
+				array[i] == NULL ||
+				array[i]->_id != id_user)
+			continue;
+
+		tl_user_t *user = (tl_user_t *)array[i];
+		tg_user_t tgm;	
+		tg_user_from_tl(tg, &tgm, user);
+		tg_user_save(tg, &tgm);
+		tg_user_free(&tgm);
+	}
+}

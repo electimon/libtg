@@ -8,6 +8,8 @@
 #include "tg.h"
 #include "database.h"
 #include "../tl/alloc.h"
+#include "user.h"
+#include "chat.h"
 
 // #include <stdint.h>
 #if INTPTR_MAX == INT32_MAX
@@ -396,13 +398,17 @@ int tg_messages_get_history(
 				tl_messages_channelMessages_t *msgs = 
 					(tl_messages_channelMessages_t *)tl;
 				
+				// update users
+				tg_users_save(tg, msgs->users_len, msgs->users_);
+				// update chats
+				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
+
 				c = parse_msgs(
 						tg, peer.id, 
 						msgs->messages_len, 
 						msgs->messages_, 
 						userdata, 
 						callback);
-
 			}
 			break;
 			
@@ -411,13 +417,17 @@ int tg_messages_get_history(
 				tl_messages_messages_t *msgs = 
 					(tl_messages_messages_t *)tl;
 				
+				// update users
+				tg_users_save(tg, msgs->users_len, msgs->users_);
+				// update chats
+				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
+				
 				c = parse_msgs(
 						tg, peer.id, 
 						msgs->messages_len, 
 						msgs->messages_, 
 						userdata, 
 						callback);
-
 			}
 			break;
 			
@@ -425,6 +435,11 @@ int tg_messages_get_history(
 			{
 				tl_messages_messagesSlice_t *msgs = 
 					(tl_messages_messagesSlice_t *)tl;
+				
+				// update users
+				tg_users_save(tg, msgs->users_len, msgs->users_);
+				// update chats
+				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
 				
 				c = parse_msgs(
 						tg, peer.id, 
@@ -472,6 +487,11 @@ int tg_messages_get_history_async_cb(void *userdata, tl_t *tl)
 				tl_messages_channelMessages_t *msgs = 
 					(tl_messages_channelMessages_t *)tl;
 				
+				// update users
+				tg_users_save(t->tg, msgs->users_len, msgs->users_);
+				// update chats
+				tg_chats_save(t->tg, msgs->chats_len, msgs->chats_);
+
 				parse_msgs(
 						t->tg, t->peer.id, 
 						msgs->messages_len, 
@@ -487,6 +507,11 @@ int tg_messages_get_history_async_cb(void *userdata, tl_t *tl)
 				tl_messages_messages_t *msgs = 
 					(tl_messages_messages_t *)tl;
 				
+				// update users
+				tg_users_save(t->tg, msgs->users_len, msgs->users_);
+				// update chats
+				tg_chats_save(t->tg, msgs->chats_len, msgs->chats_);
+
 				parse_msgs(
 						t->tg, t->peer.id, 
 						msgs->messages_len, 
@@ -502,6 +527,11 @@ int tg_messages_get_history_async_cb(void *userdata, tl_t *tl)
 				tl_messages_messagesSlice_t *msgs = 
 					(tl_messages_messagesSlice_t *)tl;
 				
+				// update users
+				tg_users_save(t->tg, msgs->users_len, msgs->users_);
+				// update chats
+				tg_chats_save(t->tg, msgs->chats_len, msgs->chats_);
+
 				parse_msgs(
 						t->tg, t->peer.id, 
 						msgs->messages_len, 
@@ -522,6 +552,7 @@ int tg_messages_get_history_async_cb(void *userdata, tl_t *tl)
 		t->on_done(t->userdata);
 
 	free(t);
+	return 0;
 }	
 
 void tg_messages_get_history_async(
