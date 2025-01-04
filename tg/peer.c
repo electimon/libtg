@@ -80,37 +80,72 @@ tg_peer_t tg_peer_by_phone(tg_t *tg, const char *phone){
 static void tg_peer_color_set_to_colors(
 		tg_t *tg,
 		tg_colors_t *colors,
-		tl_help_peerColorSet_t *pcs)
+		tl_t *tl)
 {
-	if (pcs->_id != id_help_peerColorSet)
+	if (tl->_id != id_help_peerColorSet &&
+		  tl->_id != id_help_peerColorProfileSet)
 	{
-		ON_ERR(tg, "%s: tl is not help_getPeerColorSet: %s",
-				__func__, TL_NAME_FROM_ID(pcs->_id));
-		return;
-	}
-
-	if (pcs->colors_ == NULL){
-		ON_ERR(tg, "%s: colors is NULL",
-				__func__);
+		ON_ERR(tg, "%s: tl is not colorSet: %s",
+				__func__, TL_NAME_FROM_ID(tl->_id));
 		return;
 	}
 	
-	int i;
-	for (i = 0; i < pcs->colors_len; ++i) {
-		switch (i) {
-			case 0:
-				colors->rgb0 = pcs->colors_[i];
-				break;
-			case 1:
-				colors->rgb1 = pcs->colors_[i];
-				break;
-			case 2:
-				colors->rgb1 = pcs->colors_[i];
-				break;
-			
-			default:
-				break;
-		}	
+	if (tl->_id == id_help_peerColorSet)
+	{
+		tl_help_peerColorSet_t *pcs = 
+			(tl_help_peerColorSet_t *)tl;
+
+		if (pcs->colors_ == NULL){
+			ON_ERR(tg, "%s: colors is NULL",
+					__func__);
+			return;
+		}
+		
+		int i;
+		for (i = 0; i < pcs->colors_len; ++i) {
+			switch (i) {
+				case 0:
+					colors->rgb0 = pcs->colors_[i];
+					break;
+				case 1:
+					colors->rgb1 = pcs->colors_[i];
+					break;
+				case 2:
+					colors->rgb1 = pcs->colors_[i];
+					break;
+				
+				default:
+					break;
+			}	
+		}
+	}else if (tl->_id == id_help_peerColorProfileSet)
+	{
+		tl_help_peerColorProfileSet_t *pcs = 
+			(tl_help_peerColorProfileSet_t *)tl;
+
+		if (pcs->palette_colors_ == NULL){
+			ON_ERR(tg, "%s: colors is NULL",
+					__func__);
+			return;
+		}
+		
+		int i;
+		for (i = 0; i < pcs->palette_colors_len; ++i) {
+			switch (i) {
+				case 0:
+					colors->rgb0 = pcs->palette_colors_[i];
+					break;
+				case 1:
+					colors->rgb1 = pcs->palette_colors_[i];
+					break;
+				case 2:
+					colors->rgb1 = pcs->palette_colors_[i];
+					break;
+				
+				default:
+					break;
+			}	
+		}
 	}
 }
 
