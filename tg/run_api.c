@@ -158,6 +158,17 @@ tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query,
 	if (sockfd < 0)
 		goto tg_run_api_end;
 
+	// send query
+	ON_LOG(tg, "%s: send: %s", __func__, buf_sdump(b));
+	int s = 
+		send(sockfd, b.data, b.size, 0);
+	if (s < 0){
+		ON_ERR(tg, "%s: socket error: %d", __func__, s);
+		goto tg_run_api_end;
+	}
+
+	// receive data
+tg_run_api_receive_data:;
 	// send ACK
 	if (tg->msgids[0]){
 		buf_t ack = tg_ack(tg);
@@ -170,17 +181,6 @@ tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query,
 		}
 	}
 
-	// send query
-	ON_LOG(tg, "%s: send: %s", __func__, buf_sdump(b));
-	int s = 
-		send(sockfd, b.data, b.size, 0);
-	if (s < 0){
-		ON_ERR(tg, "%s: socket error: %d", __func__, s);
-		goto tg_run_api_end;
-	}
-
-	// receive data
-tg_run_api_receive_data:;
 	buf_t r = buf_new();
 	// get length of the package
 	uint32_t len;
