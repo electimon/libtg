@@ -239,6 +239,7 @@ int tg_get_dialogs(
 								d.access_hash = channel->access_hash_;
 								d.peer_type = TG_PEER_TYPE_CHANNEL;
 								d.name = BUF2STR(channel->title_);
+								d.broadcat = channel->broadcast_;
 								if (channel->photo_ && 
 									channel->photo_->_id == id_chatPhoto)
 								{

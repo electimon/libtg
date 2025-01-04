@@ -25,6 +25,7 @@
 	TG_DIALOG_ARG(uint64_t, photo_id, "INT", "photo_id") \
 	TG_DIALOG_STR(char*,    thumb, "TEXT", "thumb") \
 	TG_DIALOG_ARG(uint64_t, access_hash, "INT", "access_hash") \
+	TG_DIALOG_ARG(bool,     broadcat, "INT", "broadcat") \
 
 
 typedef struct tg_dialog_ {
