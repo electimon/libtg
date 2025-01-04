@@ -28,6 +28,7 @@
 void tg_do_update(tg_t *tg, tl_t *update)
 {
 	int i;
+	ON_LOG(tg, "%s: %s", __func__, TL_NAME_FROM_ID(update->_id));
 
 	if (!update)
 		return;
