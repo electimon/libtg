@@ -340,10 +340,10 @@ tg_run_api_receive_data:;
 		ON_ERR(tg, "%s: rpc result with wrong msg id", __func__);
 		// free tl
 		tl_free(tl);
-		//// receive data again
-		//goto tg_run_api_receive_data;
+		// receive data again
+		goto tg_run_api_receive_data;
 		// close socket
-		tg_net_close(tg, sockfd);
+		//tg_net_close(tg, sockfd);
 		// resend message
 		//return tg_run_api_with_progress(
 				//tg, query, progressp, progress);
