@@ -273,8 +273,10 @@ tg_run_api_receive_data:;
 		goto tg_run_api_end;
 	}
 
-	if (tl->_id != id_rpc_result){
-		
+	if (tl->_id != id_rpc_result && 
+			tl->_id != id_msg_detailed_info &&
+			tl->_id != id_msg_new_detailed_info)
+	{
 		// BAD SERVER SALT
 		if (tl->_id == id_bad_server_salt){
 			// free tl
@@ -296,17 +298,55 @@ tg_run_api_receive_data:;
 		goto tg_run_api_receive_data;
 	} 
 
+	// check info
+	if (tl->_id == id_msg_detailed_info){
+		tl_msg_detailed_info_t *di = 
+			(tl_msg_detailed_info_t *)tl;
+		if (msgid == di->answer_msg_id_){
+			// ok - we got responce
+			// free tl
+			tl_free(tl);
+			// close socket
+			tg_net_close(tg, sockfd);
+			return NULL;
+		} else {
+			// free tl
+			tl_free(tl);
+			// receive data again
+			goto tg_run_api_receive_data;
+		}
+	}
+	if (tl->_id == id_msg_new_detailed_info){
+		tl_msg_new_detailed_info_t *di = 
+			(tl_msg_new_detailed_info_t *)tl;
+		if (msgid == di->answer_msg_id_){
+			// ok - we got responce
+			// free tl
+			tl_free(tl);
+			// close socket
+			tg_net_close(tg, sockfd);
+			return NULL;
+		} else {
+			// free tl
+			tl_free(tl);
+			// receive data again
+			goto tg_run_api_receive_data;
+		}
+	}
+
 	// check msgid
 	tl_rpc_result_t *result = (tl_rpc_result_t *)tl;
 	if (msgid != result->req_msg_id_){
 		ON_ERR(tg, "%s: rpc result with wrong msg id", __func__);
 		// free tl
 		tl_free(tl);
-		// close socket
-			tg_net_close(tg, sockfd);
-			// resend message
-			return tg_run_api_with_progress(
-					tg, query, progressp, progress);
+		// receive data again
+		goto tg_run_api_receive_data;
+		//// close socket
+		//tg_net_close(tg, sockfd);
+		//// resend message
+		//return tg_run_api_with_progress(
+		//		tg, query, progressp, progress);
 	}
 	
 	// close socket
