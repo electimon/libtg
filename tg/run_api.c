@@ -306,11 +306,8 @@ tg_run_api_receive_data:;
 				__func__, TL_NAME_FROM_ID(tl->_id));
 		// free tl
 		tl_free(tl);
-		// close socket
-		tg_net_close(tg, sockfd);
-		return NULL;
 		// receive data again
-		/*goto tg_run_api_receive_data;*/
+		goto tg_run_api_receive_data;
 	} 
 
 	// check info

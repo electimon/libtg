@@ -25,7 +25,7 @@
 void tg_message_fwd(
 		tg_t *tg, tg_message_fwd_header_t *tgh, tl_messageFwdHeader_t *tlh)
 {
-	ON_LOG(tg, "%s: start...", __func__);
+	//ON_LOG(tg, "%s: start...", __func__);
 	memset(tgh, 0, sizeof(tg_message_fwd_header_t));
 	#define TG_MESSAGE_FWD_HEADER_ARG(t, arg, ...) \
 		tgh->arg = tlh->arg;
@@ -48,7 +48,7 @@ void tg_message_reply(
 		tg_t *tg, tg_message_reply_header_t *tgh, 
 		tl_messageReplyHeader_t *tlh)
 {
-	ON_LOG(tg, "%s: start...", __func__);
+	//ON_LOG(tg, "%s: start...", __func__);
 	memset(tgh, 0, sizeof(tg_message_reply_header_t));
 	#define TG_MESSAGE_REPLY_HEADER_ARG(t, arg, ...) \
 		tgh->arg = tlh->arg;
@@ -76,7 +76,7 @@ void tg_message_reply(
 void tg_message_from_tl(
 		tg_t *tg, tg_message_t *tgm, tl_message_t *tlm)
 {
-	ON_LOG(tg, "%s: start...", __func__);
+	//ON_LOG(tg, "%s: start...", __func__);
 	memset(tgm, 0, sizeof(tg_message_t));
 	
 	#define TG_MESSAGE_ARG(t, arg, ...) \
@@ -272,7 +272,7 @@ void tg_message_from_tl(
 void tg_message_from_tl_service(
 		tg_t *tg, tg_message_t *tgm, tl_messageService_t *tlm)
 {
-	ON_LOG(tg, "%s: start...", __func__);
+	//ON_LOG(tg, "%s: start...", __func__);
 	memset(tgm, 0, sizeof(tg_message_t));
 
 	tgm->is_service = true;
