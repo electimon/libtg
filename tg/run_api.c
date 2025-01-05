@@ -159,7 +159,7 @@ tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query,
 		goto tg_run_api_end;
 
 	// send query
-	ON_LOG(tg, "%s: send: %s", __func__, buf_sdump(b));
+	/*ON_LOG(tg, "%s: send: %s", __func__, buf_sdump(b));*/
 	int s = 
 		send(sockfd, b.data, b.size, 0);
 	if (s < 0){
@@ -337,7 +337,9 @@ tg_run_api_receive_data:;
 	// check msgid
 	tl_rpc_result_t *result = (tl_rpc_result_t *)tl;
 	if (msgid != result->req_msg_id_){
-		ON_ERR(tg, "%s: rpc result with wrong msg id", __func__);
+		ON_ERR(tg, 
+				"%s: rpc result with wrong msg id: "_LD_" vs "_LD_"", 
+				__func__, msgid, result->req_msg_id_);
 		// free tl
 		tl_free(tl);
 		// receive data again
@@ -508,8 +510,8 @@ void tg_run_api_async(tg_t *tg, buf_t *query,
 			return;);
 
 	// send query
-	ON_LOG(tg, "%s: msgid: "_LD_", send: %s", 
-			__func__, msgid, buf_sdump(b));
+	/*ON_LOG(tg, "%s: msgid: "_LD_", send: %s", */
+			/*__func__, msgid, buf_sdump(b));*/
 	int s = 
 		send(sockfd, b.data, b.size, 0);
 	if (s < 0){
