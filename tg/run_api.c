@@ -35,8 +35,8 @@ tl_t * tg_deserialize(tg_t *tg, buf_t *buf)
 				for (i = 0; i < obj->messages_len; ++i) {
 					mtp_message_t m = obj->messages_[i];
 					tl = tg_deserialize(tg, &m.body);	
-					if (tl && tl->_id == id_rpc_result)
-						return tl;
+					/*if (tl && tl->_id == id_rpc_result)*/
+						/*return tl;*/
 				}
 			}
 			break;
