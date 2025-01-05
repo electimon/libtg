@@ -276,6 +276,13 @@ tg_run_api_receive_data:;
 		goto tg_run_api_end;
 	}
 
+	if (tl->_id == id_msgs_ack)
+	{
+		tl_free(tl);
+		// receive data again
+		goto tg_run_api_receive_data;
+	}
+
 	if (tl->_id != id_rpc_result && 
 			tl->_id != id_msg_detailed_info &&
 			tl->_id != id_msg_new_detailed_info)
