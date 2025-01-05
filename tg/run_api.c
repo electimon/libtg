@@ -355,7 +355,8 @@ tg_run_api_receive_data:;
 	if (msgid != result->req_msg_id_){
 		ON_ERR(tg, 
 				"RPC_RESULT: %s with wrong msg id: "_LD_" vs "_LD_"", 
-				TL_NAME_FROM_ID(tl->_id), msgid, result->req_msg_id_);
+				result->result_?TL_NAME_FROM_ID(result->result_->_id):"NULL", 
+				msgid, result->req_msg_id_);
 		// free tl
 		tl_free(tl);
 		// receive data again
