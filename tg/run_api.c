@@ -26,6 +26,8 @@ tl_t * tg_deserialize(tg_t *tg, buf_t *buf)
 		ON_ERR(tg, "%s: can't deserialize data", __func__);
 		return NULL;
 	}
+	ON_LOG(tg, "%s: handle %s", __func__, 
+			TL_NAME_FROM_ID(tl->_id));
 
 	switch (tl->_id) {
 		case id_msg_container:
@@ -33,6 +35,7 @@ tl_t * tg_deserialize(tg_t *tg, buf_t *buf)
 				tl_msg_container_t *obj = 
 					(tl_msg_container_t *)tl;
 				for (i = 0; i < obj->messages_len; ++i) {
+					ON_LOG(tg, "%s: handle message in container", __func__);
 					mtp_message_t m = obj->messages_[i];
 					tl = tg_deserialize(tg, &m.body);	
 					/*if (tl && tl->_id == id_rpc_result)*/
@@ -294,8 +297,11 @@ tg_run_api_receive_data:;
 				__func__, TL_NAME_FROM_ID(tl->_id));
 		// free tl
 		tl_free(tl);
+		// close socket
+		tg_net_close(tg, sockfd);
+		return NULL;
 		// receive data again
-		goto tg_run_api_receive_data;
+		/*goto tg_run_api_receive_data;*/
 	} 
 
 	// check info
