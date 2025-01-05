@@ -379,6 +379,7 @@ tg_run_api_receive_data:;
 		tl = NULL;
 		goto tg_run_api_end;
 	}
+	ON_LOG(tg, "GOT RESULT!: %s", TL_NAME_FROM_ID(tl->_id));
 	tl = tg_result(tg, result->result_);
 
 tg_run_api_end:;
