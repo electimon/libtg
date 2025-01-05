@@ -53,7 +53,7 @@ tl_t * tg_deserialize(tg_t *tg, buf_t *buf)
 						result = tl;
 						if (res->result_->_id == id_rpc_error)
 							{
-								char *err = tg_strerr(tl);
+								char *err = tg_strerr(res->result_);
 								ON_ERR(tg, "msg container: message #%d: %s", i, err);
 								free(err);
 							}
