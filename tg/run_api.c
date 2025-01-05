@@ -34,15 +34,19 @@ tl_t * tg_deserialize(tg_t *tg, buf_t *buf)
 			{
 				tl_msg_container_t *obj = 
 					(tl_msg_container_t *)tl;
+				// catch result
+				tl_t *result = NULL;
 				for (i = 0; i < obj->messages_len; ++i) {
 					ON_LOG(tg, "%s: handle message in container", __func__);
 					mtp_message_t m = obj->messages_[i];
 					// add msgid to ack
 					tg_add_mgsid(tg, m.msg_id);
 					tl = tg_deserialize(tg, &m.body);	
-					/*if (tl && tl->_id == id_rpc_result)*/
-						/*return tl;*/
+					if (tl && tl->_id == id_rpc_result)
+						result = tl;
 				}
+				if (result)
+					return result;
 			}
 			break;
 		case id_new_session_created:
