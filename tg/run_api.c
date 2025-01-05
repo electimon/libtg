@@ -282,6 +282,15 @@ tg_run_api_receive_data:;
 		goto tg_run_api_end;
 	}
 
+	if (tl->_id == id_rpc_error)
+	{
+		char *err = tg_strerr(tl);
+		ON_ERR(tg, "RPC_ERROR: %s", err);
+		free(err);
+		tl_free(tl);
+		return NULL;
+	}
+
 	if (tl->_id == id_msgs_ack)
 	{
 		tl_free(tl);
