@@ -45,7 +45,13 @@ tl_t * tg_deserialize(tg_t *tg, buf_t *buf)
 					ON_LOG(tg, "msg container: message #%d: %s", 
 							i, TL_NAME_FROM_ID(tl->_id));
 					if (tl && tl->_id == id_rpc_result)
+					{
+						tl_rpc_result_t *res = (tl_rpc_result_t *)tl;
+						ON_LOG(tg, "msg container: message #%d: result: %s", 
+								i, 
+								res->result_?TL_NAME_FROM_ID(res->result_->_id):"NULL");
 						result = tl;
+					}
 				}
 				if (result)
 					return result;
