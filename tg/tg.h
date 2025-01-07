@@ -18,6 +18,8 @@ struct tg_ {
 	int port;
 	int sockfd;
 	bool net;
+	list_t *queue;
+	pthread_mutex_t queuem;
 	bool send_lock;
 	list_t *send_queue;
 	bool send_queue_lock;
@@ -41,6 +43,7 @@ struct tg_ {
 	buf_t ssid;
 	uint64_t fingerprint;
 	uint64_t msgids[20]; 
+	pthread_mutex_t msgidsm;
 	uint64_t dialogs_hash;
 	bool sync_dialogs;
 	int sync_dialogs_sockfd;

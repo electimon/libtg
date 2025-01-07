@@ -1,4 +1,5 @@
 #include "transport.h"
+#include <pthread.h>
 
 /*buf_t tg_ack(tg_t *tg, buf_t b)*/
 /*{*/
@@ -34,6 +35,7 @@
 buf_t tg_ack(tg_t *tg)
 {
 	// make ack
+	pthread_mutex_lock(&tg->msgidsm);
 	int i;
 	for (i = 0; i < 20; ++i) { // count msgs ids
 		if (tg->msgids[i] == 0)
@@ -42,6 +44,7 @@ buf_t tg_ack(tg_t *tg)
 	buf_t ack = 
 		tl_msgs_ack(tg->msgids, i);
 	memset(tg->msgids, 0, sizeof(tg->msgids));
+	pthread_mutex_unlock(&tg->msgidsm);
 
 	buf_t h = tg_header(tg, ack, true, false, NULL);
 	buf_t e = tg_encrypt(tg, h, true);

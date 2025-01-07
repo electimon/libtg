@@ -1,4 +1,5 @@
 #include "../tg/tg.h"
+#include <pthread.h>
 #include <stdbool.h>
 #include <time.h>
 #include <assert.h>
@@ -176,7 +177,10 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 
 		// message_id
 		uint64_t msg_id = deserialize_ui64(&b);
+		// add message id to array
+		pthread_mutex_lock(&tg->msgidsm);
 		tg_add_mgsid(tg, msg_id);
+		pthread_mutex_unlock(&tg->msgidsm);
 		
 		// seq_no
 		uint32_t seq_no = deserialize_ui32(&b);

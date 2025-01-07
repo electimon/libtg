@@ -60,6 +60,16 @@ int tg_get_dialogs(
 		void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));
 
+void tg_get_dialogs_async(
+		tg_t *tg, 
+		int limit,
+		time_t date, 
+		uint64_t * hash, 
+		uint32_t *folder_id, 
+		void *data,
+		int (*callback)(void *data, const tg_dialog_t *dialog),
+		void (*on_done)(void *data));
+
 int tg_get_dialogs_from_database(tg_t *tg, void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));
 

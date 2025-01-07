@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 04.01.2025
+ * Last Modified Date: 08.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -10,6 +10,7 @@
 #include "user.h"
 #include "tg.h"
 #include "../tl/id.h"
+#include "../tl/alloc.h"
 #include "../mtx/include/net.h"
 #include <pthread.h>
 #include <stdio.h>
@@ -23,6 +24,7 @@
 #include <unistd.h>
 #include "../transport/net.h"
 #include <string.h>
+#include <assert.h>
 #include "peer.h"
 #include "messages.h"
 
@@ -43,34 +45,13 @@
 	({buf_t i = image_from_photo_stripped(_b); \
 	 buf_to_base64(i);}) 
 
-int tg_get_dialogs(
-		tg_t *tg, 
-		int limit, 
-		time_t date, 
-		uint64_t * hash, 
-		uint32_t *folder_id, 
+static int tg_dialogs_from_tl(
+		tg_t *tg, const tl_t *tl,
 		void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog))
 {
-	int i = 0, k;
-	uint64_t h = 0;
-	/*if (hash)*/
-		/*h = *hash;*/
+	int i;
 
-	InputPeer inputPeer = tl_inputPeerSelf();
-
-	buf_t getDialogs = 
-		tl_messages_getDialogs(
-				NULL,
-				folder_id, 
-				date,
-				-1, 
-				&inputPeer, 
-				limit,
-				h);
-
-	tl_t *tl = tg_run_api(tg, &getDialogs);
-	buf_free(getDialogs);
 	if (!tl){
 		return 0;
 	}
@@ -83,7 +64,6 @@ int tg_get_dialogs(
 		return 0;
 	}
 
-			
 	if ((tl->_id == id_messages_dialogsSlice) ||
 	    (tl->_id == id_messages_dialogs))
 	{
@@ -376,8 +356,103 @@ int tg_get_dialogs(
 		return 0;
 	}
 
+	return i;
+}
+
+struct tg_get_dialogs_async_t {
+	tg_t *tg;
+	void *data;
+	int (*callback)(void *data, const tg_dialog_t *dialog);
+	int (*on_done)(void *data);
+};
+
+void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
+{
+	struct tg_get_dialogs_async_t *t = data;
+	assert(t);
+	tg_dialogs_from_tl(
+			t->tg, tl, t->data, t->callback);
+	if (t->on_done)
+		t->on_done(t->data);
+}
+
+void tg_get_dialogs_async(
+		tg_t *tg, 
+		int limit,
+		time_t date, 
+		uint64_t * hash, 
+		uint32_t *folder_id, 
+		void *data,
+		int (*callback)(void *data, const tg_dialog_t *dialog),
+		void (*on_done)(void *data))
+{
+	int i = 0, k;
+	uint64_t h = 0;
+	/*if (hash)*/
+		/*h = *hash;*/
+
+	InputPeer inputPeer = tl_inputPeerSelf();
+
+	buf_t getDialogs = 
+		tl_messages_getDialogs(
+				NULL,
+				folder_id, 
+				date,
+				-1, 
+				&inputPeer, 
+				limit,
+				h);
+
+	struct tg_get_dialogs_async_t *t = 
+		NEW(struct tg_get_dialogs_async_t, 
+				ON_ERR(tg, "%s: can't allocate memory", __func__);
+					return;);
+	t->tg = tg;
+	t->data = data;
+	t->callback = callback;
+	t->on_done = on_done;
+
+	tg_send_query_async(
+			tg, 
+			&getDialogs, 
+			t, tg_get_dialogs_async_cb);
+	buf_free(getDialogs);
+}
+
+int tg_get_dialogs(
+		tg_t *tg, 
+		int limit, 
+		time_t date, 
+		uint64_t * hash, 
+		uint32_t *folder_id, 
+		void *data,
+		int (*callback)(void *data, const tg_dialog_t *dialog))
+{
+	int i = 0, k;
+	uint64_t h = 0;
+	/*if (hash)*/
+		/*h = *hash;*/
+
+	InputPeer inputPeer = tl_inputPeerSelf();
+
+	buf_t getDialogs = 
+		tl_messages_getDialogs(
+				NULL,
+				folder_id, 
+				date,
+				-1, 
+				&inputPeer, 
+				limit,
+				h);
+
+	tl_t *tl = tg_run_api(tg, &getDialogs);
+	buf_free(getDialogs);
+	
+	i = tg_dialogs_from_tl(tg, tl, data, callback);
+
 	// free tl
 	tl_free(tl);
+
 	return i;
 }
 

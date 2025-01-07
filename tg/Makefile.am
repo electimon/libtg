@@ -16,6 +16,7 @@ libtg_la_SOURCES = tg.c \
 				   channel.c \
 				   updates.c \
 				   run_api.c \
+				   queue.c \
            ../crypto/hsh.c \
            ../crypto/aes.c \
            ../crypto/cmn.c \
@@ -25,7 +26,6 @@ libtg_la_SOURCES = tg.c \
 				   ../transport/header.c \
 				   ../transport/transport.c \
 				   ../transport/crc.c \
-				   ../transport/queue.c \
 				   ../transport/ack.c \
 				   ../transport/net.c
 

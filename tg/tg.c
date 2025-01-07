@@ -68,6 +68,22 @@ tg_t *tg_new(
 		/*return NULL;*/
 	/*tg->queue_sockfd = -1;*/
 
+	// init queue manager
+	tg->queue = NULL;		
+	if (pthread_mutex_init(
+				&tg->queuem, NULL))
+	{
+		ON_ERR(tg, "%s: can't init mutex", __func__);
+		return NULL;
+	}
+	
+	if (pthread_mutex_init(
+				&tg->msgidsm, NULL))
+	{
+		ON_ERR(tg, "%s: can't init mutex", __func__);
+		return NULL;
+	}
+
 	return tg;
 }
 

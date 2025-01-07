@@ -322,11 +322,11 @@ int main(int argc, char *argv[])
 			//tg, query_cb, 
 			//NULL, NULL);
 
-	tg_peer_t peer = {
-		TG_PEER_TYPE_CHANNEL,
-		1326223284,
-		-5244509236001112417,
-	};
+	/*tg_peer_t peer = {*/
+		/*TG_PEER_TYPE_CHANNEL,*/
+		/*1326223284,*/
+		/*-5244509236001112417,*/
+	/*};*/
 
 	//tg_get_peer_photo_file(
 			//tg, 
@@ -353,6 +353,12 @@ int main(int argc, char *argv[])
 			 /*NULL, dialogs_callback);*/
 	/*printf("GOT %d dialogs\n", count);*/
 
+	tg_get_dialogs_async(tg, 40,
+			 time(NULL),
+			 NULL, NULL,
+			 NULL, dialogs_callback, on_done);
+
+
 
 	//printf("NAME: %s\n", d.name);
 	//printf("PEER ID: %.16lx\n", d.peer_id);
@@ -366,7 +372,7 @@ int main(int argc, char *argv[])
 			//d.photo_id);
 	//printf("IMAGE: %s\n", image);
 
-	tg_message_t m;
+	/*tg_message_t m;*/
 	/*tg_get_messages_from_database(*/
 			/*tg, */
 			/*peer, */
@@ -386,24 +392,24 @@ int main(int argc, char *argv[])
 			//&m, 
 			//messages_callback_document);
 
-	for (int i = 0; i < 10; ++i) {
+	/*for (int i = 0; i < 10; ++i) {*/
 		
-	tg_messages_get_history_async(
-			tg,
-			peer, 
-			0, 
-			time(NULL), 
-			0, 
-			20, 
-			0, 
-			0, 
-			NULL, 
-			&m, 
-			messages_callback_no_log,
-			on_done);
+	/*tg_messages_get_history_async(*/
+			/*tg,*/
+			/*peer, */
+			/*0, */
+			/*time(NULL), */
+			/*0, */
+			/*20, */
+			/*0, */
+			/*0, */
+			/*NULL, */
+			/*&m, */
+			/*messages_callback_no_log,*/
+			/*on_done);*/
 
-	sleep(10);
-	}
+	/*sleep(10);*/
+	/*}*/
 
 
 	//printf("MESSAGE WITH PHOTO:\n");

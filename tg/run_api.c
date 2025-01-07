@@ -176,8 +176,8 @@ tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query,
 	if (!b.size)
 		goto tg_run_api_end;
 
-	// open socket
-	int sockfd = tg_net_open(tg);
+	// open socket - on port 80
+	int sockfd = tg_net_open_port(tg, 80);
 	if (sockfd < 0)
 		goto tg_run_api_end;
 
@@ -546,9 +546,7 @@ void tg_run_api_async(tg_t *tg, buf_t *query,
 	api->callback = callback;
 	api->userdata = userdata;
 
-	list_append(&tg->receive_queue, api, 
-			ON_ERR(tg, "%s: list_append error", __func__);
-			return;);
+	list_add(&tg->receive_queue, api); 
 
 	// send query
 	/*ON_LOG(tg, "%s: msgid: "_LD_", send: %s", */
