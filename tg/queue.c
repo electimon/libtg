@@ -90,7 +90,6 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 				char *err = tg_strerr(tl);
 				ON_ERR(queue->tg, "%s", err);
 				free(err);
-				tl_free(tl);
 				tl = NULL;
 			}
 			break;
@@ -101,7 +100,6 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 				char *err = tg_strerr(tl);
 				ON_ERR(queue->tg, "%s: %s", __func__, err);
 				free(err);
-				tl_free(tl);
 				tl = NULL;
 			}
 			break;
@@ -140,6 +138,8 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				}
 				tl = tg_deserialize(queue->tg, &buf);
 				handle_tl(queue, tl);
+				if (tl)
+					tl_free(tl);
 			}
 			break;
 		case id_msg_container:
@@ -154,6 +154,8 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					tg_add_to_ack(queue->tg, m.msg_id);
 					tl_t *tl = tl_deserialize(&m.body);
 					handle_tl(queue, tl);
+					if (tl)
+						tl_free(tl);
 				}
 			}
 			break;
@@ -325,8 +327,8 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 
 	// handle tl
 	handle_tl(queue, tl);
-	if (tl)
-		tl_free(tl);
+	/*if (tl)*/
+		/*tl_free(tl);*/
 	return RTL_RQ; // read socket again
 }
 
