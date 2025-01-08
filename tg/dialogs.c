@@ -370,6 +370,13 @@ void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
 {
 	struct tg_get_dialogs_async_t *t = data;
 	assert(t);
+	
+	if (tl == NULL){
+		if (t->on_done)
+			t->on_done(t->data);
+		return;
+	}
+
 	tg_dialogs_from_tl(
 			t->tg, tl, t->data, t->callback);
 	if (t->on_done)

@@ -108,8 +108,6 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 
 	if (queue->on_done)
 		queue->on_done(queue->userdata, tl);
-	if(tl)
-		tl_free(tl);
 	// stop query
 	queue->loop = false;
 }
@@ -326,7 +324,8 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 
 	// handle tl
 	handle_tl(queue, tl);
-	tl_free(tl);
+	if (tl)
+		tl_free(tl);
 	return RTL_RQ; // read socket again
 }
 

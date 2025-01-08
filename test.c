@@ -322,11 +322,11 @@ int main(int argc, char *argv[])
 			//tg, query_cb, 
 			//NULL, NULL);
 
-	/*tg_peer_t peer = {*/
-		/*TG_PEER_TYPE_CHANNEL,*/
-		/*1326223284,*/
-		/*-5244509236001112417,*/
-	/*};*/
+	tg_peer_t peer = {
+		TG_PEER_TYPE_CHANNEL,
+		1326223284,
+		-5244509236001112417,
+	};
 
 	//tg_get_peer_photo_file(
 			//tg, 
@@ -394,19 +394,19 @@ int main(int argc, char *argv[])
 
 	/*for (int i = 0; i < 10; ++i) {*/
 		
-	/*tg_messages_get_history_async(*/
-			/*tg,*/
-			/*peer, */
-			/*0, */
-			/*time(NULL), */
-			/*0, */
-			/*20, */
-			/*0, */
-			/*0, */
-			/*NULL, */
-			/*&m, */
-			/*messages_callback_no_log,*/
-			/*on_done);*/
+	tg_messages_get_history_async(
+			tg,
+			peer, 
+			0, 
+			time(NULL), 
+			0, 
+			20, 
+			0, 
+			0, 
+			NULL, 
+			NULL, 
+			messages_callback_no_log,
+			on_done);
 
 	/*sleep(10);*/
 	/*}*/

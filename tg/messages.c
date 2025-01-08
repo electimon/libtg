@@ -468,7 +468,7 @@ struct tg_messages_get_history_async_t {
 	void (*on_done)(void *userdata);
 }; 
 
-int tg_messages_get_history_async_cb(void *userdata, tl_t *tl)
+void tg_messages_get_history_async_cb(void *userdata, const tl_t *tl)
 {
 	assert(userdata);
 	struct tg_messages_get_history_async_t *t = userdata;
@@ -476,7 +476,7 @@ int tg_messages_get_history_async_cb(void *userdata, tl_t *tl)
 	if (tl ==  NULL){
 		if (t->on_done)
 			t->on_done(t->userdata);
-		return 0;
+		return;
 	}
 
 	printf("GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
@@ -545,14 +545,10 @@ int tg_messages_get_history_async_cb(void *userdata, tl_t *tl)
 			break;
 	}
 
-	// free tl
-	tl_free(tl);
-
 	if (t->on_done)
 		t->on_done(t->userdata);
 
 	free(t);
-	return 0;
 }	
 
 void tg_messages_get_history_async(
@@ -598,7 +594,7 @@ void tg_messages_get_history_async(
 	t->callback = callback;
 	t->on_done = on_done;
 
-	tg_run_api_async(
+	tg_send_query_async(
 			tg,
 		 	&getHistory, 
 			t, 
