@@ -284,7 +284,7 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 		if (s<0){
 			ON_ERR(queue->tg, "%s: socket error: %d", __func__, s);
 			buf_free(r);
-			return 1;
+			return RTL_EX;
 		}
 		received += s;
 		
