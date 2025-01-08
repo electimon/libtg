@@ -327,8 +327,8 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 
 	// handle tl
 	handle_tl(queue, tl);
-	/*if (tl)*/
-		/*tl_free(tl);*/
+	if (tl)
+		tl_free(tl);
 	return RTL_RQ; // read socket again
 }
 
