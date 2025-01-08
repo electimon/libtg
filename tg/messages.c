@@ -479,7 +479,7 @@ void tg_messages_get_history_async_cb(void *userdata, const tl_t *tl)
 		return;
 	}
 
-	printf("GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
+	ON_LOG(t->tg, "GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
 
 	switch (tl->_id) {
 		case id_messages_channelMessages:

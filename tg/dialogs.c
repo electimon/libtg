@@ -381,6 +381,8 @@ void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
 			t->tg, tl, t->data, t->callback);
 	if (t->on_done)
 		t->on_done(t->data);
+
+	free(t);
 }
 
 void tg_get_dialogs_async(
