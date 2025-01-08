@@ -133,6 +133,8 @@ static int tg_dialogs_from_tl(
 				pns = (tl_peerNotifySettings_t *)dialog.notify_settings_;
 			}
 
+			fprintf(stderr, "%s: %d\n", __func__, __LINE__);
+
 			d.top_message_id = dialog.top_message_;
 			
 			d.pinned = dialog.pinned_;
