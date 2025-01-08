@@ -362,7 +362,6 @@ static int tg_send(void *data)
 		pthread_mutex_unlock(&queue->tg->queuem);
 	}
 
-
 	// prepare query
 	buf_t b = tg_prepare_query(
 			queue->tg, 
@@ -431,7 +430,8 @@ static void * tg_run_queue(void * data)
 		if (res == RTL_EX)
 			break;
 	}
-	tg_net_close(queue->tg, queue->socket);
+	if (queue->socket >= 0)
+		tg_net_close(queue->tg, queue->socket);
 
 	buf_free(queue->query);
 	free(queue);
@@ -469,12 +469,18 @@ tg_queue_t * tg_queue_new(
 void tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
 {
+	tg_queue_new(tg, query, userdata, callback);
+}
+
+void tg_send_query_sync(tg_t *tg, buf_t *query,
+		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
+{
 	tg_queue_t *queue = 
 		tg_queue_new(tg, query, userdata, callback);
-	/*if (queue){*/
-		/*void *ret;*/
-		/*pthread_join(queue->p, &ret);*/
-	/*}*/
+	if (queue){
+		void *ret;
+		pthread_join(queue->p, &ret);
+	}
 }
 
 void tg_queue_cancell_all(tg_t *tg)

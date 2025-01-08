@@ -9,6 +9,7 @@
 #include "tg/files.h"
 #include "tg/messages.h"
 #include "tg/peer.h"
+#include "tg/queue.h"
 #include "tg/tg.h"
 #include "tl/buf.h"
 #include "tl/deserialize.h"
@@ -410,9 +411,18 @@ int main(int argc, char *argv[])
 			strdup(s), 
 			messages_callback_no_log,
 			on_done);
+	
+	tg_get_dialogs_async(tg, 40,
+			 time(NULL),
+			 NULL, NULL,
+			 NULL, dialogs_callback, on_done);
+
+
 
 	//sleep(1);
 	}
+
+	tg_queue_cancell_all(tg);
 
 
 	//printf("MESSAGE WITH PHOTO:\n");
