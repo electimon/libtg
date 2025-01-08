@@ -6,6 +6,7 @@
 #include "tg.h"
 #include "updates.h"
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -468,5 +469,21 @@ tg_queue_t * tg_queue_new(
 void tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
 {
-	tg_queue_new(tg, query, userdata, callback);
+	tg_queue_t *queue = 
+		tg_queue_new(tg, query, userdata, callback);
+	/*if (queue){*/
+		/*void *ret;*/
+		/*pthread_join(queue->p, &ret);*/
+	/*}*/
+}
+
+void tg_queue_cancell_all(tg_t *tg)
+{
+	pthread_mutex_lock(&tg->queuem);
+	tg_queue_t *queue;
+	list_for_each(tg->queue, queue)
+		queue->loop = false;
+
+	list_free(tg->queue);
+	pthread_mutex_unlock(&tg->queuem);
 }

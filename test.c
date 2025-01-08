@@ -141,7 +141,8 @@ int messages_callback(void *data, const tg_message_t *m)
 
 int messages_callback_no_log(void *data, const tg_message_t *m)
 {
-	printf("MSG\n");
+	//printf("MSG\n");
+	printf("MSG data: %s\n", data);
 	return 0;
 }
 
@@ -392,7 +393,9 @@ int main(int argc, char *argv[])
 			//&m, 
 			//messages_callback_document);
 
-	/*for (int i = 0; i < 10; ++i) {*/
+	for (int i = 0; i < 10; ++i) {
+	char s[20];
+	sprintf(s, "ID: %d", i);
 		
 	tg_messages_get_history_async(
 			tg,
@@ -404,12 +407,12 @@ int main(int argc, char *argv[])
 			0, 
 			0, 
 			NULL, 
-			NULL, 
+			strdup(s), 
 			messages_callback_no_log,
 			on_done);
 
-	/*sleep(10);*/
-	/*}*/
+	//sleep(1);
+	}
 
 
 	//printf("MESSAGE WITH PHOTO:\n");

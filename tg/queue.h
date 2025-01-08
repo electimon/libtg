@@ -22,4 +22,5 @@ tg_queue_t * tg_queue_new(
 int tg_queue_send(tg_t *tg, buf_t *query, 
 		void *userdata, void (*callback)(void *userdata, tl_t *tl));
 
+void tg_queue_cancell_all(tg_t *tg);
 #endif /* ifndef TG_QUEUE_H */
