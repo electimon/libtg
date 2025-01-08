@@ -97,7 +97,7 @@ static int tg_dialogs_from_tl(
 		/*tg_chats_save(tg, md.chats_len, md.chats_);*/
 		
 		for (i = 0; i < md.dialogs_len; ++i) {
-			fprintf(stderr, "dialog #%d: %s\n", 
+			ON_LOG(tg, "dialog #%d: %s\n", 
 					i, TL_NAME_FROM_ID(md.dialogs_[i]->_id));
 			// handle dialogs
 			tg_dialog_t d;
