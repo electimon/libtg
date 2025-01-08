@@ -2,7 +2,7 @@
  * File              : list.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 23.03.2022
- * Last Modified Date: 06.01.2025
+ * Last Modified Date: 09.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -91,17 +91,19 @@ static void *list_cut(list_t **listp, void *ptr,
 //foreach item at list
 #define list_for_each(list, item) \
 	list_t *__p = list; \
-	for (item=__p->data; __p; __p=__p->prev, item = __p?__p->data:NULL)
+	if (__p) \
+		for (item=__p->data; __p; __p=__p->prev, item = __p?__p->data:NULL)
 
 //free memory of list
-static void list_free(list_t *list)
+static void list_free(list_t **listp)
 {
-	list_t *l = list;
+	list_t *l = *listp;
 	while(l) {
 		list_t * prev = l->prev;
 		free(l);
 		l = prev;
 	}
+	*listp = NULL;
 }
 
 #endif // LIST_H
