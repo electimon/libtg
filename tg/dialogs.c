@@ -97,6 +97,8 @@ static int tg_dialogs_from_tl(
 		/*tg_chats_save(tg, md.chats_len, md.chats_);*/
 		
 		for (i = 0; i < md.dialogs_len; ++i) {
+			fprintf(stderr, "dialog #%d: %s\n", 
+					i, TL_NAME_FROM_ID(md.dialogs_[i]->_id));
 			// handle dialogs
 			tg_dialog_t d;
 			memset(&d, 0, sizeof(d));
@@ -363,7 +365,7 @@ struct tg_get_dialogs_async_t {
 	tg_t *tg;
 	void *data;
 	int (*callback)(void *data, const tg_dialog_t *dialog);
-	int (*on_done)(void *data);
+	void (*on_done)(void *data);
 };
 
 void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
