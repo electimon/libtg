@@ -103,8 +103,6 @@ static int tg_dialogs_from_tl(
 			tg_dialog_t d;
 			memset(&d, 0, sizeof(d));
 			
-			ON_LOG(tg, "%s: %d\n", __func__, __LINE__);
-
 			tl_dialog_t dialog;
 			memset(&d, 0, sizeof(tl_dialog_t));
 
@@ -135,6 +133,8 @@ static int tg_dialogs_from_tl(
 				peer = (tl_peerChat_t *)dialog.peer_;
 				pns = (tl_peerNotifySettings_t *)dialog.notify_settings_;
 			}
+
+			ON_LOG(tg, "%s: %d\n", __func__, __LINE__);
 
 			d.top_message_id = dialog.top_message_;
 			
