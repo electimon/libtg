@@ -102,6 +102,8 @@ static int tg_dialogs_from_tl(
 			// handle dialogs
 			tg_dialog_t d;
 			memset(&d, 0, sizeof(d));
+			
+			ON_LOG(tg, "%s: %d\n", __func__, __LINE__);
 
 			tl_dialog_t dialog;
 			memset(&d, 0, sizeof(tl_dialog_t));
@@ -109,7 +111,6 @@ static int tg_dialogs_from_tl(
 			tl_peerChat_t *peer = NULL;
 			tl_peerNotifySettings_t *pns = NULL; 
 			
-			fprintf(stderr, "%s: %d\n", __func__, __LINE__);
 			
 			if (md.dialogs_[i]->_id == id_dialogFolder){
 				tl_dialogFolder_t *df = 
