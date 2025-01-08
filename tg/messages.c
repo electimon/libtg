@@ -468,10 +468,10 @@ struct tg_messages_get_history_async_t {
 	void (*on_done)(void *userdata);
 }; 
 
-void tg_messages_get_history_async_cb(void *userdata, const tl_t *tl)
+void tg_messages_get_history_async_cb(void *d, const tl_t *tl)
 {
-	assert(userdata);
-	struct tg_messages_get_history_async_t *t = userdata;
+	assert(d);
+	struct tg_messages_get_history_async_t *t = d;
 	
 	if (tl ==  NULL){
 		if (t->on_done)
