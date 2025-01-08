@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 08.01.2025
+ * Last Modified Date: 09.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -92,9 +92,9 @@ static int tg_dialogs_from_tl(
 				__func__, md.dialogs_len);
 
 		// update users
-		tg_users_save(tg, md.users_len, md.users_);
+		/*tg_users_save(tg, md.users_len, md.users_);*/
 		// update chats
-		tg_chats_save(tg, md.chats_len, md.chats_);
+		/*tg_chats_save(tg, md.chats_len, md.chats_);*/
 		
 		for (i = 0; i < md.dialogs_len; ++i) {
 			// handle dialogs
