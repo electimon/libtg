@@ -237,17 +237,17 @@ static int tg_dialogs_from_tl(
 						}
 						break;
 					
-					case id_channelForbidden:
-						{
-							tl_channelForbidden_t *channel = 
-								(tl_channelForbidden_t *)md.chats_[k];
-							if (d.peer_id == channel->id_)
-							{
-								d.peer_type = TG_PEER_TYPE_CHANNEL;
-								d.name = BUF2STR(channel->title_);
-							}
-						}
-						break;
+					/*case id_channelForbidden:*/
+						/*{*/
+							/*tl_channelForbidden_t *channel = */
+								/*(tl_channelForbidden_t *)md.chats_[k];*/
+							/*if (d.peer_id == channel->id_)*/
+							/*{*/
+								/*d.peer_type = TG_PEER_TYPE_CHANNEL;*/
+								/*d.name = BUF2STR(channel->title_);*/
+							/*}*/
+						/*}*/
+						/*break;*/
 					
 					case id_chat:
 						{
@@ -269,16 +269,16 @@ static int tg_dialogs_from_tl(
 						}
 						break;
 					
-					case id_chatForbidden:
-						{
-							tl_chatForbidden_t *chat = 
-								(tl_chatForbidden_t *)md.chats_[k];
-							if (d.peer_id == chat->id_){
-								d.peer_type = TG_PEER_TYPE_CHAT;
-								d.name = BUF2STR(chat->title_);
-							}
-						}
-						break;
+					/*case id_chatForbidden:*/
+						/*{*/
+							/*tl_chatForbidden_t *chat = */
+								/*(tl_chatForbidden_t *)md.chats_[k];*/
+							/*if (d.peer_id == chat->id_){*/
+								/*d.peer_type = TG_PEER_TYPE_CHAT;*/
+								/*d.name = BUF2STR(chat->title_);*/
+							/*}*/
+						/*}*/
+						/*break;*/
 					
 
 					default:
