@@ -157,132 +157,132 @@ static int tg_dialogs_from_tl(
 			int k;
 
 			// iterate users
-			for (k = 0; k < md.users_len; ++k) {
-				// skip on NULL
-				if (!md.users_[k])
-					continue;
+			/*for (k = 0; k < md.users_len; ++k) {*/
+				/*// skip on NULL*/
+				/*if (!md.users_[k])*/
+					/*continue;*/
 
-				switch (md.users_[k]->_id) {
-					case id_user:
-						{
-							tl_user_t *user = 
-								(tl_user_t *)md.users_[k];
+				/*switch (md.users_[k]->_id) {*/
+					/*case id_user:*/
+						/*{*/
+							/*tl_user_t *user = */
+								/*(tl_user_t *)md.users_[k];*/
 							
-							if (d.peer_id == user->id_)
-							{
-								d.access_hash = user->access_hash_;
-								d.peer_type = TG_PEER_TYPE_USER;
-								if (user->username_.size)
-									d.name = BUF2STR(user->username_);
-								else
-									d.name = BUF2STR(user->first_name_);
+							/*if (d.peer_id == user->id_)*/
+							/*{*/
+								/*d.access_hash = user->access_hash_;*/
+								/*d.peer_type = TG_PEER_TYPE_USER;*/
+								/*if (user->username_.size)*/
+									/*d.name = BUF2STR(user->username_);*/
+								/*else*/
+									/*d.name = BUF2STR(user->first_name_);*/
 							
-								if (user->photo_ && 
-										user->photo_->_id == id_userProfilePhoto)
-								{
-									tl_userProfilePhoto_t *photo = 
-										(tl_userProfilePhoto_t *)user->photo_; 
-									d.photo_id = photo->photo_id_;
-									d.thumb = BUF2IMG(photo->stripped_thumb_);
-								}
-							}
-						}
-						break;
-				  case id_userEmpty:
-						{
-							tl_userEmpty_t *user =
-								(tl_userEmpty_t *)md.users_[k];
+								/*if (user->photo_ && */
+										/*user->photo_->_id == id_userProfilePhoto)*/
+								/*{*/
+									/*tl_userProfilePhoto_t *photo = */
+										/*(tl_userProfilePhoto_t *)user->photo_; */
+									/*d.photo_id = photo->photo_id_;*/
+									/*d.thumb = BUF2IMG(photo->stripped_thumb_);*/
+								/*}*/
+							/*}*/
+						/*}*/
+						/*break;*/
+					/*case id_userEmpty:*/
+						/*{*/
+							/*tl_userEmpty_t *user =*/
+								/*(tl_userEmpty_t *)md.users_[k];*/
 							
-							if (d.peer_id == user->id_)
-							{
-								d.peer_type = TG_PEER_TYPE_USER;
-								d.name = strdup("empty"); 
-							}
-						}
-						break;
+							/*if (d.peer_id == user->id_)*/
+							/*{*/
+								/*d.peer_type = TG_PEER_TYPE_USER;*/
+								/*d.name = strdup("empty"); */
+							/*}*/
+						/*}*/
+						/*break;*/
 					
-					default:
-						break;
-				}
-			}
+					/*default:*/
+						/*break;*/
+				/*}*/
+			/*}*/
 
 			// iterate chats
-			for (k = 0; k < md.chats_len; ++k) {
-				// skip on NULL
-				if (!md.chats_[k])
-					continue;
+			/*for (k = 0; k < md.chats_len; ++k) {*/
+				/*// skip on NULL*/
+				/*if (!md.chats_[k])*/
+					/*continue;*/
 				
-				switch (md.chats_[k]->_id) {
-				  case id_channel:
-						{
-							tl_channel_t *channel = 
-								(tl_channel_t *)md.chats_[k];
-							if (d.peer_id == channel->id_)
-							{
-								d.access_hash = channel->access_hash_;
-								d.peer_type = TG_PEER_TYPE_CHANNEL;
-								d.name = BUF2STR(channel->title_);
-								d.broadcast = channel->broadcast_;
-								if (channel->photo_ && 
-									channel->photo_->_id == id_chatPhoto)
-								{
-									tl_chatPhoto_t *photo = 
-										(tl_chatPhoto_t *)channel->photo_; 
-									d.photo_id = photo->photo_id_;
-									d.thumb = BUF2IMG(photo->stripped_thumb_);
-								}
-							}
-						}
-						break;
-				  
-					case id_channelForbidden:
-						{
-							tl_channelForbidden_t *channel = 
-								(tl_channelForbidden_t *)md.chats_[k];
-							if (d.peer_id == channel->id_)
-							{
-								d.peer_type = TG_PEER_TYPE_CHANNEL;
-								d.name = BUF2STR(channel->title_);
-							}
-						}
-						break;
+				/*switch (md.chats_[k]->_id) {*/
+					/*case id_channel:*/
+						/*{*/
+							/*tl_channel_t *channel = */
+								/*(tl_channel_t *)md.chats_[k];*/
+							/*if (d.peer_id == channel->id_)*/
+							/*{*/
+								/*d.access_hash = channel->access_hash_;*/
+								/*d.peer_type = TG_PEER_TYPE_CHANNEL;*/
+								/*d.name = BUF2STR(channel->title_);*/
+								/*d.broadcast = channel->broadcast_;*/
+								/*if (channel->photo_ && */
+									/*channel->photo_->_id == id_chatPhoto)*/
+								/*{*/
+									/*tl_chatPhoto_t *photo = */
+										/*(tl_chatPhoto_t *)channel->photo_; */
+									/*d.photo_id = photo->photo_id_;*/
+									/*d.thumb = BUF2IMG(photo->stripped_thumb_);*/
+								/*}*/
+							/*}*/
+						/*}*/
+						/*break;*/
 					
-					case id_chat:
-						{
-							tl_chat_t *chat = 
-								(tl_chat_t *)md.chats_[k];
-							if (d.peer_id == chat->id_)
-							{
-								d.peer_type = TG_PEER_TYPE_CHAT;
-								d.name = BUF2STR(chat->title_);
-								if (chat->photo_ && 
-									chat->photo_->_id == id_chatPhoto)
-								{
-									tl_chatPhoto_t *photo = 
-										(tl_chatPhoto_t *)chat->photo_; 
-									d.photo_id = photo->photo_id_;
-									d.thumb = BUF2IMG(photo->stripped_thumb_);
-								}
-							}
-						}
-						break;
-				  
-					case id_chatForbidden:
-						{
-							tl_chatForbidden_t *chat = 
-								(tl_chatForbidden_t *)md.chats_[k];
-							if (d.peer_id == chat->id_){
-								d.peer_type = TG_PEER_TYPE_CHAT;
-								d.name = BUF2STR(chat->title_);
-							}
-						}
-						break;
+					/*case id_channelForbidden:*/
+						/*{*/
+							/*tl_channelForbidden_t *channel = */
+								/*(tl_channelForbidden_t *)md.chats_[k];*/
+							/*if (d.peer_id == channel->id_)*/
+							/*{*/
+								/*d.peer_type = TG_PEER_TYPE_CHANNEL;*/
+								/*d.name = BUF2STR(channel->title_);*/
+							/*}*/
+						/*}*/
+						/*break;*/
+					
+					/*case id_chat:*/
+						/*{*/
+							/*tl_chat_t *chat = */
+								/*(tl_chat_t *)md.chats_[k];*/
+							/*if (d.peer_id == chat->id_)*/
+							/*{*/
+								/*d.peer_type = TG_PEER_TYPE_CHAT;*/
+								/*d.name = BUF2STR(chat->title_);*/
+								/*if (chat->photo_ && */
+									/*chat->photo_->_id == id_chatPhoto)*/
+								/*{*/
+									/*tl_chatPhoto_t *photo = */
+										/*(tl_chatPhoto_t *)chat->photo_; */
+									/*d.photo_id = photo->photo_id_;*/
+									/*d.thumb = BUF2IMG(photo->stripped_thumb_);*/
+								/*}*/
+							/*}*/
+						/*}*/
+						/*break;*/
+					
+					/*case id_chatForbidden:*/
+						/*{*/
+							/*tl_chatForbidden_t *chat = */
+								/*(tl_chatForbidden_t *)md.chats_[k];*/
+							/*if (d.peer_id == chat->id_){*/
+								/*d.peer_type = TG_PEER_TYPE_CHAT;*/
+								/*d.name = BUF2STR(chat->title_);*/
+							/*}*/
+						/*}*/
+						/*break;*/
 					
 
-					default:
-						break;
-				}
-			}
+					/*default:*/
+						/*break;*/
+				/*}*/
+			/*}*/
 			ON_LOG(tg, "%s: %d\n", __func__, __LINE__);
 
 				
