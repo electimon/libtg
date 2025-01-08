@@ -109,6 +109,8 @@ static int tg_dialogs_from_tl(
 			tl_peerChat_t *peer = NULL;
 			tl_peerNotifySettings_t *pns = NULL; 
 			
+			fprintf(stderr, "%s: %d\n", __func__, __LINE__);
+			
 			if (md.dialogs_[i]->_id == id_dialogFolder){
 				tl_dialogFolder_t *df = 
 					(tl_dialogFolder_t *)md.dialogs_[i];
@@ -132,8 +134,6 @@ static int tg_dialogs_from_tl(
 				peer = (tl_peerChat_t *)dialog.peer_;
 				pns = (tl_peerNotifySettings_t *)dialog.notify_settings_;
 			}
-
-			fprintf(stderr, "%s: %d\n", __func__, __LINE__);
 
 			d.top_message_id = dialog.top_message_;
 			
