@@ -134,8 +134,6 @@ static int tg_dialogs_from_tl(
 				pns = (tl_peerNotifySettings_t *)dialog.notify_settings_;
 			}
 
-			ON_LOG(tg, "%s: %d\n", __func__, __LINE__);
-
 			d.top_message_id = dialog.top_message_;
 			
 			d.pinned = dialog.pinned_;
@@ -285,6 +283,8 @@ static int tg_dialogs_from_tl(
 						break;
 				}
 			}
+			ON_LOG(tg, "%s: %d\n", __func__, __LINE__);
+
 				
 			// iterate messages
 			for (k = 0; k < md.messages_len; ++k){
