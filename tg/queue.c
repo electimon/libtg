@@ -343,12 +343,12 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 
 static void tg_send_ack(void *data)
 {
-	return;
 	tg_queue_t *queue = data;
 	// send ACK
 	if (queue->tg->msgids[0]){
 		ON_LOG(queue->tg, "%s", __func__);
 		buf_t ack = tg_ack(queue->tg);
+		ON_LOG(queue->tg, "TTTTTTTTTTTTT");
 		int s = 
 			send(queue->tg->sockfd, ack.data, ack.size, 0);
 		buf_free(ack);

@@ -34,8 +34,12 @@
 
 buf_t tg_ack(tg_t *tg)
 {
+	ON_LOG(tg, "%s", __func__);
 	// make ack
-	pthread_mutex_lock(&tg->msgidsm);
+	int err = pthread_mutex_lock(&tg->msgidsm);
+	if (err){
+		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+	}
 	int i;
 	for (i = 0; i < 20; ++i) { // count msgs ids
 		if (tg->msgids[i] == 0)
