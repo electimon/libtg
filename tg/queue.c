@@ -492,7 +492,10 @@ void tg_queue_cancell_all(tg_t *tg)
 	pthread_mutex_lock(&tg->queuem);
 	tg_queue_t *queue;
 	list_for_each(tg->queue, queue)
+	{
 		queue->loop = false;
+		close(queue->socket);
+	}
 
 	list_free(&tg->queue);
 	pthread_mutex_unlock(&tg->queuem);
