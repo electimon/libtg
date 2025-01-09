@@ -179,7 +179,7 @@ int tg_messages_get_history(
 		void *userdata,
 		int (*callback)(void *userdata, const tg_message_t *msg));
 
-void tg_messages_get_history_async(
+pthread_t tg_messages_get_history_async(
 		tg_t *tg,
 		tg_peer_t peer,
 		int offset_id,
@@ -200,7 +200,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 
 /* send text message and update local database 
  * return non-null on error */
-int tg_message_send(tg_t *tg, tg_peer_t peer, const char *message);
+pthread_t tg_message_send(tg_t *tg, tg_peer_t peer, const char *message);
 
 bool tg_messages_set_typing(tg_t *tg, tg_peer_t peer, bool typing);
 

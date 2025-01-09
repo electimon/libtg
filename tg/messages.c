@@ -472,6 +472,7 @@ void tg_messages_get_history_async_cb(void *d, const tl_t *tl)
 {
 	assert(d);
 	struct tg_messages_get_history_async_t *t = d;
+	ON_LOG(t->tg, "%s", __func__);
 	
 	if (tl ==  NULL){
 		if (t->on_done)
@@ -551,7 +552,7 @@ void tg_messages_get_history_async_cb(void *d, const tl_t *tl)
 	free(t);
 }	
 
-void tg_messages_get_history_async(
+pthread_t tg_messages_get_history_async(
 		tg_t *tg,
 		tg_peer_t peer,
 		int offset_id,
@@ -565,6 +566,7 @@ void tg_messages_get_history_async(
 		int (*callback)(void *userdata, const tg_message_t *msg),
 		void (*on_done)(void *userdata))
 {
+	ON_LOG(tg, "%s", __func__);
 	int i, k, c = 0;
 	uint64_t h = 0;
 	if (hash)
@@ -587,24 +589,25 @@ void tg_messages_get_history_async(
 	struct tg_messages_get_history_async_t *t = 
 		NEW(struct tg_messages_get_history_async_t, 
 				ON_ERR(tg, "%s: can't allocate memory", __func__);
-				return;);
+				return 0;);
 	t->tg = tg;
 	t->peer = peer;
 	t->userdata = userdata;
 	t->callback = callback;
 	t->on_done = on_done;
 
-	tg_send_query_async(
+	pthread_t p = tg_send_query_async(
 			tg,
 		 	&getHistory, 
 			t, 
 			tg_messages_get_history_async_cb);
 	buf_free(getHistory);
+	return p;
 }
 
-int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
+pthread_t tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 {
-	printf("TO SEND MESSAGE: %s\n", message);
+	ON_LOG(tg, "%s", __func__);
 	buf_t peer = tg_inputPeer(peer_); 
 	buf_t random_id = buf_rand(8);
 	buf_t m = tl_messages_sendMessage(
@@ -629,59 +632,10 @@ int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 	buf_free(peer);
 	buf_free(random_id);
 
-	tl_t *tl = tg_run_api(tg, &m);
+	pthread_t p = 
+		tg_send_query_async(tg, &m, NULL, NULL);
 	buf_free(m);
-
-	if (tl == NULL)
-		return 0;
-
-	switch (tl->_id) {
-		case id_updatesTooLong: case id_updateShortMessage:
-		case id_updateShortChatMessage: 
-			/* ???:  <16-12-24, yourname> */
-			break;
-		case id_updateShort:
-			{
-				tl_updateShort_t *us =
-					(tl_updateShort_t *)tl;
-
-				printf("UPDATE: %s (%.8x)\n",
-						TL_NAME_FROM_ID(us->update_->_id), us->update_->_id);
-			
-			}
-			break;
-		case id_updates:
-			{
-				tl_updates_t *us =
-					(tl_updates_t *)tl;
-				int i;
-				for (i = 0; i < us->updates_len; ++i) {
-					printf("UPDATE: %s (%.8x)\n",
-							TL_NAME_FROM_ID(us->updates_[i]->_id), 
-							us->updates_[i]->_id);
-				}
-			}
-			break;
-		case id_updateShortSentMessage:
-			{
-				tl_updateShortSentMessage_t *usm =
-					(tl_updateShortSentMessage_t *)tl;
-				if (usm->out_){
-
-				} else {
-
-				}
-			}	
-			break;
-
-		default:
-			break;
-	}	
-
-	// free tl
-	tl_free(tl);
-	
-	return 0;
+	return p;
 }
 
 int tg_message_to_database(tg_t *tg, const tg_message_t *m)

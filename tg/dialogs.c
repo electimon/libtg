@@ -92,9 +92,9 @@ static int tg_dialogs_from_tl(
 				__func__, md.dialogs_len);
 
 		// update users
-		/*tg_users_save(tg, md.users_len, md.users_);*/
+		tg_users_save(tg, md.users_len, md.users_);
 		// update chats
-		/*tg_chats_save(tg, md.chats_len, md.chats_);*/
+		tg_chats_save(tg, md.chats_len, md.chats_);
 		
 		for (i = 0; i < md.dialogs_len; ++i) {
 			ON_LOG(tg, "dialog #%d: %s\n", 
