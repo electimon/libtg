@@ -335,7 +335,9 @@ static int tg_document_send_with_progress_progress(
 		(struct tg_document_send_with_progress_progress_t *)p;
 	ON_LOG(t->tg, "%s", __func__);
 	t->current += size;
-	return t->progress(t->progressp, t->current, t->total);
+	if (t->progress)
+		return t->progress(t->progressp, t->current, t->total);
+	return 0;
 }
 
 struct tg_document_send_with_progress_progress_on_done_t {
