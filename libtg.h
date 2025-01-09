@@ -58,6 +58,11 @@ void tg_queue_manager_send_query(tg_t *tg, buf_t query,
 pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl));
 
+pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
+		void *userdata, void (*callback)(void *userdata, const tl_t *tl),
+		void *progressp, 
+		int (*progress)(void *progressp, int size, int total));
+
 /* return true if has auth key */
 bool tg_has_auth_key(tg_t *tg); 
 

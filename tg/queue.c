@@ -301,6 +301,10 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 		
 		ON_LOG(queue->tg, "%s: expected: %d, received: %d, total: %d (%d%%)", 
 				__func__, len, s, received, received*100/len);
+
+		if (queue->progress)
+			if(queue->progress(queue->progressp, received, len))
+				break;
 	}
 
 	// get payload 
@@ -470,7 +474,9 @@ static void * tg_run_queue(void * data)
 
 tg_queue_t * tg_queue_new(
 		tg_t *tg, buf_t *query, 
-		void *userdata, void (*on_done)(void *userdata, const tl_t *tl))
+		void *userdata, void (*on_done)(void *userdata, const tl_t *tl),
+		void *progressp, 
+		int (*progress)(void *progressp, int size, int total))
 {
 	ON_LOG(tg, "%s", __func__);
 	tg_queue_t *queue = NEW(tg_queue_t, 
@@ -482,6 +488,8 @@ tg_queue_t * tg_queue_new(
 	queue->query = buf_add_buf(*query);
 	queue->userdata = userdata;
 	queue->on_done = on_done;
+	queue->progressp = progressp;
+	queue->progress = progress;
 
 	// start thread
 	if (pthread_create(
@@ -503,15 +511,32 @@ pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 	ON_LOG(tg, "%s: tg: %p, query: %p, userdata: %p, callback: %p",
 		 	__func__, tg, query, userdata, callback);
 	tg_queue_t *queue = 
-		tg_queue_new(tg, query, userdata, callback);
+		tg_queue_new(tg, query, userdata, callback,
+			 	NULL, NULL);
 	return queue->p;
 }
+
+pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
+		void *userdata, void (*callback)(void *userdata, const tl_t *tl),
+		void *progressp, 
+		int (*progress)(void *progressp, int size, int total))
+{
+	ON_LOG(tg, "%s: tg: %p, query: %p, userdata: %p, callback: %p"
+			       "progressp: %p, progress: %p",
+		 	__func__, tg, query, userdata, callback, progressp, progress);
+	tg_queue_t *queue = 
+		tg_queue_new(tg, query, userdata, callback,
+			 	progressp, progress);
+	return queue->p;
+}
+
+
 
 void tg_send_query_sync(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
 {
 	tg_queue_t *queue = 
-		tg_queue_new(tg, query, userdata, callback);
+		tg_queue_new(tg, query, userdata, callback, NULL, NULL);
 	if (queue){
 		void *ret;
 		pthread_join(queue->p, &ret);

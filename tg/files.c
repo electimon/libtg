@@ -1,5 +1,6 @@
 #include "files.h"
 #include <assert.h>
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -28,6 +29,34 @@ static void tg_file_from_tl(tg_file_t *f, const tl_t *tl)
 	#undef TG_FILE_BUF
 }
 
+struct tg_get_file_with_progress_t {
+	tg_t *tg;
+	tg_file_t file;
+	bool result;
+};
+
+void tg_get_file_with_progress_on_done(void *d, const tl_t *tl)
+{
+	struct tg_get_file_with_progress_t *t = d;
+	ON_LOG(t->tg, "%s", __func__);
+	
+	if (tl == NULL){
+		t->result = false;
+		return;
+	}
+
+	if (tl->_id != id_upload_file){
+		ON_ERR(t->tg, "%s: expected upload_file but got: %s", 
+				__func__, TL_NAME_FROM_ID(tl->_id));
+		t->result = false;
+		return;
+	}
+	
+	t->result = true;
+	memset(&t->file, 0, sizeof(tg_file_t));
+	tg_file_from_tl(&t->file, tl);
+}
+
 int tg_get_file_with_progress(
 		tg_t *tg, 
 		InputFileLocation *location,
@@ -38,7 +67,7 @@ int tg_get_file_with_progress(
 		void *progressp,
 			int (*progress)(void *progressp, int size, int total))
 {
-	printf("%s start\n", __func__);
+	ON_LOG(tg, "%s", __func__);
 	/* If precise flag is not specified, then
 
 		• The parameter offset must be divisible by 4 KB.
@@ -60,8 +89,6 @@ int tg_get_file_with_progress(
 	/*int i, limit = 1024*4, offset = 0; // for testing */
 	int i, limit = 1048576, offset = 0;
 		
-	tl_t *tl = NULL;
-
 	for (i = 0; size>0?offset<size:1; ++i) 
 	{
 		printf("%s: download total: %d with offset: %d (%d%%)\n",
@@ -75,35 +102,36 @@ int tg_get_file_with_progress(
 				limit);
 			
 		// net send
-		tl = tg_run_api_with_progress(
-				tg, &getFile, progressp, progress);
+		struct tg_get_file_with_progress_t *t =
+			NEW(struct tg_get_file_with_progress_t,
+					ON_ERR(tg, "%s: can't allocate memory", __func__); 
+					return 1);
+		t->tg = tg;
+
+		pthread_t p = tg_send_query_async_with_progress(
+				tg, &getFile,
+				t, tg_get_file_with_progress_on_done,	
+				progressp, progress);
 		buf_free(getFile);
+		pthread_join(p, NULL);
 
-		if (tl == NULL)
-			return offset;
-
-		if (tl->_id != id_upload_file){
-			ON_ERR(tg, "%s: expected upload_file but got: %s", 
-					__func__, TL_NAME_FROM_ID(tl->_id));
+		if (!t->result){
+			free(t);
 			return offset;
 		}
-		
-		tg_file_t file;
-		memset(&file, 0, sizeof(file));
-		tg_file_from_tl(&file, tl);
-		
-		// add offset
-		offset += file.bytes_.size;
 
-		printf("FILE TYPE: %s\n", TL_NAME_FROM_ID(file.type_));
+		// add offset
+		offset += t->file.bytes_.size;
+
+		printf("FILE TYPE: %s\n", TL_NAME_FROM_ID(t->file.type_));
 		if (callback)
-			if (callback(userdata, &file))
+			if (callback(userdata, &t->file))
 				break;
 
-		tg_file_free(&file);
+		tg_file_free(&t->file);
 		
-		// free tl
-		tl_free(tl);
+		// free t
+		free(t);
 	}
 	
 	/*return file;*/
@@ -118,6 +146,7 @@ int tg_get_file(
 		int (*callback)(
 			void *userdata, const tg_file_t *file))
 {
+	ON_LOG(tg, "%s", __func__);
 	return tg_get_file_with_progress(
 			tg, 
 			location, 
@@ -140,8 +169,7 @@ char * tg_get_photo_file(tg_t *tg,
 		const char *photo_file_reference,
 		const char *photo_size)
 {
-	fprintf(stderr, "%s\n", __func__);
-	
+	ON_LOG(tg, "%s", __func__);
 	char *photo = NULL;
 	
 	//if (strcmp(photo_size, "s") == 0){
@@ -182,8 +210,7 @@ char * tg_get_peer_photo_file(tg_t *tg,
 		bool big_photo,
 		uint64_t photo_id) 
 {
-	fprintf(stderr, "%s\n", __func__);
-	
+	ON_LOG(tg, "%s", __func__);
 	char *photo = NULL;
 	
 	//if (!big_photo){
@@ -230,6 +257,7 @@ void tg_get_document(tg_t *tg,
 		void *progressp,
 			int (*progress)(void *progressp, int size, int total))
 {
+	ON_LOG(tg, "%s", __func__);
 	buf_t fr = buf_from_base64(file_reference);
 	InputFileLocation location =
 		tl_inputDocumentFileLocation(
@@ -257,8 +285,7 @@ char * tg_get_document_thumb(tg_t *tg,
 		const char * file_reference, 
 		const char * thumb_size)
 {	
-	fprintf(stderr, "%s\n", __func__);
-	
+	ON_LOG(tg, "%s", __func__);
 	char *photo = NULL;
 	
 	buf_t fr = buf_from_base64(file_reference);
@@ -309,12 +336,32 @@ static int tg_document_send_with_progress_progress(
 	return t->progress(t->progressp, t->current, t->total);
 }
 
+struct tg_document_send_with_progress_progress_on_done_t {
+	tg_t *tg;
+	bool result;
+};
+
+static void tg_document_send_with_progress_progress_on_done
+	(void *userdata, const tl_t *tl)
+{
+	struct tg_document_send_with_progress_progress_on_done_t 
+		*ondone = userdata;
+	ON_LOG(ondone->tg, "%s", __func__);
+	if (tl == NULL || tl->_id != id_boolTrue){
+		ON_ERR(ondone->tg, "%s: expected tl_true but got: %s", 
+				__func__, TL_NAME_FROM_ID(tl->_id));
+		ondone->result = false;
+	} else
+		ondone->result = true;
+}
+
 int tg_document_send(
 		tg_t *tg, tg_peer_t *peer, 
 		tg_document_t *document,
 		const char *message,
 		void *progressp, int (*progress)(void *, int, int))
 {
+	ON_LOG(tg, "%s", __func__);
 	assert(document && peer && document->filepath[0]);
 	int i;
 	ON_LOG(tg, "%s...", __func__);
@@ -411,16 +458,26 @@ tg_document_send_with_progress_saveBigFilePart:;
 					file_total_parts,	
 					&bytes);
 
-			tl_t *tl = tg_run_api_with_progress(
+			struct tg_document_send_with_progress_progress_on_done_t
+				*ondone = 
+				NEW(struct tg_document_send_with_progress_progress_on_done_t,
+						ON_ERR(tg, "%s: can't allocate memory", __func__); 
+						return 1;);
+			ondone->tg = tg;
+			
+			pthread_t p = tg_send_query_async_with_progress(
 					tg, 
 					&saveFilePart, 
+					ondone,
+					tg_document_send_with_progress_progress_on_done,
 					&t, 
 					tg_document_send_with_progress_progress);
 			buf_free(saveFilePart);
+			pthread_join(p, NULL);
+			bool result = ondone->result;
+			free(ondone);
 
-			if (tl == NULL || tl->_id != id_boolTrue){
-				ON_ERR(tg, "%s: expected tl_true but got: %s", 
-						__func__, TL_NAME_FROM_ID(tl->_id));
+			if (!result){
 				// retry
 				retry++;
 				goto tg_document_send_with_progress_saveBigFilePart;
@@ -460,16 +517,26 @@ tg_document_send_with_progress_saveFilePart:;
 					file_part, 
 					&bytes);
 
-			tl_t *tl = tg_run_api_with_progress(
+			struct tg_document_send_with_progress_progress_on_done_t
+				*ondone = 
+				NEW(struct tg_document_send_with_progress_progress_on_done_t,
+						ON_ERR(tg, "%s: can't allocate memory", __func__); 
+						return 1;);
+			ondone->tg = tg;
+			
+			pthread_t p = tg_send_query_async_with_progress(
 					tg, 
 					&saveFilePart, 
+					ondone,
+					tg_document_send_with_progress_progress_on_done,
 					&t, 
 					tg_document_send_with_progress_progress);
 			buf_free(saveFilePart);
+			pthread_join(p, NULL);
+			bool result = ondone->result;
+			free(ondone);
 
-			if (tl == NULL || tl->_id != id_boolTrue){
-				ON_ERR(tg, "%s: expected tl_true but got: %s", 
-						__func__, TL_NAME_FROM_ID(tl->_id));
+			if (!result){
 				// retry
 				retry++;
 				goto tg_document_send_with_progress_saveFilePart;
@@ -610,15 +677,8 @@ tg_document_send_with_progress_saveFilePart:;
 		buf_free(peer_);
 		buf_free(random_id);
 
-		tl_t *tl = tg_run_api(tg, &sendMedia);
+		tg_send_query_async(tg, &sendMedia, NULL, NULL);
 		buf_free(sendMedia);
-
-		if (tl == NULL){
-			return 1;
-		}
-
-		/* TODO: handle tl_updates <30-12-24, yourname> */
-		tl_free(tl);
 	}
 
 	return 0;

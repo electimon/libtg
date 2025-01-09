@@ -14,11 +14,16 @@ typedef struct tg_queue_{
 	uint64_t msgid;
 	void *userdata;
 	void (*on_done)(void *userdata, const tl_t *tl);
+	void *progressp;
+	int (*progress)(void *progressp, int size, int total);
 } tg_queue_t;
 
 tg_queue_t * tg_queue_new(
 		tg_t *tg, buf_t *query, 
-		void *userdata, void (*on_done)(void *userdata, const tl_t *tl));
+		void *userdata, void (*on_done)(void *userdata, const tl_t *tl),
+		void *progressp, 
+		int (*progress)(void *progressp, int size, int total));
+
 int tg_queue_send(tg_t *tg, buf_t *query, 
 		void *userdata, void (*callback)(void *userdata, tl_t *tl));
 
