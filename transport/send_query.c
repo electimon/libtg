@@ -19,6 +19,7 @@
 
 tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 {
+	ON_LOG(tg, "%s", __func__);
 	int i;
 	switch (tl->_id) {
 		case id_msg_container:
@@ -110,6 +111,7 @@ tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl)
 
 buf_t tg_prepare_query(tg_t *tg, buf_t query, bool enc, uint64_t *msgid)
 {
+	ON_LOG(tg, "%s", __func__);
 	buf_t h = tg_header(tg, query, enc, true, msgid);
 	
 	buf_t e = tg_encrypt(tg, h, enc);
@@ -123,6 +125,7 @@ buf_t tg_prepare_query(tg_t *tg, buf_t query, bool enc, uint64_t *msgid)
 
 tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 {
+	ON_LOG(tg, "%s", __func__);
 	if (!msg.size)
 		return NULL;
 
@@ -134,6 +137,7 @@ tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg)
 }
 
 buf_t tg_get_payload(tg_t *tg, buf_t buf, bool enc){
+	ON_LOG(tg, "%s", __func__);
 	buf_t msg = buf_new();
 
 	buf_t tr = tg_detransport(tg, buf);
@@ -205,6 +209,7 @@ tl_t * tg_send_query_to_net(
 
 tl_t * tg_send_query_(tg_t *tg, buf_t query, bool enc)
 {
+	ON_LOG(tg, "%s", __func__);
 	if (!tg->net){
 		tg->sockfd = tg_net_open_port(tg, 80);
 		tg->net = true;
@@ -320,6 +325,7 @@ void tg_queue_manager_send_query(tg_t *tg, buf_t query,
 		void *chunkp, 
 		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total))
 {
+	ON_LOG(tg, "%s", __func__);
 
 	if (!tg->salt.size)
 		tg->salt = buf_rand(8);

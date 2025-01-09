@@ -10,7 +10,7 @@
 
 static tl_t *receive_tl(tg_t *tg, int sockfd)
 {
-	ON_LOG(tg, "%s: start", __func__);
+	ON_LOG(tg, "%s", __func__);
 	buf_t r = buf_new();
 	// get length of the package
 	uint32_t len;
@@ -99,6 +99,7 @@ static tl_t *receive_tl(tg_t *tg, int sockfd)
 
 static void receive_in_queue(tg_t *tg, int sockfd)
 {
+	ON_LOG(tg, "%s", __func__);
 	tl_t *tl = receive_tl(tg, sockfd);
 	if (tl == NULL)
 		return;
@@ -109,7 +110,7 @@ static void receive_in_queue(tg_t *tg, int sockfd)
 static void * _tg_receive_daemon(void * data)
 {
 	tg_t *tg = data;
-	ON_LOG(tg, "%s: start", __func__);
+	ON_LOG(tg, "%s", __func__);
 
 	while (tg->receive_queue_manager) {
 		// receive
@@ -128,6 +129,7 @@ static void * _tg_receive_daemon(void * data)
 
 int tg_start_receive_queue_manager(tg_t *tg){
 
+	ON_LOG(tg, "%s", __func__);
 	tg->receive_queue_manager = 1;
 
 	// start thread
