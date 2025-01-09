@@ -320,6 +320,7 @@ void tg_file_free(tg_file_t *f){
 }
 
 struct tg_document_send_with_progress_progress_t {
+	tg_t *tg;
 	int total;
 	int current;
 	void *progressp;
@@ -332,6 +333,7 @@ static int tg_document_send_with_progress_progress(
 	assert(p);
 	struct tg_document_send_with_progress_progress_t *t = 
 		(struct tg_document_send_with_progress_progress_t *)p;
+	ON_LOG(t->tg, "%s", __func__);
 	t->current += size;
 	return t->progress(t->progressp, t->current, t->total);
 }
@@ -432,8 +434,14 @@ int tg_document_send(
 		buf_t bytes = buf_new();
 		buf_realloc(&bytes, part_size);
 		
-		struct tg_document_send_with_progress_progress_t t =
-			{size, 0, progressp, progress};
+		struct tg_document_send_with_progress_progress_t *t =
+			NEW(struct tg_document_send_with_progress_progress_t,
+				 	ON_ERR(tg, "%s: can't allocate memory", __func__));
+		t->tg = tg;
+		t->total = size;
+		t->current = 0;
+		t->progressp = progressp;
+		t->progress = progress;
 		
 		int len, current = 0, retry = 0;
 		for (len = fread(bytes.data, 1, part_size, fp);
@@ -470,7 +478,7 @@ tg_document_send_with_progress_saveBigFilePart:;
 					&saveFilePart, 
 					ondone,
 					tg_document_send_with_progress_progress_on_done,
-					&t, 
+					t, 
 					tg_document_send_with_progress_progress);
 			buf_free(saveFilePart);
 			pthread_join(p, NULL);
@@ -486,14 +494,21 @@ tg_document_send_with_progress_saveBigFilePart:;
 			file_part++;
 		}	
 		buf_free(bytes);
+		free(t);
 
 	} else {  // for files < 10Mb
 		// save file part
 		buf_t bytes = buf_new();
 		buf_realloc(&bytes, part_size);
 		
-		struct tg_document_send_with_progress_progress_t t =
-			{size, 0, progressp, progress};
+		struct tg_document_send_with_progress_progress_t *t =
+			NEW(struct tg_document_send_with_progress_progress_t,
+				 	ON_ERR(tg, "%s: can't allocate memory", __func__));
+		t->tg = tg;
+		t->total = size;
+		t->current = 0;
+		t->progressp = progressp;
+		t->progress = progress;
 		
 		int len, current = 0, retry = 0;
 		for (len = fread(bytes.data, 1, part_size, fp);
@@ -529,7 +544,7 @@ tg_document_send_with_progress_saveFilePart:;
 					&saveFilePart, 
 					ondone,
 					tg_document_send_with_progress_progress_on_done,
-					&t, 
+					t, 
 					tg_document_send_with_progress_progress);
 			buf_free(saveFilePart);
 			pthread_join(p, NULL);
@@ -545,6 +560,7 @@ tg_document_send_with_progress_saveFilePart:;
 			file_part++;
 		}	
 		buf_free(bytes);
+		free(t);
 	}
 
 	// While the parts are being uploaded, an MD5 hash of 
