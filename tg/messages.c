@@ -788,7 +788,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		
 	str_appendf(&s, 
 			"id FROM messages WHERE id = %d AND peer_id = "_LD_" "
-			"ORDER BY \'date\' DESC;", tg->id, peer.id);
+			"ORDER BY \'date\' DESC LIMIT 20;", tg->id, peer.id);
 
 	int i = 0;
 	tg_sqlite3_for_each(tg, s.str, stmt){
