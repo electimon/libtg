@@ -5,7 +5,6 @@
 #include "list.h"
 #include "tg.h"
 #include "updates.h"
-#include <bits/pthreadtypes.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
