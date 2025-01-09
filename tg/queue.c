@@ -38,6 +38,7 @@ static int cmp_msgid(void *msgidp, void *itemp)
 
 static tg_queue_t *tg_get_queue(tg_t *tg, uint64_t *msgid)
 {
+	ON_LOG(tg, "%s", __func__);
 	int err = pthread_mutex_lock(&tg->queuem);
 	if (err){
 		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
@@ -262,7 +263,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 
 static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 {
-	ON_LOG(queue->tg, "%s: start", __func__);
+	ON_LOG(queue->tg, "%s", __func__);
 	buf_t r = buf_new();
 	// get length of the package
 	uint32_t len;
@@ -345,6 +346,7 @@ static void tg_send_ack(void *data)
 	tg_queue_t *queue = data;
 	// send ACK
 	if (queue->tg->msgids[0]){
+		ON_LOG(queue->tg, "%s", __func__);
 		buf_t ack = tg_ack(queue->tg);
 		int s = 
 			send(queue->tg->sockfd, ack.data, ack.size, 0);
@@ -361,6 +363,7 @@ static int tg_send(void *data)
 	int err = 0;
 	// send query
 	tg_queue_t *queue = data;
+	ON_LOG(queue->tg, "%s", __func__);
 	// session id
 	if (!queue->tg->ssid.size){
 		err = pthread_mutex_lock(&queue->tg->queuem);
@@ -410,6 +413,7 @@ static int tg_send(void *data)
 static void * tg_run_queue(void * data)
 {
 	tg_queue_t *queue = data;
+	ON_LOG(queue->tg, "%s", __func__);
 	// open socket
 	queue->socket = tg_net_open(queue->tg);
 	if (queue->socket < 0)
@@ -468,6 +472,7 @@ tg_queue_t * tg_queue_new(
 		tg_t *tg, buf_t *query, 
 		void *userdata, void (*on_done)(void *userdata, const tl_t *tl))
 {
+	ON_LOG(tg, "%s", __func__);
 	tg_queue_t *queue = NEW(tg_queue_t, 
 			ON_ERR(tg, "%s: can't allocate memory", __func__);
 			return NULL;);
@@ -495,6 +500,8 @@ tg_queue_t * tg_queue_new(
 pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
 {
+	ON_LOG(tg, "%s: tg: %p, query: %p, userdata: %p, callback: %p",
+		 	__func__, tg, query, userdata, callback);
 	tg_queue_t *queue = 
 		tg_queue_new(tg, query, userdata, callback);
 	return queue->p;
@@ -513,6 +520,7 @@ void tg_send_query_sync(tg_t *tg, buf_t *query,
 
 void tg_queue_cancell_all(tg_t *tg)
 {
+	ON_LOG(tg, "%s", __func__);
 	int err = pthread_mutex_lock(&tg->queuem);
 	if (err){
 		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
