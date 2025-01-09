@@ -202,9 +202,10 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
  * return non-null on error */
 pthread_t tg_message_send(tg_t *tg, tg_peer_t peer, const char *message);
 
-bool tg_messages_set_typing(tg_t *tg, tg_peer_t peer, bool typing);
+pthread_t tg_messages_set_typing(tg_t *tg, tg_peer_t peer, bool typing);
 
-int tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id);
+pthread_t 
+tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id);
 
 
 #endif /* ifndef TG_MESSAGES_H */		
