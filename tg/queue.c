@@ -348,9 +348,8 @@ static void tg_send_ack(void *data)
 	if (queue->tg->msgids[0]){
 		ON_LOG(queue->tg, "%s", __func__);
 		buf_t ack = tg_ack(queue->tg);
-		ON_LOG(queue->tg, "TTTTTTTTTTTTT");
 		int s = 
-			send(queue->tg->sockfd, ack.data, ack.size, 0);
+			send(queue->socket, ack.data, ack.size, 0);
 		buf_free(ack);
 		if (s < 0){
 			ON_ERR(queue->tg, "%s: socket error: %d", __func__, s);
