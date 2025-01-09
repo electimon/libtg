@@ -212,9 +212,6 @@ static int tg_dialogs_from_tl(
 				if (md.chats_[k] == NULL)
 					continue;
 			
-				ON_LOG(tg, "chat: %s\n", TL_NAME_FROM_ID(md.chats_[k]->_id));
-				
-			/*
 				switch (md.chats_[k]->_id) {
 					case id_channel:
 						{
@@ -285,7 +282,6 @@ static int tg_dialogs_from_tl(
 					default:
 						break;
 				}
-		*/
 			}
 
 				
