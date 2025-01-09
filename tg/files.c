@@ -172,12 +172,12 @@ char * tg_get_photo_file(tg_t *tg,
 	ON_LOG(tg, "%s", __func__);
 	char *photo = NULL;
 	
-	//if (strcmp(photo_size, "s") == 0){
-		//photo = photo_file_from_database(tg, photo_id);
-		//if (photo){
-			//return photo;
-		//}
-	//}
+	if (strcmp(photo_size, "s") == 0){
+		photo = photo_file_from_database(tg, photo_id);
+		if (photo){
+			return photo;
+		}
+	}
 
 	buf_t fr = buf_from_base64(photo_file_reference);
 	InputFileLocation location = 
@@ -196,11 +196,11 @@ char * tg_get_photo_file(tg_t *tg,
 			_photo_file_cb);
 	buf_free(location);
 	
-	//if (photo == NULL)
-		//return NULL;
+	if (photo == NULL)
+		return NULL;
 
-	//if (strcmp(photo_size, "s") == 0)
-		//photo_to_database(tg, photo_id, photo);
+	if (strcmp(photo_size, "s") == 0)
+		photo_to_database(tg, photo_id, photo);
 
 	return photo;
 }
