@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 09.01.2025
+ * Last Modified Date: 10.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -393,7 +393,7 @@ void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
 	free(t);
 }
 
-void tg_get_dialogs_async(
+pthread_t tg_get_dialogs_async(
 		tg_t *tg, 
 		int limit,
 		time_t date, 
@@ -423,17 +423,18 @@ void tg_get_dialogs_async(
 	struct tg_get_dialogs_async_t *t = 
 		NEW(struct tg_get_dialogs_async_t, 
 				ON_ERR(tg, "%s: can't allocate memory", __func__);
-					return;);
+					return 0;);
 	t->tg = tg;
 	t->data = data;
 	t->callback = callback;
 	t->on_done = on_done;
 
-	tg_send_query_async(
+	pthread_t p = tg_send_query_async(
 			tg, 
 			&getDialogs, 
 			t, tg_get_dialogs_async_cb);
 	buf_free(getDialogs);
+	return p;
 }
 
 int tg_get_dialogs(
