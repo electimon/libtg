@@ -38,7 +38,11 @@ static int cmp_msgid(void *msgidp, void *itemp)
 
 static tg_queue_t *tg_get_queue(tg_t *tg, uint64_t *msgid)
 {
-	pthread_mutex_lock(&tg->queuem);
+	int err = pthread_mutex_lock(&tg->queuem);
+	if (err){
+		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+		return NULL;
+	}
 	tg_queue_t *q = list_cut(
 				&tg->queue, 
 				msgid, 
@@ -49,7 +53,11 @@ static tg_queue_t *tg_get_queue(tg_t *tg, uint64_t *msgid)
 
 static void tg_add_to_ack(tg_t *tg, uint64_t msgid)
 {
-	pthread_mutex_lock(&tg->msgidsm);
+	int err = pthread_mutex_lock(&tg->msgidsm);
+	if (err){
+		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+		return;
+	}
 	tg_add_mgsid(tg, msgid);
 	pthread_mutex_unlock(&tg->msgidsm);
 }
@@ -350,16 +358,25 @@ static void tg_send_ack(void *data)
 
 static int tg_send(void *data)
 {
+	int err = 0;
 	// send query
 	tg_queue_t *queue = data;
 	// session id
 	if (!queue->tg->ssid.size){
-		pthread_mutex_lock(&queue->tg->queuem);
+		err = pthread_mutex_lock(&queue->tg->queuem);
+		if (err){
+			ON_ERR(queue->tg, "%s: can't lock mutex: %d", __func__, err);
+			return 1;
+		}
 		queue->tg->ssid = buf_rand(8);
 		pthread_mutex_unlock(&queue->tg->queuem);
 	}
 	if (!queue->tg->salt.size){
-		pthread_mutex_lock(&queue->tg->queuem);
+		err = pthread_mutex_lock(&queue->tg->queuem);
+		if (err){
+			ON_ERR(queue->tg, "%s: can't lock mutex: %d", __func__, err);
+			return 1;
+		}
 		queue->tg->salt = buf_rand(8);
 		pthread_mutex_unlock(&queue->tg->queuem);
 	}
@@ -404,7 +421,14 @@ static void * tg_run_queue(void * data)
 	}
 
 	// add to list
-	pthread_mutex_lock(&queue->tg->queuem);
+	int err = 0;
+	err = pthread_mutex_lock(&queue->tg->queuem);
+	if (err){
+		ON_ERR(queue->tg, "%s: can't lock mutex: %d", __func__, err);
+		buf_free(queue->query);
+		free(queue);
+		pthread_exit(NULL);	
+	}
 	list_add(&queue->tg->queue, data);
 	pthread_mutex_unlock(&queue->tg->queuem);
 
@@ -489,7 +513,11 @@ void tg_send_query_sync(tg_t *tg, buf_t *query,
 
 void tg_queue_cancell_all(tg_t *tg)
 {
-	pthread_mutex_lock(&tg->queuem);
+	int err = pthread_mutex_lock(&tg->queuem);
+	if (err){
+		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+		return;
+	}
 	tg_queue_t *queue;
 	list_for_each(tg->queue, queue)
 	{
