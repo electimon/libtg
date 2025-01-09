@@ -5,6 +5,7 @@
 #include "list.h"
 #include "tg.h"
 #include "updates.h"
+#include <bits/pthreadtypes.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -468,10 +469,12 @@ tg_queue_t * tg_queue_new(
 	return queue;
 }
 
-void tg_send_query_async(tg_t *tg, buf_t *query,
+pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
 {
-	tg_queue_new(tg, query, userdata, callback);
+	tg_queue_t *queue = 
+		tg_queue_new(tg, query, userdata, callback);
+	return queue->p;
 }
 
 void tg_send_query_sync(tg_t *tg, buf_t *query,
