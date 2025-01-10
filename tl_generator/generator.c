@@ -541,7 +541,8 @@ int append_deserialize_table(
 
 	// copy buf
 	fputs(
-			"\tobj->_buf = buf_add_buf(*buf);\n"
+			"\tobj->_buf = buf_new();\n"
+					"\tobj->_buf = buf_cat(obj->_buf, *buf);\n"
 				, g->deserialize_table_c);
 
 
