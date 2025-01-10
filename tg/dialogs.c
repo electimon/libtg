@@ -461,6 +461,10 @@ int tg_get_dialogs(
 
 	tl_t *tl = tg_send_query_sync(tg, &getDialogs);
 	buf_free(getDialogs);
+	if (tl == NULL){
+		ON_ERR(tg, "%s: tl is NULL", __func__);
+		return 0;
+	}
 	
 	i = tg_dialogs_from_tl(tg, tl, data, callback);
 

@@ -67,6 +67,8 @@ tg_is_authorized(tg_t *tg)
 				return (tl_user_t *)user;
 			}
 		}
+		if (tl)
+			tl_free(tl);
 		return NULL;
 	}
 
@@ -124,6 +126,8 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 	if (tl && tl->_id == id_auth_sentCode){
 		return (tl_auth_sentCode_t *)tl;
 	}
+	if (tl)
+		tl_free(tl);
 	return NULL;
 }
 
@@ -168,6 +172,9 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 		
 		return (tl_user_t *)auth->user_;
 	}
+
+	if (tl)
+		tl_free(tl);
 
 	return NULL;
 }

@@ -74,6 +74,9 @@ tg_peer_t tg_peer_by_phone(tg_t *tg, const char *phone){
 		}
 	}
 
+	if (tl)
+		tl_free(tl);
+
 	return peer;
 }
 
@@ -158,7 +161,11 @@ int tg_get_peer_profile_colors(tg_t *tg, uint32_t hash,
 	buf_t query = tl_help_getPeerProfileColors(0);
 	tl_t *tl = tg_send_query_sync(tg, &query);
 	buf_free(query);
-	if (tl != NULL && tl->_id == id_help_peerColors)
+	if (tl == NULL) {
+		ON_ERR(tg, "%s: tl is NULL", __func__);
+		return 0;
+	}
+	if (tl->_id == id_help_peerColors)
 	{	
 		tl_help_peerColors_t *hpc =
 			(tl_help_peerColors_t *)tl;
@@ -182,28 +189,36 @@ int tg_get_peer_profile_colors(tg_t *tg, uint32_t hash,
 				tg_peer_color_set_to_colors(
 						tg, 
 						&colors, 
-						(tl_help_peerColorSet_t *)pco->colors_);
+						pco->colors_);
 			}
 			
 			if (pco->dark_colors_){
 				tg_peer_color_set_to_colors(
 						tg, 
 						&dark_colors, 
-						(tl_help_peerColorSet_t *)pco->dark_colors_);
+						pco->dark_colors_);
 			}
 
 			// run callback
-			if (callback)
+			if (callback){
 				if (callback(userdata, pco->color_id_, &colors, &dark_colors))
+				{
+					tl_free(tl);
 					return ++c;
+				}
+			}
 
 			c++;
 		}
+	
+		tl_free(tl);
 		return c;
 	}
 
 	ON_ERR(tg, "%s: tl is not help_peerColors: %s",
 			__func__, TL_NAME_FROM_ID(tl->_id));
+
+	tl_free(tl);
 	
 	return 0;
 }

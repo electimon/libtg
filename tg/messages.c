@@ -387,8 +387,10 @@ int tg_messages_get_history(
 	tl_t * tl = tg_send_query_sync(tg, &getHistory);
 	buf_free(getHistory);
 
-	if (tl ==  NULL)
+	if (tl == NULL){
+		ON_ERR(tg, "%s: tl is NULL", __func__);
 		return 0;
+	}
 
 	printf("GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
 
