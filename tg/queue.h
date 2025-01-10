@@ -9,7 +9,6 @@ typedef struct tg_queue_{
 	pthread_t p;
 	int socket;
 	bool loop;
-	bool catched;
 	buf_t query;
 	uint64_t msgid;
 	void *userdata;

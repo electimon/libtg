@@ -281,6 +281,48 @@ int main(int argc, char *argv[])
 	tg_set_on_log  (tg, NULL, on_log);
 	tg_set_on_error  (tg, NULL, on_err);
 
+	/*tl_auth_sentCode_t *sentCode = */
+		/*tg_auth_sendCode(tg, "+79990407731");*/
+
+	/*if (!sentCode)*/
+		/*return 1;*/
+
+	/*int code;*/
+	/*printf("The code was send via %s\n", */
+			/*TL_NAME_FROM_ID(sentCode->type_->_id));*/
+	/*printf("enter code: \n");*/
+	/*scanf("%d", &code);*/
+	/*printf("code: %d\n", code);*/
+	/*char phone_code[32];*/
+	/*sprintf(phone_code, "%d", code);*/
+
+	/*tl_user_t *user = tg_auth_signIn(tg, */
+		 /*sentCode, "+79990407731", phone_code);*/
+
+	/*if (!user){*/
+		/*printf("can't authorize\n");*/
+		/*return 1;*/
+	/*}*/
+
+	buf_t getConfig = tl_help_getConfig();
+	buf_t init = initConnection(tg, getConfig);
+	tl_t *tl = tg_send_query_sync(tg, &init);
+	if (!tl){
+		printf("TL IS NULL\n");
+		return 1;
+	}
+	if (tl->_id == id_config){
+		// handle config
+		tl_config_t *config = (tl_config_t *)tl;
+		int	i;
+		for (i = 0; i < config->dc_options_len; ++i) {
+			tl_dcOption_t *option = 
+				(tl_dcOption_t *)config->dc_options_[i];
+
+			printf("%d: %s\n", option->id_, option->ip_address_.data);
+		}
+	}
+
 	//InputUser iuser = tl_inputUserSelf();
 	//buf_t getUsers = 
 		//tl_users_getUsers(&iuser, 1);	
@@ -324,11 +366,11 @@ int main(int argc, char *argv[])
 			//tg, query_cb, 
 			//NULL, NULL);
 
-	tg_peer_t peer = {
-		TG_PEER_TYPE_CHANNEL,
-		1326223284,
-		-5244509236001112417,
-	};
+	/*tg_peer_t peer = {*/
+		/*TG_PEER_TYPE_CHANNEL,*/
+		/*1326223284,*/
+		/*-5244509236001112417,*/
+	/*};*/
 
 	//tg_get_peer_photo_file(
 			//tg, 
@@ -355,10 +397,10 @@ int main(int argc, char *argv[])
 			 /*NULL, dialogs_callback);*/
 	/*printf("GOT %d dialogs\n", count);*/
 
-	tg_get_dialogs_async(tg, 40,
-			 time(NULL),
-			 NULL, NULL,
-			 NULL, dialogs_callback, on_done);
+	/*tg_get_dialogs_async(tg, 40,*/
+			 /*time(NULL),*/
+			 /*NULL, NULL,*/
+			 /*NULL, dialogs_callback, on_done);*/
 
 
 
@@ -394,35 +436,35 @@ int main(int argc, char *argv[])
 			//&m, 
 			//messages_callback_document);
 
-	for (int i = 0; i < 10; ++i) {
-	char s[20];
-	sprintf(s, "ID: %d", i);
+	/*for (int i = 0; i < 10; ++i) {*/
+	/*char s[20];*/
+	/*sprintf(s, "ID: %d", i);*/
 		
-	tg_messages_get_history_async(
-			tg,
-			peer, 
-			0, 
-			time(NULL), 
-			0, 
-			20, 
-			0, 
-			0, 
-			NULL, 
-			strdup(s), 
-			messages_callback_no_log,
-			on_done);
+	/*tg_messages_get_history_async(*/
+			/*tg,*/
+			/*peer, */
+			/*0, */
+			/*time(NULL), */
+			/*0, */
+			/*20, */
+			/*0, */
+			/*0, */
+			/*NULL, */
+			/*strdup(s), */
+			/*messages_callback_no_log,*/
+			/*on_done);*/
 	
-	tg_get_dialogs_async(tg, 40,
-			 time(NULL),
-			 NULL, NULL,
-			 NULL, dialogs_callback, on_done);
+	/*tg_get_dialogs_async(tg, 40,*/
+			 /*time(NULL),*/
+			 /*NULL, NULL,*/
+			 /*NULL, dialogs_callback, on_done);*/
 
 
 
-	//sleep(1);
-	}
+	/*//sleep(1);*/
+	/*}*/
 
-	tg_queue_cancell_all(tg);
+	/*tg_queue_cancell_all(tg);*/
 
 
 	//printf("MESSAGE WITH PHOTO:\n");

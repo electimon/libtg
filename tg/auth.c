@@ -9,7 +9,7 @@
 #include "../mtx/include/api.h"
 #include <sys/socket.h>
 
-static buf_t _init(tg_t *tg, buf_t query)
+buf_t initConnection(tg_t *tg, buf_t query)
 {
 	buf_t initConnection = 
 		tl_initConnection(
@@ -52,11 +52,14 @@ tg_is_authorized(tg_t *tg)
 			tl_users_getUsers(&iuser, 1);	
 		ON_LOG_BUF(tg, getUsers, 
 				"%s: getUsers: ", __func__);
+		buf_free(iuser);
+
+		buf_t init = initConnection(tg, getUsers);
+		buf_free(getUsers);
 		
 		tl_t *tl = 
-			tg_send_query(tg, _init(tg, getUsers)); 
-		buf_free(iuser);
-		buf_free(getUsers);
+			tg_send_query_sync(tg, &init); 
+		buf_free(init);
 		
 		if (tl && tl->_id == id_vector){
 			tl_t *user = tl_deserialize(&((tl_vector_t *)tl)->data_);
@@ -64,12 +67,6 @@ tg_is_authorized(tg_t *tg)
 				return (tl_user_t *)user;
 			}
 		}
-		// throw error
-		char *err = tg_strerr(tl); 
-		ON_ERR(tg, "%s", err);
-		free(err);
-		// free tl
-		/* TODO:  <14-11-24, kuzmich> */
 		return NULL;
 	}
 
@@ -80,21 +77,8 @@ tg_is_authorized(tg_t *tg)
 tl_auth_sentCode_t *
 tg_auth_sendCode(tg_t *tg, const char *phone_number) 
 {
-	// create new auth_key
-	if (tg->net){
-		tg_net_close(tg, tg->sockfd);
-	}
-
-	api.app.open();
-	tg->sockfd = shared_rc.net.sockfd;
-	tg->net = true;
-	tg->key = 
-		buf_add(shared_rc.key.data, shared_rc.key.size);
-	tg->salt = 
-		buf_add(shared_rc.salt.data, shared_rc.salt.size);
-	tg->ssid = buf_rand(8);
-	tg->seqn = shared_rc.seqnh + 1;
-
+	ON_LOG(tg, "%s", __func__);
+	
 	// get tokens from database 
 	buf_t t[20]; int tn = 0;
 	char *auth_tokens = auth_tokens_from_database(tg);
@@ -126,23 +110,20 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 				tg->apiId, 
 				tg->apiHash, 
 				&codeSettings);
-	
 	ON_LOG_BUF(tg, sendCode, 
 			"%s: sendCode: ", __func__);
+	buf_free(codeSettings);
+
+	buf_t init = initConnection(tg, sendCode);
+	buf_free(sendCode);
 
 	tl_t *tl = 
-		tg_send_query(tg, _init(tg, sendCode)); 
+		tg_send_query_sync(tg, &init); 
+	buf_free(init);
 
 	if (tl && tl->_id == id_auth_sentCode){
 		return (tl_auth_sentCode_t *)tl;
 	}
-	// throw error
-	char *err = tg_strerr(tl); 
-	ON_ERR(tg, "%s", err);
-	free(err);
-	// free tl
-	/* TODO:  <14-11-24, kuzmich> */
-
 	return NULL;
 }
 
@@ -150,6 +131,7 @@ tl_user_t *
 tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode, 
 		const char *phone_number, const char *phone_code) 
 {
+	ON_LOG(tg, "%s", __func__);
 	buf_t signIn = 
 		tl_auth_signIn(
 				phone_number, 
@@ -158,7 +140,8 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 				NULL);
 	
 	tl_t *tl = 
-		tg_send_query(tg, signIn);
+		tg_send_query_sync(tg, &signIn);
+	buf_free(signIn);
 	
 	if (tl && tl->_id == id_auth_authorization){
 		tl_auth_authorization_t *auth =
@@ -179,22 +162,12 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 				auth->future_auth_token_.size);
 			auth_token_to_database(tg, auth_token);
 		}
+		
 		// save auth_key_id 
 		auth_key_to_database(tg, tg->key);
-
-		// close port
-		//tg_net_close(tg, tg->sockfd);
-		//tg->net = false;
-
+		
 		return (tl_user_t *)auth->user_;
 	}
-
-	// throw error
-	char *err = tg_strerr(tl); 
-	ON_ERR(tg, "%s", err);
-	free(err);
-	// free tl
-	/* TODO:  <14-11-24, kuzmich> */
 
 	return NULL;
 }

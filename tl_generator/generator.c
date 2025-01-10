@@ -355,6 +355,8 @@ int append_free(
 				
 	}
 	
+	fputs("\tbuf_free(tl->_buf);\n", g->free_c);
+	
 	fputs("\tfree(tl);\n", g->free_c);
 
 	fputs("}\n\n", g->free_c);
@@ -536,6 +538,12 @@ int append_deserialize_table(
 				"\ttl_%s_t *obj = NEW(tl_%s_t, return NULL);\n"
 				, m->name, m->name)
 				, g->deserialize_table_c);
+
+	// copy buf
+	fputs(
+			"\tobj->_buf = buf_add_buf(*buf);\n"
+				, g->deserialize_table_c);
+
 
 	fputs(
 				"\tobj->_id = deserialize_ui32(buf);\n"
@@ -856,6 +864,7 @@ int append_struct(
 		 	g->struct_h);
 	
 	fputs("\tuint32_t _id;\n", g->struct_h);
+	fputs("\tbuf_t _buf;\n", g->struct_h);
 
 	if (strcmp(m->name, "vector") == 0){
 		fputs("\tuint32_t len_;\n", g->struct_h);

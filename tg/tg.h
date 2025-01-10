@@ -68,6 +68,7 @@ int dialogs_hash_to_database(tg_t *tg, uint64_t hash);
 uint64_t messages_hash_from_database(tg_t *tg, uint64_t peer_id);
 int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash);
 
+buf_t initConnection(tg_t *tg, buf_t query);
 
 char *photo_file_from_database(tg_t *tg, uint64_t photo_id);
 int photo_to_database(tg_t *tg, uint64_t photo_id, const char *data);

@@ -1,4 +1,8 @@
 #include "queue.h"
+#include "../mtx/include/api.h"
+#include "../mtx/include/buf.h"
+#include "../mtx/include/setup.h"
+#include "../mtx/include/types.h"
 #include "../transport/net.h"
 #include "../transport/transport.h"
 #include "../tl/alloc.h"
@@ -88,6 +92,7 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 					free(err);
 				}
 				tl = tg_deserialize(queue->tg, &buf);
+				buf_free(buf);
 			}
 			break;
 		case id_bad_msg_notification:
@@ -146,6 +151,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					free(err);
 				}
 				tl = tg_deserialize(queue->tg, &buf);
+				buf_free(buf);
 				handle_tl(queue, tl);
 				if (tl)
 					tl_free(tl);
@@ -368,6 +374,23 @@ static int tg_send(void *data)
 	// send query
 	tg_queue_t *queue = data;
 	ON_LOG(queue->tg, "%s", __func__);
+	// auth_key
+	if (!queue->tg->key.size){
+		err = pthread_mutex_lock(&queue->tg->queuem);
+		if (err){
+			ON_ERR(queue->tg, "%s: can't lock mutex: %d", __func__, err);
+			return 1;
+		}
+		close(queue->socket);
+		api.app.open();	
+		queue->tg->key = 
+			buf_add(shared_rc.key.data, shared_rc.key.size);
+		queue->tg->salt = 
+			buf_add(shared_rc.salt.data, shared_rc.salt.size);
+		queue->socket = shared_rc.net.sockfd;
+		pthread_mutex_unlock(&queue->tg->queuem);
+	}
+
 	// session id
 	if (!queue->tg->ssid.size){
 		err = pthread_mutex_lock(&queue->tg->queuem);
@@ -378,6 +401,8 @@ static int tg_send(void *data)
 		queue->tg->ssid = buf_rand(8);
 		pthread_mutex_unlock(&queue->tg->queuem);
 	}
+
+	// server salt
 	if (!queue->tg->salt.size){
 		err = pthread_mutex_lock(&queue->tg->queuem);
 		if (err){
@@ -530,17 +555,22 @@ pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 	return queue->p;
 }
 
-
-
-void tg_send_query_sync(tg_t *tg, buf_t *query,
-		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
+static void tg_send_query_sync_cb(void *d, const tl_t *tl)
 {
+	tl_t **tlp = d;
+	*tlp = tl_deserialize((buf_t *)(&tl->_buf));
+}
+
+tl_t *tg_send_query_sync(tg_t *tg, buf_t *query)
+{
+	tl_t *tl = NULL;
 	tg_queue_t *queue = 
-		tg_queue_new(tg, query, userdata, callback, NULL, NULL);
+		tg_queue_new(tg, query, &tl, tg_send_query_sync_cb, NULL, NULL);
 	if (queue){
-		void *ret;
-		pthread_join(queue->p, &ret);
+		pthread_join(queue->p, NULL);
 	}
+
+	return tl;
 }
 
 void tg_queue_cancell_all(tg_t *tg)

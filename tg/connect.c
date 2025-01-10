@@ -53,9 +53,9 @@ int tg_connect(
 	tg_set_on_error(tg, &t, on_err);
 
 	// check if has auth_key
-	if (!tg_has_auth_key(tg))
-		if (tg_new_auth_key(tg))
-			return 1;
+	/*if (!tg_has_auth_key(tg))*/
+		/*if (tg_new_auth_key(tg))*/
+			/*return 1;*/
 	
 	// check if authorized
 	tl_user_t *user = 

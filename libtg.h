@@ -55,6 +55,7 @@ void tg_queue_manager_send_query(tg_t *tg, buf_t query,
 		void *chunkp, 
 		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total));
 
+tl_t *tg_send_query_sync(tg_t *tg, buf_t *query);
 pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl));
 

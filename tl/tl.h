@@ -7,6 +7,7 @@
 
 typedef struct tl_ {
 	uint32_t _id;
+	buf_t _buf;
 } tl_t;
 
 typedef struct mtp_message_ {
