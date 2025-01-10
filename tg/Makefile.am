@@ -4,7 +4,6 @@ libtg_la_SOURCES = tg.c \
 				   connect.c \
 				   database.c \
 				   auth.c \
-				   auth_key.c \
 				   strerr.c \
 				   dialogs.c \
 				   messages.c \
@@ -15,23 +14,21 @@ libtg_la_SOURCES = tg.c \
 				   user.c \
 				   channel.c \
 				   updates.c \
-				   run_api.c \
+				   encrypt.c \
+				   header.c \
+				   transport.c \
+				   ack.c \
+				   net.c \
 				   queue.c \
+				   prepare_query.c \
            ../crypto/hsh.c \
            ../crypto/aes.c \
            ../crypto/cmn.c \
-           ../crypto/rsa.c \
-				   ../transport/send_query.c \
-				   ../transport/encrypt.c \
-				   ../transport/header.c \
-				   ../transport/transport.c \
-				   ../transport/crc.c \
-				   ../transport/ack.c \
-				   ../transport/net.c
+           ../crypto/rsa.c
 
 libtg_la_LIBADD = ../tl/*.o ../mtx/src/*.o -lsqlite3 -lcrypto -lz
 libtg_la_LDFLAGS = -Wl,-w
 if MACOS
-libtg_la_SOURCES += ../transport/darwin-posix-rt/clock_gettime.c
+libtg_la_SOURCES += darwin-posix-rt/clock_gettime.c
 #libtg_la_LIBADD  += ../mtx/darwin-posix-rt/*.o
 endif

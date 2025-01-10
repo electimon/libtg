@@ -1,5 +1,4 @@
 #include "../tg/tg.h"
-#include "crc.h"
 
 buf_t tg_transport(tg_t *tg, buf_t buf)
 {

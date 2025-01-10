@@ -36,9 +36,8 @@ void tg_close(tg_t *tg);
 /* return allocated string with error from tl object */
 char * tg_strerr(const tl_t *tl);
 
-/* send TL query to server and return answer 
- * for multythreading this function is bad - use queue_manager*/
-tl_t * tg_send_query(tg_t *tg, buf_t query);
+/* send TL query to server and return answer */
+tl_t *tg_send_query_sync(tg_t *tg, buf_t *query);
 
 /* send TL query via queue manager in thread and run
  * callback on done.
@@ -47,15 +46,7 @@ tl_t * tg_send_query(tg_t *tg, buf_t query);
  * you need to handle chunk callback, where you set new 
  * portion of TL query to be send as chunk callback return
  * value 
- * you may handle upload/download progress via chunk
- * callback */
-void tg_queue_manager_send_query(tg_t *tg, buf_t query,
-		void *userdata,
-		int (*callback)(void *userdata, const tl_t *tl),
-		void *chunkp, 
-		buf_t (*chunk)(void *chunkp, uint32_t received, uint32_t total));
-
-tl_t *tg_send_query_sync(tg_t *tg, buf_t *query);
+ * you may handle upload/download progress via progress callback */
 pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl));
 
@@ -107,17 +98,8 @@ int tg_connect(
 			const char *msg));
 
 
-
-tl_t *tg_run_api(tg_t *tg, buf_t *query);
-
-tl_t *tg_run_api_with_progress(tg_t *tg, buf_t *query, 
-		void *progressp, 
-		int (*progress)(void *progressp, int size, int total));
-
-void tg_run_api_async(tg_t *tg, buf_t *query,
-		void *userdata, 
-		int (*callback)(void *userdata, tl_t *tl));
-
-int tg_account_register_ios(tg_t *tg, const char *token, bool development);
+/* register ios device for push notifications */
+int tg_account_register_ios(
+		tg_t *tg, const char *token, bool development);
 
 #endif /* ifndef LIBTG_H */

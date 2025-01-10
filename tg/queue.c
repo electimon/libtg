@@ -3,8 +3,8 @@
 #include "../mtx/include/buf.h"
 #include "../mtx/include/setup.h"
 #include "../mtx/include/types.h"
-#include "../transport/net.h"
-#include "../transport/transport.h"
+#include "net.h"
+#include "transport.h"
 #include "../tl/alloc.h"
 #include "list.h"
 #include "tg.h"
@@ -91,7 +91,7 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 					ON_ERR(queue->tg, "%s: %s", __func__, err);
 					free(err);
 				}
-				tl = tg_deserialize(queue->tg, &buf);
+				tl = tl_deserialize(&buf);
 				buf_free(buf);
 			}
 			break;
@@ -150,7 +150,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					ON_ERR(queue->tg, "%s: %s", __func__, err);
 					free(err);
 				}
-				tl = tg_deserialize(queue->tg, &buf);
+				tl = tl_deserialize(&buf);
 				buf_free(buf);
 				handle_tl(queue, tl);
 				if (tl)

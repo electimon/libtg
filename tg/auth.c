@@ -1,6 +1,6 @@
 #include "../config.h"
 #include "tg.h"
-#include "../transport/net.h"
+#include "net.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "strtok_foreach.h"

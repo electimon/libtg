@@ -128,7 +128,4 @@ tl_t * tg_send_query_to_net(
 
 buf_t image_from_photo_stripped(buf_t photoStreppedData);
 
-tl_t * tg_deserialize(tg_t *tg, buf_t *buf);
-
-void tg_run_api_async_receive(tg_t *tg, tl_t *tl); 
 #endif /* ifndef TG_H_ */

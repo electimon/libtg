@@ -1,8 +1,8 @@
 #include "../libtg.h"
 #include "../tl/alloc.h"
 #include "tg.h"
-#include "../transport/net.h"
-#include "../transport/queue.h"
+#include "net.h"
+#include "queue.h"
 #include "../crypto/cry.h"
 #include "../crypto/hsh.h"
 #include <stdint.h>
@@ -165,7 +165,7 @@ int tg_account_register_ios(tg_t *tg, const char *token, bool development)
 	buf_free(secret);
 	buf_free(app_sandbox);
 	
-	tl_t *tl = tg_run_api(tg, &query);
+	tl_t *tl = tg_send_query_sync(tg, &query);
 	buf_free(query);
 	
 	if (tl == NULL)

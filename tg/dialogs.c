@@ -22,7 +22,7 @@
 #include "pthread.h"
 #include "database.h"
 #include <unistd.h>
-#include "../transport/net.h"
+#include "net.h"
 #include <string.h>
 #include <assert.h>
 #include "peer.h"
@@ -459,7 +459,7 @@ int tg_get_dialogs(
 				limit,
 				h);
 
-	tl_t *tl = tg_run_api(tg, &getDialogs);
+	tl_t *tl = tg_send_query_sync(tg, &getDialogs);
 	buf_free(getDialogs);
 	
 	i = tg_dialogs_from_tl(tg, tl, data, callback);

@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <openssl/md5.h>
-#include "../transport/transport.h"
-#include "../transport/net.h"
+#include "transport.h"
+#include "net.h"
 #include "../tl/alloc.h"
 #include "peer.h"
 #include "tg.h"

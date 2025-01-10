@@ -1,5 +1,5 @@
 #include "tg.h"
-#include "../transport/net.h"
+#include "net.h"
 #include "../crypto/cmn.h"
 #include "../crypto/cry.h"
 #include "../crypto/hsh.h"

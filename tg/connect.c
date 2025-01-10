@@ -2,7 +2,7 @@
 #include "strtok_foreach.h"
 #include <stdio.h>
 #include <string.h>
-#include "../transport/net.h"
+#include "net.h"
 
 struct tg_connect_t {
 	void *userdata;
@@ -52,11 +52,6 @@ int tg_connect(
 
 	tg_set_on_error(tg, &t, on_err);
 
-	// check if has auth_key
-	/*if (!tg_has_auth_key(tg))*/
-		/*if (tg_new_auth_key(tg))*/
-			/*return 1;*/
-	
 	// check if authorized
 	tl_user_t *user = 
 		tg_is_authorized(tg);
