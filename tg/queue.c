@@ -388,6 +388,7 @@ static int tg_send(void *data)
 		queue->tg->salt = 
 			buf_add(shared_rc.salt.data, shared_rc.salt.size);
 		queue->socket = shared_rc.net.sockfd;
+		queue->tg->seqn = shared_rc.seqnh + 1;
 		pthread_mutex_unlock(&queue->tg->queuem);
 	}
 
