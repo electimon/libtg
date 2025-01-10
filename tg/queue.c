@@ -91,8 +91,15 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 					ON_ERR(queue->tg, "%s: %s", __func__, err);
 					free(err);
 				}
-				tl = tl_deserialize(&buf);
+				tl_t *ttl = tl_deserialize(&buf);
 				buf_free(buf);
+				if (queue->on_done)
+					queue->on_done(queue->userdata, ttl);
+				// stop query
+				queue->loop = false;
+				if (ttl)
+					tl_free(ttl);
+				return;
 			}
 			break;
 		case id_bad_msg_notification:
@@ -100,7 +107,6 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 				tl_bad_msg_notification_t *obj = 
 					(tl_bad_msg_notification_t *)tl;
 				// handle bad msg notification
-				tg_add_to_ack(queue->tg, obj->bad_msg_id_);
 				char *err = tg_strerr(tl);
 				ON_ERR(queue->tg, "%s", err);
 				free(err);
@@ -150,11 +156,11 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					ON_ERR(queue->tg, "%s: %s", __func__, err);
 					free(err);
 				}
-				tl = tl_deserialize(&buf);
+				tl_t *ttl = tl_deserialize(&buf);
 				buf_free(buf);
-				handle_tl(queue, tl);
-				if (tl)
-					tl_free(tl);
+				handle_tl(queue, ttl);
+				if (ttl)
+					tl_free(ttl);
 			}
 			break;
 		case id_msg_container:
@@ -167,10 +173,10 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					mtp_message_t m = container->messages_[i];
 					// add to ack
 					tg_add_to_ack(queue->tg, m.msg_id);
-					tl_t *tl = tl_deserialize(&m.body);
-					handle_tl(queue, tl);
-					if (tl)
-						tl_free(tl);
+					tl_t *ttl = tl_deserialize(&m.body);
+					handle_tl(queue, ttl);
+					if (ttl)
+						tl_free(ttl);
 				}
 			}
 			break;
