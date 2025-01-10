@@ -647,7 +647,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 	str_appendf(&s,
 		"INSERT INTO \'messages\' (\'msg_id\') "
 		"SELECT %d "
-		"WHERE NOT EXISTS (SELECT 1 FROM messages WHERE msg_id = %d);\n"
+		"WHERE NOT EXISTS (SELECT 1 FROM \'messages\' WHERE msg_id = %d);\n"
 		, m->id_, m->id_);
 
 	str_appendf(&s, "UPDATE \'messages\' SET ");
@@ -688,7 +688,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 	str_appendf(&s, "id = %d WHERE msg_id = %d;\n"
 			, tg->id, m->id_);
 	
-	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
+	ON_LOG(tg, "%s: msg_id: %d", __func__, m->id_);
 	int ret = tg_sqlite3_exec(tg, s.str);
 	
 	free(s.str);
