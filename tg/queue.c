@@ -348,18 +348,16 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 
 static void tg_send_ack(void *data)
 {
-	tg_queue_t *queue = data;
 	// send ACK
-	if (queue->tg->msgids[0]){
-		ON_LOG(queue->tg, "%s", __func__);
-		buf_t ack = tg_ack(queue->tg);
-		if (ack.size < 1)
-			return;
+	tg_queue_t *queue = data;
+	ON_LOG(queue->tg, "%s", __func__);
+	buf_t ack = tg_ack(queue->tg);
+	if (ack.size < 1)
+		return;
 
-		int s = 
-			send(queue->socket, ack.data, ack.size, 0);
-		buf_free(ack);
-	}
+	int s = 
+		send(queue->socket, ack.data, ack.size, 0);
+	buf_free(ack);
 }
 
 static int tg_send(void *data)
@@ -461,7 +459,7 @@ static void * tg_run_queue(void * data)
 	pthread_mutex_unlock(&queue->tg->queuem);
 
 	// send ack
-	/*tg_send_ack(data);*/
+	tg_send_ack(data);
 	
 	// send
 	if (tg_send(data))
