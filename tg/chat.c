@@ -155,6 +155,7 @@ int tg_chat_save(tg_t *tg, const tg_chat_t *m)
 	str_init(&s);
 
 	str_appendf(&s,
+		"BEGIN TRANSACTION;"
 		"INSERT INTO \'chats\' (\'chat_id\') "
 		"SELECT  "_LD_" "
 		"WHERE NOT EXISTS (SELECT 1 FROM chats WHERE chat_id = "_LD_");\n"
@@ -190,6 +191,7 @@ int tg_chat_save(tg_t *tg, const tg_chat_t *m)
 
 	str_appendf(&s, "id = %d WHERE chat_id = "_LD_";\n"
 			, tg->id, m->id_);
+	str_appendf(&s, "COMMIT TRANSACTION;");	
 	
 	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
 	int ret = tg_sqlite3_exec(tg, s.str);
