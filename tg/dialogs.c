@@ -297,13 +297,12 @@ static int tg_dialogs_from_tl(
 						// save message to database
 						tg_message_t tgm;
 						tg_message_from_tl(tg, &tgm, message);
-						tg_message_to_database(tg, &tgm);
 
 						// update dialog
 						d.top_message_date = message->date_;
 						d.top_message_text = BUF2STR(message->message_);
-						if (message->peer_id_){
-							switch (message->peer_id_->_id) {
+						if (message->from_id_){
+							switch (message->from_id_->_id) {
 								case id_peerUser:
 									{
 										tl_peerUser_t *from = 
@@ -334,6 +333,7 @@ static int tg_dialogs_from_tl(
 									break;
 							}
 						}
+						tg_message_to_database(tg, &tgm);
 					}
 				}
 			} // done messages 
