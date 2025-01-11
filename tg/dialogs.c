@@ -348,7 +348,7 @@ static int tg_dialogs_from_tl(
 					break;
 
 			// free dialog
-			/*tg_dialog_free(&d);*/
+			tg_dialog_free(&d);
 		
 		} // done dialogs
 
@@ -468,7 +468,7 @@ int tg_get_dialogs(
 		return 0;
 	}
 	
-	i = tg_dialogs_from_tl(tg, tl, data, callback);
+	/*i = tg_dialogs_from_tl(tg, tl, data, callback);*/
 
 	// free tl
 	tl_free(tl);
