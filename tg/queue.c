@@ -324,7 +324,6 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 	}
 	buf_free(r);
 
-	ON_ERR(queue->tg, "SSSSS");
 	// deheader
 	buf_t msg = tg_deheader(queue->tg, d, true);
 	buf_free(d);
