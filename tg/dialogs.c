@@ -297,7 +297,7 @@ static int tg_dialogs_from_tl(
 						// save message to database
 						tg_message_t tgm;
 						tg_message_from_tl(tg, &tgm, message);
-						/*tg_message_to_database(tg, &tgm);*/
+						tg_message_to_database(tg, &tgm);
 
 						// update dialog
 						d.top_message_date = message->date_;

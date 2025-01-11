@@ -572,7 +572,10 @@ tl_t *tg_send_query_sync(tg_t *tg, buf_t *query)
 {
 	tl_t *tl = NULL;
 	tg_queue_t *queue = 
-		tg_queue_new(tg, query, &tl, tg_send_query_sync_cb, NULL, NULL);
+		tg_queue_new(tg, query, 
+				&tl, 
+				tg_send_query_sync_cb, 
+				NULL, NULL);
 	if (queue){
 		pthread_join(queue->p, NULL);
 	}
