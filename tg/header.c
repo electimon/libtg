@@ -177,7 +177,7 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 		if (ssid != buf_get_ui64(tg->ssid)){
 			ON_ERR(tg, "%s: session id mismatch!", __func__);
 		}
-
+			
 		// message_id
 		uint64_t msg_id = deserialize_ui64(&b);
 		// add message id to array

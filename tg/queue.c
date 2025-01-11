@@ -324,6 +324,7 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 	}
 	buf_free(r);
 
+	ON_ERR(queue->tg, "SSSSS");
 	// deheader
 	buf_t msg = tg_deheader(queue->tg, d, true);
 	buf_free(d);
@@ -352,7 +353,7 @@ static void tg_send_ack(void *data)
 	tg_queue_t *queue = data;
 	ON_LOG(queue->tg, "%s", __func__);
 	buf_t ack = tg_ack(queue->tg);
-	if (ack.size < 1)
+	if (!ack.size)
 		return;
 
 	int s = 

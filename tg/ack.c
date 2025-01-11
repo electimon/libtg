@@ -14,8 +14,10 @@ buf_t tg_ack(tg_t *tg)
 	}
 
 	int len = arrlen(tg->msgids);
-	if (len < 1)
+	if (len < 1){
+		pthread_mutex_unlock(&tg->msgidsm);
 		return ret;
+	}
 
 	if (len > 20)
 		len = 20;
