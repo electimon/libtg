@@ -647,6 +647,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 	str_init(&s);
 
 	str_appendf(&s,
+		"BEGIN TRANSACTION;"
 		"INSERT INTO \'messages\' (\'msg_id\') "
 		"SELECT %d "
 		"WHERE NOT EXISTS (SELECT 1 FROM \'messages\' WHERE msg_id = %d);\n"
@@ -689,6 +690,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 
 	str_appendf(&s, "id = %d WHERE msg_id = %d;\n"
 			, tg->id, m->id_);
+	str_appendf(&s, "COMMIT TRANSACTION;");	
 	
 	ON_LOG(tg, "%s: msg_id: %d", __func__, m->id_);
 	int ret = tg_sqlite3_exec(tg, s.str);
@@ -702,6 +704,7 @@ void tg_messages_create_table(tg_t *tg){
 	char sql[BUFSIZ]; 
 	
 	sprintf(sql,
+			"BEGIN TRANSACTION;"
 		"CREATE TABLE IF NOT EXISTS messages (id INT, msg_id INT UNIQUE); ");
 	ON_LOG(tg, "%s", sql);
 	tg_sqlite3_exec(tg, sql);	
@@ -743,6 +746,7 @@ void tg_messages_create_table(tg_t *tg){
 	#undef TG_MESSAGE_SPA
 	#undef TG_MESSAGE_SPS
 	#undef TG_MESSAGE_RPL
+	tg_sqlite3_exec(tg, "COMMIT TRANSACTION;");
 } 
 
 void tg_message_free(tg_message_t *m)

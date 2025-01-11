@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 11.01.2025
+ * Last Modified Date: 12.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -510,6 +510,7 @@ int tg_dialog_to_database(tg_t *tg, const tg_dialog_t *d){
 	str_init(&s);
 
 	str_appendf(&s,
+		"BEGIN TRANSACTION;"
 		"INSERT INTO \'dialogs\' (\'peer_id\') "
 		"SELECT  "_LD_" "
 		"WHERE NOT EXISTS (SELECT 1 FROM dialogs WHERE peer_id = "_LD_");\n"
@@ -534,6 +535,7 @@ int tg_dialog_to_database(tg_t *tg, const tg_dialog_t *d){
 	str_appendf(&s, "id = %d WHERE peer_id = "_LD_";\n"
 			, tg->id, d->peer_id);
 	
+	str_appendf(&s, "COMMIT TRANSACTION;");	
 	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
 	if (tg_sqlite3_exec(tg, s.str) == 0){
 		// update hash
