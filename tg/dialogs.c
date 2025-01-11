@@ -302,33 +302,38 @@ static int tg_dialogs_from_tl(
 						// update dialog
 						d.top_message_date = message->date_;
 						d.top_message_text = BUF2STR(message->message_);
-						/*
 						if (message->peer_id_){
-							tl_peerUser_t *from = 
-								(tl_peerUser_t *)message->from_id_;
 							switch (message->peer_id_->_id) {
 								case id_peerUser:
-									d.top_message_from_peer_type = TG_PEER_TYPE_USER;	
-									d.top_message_from_peer_id = from->user_id_;
+									{
+										tl_peerUser_t *from = 
+											(tl_peerUser_t *)message->from_id_;
+										d.top_message_from_peer_type = TG_PEER_TYPE_USER;	
+										d.top_message_from_peer_id = from->user_id_;
+									}
 									break;
 								case id_peerChannel:
-									tl_peerChannel_t *from = 
-										(tl_peerChannel_t *)message->from_id_;
-									d.top_message_from_peer_type = TG_PEER_TYPE_CHANNEL;	
-									d.top_message_from_peer_id = from->user_id_;
+									{
+										tl_peerChannel_t *from = 
+											(tl_peerChannel_t *)message->from_id_;
+										d.top_message_from_peer_type = TG_PEER_TYPE_CHANNEL;	
+										d.top_message_from_peer_id = from->channel_id_;
+									}
 									break;
 								case id_peerChat:
-									d.top_message_from_peer_type = TG_PEER_TYPE_CHAT;	
-									d.top_message_from_peer_id = from->user_id_;
+									{
+										tl_peerChat_t *from = 
+											(tl_peerChat_t *)message->from_id_;
+										d.top_message_from_peer_type = TG_PEER_TYPE_CHAT;	
+										d.top_message_from_peer_id = from->chat_id_;
+									}
 									break;
 								
 								default:
 									d.top_message_from_peer_type = TG_PEER_TYPE_NULL;	
 									break;
-									
 							}
 						}
-						*/
 					}
 				}
 			} // done messages 
