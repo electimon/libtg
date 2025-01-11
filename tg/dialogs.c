@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 10.01.2025
+ * Last Modified Date: 11.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -297,7 +297,7 @@ static int tg_dialogs_from_tl(
 						// save message to database
 						tg_message_t tgm;
 						tg_message_from_tl(tg, &tgm, message);
-						tg_message_to_database(tg, &tgm);
+						/*tg_message_to_database(tg, &tgm);*/
 
 						// update dialog
 						d.top_message_date = message->date_;

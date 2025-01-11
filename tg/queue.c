@@ -159,8 +159,8 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				tl_t *ttl = tl_deserialize(&buf);
 				buf_free(buf);
 				handle_tl(queue, ttl);
-				//if (ttl)
-					//tl_free(ttl);
+				if (ttl)
+					tl_free(ttl);
 			}
 			break;
 		case id_msg_container:
@@ -175,8 +175,8 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					tg_add_to_ack(queue->tg, m.msg_id);
 					tl_t *ttl = tl_deserialize(&m.body);
 					handle_tl(queue, ttl);
-					//if (ttl)
-						//tl_free(ttl);
+					if (ttl)
+						tl_free(ttl);
 				}
 			}
 			break;
@@ -352,8 +352,8 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 
 	// handle tl
 	handle_tl(queue, tl);
-	//if (tl)
-		//tl_free(tl);
+	if (tl)
+		tl_free(tl);
 	return RTL_RQ; // read socket again
 }
 
@@ -500,7 +500,7 @@ static void * tg_run_queue(void * data)
 		tg_net_close(queue->tg, queue->socket);
 
 	buf_free(queue->query);
-	//free(queue);
+	free(queue);
 	pthread_exit(NULL);	
 }
 
@@ -517,8 +517,7 @@ tg_queue_t * tg_queue_new(
 
 	queue->tg = tg;
 	queue->loop = true;
-	queue->query = buf_new();
-	queue->query = buf_cat(queue->query, *query);
+	queue->query = buf_add_buf(*query);
 	queue->userdata = userdata;
 	queue->on_done = on_done;
 	queue->progressp = progressp;
