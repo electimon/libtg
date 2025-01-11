@@ -473,7 +473,7 @@ static void * tg_run_queue(void * data)
 	pthread_mutex_unlock(&queue->tg->queuem);
 
 	// send ack
-	tg_send_ack(data);
+	/*tg_send_ack(data);*/
 	
 	// send
 	if (tg_send(data))
