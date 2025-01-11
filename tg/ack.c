@@ -22,6 +22,7 @@ buf_t tg_ack(tg_t *tg)
 
 	buf_t ack = tl_msgs_ack(tg->msgids, len);
 	// remove from array
+	arrfree(tg->msgids);
 	tg->msgids = NULL;
 	pthread_mutex_unlock(&tg->msgidsm);
 
