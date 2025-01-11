@@ -500,7 +500,7 @@ static void * tg_run_queue(void * data)
 		tg_net_close(queue->tg, queue->socket);
 
 	buf_free(queue->query);
-	free(queue);
+	//free(queue);
 	pthread_exit(NULL);	
 }
 
@@ -517,7 +517,8 @@ tg_queue_t * tg_queue_new(
 
 	queue->tg = tg;
 	queue->loop = true;
-	queue->query = buf_add_buf(*query);
+	queue->query = buf_new();
+	queue->query = buf_cat(queue->query, *query);
 	queue->userdata = userdata;
 	queue->on_done = on_done;
 	queue->progressp = progressp;
