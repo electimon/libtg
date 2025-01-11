@@ -353,13 +353,12 @@ static void tg_send_ack(void *data)
 	if (queue->tg->msgids[0]){
 		ON_LOG(queue->tg, "%s", __func__);
 		buf_t ack = tg_ack(queue->tg);
+		if (ack.size < 1)
+			return;
+
 		int s = 
 			send(queue->socket, ack.data, ack.size, 0);
 		buf_free(ack);
-		if (s < 0){
-			ON_ERR(queue->tg, "%s: socket error: %d", __func__, s);
-			tg_net_close(queue->tg, queue->socket);
-		}
 	}
 }
 
@@ -462,7 +461,7 @@ static void * tg_run_queue(void * data)
 	pthread_mutex_unlock(&queue->tg->queuem);
 
 	// send ack
-	/*tg_send_ack(data);*/
+	tg_send_ack(data);
 	
 	// send
 	if (tg_send(data))
