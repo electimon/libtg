@@ -348,7 +348,7 @@ static int tg_dialogs_from_tl(
 					break;
 
 			// free dialog
-			tg_dialog_free(&d);
+			/*tg_dialog_free(&d);*/
 		
 		} // done dialogs
 
@@ -378,11 +378,13 @@ void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
 	if (tl == NULL){
 		if (t->on_done)
 			t->on_done(t->data);
+		free(t);
 		return;
 	}
 
 	tg_dialogs_from_tl(
 			t->tg, tl, t->data, t->callback);
+
 	if (t->on_done)
 		t->on_done(t->data);
 
