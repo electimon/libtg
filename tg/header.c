@@ -181,13 +181,7 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 		// message_id
 		uint64_t msg_id = deserialize_ui64(&b);
 		// add message id to array
-		int err = 0;
-		err = pthread_mutex_lock(&tg->msgidsm);
-		if (err){
-			ON_ERR(tg, "can't lock mutex: %d", err);
-		} else
-			tg_add_mgsid(tg, msg_id);
-		pthread_mutex_unlock(&tg->msgidsm);
+		tg_add_msgid(tg, msg_id);
 		
 		// seq_no
 		uint32_t seq_no = deserialize_ui32(&b);
@@ -214,8 +208,7 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 
 		// message_id
 		uint64_t msg_id = deserialize_ui64(&b);
-		tg_add_mgsid(tg, msg_id);
-		// ack msg_id (under construction...)
+		tg_add_msgid(tg, msg_id);
 
 		// message_data_length
 		uint32_t msg_data_len = deserialize_ui32(&b);

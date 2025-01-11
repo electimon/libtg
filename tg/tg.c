@@ -127,14 +127,6 @@ void tg_set_server_address(tg_t *tg, const char *ip, int port)
 	}
 }
 
-void tg_add_mgsid(tg_t *tg, uint64_t msgid){
-	memmove(
-			&(tg->msgids[1]), 
-			tg->msgids, 
-			sizeof(uint64_t)*19);
-	tg->msgids[0] = msgid;
-}
-
 void update_hash(uint64_t *hash, uint32_t msg_id){
 	int k;
 	uint64_t h = 0;

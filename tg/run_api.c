@@ -40,7 +40,7 @@ tl_t * tg_deserialize(tg_t *tg, buf_t *buf)
 				for (i = 0; i < obj->messages_len; ++i) {
 					mtp_message_t m = obj->messages_[i];
 					// add msgid to ack
-					tg_add_mgsid(tg, m.msg_id);
+					//tg_add_mgsid(tg, m.msg_id);
 					tl = tg_deserialize(tg, &m.body);	
 					ON_LOG(tg, "msg container: message #%d: %s", 
 							i, TL_NAME_FROM_ID(tl->_id));

@@ -42,7 +42,7 @@ struct tg_ {
 	buf_t salt;
 	buf_t ssid;
 	uint64_t fingerprint;
-	uint64_t msgids[20]; 
+	uint64_t *msgids; 
 	pthread_mutex_t msgidsm;
 	uint64_t dialogs_hash;
 	bool sync_dialogs;
@@ -86,7 +86,7 @@ int auth_token_to_database(tg_t *tg, const char *auth_token);
 int auth_key_to_database(
 		tg_t *tg, buf_t auth_key);
 
-void tg_add_mgsid(tg_t*, uint64_t);
+void tg_add_msgid(tg_t*, uint64_t);
 
 tl_t * tg_send_query_(tg_t *tg, buf_t s, bool encrypt);
 tl_t * tg_send_query_to_net(

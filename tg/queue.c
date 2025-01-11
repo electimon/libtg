@@ -56,17 +56,6 @@ static tg_queue_t *tg_get_queue(tg_t *tg, uint64_t *msgid)
 	return q;
 }
 
-static void tg_add_to_ack(tg_t *tg, uint64_t msgid)
-{
-	int err = pthread_mutex_lock(&tg->msgidsm);
-	if (err){
-		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
-		return;
-	}
-	tg_add_mgsid(tg, msgid);
-	pthread_mutex_unlock(&tg->msgidsm);
-}
-
 static void catched_tl(tg_queue_t *queue, tl_t *tl)
 {
 	if (tl == NULL){
@@ -172,7 +161,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				for (i = 0; i < container->messages_len; ++i) {
 					mtp_message_t m = container->messages_[i];
 					// add to ack
-					tg_add_to_ack(queue->tg, m.msg_id);
+					tg_add_msgid(queue->tg, m.msg_id);
 					tl_t *ttl = tl_deserialize(&m.body);
 					handle_tl(queue, ttl);
 					if (ttl)
@@ -194,7 +183,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					(tl_pong_t *)tl;
 				// handle pong
 				ON_LOG(queue->tg, "pong...");
-				tg_add_to_ack(queue->tg, obj->msg_id_);
+				tg_add_msgid(queue->tg, obj->msg_id_);
 			}
 			break;
 		case id_bad_msg_notification:
@@ -202,7 +191,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				tl_bad_msg_notification_t *obj = 
 					(tl_bad_msg_notification_t *)tl;
 				// handle bad msg notification
-				tg_add_to_ack(queue->tg, obj->bad_msg_id_);
+				tg_add_msgid(queue->tg, obj->bad_msg_id_);
 				char *err = tg_strerr(tl);
 				ON_ERR(queue->tg, "%s", err);
 				free(err);
@@ -227,7 +216,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_msg_detailed_info_t *di = 
 					(tl_msg_detailed_info_t *)tl;
-				tg_add_to_ack(queue->tg, di->msg_id_);
+				tg_add_msgid(queue->tg, di->msg_id_);
 				tg_queue_t *q = tg_get_queue(
 						queue->tg, &di->answer_msg_id_);
 				if (q){ // ok - we got msgid
