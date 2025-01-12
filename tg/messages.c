@@ -217,6 +217,7 @@ void tg_message_from_tl(
 											(tl_documentAttributeSticker_t *)attr;
 										tgm->message_ =
 											buf_strdup(a->alt_);
+										tgm->is_sticker = true;
 									}
 									break;
 								
