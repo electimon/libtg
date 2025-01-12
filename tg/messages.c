@@ -192,6 +192,7 @@ void tg_message_from_tl(
 										tgm->doc_vw = a->w_;
 										tgm->doc_vh = a->h_;
 										tgm->doc_vduration = a->duration_;
+										tgm->doc_isVideo = true;
 									}
 									break;
 								case id_documentAttributeAudio:
