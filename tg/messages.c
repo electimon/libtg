@@ -210,6 +210,7 @@ void tg_message_from_tl(
 										tgm->doc_file_name =
 											buf_strdup(a->file_name_);
 									}
+									break;
 								case id_documentAttributeSticker:
 									{
 										tl_documentAttributeSticker_t *a =
@@ -217,6 +218,7 @@ void tg_message_from_tl(
 										tgm->message_ =
 											buf_strdup(a->alt_);
 									}
+									break;
 								
 
 								default:
