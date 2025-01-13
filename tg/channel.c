@@ -21,7 +21,7 @@
 void tg_channel_from_tl(
 		tg_t *tg, tg_channel_t *tgm, tl_channel_t *tlm)
 {
-	ON_LOG(tg, "%s: start...", __func__);
+	ON_LOG(tg, "%s", __func__);
 	memset(tgm, 0, sizeof(tg_channel_t));
 	
 	#define TG_CHANNEL_ARG(t, arg, ...) \
@@ -112,6 +112,7 @@ void tg_channel_from_tl(
 }
 
 void tg_channel_create_table(tg_t *tg){
+	ON_LOG(tg, "%s", __func__);	
 	char sql[BUFSIZ]; 
 	
 	sprintf(sql,
@@ -148,6 +149,7 @@ void tg_channel_create_table(tg_t *tg){
 
 int tg_channel_save(tg_t *tg, const tg_channel_t *m)
 {
+	ON_LOG(tg, "%s", __func__);	
 	// save chat to database
 	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
@@ -214,6 +216,7 @@ void tg_channel_free(tg_channel_t *m)
 
 tg_channel_t * tg_channel_get(tg_t *tg, uint64_t channel_id)
 {
+	ON_LOG(tg, "%s", __func__);	
 	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);

@@ -552,6 +552,7 @@ int tg_get_dialogs_from_database(
 		void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog))
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
@@ -589,6 +590,7 @@ int tg_get_dialogs_from_database(
 
 		if (callback){
 			if (callback(data, &d)){
+				tg_dialog_free(&d);
 				sqlite3_close(db);
 				pthread_mutex_unlock(&tg->databasem); // unlock
 				break;

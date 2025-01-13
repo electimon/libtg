@@ -143,6 +143,7 @@ void tg_user_create_table(tg_t *tg){
 
 int tg_user_save(tg_t *tg, const tg_user_t *m)
 {
+	ON_LOG(tg, "%s", __func__);	
 	// save chat to database
 	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
@@ -210,6 +211,7 @@ void tg_user_free(tg_user_t *m)
 
 tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id)
 {
+	ON_LOG(tg, "%s", __func__);	
 	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
@@ -274,6 +276,7 @@ tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id)
 
 tg_user_t * tg_user_get_by_phone(tg_t *tg, const char *phone)
 {
+	ON_LOG(tg, "%s", __func__);	
 	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
@@ -338,6 +341,7 @@ tg_user_t * tg_user_get_by_phone(tg_t *tg, const char *phone)
 
 void tg_users_save(tg_t *tg, int count, tl_t **array)
 {
+	ON_LOG(tg, "%s", __func__);	
 	int i;
 	for (i = 0; i < count; ++i) {
 		if (array == NULL || 

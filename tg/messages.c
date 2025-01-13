@@ -654,6 +654,7 @@ pthread_t tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 
 int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 {
+	ON_LOG(tg, "%s", __func__);
 	// save message to database
 	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
@@ -713,6 +714,7 @@ int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 }
 
 void tg_messages_create_table(tg_t *tg){
+	ON_LOG(tg, "%s", __func__);
 	char sql[BUFSIZ]; 
 	
 	sprintf(sql,
@@ -779,6 +781,7 @@ void tg_message_free(tg_message_t *m)
 int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		int (*callback)(void *data, const tg_message_t *message))
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
@@ -850,6 +853,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		if (callback){
 			int ret = callback(data, &m);
 			if (ret){
+				tg_message_free(&m);
 				sqlite3_close(db);
 				pthread_mutex_unlock(&tg->databasem); // unlock
 				return i;

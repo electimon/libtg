@@ -87,6 +87,7 @@ int tg_sqlite3_exec(
 
 int database_init(tg_t *tg, const char *database_path)
 {
+	ON_LOG(tg, "%s", __func__);	
 	sqlite3 *db;
 	int err = sqlite3_open_v2(
 			tg->database_path, &db, 
