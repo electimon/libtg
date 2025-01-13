@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 12.01.2025
+ * Last Modified Date: 13.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -333,14 +333,14 @@ static int tg_dialogs_from_tl(
 									break;
 							}
 						}
-						tg_message_to_database(tg, &tgm);
+						//tg_message_to_database(tg, &tgm); -- last msg
 					}
 				}
 			} // done messages 
 
 			if (d.peer_type == TG_PEER_TYPE_NULL) {
 				ON_LOG(tg, "%s: can't find dialog data "
-						"for peer: %.8x: %ld",
+						"for peer: %.8x: "_LD_"",
 						__func__, peer->_id, peer->chat_id_);
 				continue;
 			}
@@ -506,11 +506,11 @@ void tg_dialogs_create_table(tg_t *tg){
 
 int tg_dialog_to_database(tg_t *tg, const tg_dialog_t *d){
 	// save dialog to database
+	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 
 	str_appendf(&s,
-		"BEGIN TRANSACTION;"
 		"INSERT INTO \'dialogs\' (\'peer_id\') "
 		"SELECT  "_LD_" "
 		"WHERE NOT EXISTS (SELECT 1 FROM dialogs WHERE peer_id = "_LD_");\n"
@@ -535,7 +535,6 @@ int tg_dialog_to_database(tg_t *tg, const tg_dialog_t *d){
 	str_appendf(&s, "id = %d WHERE peer_id = "_LD_";\n"
 			, tg->id, d->peer_id);
 	
-	str_appendf(&s, "COMMIT TRANSACTION;");	
 	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
 	if (tg_sqlite3_exec(tg, s.str) == 0){
 		// update hash
@@ -544,6 +543,7 @@ int tg_dialog_to_database(tg_t *tg, const tg_dialog_t *d){
 	}
 	free(s.str);
 
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return 0;
 }
 
@@ -552,6 +552,7 @@ int tg_get_dialogs_from_database(
 		void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog))
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 	str_appendf(&s, "SELECT ");
@@ -589,6 +590,7 @@ int tg_get_dialogs_from_database(
 		if (callback){
 			if (callback(data, &d)){
 				sqlite3_close(db);
+				pthread_mutex_unlock(&tg->databasem); // unlock
 				break;
 			}
 		}
@@ -596,6 +598,7 @@ int tg_get_dialogs_from_database(
 		tg_dialog_free(&d);
 	}	
 	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	free(s.str);
 	return 0;
 }

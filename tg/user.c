@@ -144,11 +144,11 @@ void tg_user_create_table(tg_t *tg){
 int tg_user_save(tg_t *tg, const tg_user_t *m)
 {
 	// save chat to database
+	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 
 	str_appendf(&s,
-		"BEGIN TRANSACTION;"
 		"INSERT INTO \'users\' (\'user_id\') "
 		"SELECT  "_LD_" "
 		"WHERE NOT EXISTS (SELECT 1 FROM users WHERE user_id = "_LD_");\n"
@@ -185,13 +185,13 @@ int tg_user_save(tg_t *tg, const tg_user_t *m)
 
 	str_appendf(&s, "id = %d WHERE user_id = "_LD_";\n"
 			, tg->id, m->id_);
-	str_appendf(&s, "COMMIT TRANSACTION;");	
 	
 	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
 	int ret = tg_sqlite3_exec(tg, s.str);
 	
 	free(s.str);
 	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return ret;
 }
 
@@ -210,6 +210,7 @@ void tg_user_free(tg_user_t *m)
 
 tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 	str_appendf(&s, "SELECT ");
@@ -265,6 +266,7 @@ tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id)
 
 		break;
 	}	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	
 	free(s.str);
 	return m;
@@ -272,6 +274,7 @@ tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id)
 
 tg_user_t * tg_user_get_by_phone(tg_t *tg, const char *phone)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 	str_appendf(&s, "SELECT ");
@@ -328,6 +331,7 @@ tg_user_t * tg_user_get_by_phone(tg_t *tg, const char *phone)
 		break;
 	}	
 	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	free(s.str);
 	return m;
 }

@@ -151,11 +151,11 @@ void tg_chat_create_table(tg_t *tg){
 int tg_chat_save(tg_t *tg, const tg_chat_t *m)
 {
 	// save chat to database
+	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 
 	str_appendf(&s,
-		"BEGIN TRANSACTION;"
 		"INSERT INTO \'chats\' (\'chat_id\') "
 		"SELECT  "_LD_" "
 		"WHERE NOT EXISTS (SELECT 1 FROM chats WHERE chat_id = "_LD_");\n"
@@ -191,13 +191,13 @@ int tg_chat_save(tg_t *tg, const tg_chat_t *m)
 
 	str_appendf(&s, "id = %d WHERE chat_id = "_LD_";\n"
 			, tg->id, m->id_);
-	str_appendf(&s, "COMMIT TRANSACTION;");	
 	
 	/*ON_LOG(d->tg, "%s: %s", __func__, s.str);*/
 	int ret = tg_sqlite3_exec(tg, s.str);
 	
 	free(s.str);
 	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return ret;
 }
 
@@ -216,6 +216,7 @@ void tg_chat_free(tg_chat_t *m)
 
 tg_chat_t * tg_chat_get(tg_t *tg, uint64_t chat_id)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 	str_appendf(&s, "SELECT ");
@@ -272,6 +273,7 @@ tg_chat_t * tg_chat_get(tg_t *tg, uint64_t chat_id)
 		break;
 	}	
 	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	free(s.str);
 	return m;
 }

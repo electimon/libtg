@@ -128,6 +128,7 @@ int database_init(tg_t *tg, const char *database_path)
 
 buf_t auth_key_from_database(tg_t *tg)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT auth_key FROM auth_keys WHERE id = %d;"
@@ -140,11 +141,13 @@ buf_t auth_key_from_database(tg_t *tg)
 			sqlite3_column_bytes(stmt, 0));
 	}
 	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return auth_key;
 }
 
 char * phone_number_from_database(tg_t *tg)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT phone_number FROM phone_numbers WHERE id = %d;"
@@ -152,6 +155,8 @@ char * phone_number_from_database(tg_t *tg)
 	char buf[BUFSIZ] = {0};
 	tg_sqlite3_for_each(tg, sql, stmt)
 		strcpy(buf, (char *)sqlite3_column_text(stmt, 0));
+	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 
 	if (*buf)
 		return strdup(buf);
@@ -162,22 +167,24 @@ char * phone_number_from_database(tg_t *tg)
 int phone_number_to_database(
 		tg_t *tg, const char *phone_number)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 
 	sprintf(sql, 
-			"BEGIN TRANSACTION;"
 			"ALTER TABLE \'phone_numbers\' ADD COLUMN \'phone_number\' TEXT; "
 			"INSERT INTO \'phone_numbers\' (\'id\') "
 			"SELECT %d "
 			"WHERE NOT EXISTS (SELECT 1 FROM phone_numbers WHERE id = %d); "
 			"UPDATE \'phone_numbers\' SET \'phone_number\' = \'%s\', id = %d; "
-			"COMMIT TRANSACTION;"
 		,tg->id, tg->id, phone_number, tg->id);
-	return tg_sqlite3_exec(tg, sql);
+	int ret = tg_sqlite3_exec(tg, sql);
+	pthread_mutex_unlock(&tg->databasem); // unlock
+  return ret;
 }
 
 char * auth_tokens_from_database(tg_t *tg)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 		"SELECT * FROM ((SELECT ROW_NUMBER() OVER (ORDER BY ID) "
@@ -185,8 +192,10 @@ char * auth_tokens_from_database(tg_t *tg)
 		"ORDER BY Number DESC "	
 		"LIMIT 20;", tg->id);
 	struct str s;
-	if (str_init(&s))
+	if (str_init(&s)){
+		pthread_mutex_unlock(&tg->databasem); // unlock
 		return NULL;
+	}
 
 	int i = 0;
 	tg_sqlite3_for_each(tg, sql, stmt){
@@ -199,6 +208,8 @@ char * auth_tokens_from_database(tg_t *tg)
 			i++;
 		}
 	}
+	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 
 	if (s.len){
 		return s.str;
@@ -211,6 +222,7 @@ char * auth_tokens_from_database(tg_t *tg)
 int auth_token_to_database(
 		tg_t *tg, const char *auth_token)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	tg_sqlite3_exec(tg,
 "ALTER TABLE \'auth_tokens\' ADD COLUMN \'auth_token\' TEXT; ");
 	
@@ -218,18 +230,20 @@ int auth_token_to_database(
 	sprintf(sql, 
 			"INSERT INTO \'auth_tokens\' (id, \'auth_token\') VALUES (%d, \'%s\'); "
 		, tg->id, auth_token);
-	return tg_sqlite3_exec(tg, sql);
+	int ret = tg_sqlite3_exec(tg, sql);
+	pthread_mutex_unlock(&tg->databasem); // unlock
+	return ret;
 }
 
 int auth_key_to_database(
 		tg_t *tg, buf_t auth_key)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	tg_sqlite3_exec(tg, 
 			"ALTER TABLE \'auth_keys\' ADD COLUMN \'auth_key\' BLOB; ");	
 	
 	char sql[BUFSIZ];
 	sprintf(sql, 
-			"BEGIN TRANSACTION;"
 			"INSERT INTO \'auth_keys\' (id) "
 			"SELECT %d "
 			"WHERE NOT EXISTS (SELECT 1 FROM auth_keys WHERE id = %d); "
@@ -240,7 +254,6 @@ int auth_key_to_database(
 	sprintf(sql, 
 			"UPDATE \'auth_keys\' SET \'auth_key\' = (?) "
 			"WHERE id = %d; "
-			"COMMIT TRANSACTION;"
 			, tg->id);
 	
 	sqlite3 *db = tg_sqlite3_open(tg);
@@ -250,10 +263,12 @@ int auth_key_to_database(
 	if (res != SQLITE_OK) {
 		ON_ERR(tg, "%s", sqlite3_errmsg(db));
 		sqlite3_close(db);
+		pthread_mutex_unlock(&tg->databasem); // unlock
 		return 1;
 	}	
 
-	res = sqlite3_bind_blob(stmt, 1, auth_key.data, auth_key.size, SQLITE_TRANSIENT);
+	res = sqlite3_bind_blob(stmt, 1, auth_key.data,
+		 	auth_key.size, SQLITE_TRANSIENT);
 	if (res != SQLITE_OK) {
 		ON_ERR(tg, "%s", sqlite3_errmsg(db));
 	}	
@@ -262,12 +277,15 @@ int auth_key_to_database(
 	
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
+	
+	pthread_mutex_unlock(&tg->databasem); // unlock
 
 	return 0;
 }
 
 uint64_t dialogs_hash_from_database(tg_t *tg)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT hash FROM dialogs_hash WHERE id = %d;"
@@ -276,27 +294,30 @@ uint64_t dialogs_hash_from_database(tg_t *tg)
 	tg_sqlite3_for_each(tg, sql, stmt)
 		hash = sqlite3_column_int64(stmt, 0);
 
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return hash;
 }
 
 int dialogs_hash_to_database(tg_t *tg, uint64_t hash)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
-			"BEGIN TRANSACTION;"
 			"ALTER TABLE \'dialogs_hash\' ADD COLUMN \'hash\' INT; "
 			"INSERT INTO \'dialogs_hash\' (\'id\') "
 			"SELECT %d "
 			"WHERE NOT EXISTS (SELECT 1 FROM dialogs_hash WHERE id = %d); "
-			"UPDATE \'dialogs_hash\' SET \'hash\' = \'%ld\', id = %d; "
-			"COMMIT TRANSACTION;"
+			"UPDATE \'dialogs_hash\' SET \'hash\' = \'"_LD_"\', id = %d; "
 		,tg->id, tg->id, hash, tg->id);
 	
-	return tg_sqlite3_exec(tg, sql);
+	int ret = tg_sqlite3_exec(tg, sql);
+	pthread_mutex_unlock(&tg->databasem); // unlock
+	return ret;
 }
 
 uint64_t messages_hash_from_database(tg_t *tg, uint64_t peer_id)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT hash FROM messages_hash WHERE id = %d "
@@ -306,14 +327,15 @@ uint64_t messages_hash_from_database(tg_t *tg, uint64_t peer_id)
 	tg_sqlite3_for_each(tg, sql, stmt)
 		hash = sqlite3_column_int64(stmt, 0);
 
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return hash;
 }
 
 int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
-			"BEGIN TRANSACTION;"
 			"ALTER TABLE \'messages_hash\' ADD COLUMN \'hash\' INT; "
 			"ALTER TABLE \'messages_hash\' ADD COLUMN \'peer_id\' INT; "
 			"INSERT INTO \'messages_hash\' (\'peer_id\') "
@@ -321,14 +343,16 @@ int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash)
 			"WHERE NOT EXISTS (SELECT 1 FROM messages_hash WHERE peer_id = "_LD_"); "
 			"UPDATE \'messages_hash\' SET \'hash\' = "_LD_", id = %d " 
 			"WHERE \'peer_id\' = "_LD_";"
-			"COMMIT TRANSACTION;"
 		,peer_id, peer_id, hash, tg->id, peer_id);
 	
-	return tg_sqlite3_exec(tg, sql);
+	int ret = tg_sqlite3_exec(tg, sql);
+	pthread_mutex_unlock(&tg->databasem); // unlock
+	return ret;
 }
 
 char *photo_file_from_database(tg_t *tg, uint64_t photo_id)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT data FROM photos WHERE id = %d "
@@ -345,13 +369,14 @@ char *photo_file_from_database(tg_t *tg, uint64_t photo_id)
 			break;
 		}
 
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return photo;
 }
 
 int photo_to_database(tg_t *tg, uint64_t photo_id, const char *data)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	tg_sqlite3_exec(tg, 
-			"BEGIN TRANSACTION;"
 			"ALTER TABLE \'photos\' ADD COLUMN \'data\' TEXT; "
 			"ALTER TABLE \'photos\' ADD COLUMN \'photo_id\' INT; "
 			);
@@ -368,15 +393,16 @@ int photo_to_database(tg_t *tg, uint64_t photo_id, const char *data)
 	str_append(&sql, data, strlen(data));
 	str_appendf(&sql, "\' WHERE photo_id = "_LD_";"
 			, photo_id);
-	str_appendf(&sql, "COMMIT TRANSACTION;");	
 	int ret = tg_sqlite3_exec(tg, sql.str);
 	free(sql.str);
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return ret;
 }
 
 char *peer_photo_file_from_database(
 		tg_t *tg, uint64_t peer_id, uint64_t photo_id)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT data FROM peer_photos WHERE id = %d "
@@ -393,6 +419,7 @@ char *peer_photo_file_from_database(
 			break;
 		}
 
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return photo;
 }
 
@@ -400,9 +427,9 @@ int peer_photo_to_database(tg_t *tg,
 		uint64_t peer_id, uint64_t photo_id,
 		const char *data)
 {
+	pthread_mutex_lock(&tg->databasem); // lock
 	printf("%s\n", __func__);
 	tg_sqlite3_exec(tg, 
-			"BEGIN TRANSACTION;"
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'data\' TEXT; "
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'peer_id\' INT; "
 			"ALTER TABLE \'peer_photos\' ADD COLUMN \'photo_id\' INT; "
@@ -420,10 +447,10 @@ int peer_photo_to_database(tg_t *tg,
 	str_append(&sql, data, strlen(data));
 	str_appendf(&sql, "\' WHERE peer_id = "_LD_";"
 			, peer_id);
-	str_appendf(&sql, "COMMIT TRANSACTION;");	
 
 	fprintf(stderr, "%s: %d\n", __func__, __LINE__);
 	int ret = tg_sqlite3_exec(tg, sql.str);
 	free(sql.str);
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	return ret;
 }

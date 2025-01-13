@@ -58,9 +58,6 @@ tg_t *tg_new(
 	// start new seqn
 	tg->seqn = 0;
 
-	// load dialogs hash
-	tg->dialogs_hash = dialogs_hash_from_database(tg);
-
 	// start queue manager
 	/*if (tg_start_send_queue_manager(tg))*/
 		/*return NULL;*/
@@ -84,15 +81,19 @@ tg_t *tg_new(
 		return NULL;
 	}
 
+	if (pthread_mutex_init(
+				&tg->databasem, NULL))
+	{
+		ON_ERR(tg, "%s: can't init mutex", __func__);
+		return NULL;
+	}
+
 	return tg;
 }
 
 void tg_close(tg_t *tg)
 {
 	// close Telegram
-	
-	// close network
-	tg_net_close(tg, tg->sockfd);
 	
 	// free
 	free(tg);

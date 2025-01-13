@@ -5,6 +5,7 @@
 #include "tg.h"
 #include "messages.h"
 #include "user.h"
+#include <pthread.h>
 #include <stdint.h>
 #include <string.h>
 #include "database.h"
@@ -284,6 +285,7 @@ static uint64_t message_update(tg_t *tg,
 	/* TODO: entities <03-01-25, yourname> */
 
 	// save message to database
+	pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 	str_appendf(&s,
@@ -306,6 +308,7 @@ static uint64_t message_update(tg_t *tg,
 	str_appendf(&s, "id = %d WHERE msg_id = %d;\n"
 			, tg->id, msg->id_);
 	tg_sqlite3_exec(tg, s.str);
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	free(s.str);
 	return chat_id;
 }
