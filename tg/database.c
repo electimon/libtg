@@ -129,7 +129,7 @@ int database_init(tg_t *tg, const char *database_path)
 
 buf_t auth_key_from_database(tg_t *tg)
 {
-	pthread_mutex_lock(&tg->databasem); // lock
+	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT auth_key FROM auth_keys WHERE id = %d;"
@@ -142,13 +142,13 @@ buf_t auth_key_from_database(tg_t *tg)
 			sqlite3_column_bytes(stmt, 0));
 	}
 	
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	//pthread_mutex_unlock(&tg->databasem); // unlock
 	return auth_key;
 }
 
 char * phone_number_from_database(tg_t *tg)
 {
-	pthread_mutex_lock(&tg->databasem); // lock
+	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT phone_number FROM phone_numbers WHERE id = %d;"
@@ -157,7 +157,7 @@ char * phone_number_from_database(tg_t *tg)
 	tg_sqlite3_for_each(tg, sql, stmt)
 		strcpy(buf, (char *)sqlite3_column_text(stmt, 0));
 	
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	//pthread_mutex_unlock(&tg->databasem); // unlock
 
 	if (*buf)
 		return strdup(buf);
@@ -185,7 +185,7 @@ int phone_number_to_database(
 
 char * auth_tokens_from_database(tg_t *tg)
 {
-	pthread_mutex_lock(&tg->databasem); // lock
+	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 		"SELECT * FROM ((SELECT ROW_NUMBER() OVER (ORDER BY ID) "
@@ -194,7 +194,7 @@ char * auth_tokens_from_database(tg_t *tg)
 		"LIMIT 20;", tg->id);
 	struct str s;
 	if (str_init(&s)){
-		pthread_mutex_unlock(&tg->databasem); // unlock
+		//pthread_mutex_unlock(&tg->databasem); // unlock
 		return NULL;
 	}
 
@@ -210,7 +210,7 @@ char * auth_tokens_from_database(tg_t *tg)
 		}
 	}
 	
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	//pthread_mutex_unlock(&tg->databasem); // unlock
 
 	if (s.len){
 		return s.str;
@@ -286,7 +286,7 @@ int auth_key_to_database(
 
 uint64_t dialogs_hash_from_database(tg_t *tg)
 {
-	pthread_mutex_lock(&tg->databasem); // lock
+	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT hash FROM dialogs_hash WHERE id = %d;"
@@ -318,7 +318,7 @@ int dialogs_hash_to_database(tg_t *tg, uint64_t hash)
 
 uint64_t messages_hash_from_database(tg_t *tg, uint64_t peer_id)
 {
-	pthread_mutex_lock(&tg->databasem); // lock
+	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT hash FROM messages_hash WHERE id = %d "
@@ -328,7 +328,7 @@ uint64_t messages_hash_from_database(tg_t *tg, uint64_t peer_id)
 	tg_sqlite3_for_each(tg, sql, stmt)
 		hash = sqlite3_column_int64(stmt, 0);
 
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	//pthread_mutex_unlock(&tg->databasem); // unlock
 	return hash;
 }
 
@@ -353,7 +353,7 @@ int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash)
 
 char *photo_file_from_database(tg_t *tg, uint64_t photo_id)
 {
-	pthread_mutex_lock(&tg->databasem); // lock
+	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT data FROM photos WHERE id = %d "
@@ -370,7 +370,7 @@ char *photo_file_from_database(tg_t *tg, uint64_t photo_id)
 			break;
 		}
 
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	//pthread_mutex_unlock(&tg->databasem); // unlock
 	return photo;
 }
 
@@ -403,7 +403,7 @@ int photo_to_database(tg_t *tg, uint64_t photo_id, const char *data)
 char *peer_photo_file_from_database(
 		tg_t *tg, uint64_t peer_id, uint64_t photo_id)
 {
-	pthread_mutex_lock(&tg->databasem); // lock
+	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
 			"SELECT data FROM peer_photos WHERE id = %d "
@@ -420,7 +420,7 @@ char *peer_photo_file_from_database(
 			break;
 		}
 
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	//pthread_mutex_unlock(&tg->databasem); // unlock
 	return photo;
 }
 

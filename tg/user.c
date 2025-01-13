@@ -212,7 +212,7 @@ void tg_user_free(tg_user_t *m)
 tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id)
 {
 	ON_LOG(tg, "%s", __func__);	
-	pthread_mutex_lock(&tg->databasem); // lock
+	/*pthread_mutex_lock(&tg->databasem); // lock*/
 	struct str s;
 	str_init(&s);
 	str_appendf(&s, "SELECT ");
@@ -268,7 +268,7 @@ tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id)
 
 		break;
 	}	
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	/*pthread_mutex_unlock(&tg->databasem); // unlock*/
 	
 	free(s.str);
 	return m;
@@ -277,7 +277,7 @@ tg_user_t * tg_user_get(tg_t *tg, uint64_t user_id)
 tg_user_t * tg_user_get_by_phone(tg_t *tg, const char *phone)
 {
 	ON_LOG(tg, "%s", __func__);	
-	pthread_mutex_lock(&tg->databasem); // lock
+	/*pthread_mutex_lock(&tg->databasem); // lock*/
 	struct str s;
 	str_init(&s);
 	str_appendf(&s, "SELECT ");
@@ -334,7 +334,7 @@ tg_user_t * tg_user_get_by_phone(tg_t *tg, const char *phone)
 		break;
 	}	
 	
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	/*pthread_mutex_unlock(&tg->databasem); // unlock*/
 	free(s.str);
 	return m;
 }

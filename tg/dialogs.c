@@ -553,7 +553,7 @@ int tg_get_dialogs_from_database(
 		int (*callback)(void *data, const tg_dialog_t *dialog))
 {
 	ON_LOG(tg, "%s", __func__);
-	pthread_mutex_lock(&tg->databasem); // lock
+	//pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 	str_appendf(&s, "SELECT ");
@@ -592,7 +592,7 @@ int tg_get_dialogs_from_database(
 			if (callback(data, &d)){
 				tg_dialog_free(&d);
 				sqlite3_close(db);
-				pthread_mutex_unlock(&tg->databasem); // unlock
+				//pthread_mutex_unlock(&tg->databasem); // unlock
 				break;
 			}
 		}
@@ -600,7 +600,7 @@ int tg_get_dialogs_from_database(
 		tg_dialog_free(&d);
 	}	
 	
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	//pthread_mutex_unlock(&tg->databasem); // unlock
 	free(s.str);
 	return 0;
 }

@@ -218,7 +218,7 @@ void tg_chat_free(tg_chat_t *m)
 tg_chat_t * tg_chat_get(tg_t *tg, uint64_t chat_id)
 {
 	ON_LOG(tg, "%s", __func__);	
-	pthread_mutex_lock(&tg->databasem); // lock
+	/*pthread_mutex_lock(&tg->databasem); // lock*/
 	struct str s;
 	str_init(&s);
 	str_appendf(&s, "SELECT ");
@@ -275,7 +275,7 @@ tg_chat_t * tg_chat_get(tg_t *tg, uint64_t chat_id)
 		break;
 	}	
 	
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	/*pthread_mutex_unlock(&tg->databasem); // unlock*/
 	free(s.str);
 	return m;
 }

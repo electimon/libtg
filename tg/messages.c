@@ -782,7 +782,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		int (*callback)(void *data, const tg_message_t *message))
 {
 	ON_LOG(tg, "%s", __func__);
-	pthread_mutex_lock(&tg->databasem); // lock
+	//pthread_mutex_lock(&tg->databasem); // lock
 	struct str s;
 	str_init(&s);
 	str_appendf(&s, "SELECT ");
@@ -855,7 +855,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 			if (ret){
 				tg_message_free(&m);
 				sqlite3_close(db);
-				pthread_mutex_unlock(&tg->databasem); // unlock
+				//pthread_mutex_unlock(&tg->databasem); // unlock
 				return i;
 			}
 		}
@@ -863,7 +863,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 		tg_message_free(&m);
 	}	
 	
-	pthread_mutex_unlock(&tg->databasem); // unlock
+	//pthread_mutex_unlock(&tg->databasem); // unlock
 	free(s.str);
 	return i;
 }
