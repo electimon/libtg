@@ -413,9 +413,9 @@ int tg_messages_get_history(
 					(tl_messages_channelMessages_t *)tl;
 				
 				// update users
-				tg_users_save(tg, msgs->users_len, msgs->users_);
+				/*tg_users_save(tg, msgs->users_len, msgs->users_);*/
 				// update chats
-				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
+				/*tg_chats_save(tg, msgs->chats_len, msgs->chats_);*/
 
 				c = parse_msgs(
 						tg, peer.id, 
@@ -432,9 +432,9 @@ int tg_messages_get_history(
 					(tl_messages_messages_t *)tl;
 				
 				// update users
-				tg_users_save(tg, msgs->users_len, msgs->users_);
+				/*tg_users_save(tg, msgs->users_len, msgs->users_);*/
 				// update chats
-				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
+				/*tg_chats_save(tg, msgs->chats_len, msgs->chats_);*/
 				
 				c = parse_msgs(
 						tg, peer.id, 
@@ -451,9 +451,9 @@ int tg_messages_get_history(
 					(tl_messages_messagesSlice_t *)tl;
 				
 				// update users
-				tg_users_save(tg, msgs->users_len, msgs->users_);
+				/*tg_users_save(tg, msgs->users_len, msgs->users_);*/
 				// update chats
-				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
+				/*tg_chats_save(tg, msgs->chats_len, msgs->chats_);*/
 				
 				c = parse_msgs(
 						tg, peer.id, 
