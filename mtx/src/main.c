@@ -25,7 +25,7 @@ int main()
 
   api.log.info("Start.");
 
-  app = api.app.open();
+  app = api.app.open(_ip, _port);
   api.app.run(app);
 
   api.log.info("Finish.");

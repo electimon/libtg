@@ -42,7 +42,7 @@ typedef struct buf_api_
 
 typedef struct app_api_
 {
-  METHOD(open, app_t);
+  METHOD(open, app_t, char*, int);
   METHOD(run, ui8_t, app_t);
   METHOD(close, ui8_t, app_t);
 } app_api_t;
@@ -130,7 +130,7 @@ typedef struct sil_api_
 
 typedef struct scl_api_
 {
-  METHOD(open, scl_t);
+  METHOD(open, scl_t, char*, int);
   METHOD(run, void, void);
   METHOD(close, void, void);
 } scl_api_t;

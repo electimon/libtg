@@ -11,9 +11,9 @@
 #include "../include/types.h"
 #include "../include/setup.h"
 
-extern scl_t scl_open()
+extern scl_t scl_open(char *ip, int port)
 {
-  api.net.open(_ip, _port);
+  api.net.open(ip, port);
   api.srl.init();
   api.log.info(">> auth");
   api.srl.auth();

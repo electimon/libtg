@@ -11,7 +11,7 @@
 
 #include "types.h"
 
-extern app_t app_open();
+extern app_t app_open(char *ip, int port);
 extern ui8_t app_run(app_t app);
 extern ui8_t app_close(app_t app);
 

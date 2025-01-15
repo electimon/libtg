@@ -11,7 +11,7 @@
 
 #include "types.h"
 
-extern scl_t scl_open();
+extern scl_t scl_open(char *ip, int port);
 extern void scl_run();
 extern void scl_close();
 

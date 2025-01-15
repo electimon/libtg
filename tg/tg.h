@@ -8,6 +8,12 @@
 #include "../tl/str.h"
 #include "list.h"
 
+#define DC1 "149.154.175.53"    // MIA, Miami FL, USA
+#define DC2 "149.154.167.51"    // AMS, Amsterdam, NL 
+#define DC3 "149.154.175.100"   // MIA, Miami FL, USA
+#define DC4 "149.154.167.91"    // AMS, Amsterdam, NL
+#define DC5 "91.108.56.130"     // SIN, Singapore, SG
+
 struct tg_ {
 	int id;
 	int apiId;

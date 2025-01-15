@@ -2,6 +2,8 @@
 #include "database.h"
 #include "tg.h"
 #include "../tl/alloc.h"
+#include <assert.h>
+#include <string.h>
 
 #if INTPTR_MAX == INT32_MAX
     #define THIS_IS_32_BIT_ENVIRONMENT
@@ -277,4 +279,136 @@ tg_channel_t * tg_channel_get(tg_t *tg, uint64_t channel_id)
 	//pthread_mutex_unlock(&tg->databasem); // unlock
 	free(s.str);
 	return m;
+}
+
+int tg_parse_chennels(tg_t *tg, int argc, tl_t **argv,
+	void *data,
+	int (*callback)(void *data, const tg_channel_t *cannel))
+{
+	int i, n = 0;
+	for (i = 0; i < argc; ++i) {
+		if (argv[i]->_id == id_channel)
+		{
+			tl_channel_t *channel = 
+				(tl_channel_t *)argv[i];
+
+			tg_channel_t tgm;
+			tg_channel_from_tl(tg, &tgm, channel);
+			if (callback){
+				if (callback(data, &tgm)){
+					tg_channel_free(&tgm);
+					return ++n;
+				}
+			}
+			tg_channel_free(&tgm);
+			n++;
+		}
+	}
+	return n;
+}
+
+struct tg_channel_search_global_t {
+	tg_t *tg;
+	void *data;
+	int (*callback)(void *data, const tg_channel_t *cannel);
+	void (*on_done)(void *data);
+};
+
+void tg_channel_search_global_cb(void *d, const tl_t *tl)
+{
+	assert(d);
+	struct tg_channel_search_global_t *t = d;
+	if (tl == NULL){
+		if (t->on_done)
+			t->on_done(t->data);
+		free(t);
+		return;
+	}
+
+	switch (tl->_id) {
+		case id_messages_channelMessages:
+			{
+				tl_messages_channelMessages_t *msgs = 
+					(tl_messages_channelMessages_t *)tl;
+				tg_parse_chennels(t->tg, 
+						msgs->chats_len, 
+						msgs->chats_, 
+						t->data, 
+						t->callback);
+			}
+			break;
+			
+		case id_messages_messages:
+			{
+				tl_messages_messages_t *msgs = 
+					(tl_messages_messages_t *)tl;
+				
+				tg_parse_chennels(t->tg, 
+						msgs->chats_len, 
+						msgs->chats_, 
+						t->data, 
+						t->callback);
+			}
+			break;
+			
+		case id_messages_messagesSlice:
+			{
+				tl_messages_messagesSlice_t *msgs = 
+					(tl_messages_messagesSlice_t *)tl;
+					
+				tg_parse_chennels(t->tg, 
+						msgs->chats_len, 
+						msgs->chats_, 
+						t->data, 
+						t->callback);
+			}
+			break;
+			
+		default:
+			break;
+	}
+
+	if (t->on_done)
+		t->on_done(t->data);
+	free(t);
+}
+
+pthread_t 
+tg_channel_search_global(tg_t *tg, const char *query, 
+		MessagesFilter *filter, 
+		int offset, int limit, 
+		void *data, 
+		int (*callback)(void *data, const tg_channel_t *cannel),
+		void (*on_done)(void *data))
+{
+	InputPeer inputPeer = tl_inputPeerEmpty();
+	buf_t search = tl_messages_searchGlobal(
+			true, 
+			NULL, 
+			query, 
+			filter, 
+			0, 
+			0, 
+			0, 
+			&inputPeer, 
+			offset, 
+			limit);
+	buf_free(inputPeer);
+
+	struct tg_channel_search_global_t *t = 
+		NEW(struct tg_channel_search_global_t, 
+				ON_ERR(tg, "%s: can't allocate memory", __func__);
+				return 0);
+	
+	t->tg = tg;
+	t->data = data;
+	t->callback = callback;
+	t->on_done = on_done;
+	
+	pthread_t p = tg_send_query_async(
+			tg, &search,
+		 	data, tg_channel_search_global_cb);
+	buf_free(search);
+	
+	return p;
 }

@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #if INTPTR_MAX == INT32_MAX
@@ -54,6 +56,63 @@ static tg_queue_t *tg_get_queue(tg_t *tg, uint64_t *msgid)
 				cmp_msgid);
 	pthread_mutex_unlock(&tg->queuem);
 	return q;
+}
+
+static bool set_dc(tg_queue_t *queue, int dc)
+{
+	switch (dc) {
+		case 1:
+			strcpy(queue->ip, DC1);
+			return true;
+		case 2:
+			strcpy(queue->ip, DC2);
+			return true;
+		case 3:
+			strcpy(queue->ip, DC3);
+			return true;
+		case 4:
+			strcpy(queue->ip, DC4);
+			return true;
+		case 5:
+			strcpy(queue->ip, DC5);
+			return true;
+
+		default:
+			break;
+			
+	}
+	return false;
+}
+
+static int handle_rpc_error(
+		tg_queue_t *queue, tl_rpc_error_t *error)
+{
+	if (!error || !error->error_message_.data)
+		return 1;
+
+	char *str;
+	str = strstr(
+			(char *)error->error_message_.data, 
+			"MIGRATE_");
+	if (str){
+		str += strlen("MIGRATE_");
+		if (set_dc(queue, atoi(str)))
+		{
+			// resend queue
+			tg_queue_new(
+					queue->tg, 
+					&queue->query, 
+					queue->ip,
+					queue->port,
+					queue->userdata, 
+					queue->on_done, 
+					queue->progressp, 
+					queue->progress);
+		}
+		return 0;
+	}
+
+	return 1;
 }
 
 static void catched_tl(tg_queue_t *queue, tl_t *tl)
@@ -106,10 +165,18 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_rpc_error_t *rpc_error = 
 					(tl_rpc_error_t *)tl;
-				char *err = tg_strerr(tl);
-				ON_ERR(queue->tg, "%s: %s", __func__, err);
-				free(err);
-				tl = NULL;
+				
+				queue->loop = false; // stop receive data!
+
+				if (handle_rpc_error(queue, rpc_error))
+				{
+					char *err = tg_strerr(tl);
+					ON_ERR(queue->tg, "%s: %s", __func__, err);
+					free(err);
+					tl = NULL;
+					break; // run on_done
+				}
+				return; // do not run on_done!
 			}
 			break;
 	}
@@ -343,6 +410,7 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 	handle_tl(queue, tl);
 	if (tl)
 		tl_free(tl);
+	
 	return RTL_RQ; // read socket again
 }
 
@@ -374,7 +442,7 @@ static int tg_send(void *data)
 			return 1;
 		}
 		close(queue->socket);
-		api.app.open();	
+		api.app.open(queue->tg->ip, queue->tg->port);	
 		queue->tg->key = 
 			buf_add(shared_rc.key.data, shared_rc.key.size);
 		queue->tg->salt = 
@@ -437,7 +505,8 @@ static void * tg_run_queue(void * data)
 	tg_queue_t *queue = data;
 	ON_LOG(queue->tg, "%s", __func__);
 	// open socket
-	queue->socket = tg_net_open(queue->tg);
+	queue->socket = 
+		tg_net_open(queue->tg, queue->ip, queue->port);
 	if (queue->socket < 0)
 	{
 		ON_ERR(queue->tg, "%s: can't open socket", __func__);
@@ -492,6 +561,7 @@ static void * tg_run_queue(void * data)
 
 tg_queue_t * tg_queue_new(
 		tg_t *tg, buf_t *query, 
+		const char *ip, int port,
 		void *userdata, void (*on_done)(void *userdata, const tl_t *tl),
 		void *progressp, 
 		int (*progress)(void *progressp, int size, int total))
@@ -504,6 +574,8 @@ tg_queue_t * tg_queue_new(
 	queue->tg = tg;
 	queue->loop = true;
 	queue->query = buf_add_buf(*query);
+	strncpy(queue->ip, ip, sizeof(queue->ip)-1);
+	queue->port = port;
 	queue->userdata = userdata;
 	queue->on_done = on_done;
 	queue->progressp = progressp;
@@ -523,17 +595,6 @@ tg_queue_t * tg_queue_new(
 	return queue;
 }
 
-pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
-		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
-{
-	ON_LOG(tg, "%s: tg: %p, query: %p, userdata: %p, callback: %p",
-		 	__func__, tg, query, userdata, callback);
-	tg_queue_t *queue = 
-		tg_queue_new(tg, query, userdata, callback,
-			 	NULL, NULL);
-	return queue->p;
-}
-
 pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl),
 		void *progressp, 
@@ -543,9 +604,22 @@ pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 			       "progressp: %p, progress: %p",
 		 	__func__, tg, query, userdata, callback, progressp, progress);
 	tg_queue_t *queue = 
-		tg_queue_new(tg, query, userdata, callback,
+		tg_queue_new(tg, query, 
+				tg->ip, tg->port,
+				userdata, callback,
 			 	progressp, progress);
 	return queue->p;
+}
+
+pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
+		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
+{
+	ON_LOG(tg, "%s: tg: %p, query: %p, userdata: %p, callback: %p",
+		 	__func__, tg, query, userdata, callback);
+	return tg_send_query_async_with_progress(
+			tg, query, 
+			userdata, callback,
+			NULL, NULL);
 }
 
 static void tg_send_query_sync_cb(void *d, const tl_t *tl)
@@ -557,14 +631,11 @@ static void tg_send_query_sync_cb(void *d, const tl_t *tl)
 tl_t *tg_send_query_sync(tg_t *tg, buf_t *query)
 {
 	tl_t *tl = NULL;
-	tg_queue_t *queue = 
-		tg_queue_new(tg, query, 
-				&tl, 
-				tg_send_query_sync_cb, 
-				NULL, NULL);
-	if (queue){
-		pthread_join(queue->p, NULL);
-	}
+	pthread_t p = 
+		tg_send_query_async(tg, query, 
+				&tl, tg_send_query_sync_cb);
+	
+	pthread_join(p, NULL);
 
 	return tl;
 }

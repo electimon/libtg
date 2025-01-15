@@ -6,6 +6,8 @@
 
 typedef struct tg_queue_{
 	tg_t *tg;
+	char ip[16];
+	int port;
 	pthread_t p;
 	int socket;
 	bool loop;
@@ -19,6 +21,7 @@ typedef struct tg_queue_{
 
 tg_queue_t * tg_queue_new(
 		tg_t *tg, buf_t *query, 
+		const char *ip, int port,
 		void *userdata, void (*on_done)(void *userdata, const tl_t *tl),
 		void *progressp, 
 		int (*progress)(void *progressp, int size, int total));

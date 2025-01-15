@@ -8,13 +8,13 @@
 
 #include "../include/api.h"
 
-app_t app_open()
+app_t app_open(char *ip, int port)
 {
   app_t app;
 
   app.exit_code = 0;
   reset_shared_rc();
-  app.scl = api.scl.open();
+  app.scl = api.scl.open(ip, port);
 
   return app;
 }
