@@ -412,3 +412,19 @@ tg_channel_search_global(tg_t *tg, const char *query,
 	
 	return p;
 }
+
+pthread_t tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
+{
+	InputChannel inputChannel = tl_inputChannel(
+			peer.id, peer.access_hash);
+
+	buf_t query = tl_channels_readHistory(
+			&inputChannel, max_id);
+	buf_free(inputChannel);
+	
+	pthread_t p = tg_send_query_async(
+			tg, &query, NULL, NULL);
+	buf_free(query);
+	
+	return p;
+}
