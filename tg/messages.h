@@ -210,4 +210,6 @@ tg_messages_set_typing(tg_t *tg, tg_peer_t peer, bool typing);
 pthread_t 
 tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id);
 
+int tg_messages_get_read_date(tg_t*, tg_peer_t, uint32_t msg_id);
+
 #endif /* ifndef TG_MESSAGES_H */		

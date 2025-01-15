@@ -176,7 +176,6 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 					char *err = tg_strerr(tl);
 					ON_ERR(queue->tg, "%s: %s", __func__, err);
 					free(err);
-					tl = NULL;
 					break; // run on_done
 				}
 				return; // do not run on_done!

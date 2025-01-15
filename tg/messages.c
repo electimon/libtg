@@ -891,13 +891,13 @@ pthread_t tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
 	return p;
 }
 
-pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer_, uint32_t max_id)
+pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 {
-	Peer peer = tg_inputPeer(peer_); 
+	InputPeer inputPeer = tg_inputPeer(peer); 
 
 	buf_t readHistory = tl_messages_readHistory(
-			&peer, max_id);
-	buf_free(peer);
+			&inputPeer, max_id);
+	buf_free(inputPeer);
 	
 	pthread_t p = tg_send_query_async(
 			tg, &readHistory, NULL, NULL);
@@ -906,4 +906,30 @@ pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer_, uint32_t max_id)
 	/* TODO: messages.AffectedMessages */
 	
 	return p;
+}
+
+
+int tg_messages_get_read_date(
+		tg_t *tg, tg_peer_t peer, uint32_t msg_id)
+{
+	InputPeer inputPeer = tg_inputPeer(peer);
+	buf_t query = tl_messages_getOutboxReadDate(
+			&inputPeer, msg_id);
+	buf_free(inputPeer);
+
+	tl_t *tl = tg_send_query_sync(tg, &query);
+	if (tl == NULL)
+		return 0;
+
+	if (tl->_id == id_outboxReadDate){
+		tl_outboxReadDate_t *ord = 
+			(tl_outboxReadDate_t *)tl;
+		
+		uint32_t date = ord->date_;
+		free(tl);
+		return date;
+	}
+
+	free(tl);
+	return 0;
 }

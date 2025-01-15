@@ -428,3 +428,4 @@ pthread_t tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 	
 	return p;
 }
+
