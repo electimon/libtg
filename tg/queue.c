@@ -60,6 +60,7 @@ static tg_queue_t *tg_get_queue(tg_t *tg, uint64_t *msgid)
 
 static bool set_dc(tg_queue_t *queue, int dc)
 {
+	ON_LOG(queue->tg, "MIGRATE TO: %d", dc);
 	switch (dc) {
 		case 1:
 			strcpy(queue->ip, DC1);
@@ -89,6 +90,8 @@ static int handle_rpc_error(
 {
 	if (!error || !error->error_message_.data)
 		return 1;
+
+	ON_LOG(queue->tg, "%s: %s", __func__, error->error_message_.data);
 
 	char *str;
 	str = strstr(
