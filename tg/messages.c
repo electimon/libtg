@@ -908,7 +908,6 @@ pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 	return p;
 }
 
-
 int tg_messages_get_read_date(
 		tg_t *tg, tg_peer_t peer, uint32_t msg_id)
 {
@@ -918,8 +917,22 @@ int tg_messages_get_read_date(
 	buf_free(inputPeer);
 
 	tl_t *tl = tg_send_query_sync(tg, &query);
+	buf_free(query);
+	
 	if (tl == NULL)
-		return 0;
+		return -1;
+
+	if (tl->_id == id_rpc_error){
+		tl_rpc_error_t *e = (tl_rpc_error_t *)tl;
+		if (strcmp((char *)e->error_message_.data, 
+				"MESSAGE_NOT_READ_YET") == 0)
+		{
+			free(tl);
+			return 0;
+		}
+		free(tl);
+		return -1;
+	}
 
 	if (tl->_id == id_outboxReadDate){
 		tl_outboxReadDate_t *ord = 
@@ -931,5 +944,5 @@ int tg_messages_get_read_date(
 	}
 
 	free(tl);
-	return 0;
+	return -1;
 }
