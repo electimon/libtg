@@ -96,11 +96,21 @@ static int handle_rpc_error(
 	char *str;
 	str = strstr(
 			(char *)error->error_message_.data, 
-			"MIGRATE_");
+			"FILE_MIGRATE_");
 	if (str){
-		str += strlen("MIGRATE_");
-		if (set_dc(queue, atoi(str)))
+		str += strlen("FILE_MIGRATE_");
+		int dc = atoi(str);
+		if (set_dc(queue, dc))
 		{
+			// export auth to dc
+			buf_t export_auth = 
+				tl_auth_exportAuthorization(dc);
+			tl_t *ea = 
+				tg_send_query_sync(queue->tg, &export_auth);
+			buf_free(export_auth);
+			// handle answer
+			/* TODO: handle tl answer <16-01-25, kuzmich> */
+
 			// resend queue
 			tg_queue_new(
 					queue->tg, 
