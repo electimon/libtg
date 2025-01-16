@@ -2,7 +2,7 @@
 
 buf_t tg_transport(tg_t *tg, buf_t buf)
 {
-	ON_LOG(tg, "%s", __func__);
+	//ON_LOG(tg, "%s", __func__);
   buf_t b;
 	buf_init(&b);
 	
@@ -34,7 +34,7 @@ buf_t tg_transport(tg_t *tg, buf_t buf)
 
 buf_t tg_detransport(tg_t *tg, buf_t a)
 {
-	ON_LOG(tg, "%s", __func__);
+	//ON_LOG(tg, "%s", __func__);
 	buf_t b;
 	buf_init(&b);
 	

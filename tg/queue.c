@@ -547,7 +547,7 @@ static void * tg_run_queue(void * data)
 	// receive loop
 	while (queue->loop) {
 		// receive
-		ON_LOG(queue->tg, "%s: receive...", __func__);
+		/*ON_LOG(queue->tg, "%s: receive...", __func__);*/
 		//usleep(1000); // in microseconds
 		enum RTL res = 
 			_tg_receive(queue, queue->socket);

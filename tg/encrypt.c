@@ -5,7 +5,7 @@
 
 buf_t tg_encrypt(tg_t *tg, buf_t b, bool enc)
 {
-	ON_LOG(tg, "%s", __func__);
+	//ON_LOG(tg, "%s", __func__);
   buf_t e = {};
 	buf_init(&e);
 
@@ -104,7 +104,7 @@ buf_t tg_encrypt(tg_t *tg, buf_t b, bool enc)
 
 buf_t tg_decrypt(tg_t *tg, buf_t m, bool enc)
 {
-	ON_LOG(tg, "%s", __func__);
+	//ON_LOG(tg, "%s", __func__);
   buf_t d;
 	buf_init(&d);
 

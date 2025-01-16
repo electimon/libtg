@@ -28,7 +28,7 @@ static long long tg_get_current_time()
 }
 
 buf_t tg_mtp_message(tg_t *tg, buf_t payload, bool content){
-	ON_LOG(tg, "%s", __func__);
+	/*ON_LOG(tg, "%s", __func__);*/
 	//message msg_id:long seqno:int bytes:int body:Object = Message;
   buf_t msg = buf_new();
 	
@@ -61,7 +61,7 @@ buf_t tg_mtp_message(tg_t *tg, buf_t payload, bool content){
 buf_t tg_header(tg_t *tg, buf_t b, bool enc, 
 		bool content, uint64_t *msgid)
 {
-	ON_LOG(tg, "%s", __func__);
+	/*ON_LOG(tg, "%s", __func__);*/
   buf_t s = {};
 	buf_init(&s);
 
@@ -153,7 +153,7 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 
 buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 {
-	ON_LOG(tg, "%s", __func__);
+	/*ON_LOG(tg, "%s", __func__);*/
 	if (!b.size){
 		ON_ERR(tg, "%s: got nothing", __func__);
 		return b;
