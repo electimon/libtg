@@ -164,6 +164,10 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 					queue->on_done(queue->userdata, ttl);
 				if (ttl)
 					tl_free(ttl);
+
+				pthread_mutex_unlock(&tg->queuem);
+				queue->loop = false; // stop receive data!
+				return; // do not run on_done!
 			}
 			break;
 		case id_bad_msg_notification:
@@ -196,6 +200,7 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 			}
 			break;
 	}
+	ON_LOG(tg, "XXXXXXXXXXXXXXXX");
 
 	if (queue->on_done)
 		queue->on_done(queue->userdata, tl);
