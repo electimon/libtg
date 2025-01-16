@@ -135,20 +135,21 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				&msg_id, 
 				cmp_msgid);
 		
-	pthread_mutex_unlock(&tg->queuem);
 
 	if (queue == NULL){
 		ON_ERR(tg, "can't find queue for msg_id: "_LD_"", msg_id);
+		pthread_mutex_unlock(&tg->queuem);
 		return;
 	}
 
 	// lock queue
 	err = pthread_mutex_lock(&queue->m);
+	pthread_mutex_unlock(&tg->queuem); // unlock list
 	if (err){
 		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
 		return;
 	}
-
+		
 	ON_LOG(tg, "%s: %s", __func__, TL_NAME_FROM_ID(tl->_id));
 
 	switch (tl->_id) {
@@ -595,6 +596,11 @@ tg_queue_t * tg_queue_new(
 	tg_queue_t *queue = NEW(tg_queue_t, 
 			ON_ERR(tg, "%s: can't allocate memory", __func__);
 			return NULL;);
+
+	if (pthread_mutex_init(&queue->m, NULL)){
+		ON_ERR(tg, "%s: can't init mutex", __func__);
+		return NULL;
+	}
 
 	queue->tg = tg;
 	queue->loop = true;
