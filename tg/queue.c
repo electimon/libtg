@@ -303,14 +303,14 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				tl_msg_detailed_info_t *di = 
 					(tl_msg_detailed_info_t *)tl;
 				tg_add_msgid(queue->tg, di->msg_id_);
-				catched_tl(q->tg, di->answer_msg_id_, NULL);
+				catched_tl(queue->tg, di->answer_msg_id_, NULL);
 			}
 			break;
 		case id_msg_new_detailed_info:
 			{
 				tl_msg_new_detailed_info_t *di = 
 					(tl_msg_new_detailed_info_t *)tl;
-				catched_tl(q->tg, di->answer_msg_id_, NULL);
+				catched_tl(queue->tg, di->answer_msg_id_, NULL);
 			}
 			break;
 		case id_rpc_result:
@@ -321,8 +321,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					ON_LOG(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
 							TL_NAME_FROM_ID(rpc_result->result_->_id), 
 							rpc_result->req_msg_id_);
-					catched_tl(q->tg, rpc_result->req_msg_id_, rpc_result->result_);
-				}
+				catched_tl(queue->tg, rpc_result->req_msg_id_, rpc_result->result_);
 			}
 			break;
 		case id_updatesTooLong: case id_updateShort:
