@@ -683,13 +683,10 @@ void tg_queue_cancell_all(tg_t *tg)
 	list_for_each(tg->queue, queue)
 	{
 		// lock queue - (it may be locked by catche_tl)
-		int err = pthread_mutex_lock(&queue->m);
-		if (err){
-			ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
-			return;
+		if (pthread_mutex_trylock(&queue->m) == 0){
+			queue->loop = false;
+			pthread_mutex_unlock(&queue->m);
 		}
-		queue->loop = false;
-		pthread_mutex_unlock(&queue->m);
 	}
 
 	list_free(&tg->queue);
