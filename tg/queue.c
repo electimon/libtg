@@ -321,6 +321,10 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				// get queue in list
 				tg_queue_t *q = tg_get_queue(
 						queue->tg, &rpc_result->req_msg_id_);
+				if (rpc_result->result_)
+					ON_LOG(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
+							TL_NAME_FROM_ID(rpc_result->result_->_id), 
+							rpc_result->req_msg_id_);
 				if (q){ // ok - we got msgid
 					catched_tl(q, rpc_result->result_);
 				}
