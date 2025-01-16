@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 16.01.2025
+ * Last Modified Date: 17.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -410,8 +410,10 @@ void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
 			t->hash, 
 			t->data, t->callback);
 
+	ON_LOG(t->tg, "SSSSSSSSSSSSSS");
 	if (t->on_done)
 		t->on_done(t->data);
+	ON_LOG(t->tg, "LLLLLLLLLLLLL");
 
 	free(t);
 }
