@@ -13,6 +13,7 @@ typedef struct tg_queue_{
 	bool loop;
 	buf_t query;
 	uint64_t msgid;
+	pthread_mutex_t m;
 	void *userdata;
 	void (*on_done)(void *userdata, const tl_t *tl);
 	void *progressp;
