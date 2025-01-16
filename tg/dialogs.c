@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 13.01.2025
+ * Last Modified Date: 16.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -47,10 +47,11 @@
 
 static int tg_dialogs_from_tl(
 		tg_t *tg, const tl_t *tl,
+		uint64_t *hash,
 		void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog))
 {
-	int i;
+	int i, n=0;
 
 	if (!tl){
 		return 0;
@@ -87,6 +88,11 @@ static int tg_dialogs_from_tl(
 		{
 			md = *(tl_messages_dialogs_t *)tl;
 		}
+
+		if (md.dialogs_ == NULL){
+			ON_ERR(tg, "dialogs pointer is NULL!");
+			return 0;
+		}
 		
 		ON_LOG(tg, "%s: got %d dialogs", 
 				__func__, md.dialogs_len);
@@ -97,6 +103,9 @@ static int tg_dialogs_from_tl(
 		tg_chats_save(tg, md.chats_len, md.chats_);
 		
 		for (i = 0; i < md.dialogs_len; ++i) {
+			if (md.dialogs_[i] == NULL)
+				continue;
+
 			ON_LOG(tg, "dialog #%d: %s\n", 
 					i, TL_NAME_FROM_ID(md.dialogs_[i]->_id));
 			// handle dialogs
@@ -340,12 +349,18 @@ static int tg_dialogs_from_tl(
 
 			if (d.peer_type == TG_PEER_TYPE_NULL) {
 				ON_LOG(tg, "%s: can't find dialog data "
-						"for peer: %.8x: "_LD_"",
-						__func__, peer->_id, peer->chat_id_);
+						"for peer: (%s): "_LD_"",
+						__func__, TL_NAME_FROM_ID(peer->_id), peer->chat_id_);
 				continue;
 			}
 			// save dialog to database
 			tg_dialog_to_database(tg, &d);
+
+			// update hash
+			if (hash){
+				ON_LOG(tg, "update_hash");
+				update_hash(hash, d.top_message_id);
+			}
 
 			// callback dialog
 			if (callback)
@@ -354,23 +369,26 @@ static int tg_dialogs_from_tl(
 
 			// free dialog
 			tg_dialog_free(&d);
+
+			// counter
+			n++;
 		
 		} // done dialogs
 
 	} else { // not dialogs or dialogsSlice
 		// throw error
-		char *err = tg_strerr(tl); 
-		ON_ERR(tg, "%s", err);
-		free(err);
+		ON_ERR(tg, "%s: can't handle %s",
+				__func__, TL_NAME_FROM_ID(tl->_id));
 		return 0;
 	}
 
-	return i;
+	return n;
 }
 
 struct tg_get_dialogs_async_t {
 	tg_t *tg;
 	void *data;
+	uint64_t *hash;
 	int (*callback)(void *data, const tg_dialog_t *dialog);
 	void (*on_done)(void *data);
 };
@@ -388,7 +406,9 @@ void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
 	}
 
 	tg_dialogs_from_tl(
-			t->tg, tl, t->data, t->callback);
+			t->tg, tl, 
+			t->hash, 
+			t->data, t->callback);
 
 	if (t->on_done)
 		t->on_done(t->data);
@@ -407,9 +427,6 @@ pthread_t tg_get_dialogs_async(
 		void (*on_done)(void *data))
 {
 	int i = 0, k;
-	uint64_t h = 0;
-	/*if (hash)*/
-		/*h = *hash;*/
 
 	InputPeer inputPeer = tl_inputPeerSelf();
 
@@ -421,7 +438,7 @@ pthread_t tg_get_dialogs_async(
 				-1, 
 				&inputPeer, 
 				limit,
-				h);
+				hash?*hash:0);
 
 	struct tg_get_dialogs_async_t *t = 
 		NEW(struct tg_get_dialogs_async_t, 
@@ -429,6 +446,7 @@ pthread_t tg_get_dialogs_async(
 					return 0;);
 	t->tg = tg;
 	t->data = data;
+	t->hash = hash;
 	t->callback = callback;
 	t->on_done = on_done;
 
@@ -450,9 +468,6 @@ int tg_get_dialogs(
 		int (*callback)(void *data, const tg_dialog_t *dialog))
 {
 	int i = 0, k;
-	uint64_t h = 0;
-	/*if (hash)*/
-		/*h = *hash;*/
 
 	InputPeer inputPeer = tl_inputPeerSelf();
 
@@ -464,7 +479,7 @@ int tg_get_dialogs(
 				-1, 
 				&inputPeer, 
 				limit,
-				h);
+				hash?*hash:0);
 
 	tl_t *tl = tg_send_query_sync(tg, &getDialogs);
 	buf_free(getDialogs);
@@ -473,7 +488,7 @@ int tg_get_dialogs(
 		return 0;
 	}
 	
-	i = tg_dialogs_from_tl(tg, tl, data, callback);
+	i = tg_dialogs_from_tl(tg, tl, hash, data, callback);
 
 	// free tl
 	tl_free(tl);
