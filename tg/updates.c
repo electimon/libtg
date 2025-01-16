@@ -204,6 +204,82 @@ void tg_do_update(tg_t *tg, tl_t *update)
 			}
 			return;
 
+		case id_updateChannelUserTyping:
+			{
+				tl_updateChannelUserTyping_t *m =
+					(tl_updateChannelUserTyping_t *)update;
+				tl_peerUser_t *peer = (tl_peerUser_t *)m->from_id_;
+				if (peer == NULL)
+					break;;	
+
+				struct id {uint64_t chat_id; uint64_t user_id;} id = 
+				{m->channel_id_, peer->user_id_};
+				
+				switch (m->action_->_id) {
+					case id_sendMessageTypingAction:
+						{
+							tl_sendMessageTypingAction_t *a = 
+								(tl_sendMessageTypingAction_t *)m->action_; 
+							ON_UPDATE(tg, TG_UPDATE_CHAT_USER_TYPING, &id);
+						}
+						break;
+					case id_sendMessageCancelAction:
+						{
+							tl_sendMessageCancelAction_t *a = 
+								(tl_sendMessageCancelAction_t *)m->action_; 
+							ON_UPDATE(tg, TG_UPDATE_CHAT_USER_CANCEL, &id);
+						}
+						break;
+					case id_sendMessageUploadVideoAction:
+						{
+							tl_sendMessageUploadVideoAction_t *a = 
+								(tl_sendMessageUploadVideoAction_t *)m->action_; 
+							ON_UPDATE(tg, TG_UPDATE_CHAT_USER_UPLOAD_VIDEO, &id);
+						}
+						break;
+					case id_sendMessageUploadAudioAction:
+						{
+							tl_sendMessageUploadAudioAction_t *a = 
+								(tl_sendMessageUploadAudioAction_t *)m->action_; 
+							ON_UPDATE(tg, TG_UPDATE_CHAT_USER_UPLOAD_AUDIO, &id);
+						}
+						break;
+					case id_sendMessageUploadPhotoAction:
+						{
+							tl_sendMessageUploadPhotoAction_t *a = 
+								(tl_sendMessageUploadPhotoAction_t *)m->action_; 
+							ON_UPDATE(tg, TG_UPDATE_CHAT_USER_UPLOAD_PHOTO, &id);
+						}
+						break;
+					case id_sendMessageUploadDocumentAction:
+						{
+							tl_sendMessageUploadDocumentAction_t *a = 
+								(tl_sendMessageUploadDocumentAction_t *)m->action_; 
+							ON_UPDATE(tg, TG_UPDATE_CHAT_USER_UPLOAD_DOCUMENT, &id);
+						}
+						break;
+					case id_sendMessageRecordAudioAction:
+						{
+							tl_sendMessageRecordAudioAction_t *a = 
+								(tl_sendMessageRecordAudioAction_t *)m->action_; 
+							ON_UPDATE(tg, TG_UPDATE_CHAT_USER_RECORD_AUDIO, &id);
+						}
+						break;
+					case id_sendMessageRecordRoundAction:
+						{
+							tl_sendMessageRecordRoundAction_t *a = 
+								(tl_sendMessageRecordRoundAction_t *)m->action_; 
+							ON_UPDATE(tg, TG_UPDATE_CHAT_USER_RECORD_ROUND, &id);
+						}
+						break;
+
+					default:
+						break;
+				}	
+					
+			}
+			return;
+
 		case id_updateUserStatus:
 			{
 				tl_updateUserStatus_t *m =

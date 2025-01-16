@@ -130,6 +130,9 @@ static int handle_rpc_error(
 
 static void catched_tl(tg_queue_t *queue, tl_t *tl)
 {
+	if (queue == NULL)
+		return;
+
 	if (tl == NULL){
 		ON_ERR(queue->tg, "%s: tl is NULL", __func__);
 		return;
@@ -311,6 +314,9 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 						queue->tg, &di->answer_msg_id_);
 				if (q){ // ok - we got msgid
 					catched_tl(q, NULL);
+				} else {
+					ON_ERR(queue->tg, "can't find queue for msg_id: "_LD_"",
+							di->answer_msg_id_);
 				}
 			}
 			break;
@@ -318,15 +324,18 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_rpc_result_t *rpc_result = 
 					(tl_rpc_result_t *)tl;
-				// get queue in list
-				tg_queue_t *q = tg_get_queue(
-						queue->tg, &rpc_result->req_msg_id_);
 				if (rpc_result->result_)
 					ON_LOG(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
 							TL_NAME_FROM_ID(rpc_result->result_->_id), 
 							rpc_result->req_msg_id_);
+				// get queue in list
+				tg_queue_t *q = tg_get_queue(
+						queue->tg, &rpc_result->req_msg_id_);
 				if (q){ // ok - we got msgid
 					catched_tl(q, rpc_result->result_);
+				} else {
+					ON_ERR(queue->tg, "can't find queue for msg_id: "_LD_"",
+							rpc_result->req_msg_id_);
 				}
 			}
 			break;
