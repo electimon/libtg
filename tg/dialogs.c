@@ -410,10 +410,8 @@ void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
 			t->hash, 
 			t->data, t->callback);
 
-	ON_LOG(t->tg, "SSSSSSSSSSSSSS");
 	if (t->on_done)
 		t->on_done(t->data);
-	ON_LOG(t->tg, "LLLLLLLLLLLLL");
 
 	free(t);
 }

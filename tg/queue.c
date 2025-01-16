@@ -200,10 +200,12 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 	if (queue->on_done)
 		queue->on_done(queue->userdata, tl);
 	
+	ON_LOG(tg, "SSSSSSSSSSSSSS");
 	// stop query
 	queue->loop = false;
 
 	pthread_mutex_unlock(&tg->queuem);
+	ON_LOG(tg, "PPPPPPPPPPPPPPPPPPP");
 }
 
 static void handle_tl(tg_queue_t *queue, tl_t *tl)
