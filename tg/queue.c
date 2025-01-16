@@ -9,6 +9,7 @@
 #include "list.h"
 #include "tg.h"
 #include "updates.h"
+#include <assert.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -40,22 +41,6 @@ static int cmp_msgid(void *msgidp, void *itemp)
 	if (*msgid == item->msgid)
 		return 1;
 	return 0;
-}
-
-static tg_queue_t *tg_get_queue(tg_t *tg, uint64_t *msgid)
-{
-	ON_LOG(tg, "%s", __func__);
-	int err = pthread_mutex_lock(&tg->queuem);
-	if (err){
-		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
-		return NULL;
-	}
-	tg_queue_t *q = list_cut(
-				&tg->queue, 
-				msgid, 
-				cmp_msgid);
-	pthread_mutex_unlock(&tg->queuem);
-	return q;
 }
 
 static bool set_dc(tg_queue_t *queue, int dc)
@@ -128,17 +113,35 @@ static int handle_rpc_error(
 	return 1;
 }
 
-static void catched_tl(tg_queue_t *queue, tl_t *tl)
+static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 {
-	if (queue == NULL)
-		return;
-
+	assert(tg);
+	ON_LOG(tg, "%s", __func__);
+	
 	if (tl == NULL){
-		ON_ERR(queue->tg, "%s: tl is NULL", __func__);
+		ON_ERR(tg, "%s: tl is NULL", __func__);
 		return;
 	}
-	ON_LOG(queue->tg, "%s: %s", __func__, 
-			TL_NAME_FROM_ID(tl->_id));
+	
+	// get queue
+	int err = pthread_mutex_lock(&tg->queuem);
+	if (err){
+		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+		return;
+	}
+	
+	tg_queue_t *queue = list_cut(
+				&tg->queue, 
+				&msg_id, 
+				cmp_msgid);
+
+	if (queue == NULL){
+		ON_ERR(tg, "can't find queue for msg_id: "_LD_"", msg_id);
+		pthread_mutex_unlock(&tg->queuem);
+		return;
+	}
+
+	ON_LOG(tg, "%s: %s", __func__, TL_NAME_FROM_ID(tl->_id));
 
 	switch (tl->_id) {
 		case id_gzip_packed:
@@ -152,18 +155,15 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 				if (_e)
 				{
 					char *err = gunzip_buf_err(_e);
-					ON_ERR(queue->tg, "%s: %s", __func__, err);
+					ON_ERR(tg, "%s: %s", __func__, err);
 					free(err);
 				}
 				tl_t *ttl = tl_deserialize(&buf);
 				buf_free(buf);
 				if (queue->on_done)
 					queue->on_done(queue->userdata, ttl);
-				// stop query
-				queue->loop = false;
 				if (ttl)
 					tl_free(ttl);
-				return;
 			}
 			break;
 		case id_bad_msg_notification:
@@ -182,8 +182,6 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 				tl_rpc_error_t *rpc_error = 
 					(tl_rpc_error_t *)tl;
 				
-				queue->loop = false; // stop receive data!
-
 				if (handle_rpc_error(queue, rpc_error))
 				{
 					char *err = tg_strerr(tl);
@@ -191,6 +189,9 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 					free(err);
 					break; // run on_done
 				}
+
+				pthread_mutex_unlock(&tg->queuem);
+				queue->loop = false; // stop receive data!
 				return; // do not run on_done!
 			}
 			break;
@@ -198,8 +199,11 @@ static void catched_tl(tg_queue_t *queue, tl_t *tl)
 
 	if (queue->on_done)
 		queue->on_done(queue->userdata, tl);
+	
 	// stop query
 	queue->loop = false;
+
+	pthread_mutex_unlock(&tg->queuem);
 }
 
 static void handle_tl(tg_queue_t *queue, tl_t *tl)
@@ -299,25 +303,14 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				tl_msg_detailed_info_t *di = 
 					(tl_msg_detailed_info_t *)tl;
 				tg_add_msgid(queue->tg, di->msg_id_);
-				tg_queue_t *q = tg_get_queue(
-						queue->tg, &di->answer_msg_id_);
-				if (q){ // ok - we got msgid
-					catched_tl(q, NULL);
-				}
+				catched_tl(q->tg, di->answer_msg_id_, NULL);
 			}
 			break;
 		case id_msg_new_detailed_info:
 			{
 				tl_msg_new_detailed_info_t *di = 
 					(tl_msg_new_detailed_info_t *)tl;
-				tg_queue_t *q = tg_get_queue(
-						queue->tg, &di->answer_msg_id_);
-				if (q){ // ok - we got msgid
-					catched_tl(q, NULL);
-				} else {
-					ON_ERR(queue->tg, "can't find queue for msg_id: "_LD_"",
-							di->answer_msg_id_);
-				}
+				catched_tl(q->tg, di->answer_msg_id_, NULL);
 			}
 			break;
 		case id_rpc_result:
@@ -328,14 +321,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					ON_LOG(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
 							TL_NAME_FROM_ID(rpc_result->result_->_id), 
 							rpc_result->req_msg_id_);
-				// get queue in list
-				tg_queue_t *q = tg_get_queue(
-						queue->tg, &rpc_result->req_msg_id_);
-				if (q){ // ok - we got msgid
-					catched_tl(q, rpc_result->result_);
-				} else {
-					ON_ERR(queue->tg, "can't find queue for msg_id: "_LD_"",
-							rpc_result->req_msg_id_);
+					catched_tl(q->tg, rpc_result->req_msg_id_, rpc_result->result_);
 				}
 			}
 			break;
