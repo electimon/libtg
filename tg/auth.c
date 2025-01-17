@@ -9,6 +9,34 @@
 #include "../mtx/include/api.h"
 #include <sys/socket.h>
 
+static bool tg_set_dc(tg_t *tg, int dc)
+{
+	ON_LOG(tg, "TG MIGRATE TO: %d", dc);
+	switch (dc) {
+		case 1:
+			strcpy(tg->ip, DC1);
+			return true;
+		case 2:
+			strcpy(tg->ip, DC2);
+			return true;
+		case 3:
+			strcpy(tg->ip, DC3);
+			return true;
+		case 4:
+			strcpy(tg->ip, DC4);
+			return true;
+		case 5:
+			strcpy(tg->ip, DC5);
+			return true;
+
+		default:
+			break;
+			
+	}
+	return false;
+}
+
+
 buf_t initConnection(tg_t *tg, buf_t query)
 {
 	buf_t initConnection = 
@@ -60,8 +88,24 @@ tg_is_authorized(tg_t *tg)
 		tl_t *tl = 
 			tg_send_query_sync(tg, &init); 
 		buf_free(init);
+
+		if (tl == NULL){
+			return NULL;
+		}
+
+		if (tl->_id == id_rpc_error){
+			tl_rpc_error_t *error = (tl_rpc_error_t *)tl;
+			char *str = 
+				strstr((char *)error->error_message_.data, "PHONE_MIGRATE_");
+			if (str){
+				str += strlen("PHONE_MIGRATE_");
+				int dc = atoi(str);
+				tg_set_dc(tg, dc);
+				return tg_is_authorized(tg);
+			}
+		}
 		
-		if (tl && tl->_id == id_vector){
+		if (tl->_id == id_vector){
 			tl_t *user = tl_deserialize(&((tl_vector_t *)tl)->data_);
 			if (user && user->_id == id_user){
 				return (tl_user_t *)user;
@@ -123,6 +167,25 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 		tg_send_query_sync(tg, &init); 
 	buf_free(init);
 
+	if (tl == NULL){
+		return NULL;
+	}
+
+	if (tl->_id == id_rpc_error){
+		tl_rpc_error_t *error = (tl_rpc_error_t *)tl;
+		char *str = 
+			strstr((char *)error->error_message_.data, "PHONE_MIGRATE_");
+		if (str){
+			str += strlen("PHONE_MIGRATE_");
+			int dc = atoi(str);
+			tg_set_dc(tg, dc);
+			// generate auth key
+			api.net.close(shared_rc.net);
+			tg->key.size = 0;
+			return tg_auth_sendCode(tg, phone_number);
+		}
+	}
+		
 	if (tl && tl->_id == id_auth_sentCode){
 		return (tl_auth_sentCode_t *)tl;
 	}

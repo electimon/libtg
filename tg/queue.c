@@ -118,11 +118,6 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 	assert(tg);
 	ON_LOG(tg, "%s", __func__);
 	
-	if (tl == NULL){
-		ON_ERR(tg, "%s: tl is NULL", __func__);
-		return;
-	}
-	
 	// get queue
 	int err = pthread_mutex_lock(&tg->queuem);
 	if (err){
@@ -147,6 +142,14 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 	pthread_mutex_unlock(&tg->queuem); // unlock list
 	if (err){
 		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+		return;
+	}
+
+	if (tl == NULL){
+		ON_ERR(tg, "%s: tl is NULL", __func__);
+		if (queue->on_done)
+			queue->on_done(queue->userdata, tl);
+		pthread_mutex_unlock(&queue->m); // unlock
 		return;
 	}
 		
