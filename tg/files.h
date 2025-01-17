@@ -134,4 +134,12 @@ int tg_document_send(
 		const char *message,
 		void *progressp, int (*progress)(void *, int, int));
 
+int tg_contact_send(
+		tg_t *tg, tg_peer_t *peer, 
+		const char *phone_number,
+		const char *first_name,
+		const char *last_name,
+		const char *vcard,
+		const char *message);
+
 #endif /* ifndef TG_FILES_H */

@@ -717,3 +717,59 @@ tg_document_t *tg_voice_message(tg_t *tg, const char *filepath)
 	d->audio_voice = true;
 	return d;
 }
+
+int tg_contact_send(
+		tg_t *tg, tg_peer_t *peer, 
+		const char *phone_number,
+		const char *first_name,
+		const char *last_name,
+		const char *vcard,
+		const char *message)
+{
+	InputMedia inputMedia = tl_inputMediaContact(
+			phone_number, 
+			first_name, 
+			last_name, 
+			vcard);
+	InputPeer inputPeer = tg_inputPeer(*peer);
+	buf_t random_id = buf_rand(8);
+
+	buf_t sendMedia = tl_messages_sendMedia(
+				false, 
+				false, 
+				false, 
+				false, 
+				false, 
+				false, 
+				&inputPeer, 
+				NULL, 
+				&inputMedia, 
+				message?message:"", 
+				buf_get_ui64(random_id), 
+				NULL, 
+				NULL, 
+				0, 
+				NULL, 
+				NULL, 
+				NULL, 
+				NULL);
+
+	buf_free(inputMedia);
+	buf_free(inputPeer);
+	buf_free(random_id);
+
+	tl_t *tl = tg_send_query_sync(tg, &sendMedia);
+	buf_free(sendMedia);
+
+	if (tl == NULL)
+		return 1;
+
+	if (tl->_id == id_rpc_error){
+		tl_free(tl);
+		return 1;
+	}
+
+	tl_free(tl);
+	return 0;
+}
+
