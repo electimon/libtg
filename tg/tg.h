@@ -8,8 +8,8 @@
 #include "../tl/str.h"
 #include "list.h"
 
-//#define SERVER_IP   "149.154.167.50"
-#define SERVER_IP   "149.154.175.57"
+#define SERVER_IP   "149.154.167.50"
+//#define SERVER_IP   "149.154.175.57"
 #define SERVER_PORT 443
 
 struct tg_ {
