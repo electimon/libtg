@@ -13,21 +13,21 @@ static bool tg_set_dc(tg_t *tg, int dc)
 {
 	ON_LOG(tg, "TG MIGRATE TO: %d", dc);
 	switch (dc) {
-		case 1:
-			strcpy(tg->ip, DC1);
-			return true;
-		case 2:
-			strcpy(tg->ip, DC2);
-			return true;
-		case 3:
-			strcpy(tg->ip, DC3);
-			return true;
-		case 4:
-			strcpy(tg->ip, DC4);
-			return true;
-		case 5:
-			strcpy(tg->ip, DC5);
-			return true;
+		/*case 1:*/
+			/*strcpy(tg->ip, DC1);*/
+			/*return true;*/
+		/*case 2:*/
+			/*strcpy(tg->ip, DC2);*/
+			/*return true;*/
+		/*case 3:*/
+			/*strcpy(tg->ip, DC3);*/
+			/*return true;*/
+		/*case 4:*/
+			/*strcpy(tg->ip, DC4);*/
+			/*return true;*/
+		/*case 5:*/
+			/*strcpy(tg->ip, DC5);*/
+			/*return true;*/
 
 		default:
 			break;
@@ -71,48 +71,48 @@ tg_is_authorized(tg_t *tg)
 	if (tg->key.size){
 		ON_LOG(tg, "have auth_key with len: %d", tg->key.size);
 
+		// init connection and get config
+		buf_t getConfig = tl_help_getConfig();
+		buf_t init = initConnection(tg, getConfig);
+		buf_free(getConfig);
+		
+		tl_t *tl = tg_send_query_sync(tg, &init); 
+		buf_free(init);
+
+		if (tl == NULL || tl->_id !=id_config){
+			ON_ERR(tg, "can't get config!");
+			return NULL;
+		}
+
+		tg->config = (tl_config_t *)tl;
+		tl = NULL;
+
 		// check if authorized
 		InputUser iuser = tl_inputUserSelf();
-		ON_LOG_BUF(tg, iuser, 
-				"%s: InputUser: ", __func__);
+		/*ON_LOG_BUF(tg, iuser, "%s: InputUser: ", __func__);*/
 		
 		buf_t getUsers = 
 			tl_users_getUsers(&iuser, 1);	
-		ON_LOG_BUF(tg, getUsers, 
-				"%s: getUsers: ", __func__);
+		/*ON_LOG_BUF(tg, getUsers, "%s: getUsers: ", __func__);*/
 		buf_free(iuser);
 
-		buf_t init = initConnection(tg, getUsers);
+		tl = tg_send_query_sync(tg, &getUsers); 
 		buf_free(getUsers);
-		
-		tl_t *tl = 
-			tg_send_query_sync(tg, &init); 
-		buf_free(init);
 
 		if (tl == NULL){
 			return NULL;
 		}
 
-		if (tl->_id == id_rpc_error){
-			tl_rpc_error_t *error = (tl_rpc_error_t *)tl;
-			char *str = 
-				strstr((char *)error->error_message_.data, "PHONE_MIGRATE_");
-			if (str){
-				str += strlen("PHONE_MIGRATE_");
-				int dc = atoi(str);
-				tg_set_dc(tg, dc);
-				return tg_is_authorized(tg);
-			}
-		}
-		
 		if (tl->_id == id_vector){
-			tl_t *user = tl_deserialize(&((tl_vector_t *)tl)->data_);
+			tl_vector_t *vector = (tl_vector_t *)tl;
+			ON_LOG(tg, "got vector with len: %d", vector->len_);
+			/*ON_LOG_BUF(tg, vector->data_, "VECTOR DATA: ");*/
+			tl_t *user = tl_deserialize(&vector->data_);
 			if (user && user->_id == id_user){
 				return (tl_user_t *)user;
 			}
 		}
-		if (tl)
-			tl_free(tl);
+
 		return NULL;
 	}
 
@@ -123,7 +123,23 @@ tg_is_authorized(tg_t *tg)
 tl_auth_sentCode_t *
 tg_auth_sendCode(tg_t *tg, const char *phone_number) 
 {
+	tl_t *tl = NULL;
 	ON_LOG(tg, "%s", __func__);
+	
+	// init connection and get config
+	buf_t getConfig = tl_help_getConfig();
+	buf_t init = initConnection(tg, getConfig);
+	buf_free(getConfig);
+	
+	tl = tg_send_query_sync(tg, &init); 
+	buf_free(init);
+
+	if (tl == NULL || tl->_id !=id_config){
+		ON_ERR(tg, "can't get config!");
+		return NULL;
+	}
+
+	tg->config = (tl_config_t *)tl;
 	
 	// get tokens from database 
 	buf_t t[20]; int tn = 0;
@@ -160,12 +176,8 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 			"%s: sendCode: ", __func__);
 	buf_free(codeSettings);
 
-	buf_t init = initConnection(tg, sendCode);
+	tl = tg_send_query_sync(tg, &sendCode); 
 	buf_free(sendCode);
-
-	tl_t *tl = 
-		tg_send_query_sync(tg, &init); 
-	buf_free(init);
 
 	if (tl == NULL){
 		return NULL;
@@ -178,7 +190,11 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 		if (str){
 			str += strlen("PHONE_MIGRATE_");
 			int dc = atoi(str);
-			tg_set_dc(tg, dc);
+			const char *ip = 
+				tg_ip_address_for_dc(tg, dc);
+			if (!ip)
+				return NULL;
+			tg_set_server_address(tg, ip, 443);
 			// generate auth key
 			api.net.close(shared_rc.net);
 			tg->key.size = 0;
@@ -232,6 +248,9 @@ tg_auth_signIn(tg_t *tg, tl_auth_sentCode_t *sentCode,
 		
 		// save auth_key_id 
 		auth_key_to_database(tg, tg->key);
+
+		// save ip address
+		ip_address_to_database(tg, tg->ip);
 		
 		return (tl_user_t *)auth->user_;
 	}

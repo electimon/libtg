@@ -304,22 +304,15 @@ int main(int argc, char *argv[])
 		/*return 1;*/
 	/*}*/
 
-	buf_t getConfig = tl_help_getConfig();
-	buf_t init = initConnection(tg, getConfig);
-	tl_t *tl = tg_send_query_sync(tg, &init);
-	if (!tl){
-		printf("TL IS NULL\n");
-		return 1;
-	}
-	if (tl->_id == id_config){
+	if (tg->config){
 		// handle config
-		tl_config_t *config = (tl_config_t *)tl;
 		int	i;
-		for (i = 0; i < config->dc_options_len; ++i) {
+		for (i = 0; i < tg->config->dc_options_len; ++i) {
 			tl_dcOption_t *option = 
-				(tl_dcOption_t *)config->dc_options_[i];
+				(tl_dcOption_t *)tg->config->dc_options_[i];
 
-			printf("%d: %s\n", option->id_, option->ip_address_.data);
+			printf("%d: %s: %d\n", 
+					option->id_, option->ip_address_.data, option->port_);
 		}
 	}
 
@@ -366,11 +359,11 @@ int main(int argc, char *argv[])
 			//tg, query_cb, 
 			//NULL, NULL);
 
-	tg_peer_t peer = {
-		TG_PEER_TYPE_CHANNEL,
-		1326223284,
-		-5244509236001112417,
-	};
+	/*tg_peer_t peer = {*/
+		/*TG_PEER_TYPE_CHANNEL,*/
+		/*1326223284,*/
+		/*-5244509236001112417,*/
+	/*};*/
 
 	//tg_get_peer_photo_file(
 			//tg, 
@@ -397,10 +390,10 @@ int main(int argc, char *argv[])
 			 /*NULL, dialogs_callback);*/
 	/*printf("GOT %d dialogs\n", count);*/
 
-	tg_get_dialogs_async(tg, 40,
-			 time(NULL),
-			 NULL, NULL,
-			 NULL, dialogs_callback, on_done);
+	/*tg_get_dialogs_async(tg, 40,*/
+			 /*time(NULL),*/
+			 /*NULL, NULL,*/
+			 /*NULL, dialogs_callback, on_done);*/
 
 
 
@@ -436,23 +429,23 @@ int main(int argc, char *argv[])
 			//&m, 
 			//messages_callback_document);
 
-	for (int i = 0; i < 10; ++i) {
-	char s[20];
-	sprintf(s, "ID: %d", i);
+	/*for (int i = 0; i < 10; ++i) {*/
+	/*char s[20];*/
+	/*sprintf(s, "ID: %d", i);*/
 		
-	tg_messages_get_history_async(
-			tg,
-			peer, 
-			0, 
-			time(NULL), 
-			0, 
-			20, 
-			0, 
-			0, 
-			NULL, 
-			strdup(s), 
-			messages_callback_no_log,
-			on_done);
+	/*tg_messages_get_history_async(*/
+			/*tg,*/
+			/*peer, */
+			/*0, */
+			/*time(NULL), */
+			/*0, */
+			/*20, */
+			/*0, */
+			/*0, */
+			/*NULL, */
+			/*strdup(s), */
+			/*messages_callback_no_log,*/
+			/*on_done);*/
 	
 	/*tg_get_dialogs_async(tg, 40,*/
 			 /*time(NULL),*/
@@ -462,9 +455,9 @@ int main(int argc, char *argv[])
 
 
 	/*//sleep(1);*/
-	}
+	/*}*/
 
-	tg_queue_cancell_all(tg);
+	/*tg_queue_cancell_all(tg);*/
 
 
 	//printf("MESSAGE WITH PHOTO:\n");

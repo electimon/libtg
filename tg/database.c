@@ -105,6 +105,7 @@ int database_init(tg_t *tg, const char *database_path)
 
 	// create tables
 	char sql[] = 
+		"CREATE TABLE IF NOT EXISTS ips (id INT); "
 		"CREATE TABLE IF NOT EXISTS phone_numbers (id INT); "
 		"CREATE TABLE IF NOT EXISTS auth_tokens (id INT); "
 		"CREATE TABLE IF NOT EXISTS auth_keys (id INT); "
@@ -169,10 +170,12 @@ int phone_number_to_database(
 		tg_t *tg, const char *phone_number)
 {
 	pthread_mutex_lock(&tg->databasem); // lock
+	
+	tg_sqlite3_exec(tg,
+			"ALTER TABLE \'phone_numbers\' ADD COLUMN \'phone_number\' TEXT; ");
+	
 	char sql[BUFSIZ];
-
 	sprintf(sql, 
-			"ALTER TABLE \'phone_numbers\' ADD COLUMN \'phone_number\' TEXT; "
 			"INSERT INTO \'phone_numbers\' (\'id\') "
 			"SELECT %d "
 			"WHERE NOT EXISTS (SELECT 1 FROM phone_numbers WHERE id = %d); "
@@ -454,4 +457,42 @@ int peer_photo_to_database(tg_t *tg,
 	free(sql.str);
 	pthread_mutex_unlock(&tg->databasem); // unlock
 	return ret;
+}
+
+int ip_address_to_database(tg_t *tg, const char *ip)
+{
+	pthread_mutex_lock(&tg->databasem); // lock
+
+	tg_sqlite3_exec(tg,
+		"ALTER TABLE \'ips\' ADD COLUMN \'ip\' TEXT; ");
+
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"INSERT INTO \'ips\' (\'id\') "
+			"SELECT %d "
+			"WHERE NOT EXISTS (SELECT 1 FROM ips WHERE id = %d); "
+			"UPDATE \'ips\' SET \'ip\' = \'%s\', id = %d; "
+		,tg->id, tg->id, ip, tg->id);
+	int ret = tg_sqlite3_exec(tg, sql);
+	pthread_mutex_unlock(&tg->databasem); // unlock
+  return ret;
+}
+
+char *ip_address_from_database(tg_t *tg)
+{
+	//pthread_mutex_lock(&tg->databasem); // lock
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"SELECT ip FROM ips WHERE id = %d;"
+			, tg->id);
+	char buf[BUFSIZ] = {0};
+	tg_sqlite3_for_each(tg, sql, stmt)
+		strcpy(buf, (char *)sqlite3_column_text(stmt, 0));
+	
+	//pthread_mutex_unlock(&tg->databasem); // unlock
+
+	if (*buf)
+		return strdup(buf);
+	else
+		return NULL;
 }

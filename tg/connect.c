@@ -23,6 +23,19 @@ static void on_err(void *d, const char *err)
 		t->callback(t->userdata, TG_AUTH_ERROR, NULL, err);
 }
 
+static void on_log(void *d, const char *msg)
+{
+	struct tg_connect_t *t = d;
+	if (msg)
+		strcpy(t->error, msg);
+	else
+		t->error[0] = 0;
+
+	if (t->callback)
+		t->callback(t->userdata, TG_AUTH_INFO, NULL, msg);
+}
+
+
 #define _TG_CB(auth, tl, ...)\
 	({\
 	 char err[256];\
@@ -51,10 +64,10 @@ int tg_connect(
 	/*void (*_prev_on_err_call)= tg->on_err;*/
 
 	tg_set_on_error(tg, &t, on_err);
+	tg_set_on_log(tg, &t, on_log);
 
 	// check if authorized
-	tl_user_t *user = 
-		tg_is_authorized(tg);
+	tl_user_t *user = tg_is_authorized(tg);
 	if (user){
 		_TG_CB(TG_AUTH_SUCCESS, user, "authorized!");
 		return 0;

@@ -39,8 +39,15 @@ tg_t *tg_new(
 	tg->pubkey = pem;
 
 	// set server address
-	strncpy(tg->ip, SERVER_IP,
+	const char *ip = ip_address_from_database(tg);
+	if (ip)
+		strncpy(tg->ip, ip,
 			sizeof(tg->ip) - 1);
+	else
+		strncpy(tg->ip, SERVER_IP,
+			sizeof(tg->ip) - 1);
+	
+	// set port
 	tg->port = SERVER_PORT;
 
 	// set auth_key
@@ -171,4 +178,34 @@ int tg_account_register_ios(tg_t *tg, const char *token, bool development)
 	tl_free(tl);
 	
 	return ret;
+}
+
+tl_config_t *tg_get_config(tg_t *tg){
+	buf_t query = tl_help_getConfig();
+	tl_t *tl = tg_send_query_sync(tg, &query);
+	buf_free(query);
+	if (tl == NULL)
+		return NULL;
+
+	if (tl->_id != id_config)
+		return NULL;
+
+	return (tl_config_t *)tl;
+}
+
+const char *tg_ip_address_for_dc(tg_t *tg, int dc){
+	if (!tg->config)
+		return NULL;
+	int i;
+	for (i = 0; i < tg->config->dc_options_len; ++i) {
+		tl_dcOption_t *dco = 
+			(tl_dcOption_t *)tg->config->dc_options_[i];
+		if (!dco)
+			continue;
+		if (dco->id_ == dc)
+			return (const char *)dco->ip_address_.data;	
+	}
+
+	ON_ERR(tg, "can't get ip address for dc: %d", dc);
+	return NULL;
 }

@@ -8,11 +8,9 @@
 #include "../tl/str.h"
 #include "list.h"
 
-#define DC1 "149.154.175.53"    // MIA, Miami FL, USA
-#define DC2 "149.154.167.51"    // AMS, Amsterdam, NL 
-#define DC3 "149.154.175.100"   // MIA, Miami FL, USA
-#define DC4 "149.154.167.91"    // AMS, Amsterdam, NL
-#define DC5 "91.108.56.130"     // SIN, Singapore, SG
+//#define SERVER_IP   "149.154.167.50"
+#define SERVER_IP   "149.154.175.57"
+#define SERVER_PORT 443
 
 struct tg_ {
 	int id;
@@ -25,6 +23,7 @@ struct tg_ {
 	int port;
 	list_t *queue;
 	pthread_mutex_t queuem;
+	tl_config_t *config;
 	void *on_err_data;
 	void (*on_err)(void *on_err_data, const char *err);
 	void *on_log_data;
@@ -68,6 +67,9 @@ int phone_number_to_database(
 		tg_t *tg, const char *phone_number);
 
 int auth_token_to_database(tg_t *tg, const char *auth_token);
+
+int ip_address_to_database(tg_t *tg, const char *ip);
+char *ip_address_from_database(tg_t *tg);
 
 int auth_key_to_database(
 		tg_t *tg, buf_t auth_key);
@@ -113,5 +115,8 @@ tl_t * tg_send_query_to_net(
 	})
 
 buf_t image_from_photo_stripped(buf_t photoStreppedData);
+
+tl_config_t *tg_get_config(tg_t *tg);
+const char *tg_ip_address_for_dc(tg_t *tg, int dc);
 
 #endif /* ifndef TG_H_ */

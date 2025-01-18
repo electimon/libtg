@@ -46,27 +46,27 @@ static int cmp_msgid(void *msgidp, void *itemp)
 static bool set_dc(tg_queue_t *queue, int dc)
 {
 	ON_LOG(queue->tg, "MIGRATE TO: %d", dc);
-	switch (dc) {
-		case 1:
-			strcpy(queue->ip, DC1);
-			return true;
-		case 2:
-			strcpy(queue->ip, DC2);
-			return true;
-		case 3:
-			strcpy(queue->ip, DC3);
-			return true;
-		case 4:
-			strcpy(queue->ip, DC4);
-			return true;
-		case 5:
-			strcpy(queue->ip, DC5);
-			return true;
+	//switch (dc) {
+		//case 1:
+			//strcpy(queue->ip, DC1);
+			//return true;
+		//case 2:
+			//strcpy(queue->ip, DC2);
+			//return true;
+		//case 3:
+			//strcpy(queue->ip, DC3);
+			//return true;
+		//case 4:
+			//strcpy(queue->ip, DC4);
+			//return true;
+		//case 5:
+			//strcpy(queue->ip, DC5);
+			//return true;
 
-		default:
-			break;
+		//default:
+			//break;
 			
-	}
+	//}
 	return false;
 }
 

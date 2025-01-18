@@ -541,8 +541,7 @@ int append_deserialize_table(
 
 	// copy buf
 	fputs(
-			"\tobj->_buf = buf_new();\n"
-					"\tobj->_buf = buf_cat(obj->_buf, *buf);\n"
+			"\tobj->_buf = buf_add_buf(*buf);\n"
 				, g->deserialize_table_c);
 
 
@@ -553,7 +552,7 @@ int append_deserialize_table(
 	if (strcmp(m->name, "vector") == 0){
 		fputs("\tobj->len_ = deserialize_ui32(buf);\n"
 				, g->deserialize_table_c);
-		fputs("\tobj->data_ = *buf;\n", 
+		fputs("\tobj->data_ = buf_add_buf(*buf);\n", 
 				g->deserialize_table_c);
 	}
 		
