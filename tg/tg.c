@@ -39,10 +39,12 @@ tg_t *tg_new(
 	tg->pubkey = pem;
 
 	// set server address
-	const char *ip = ip_address_from_database(tg);
-	if (ip)
+	char *ip = ip_address_from_database(tg);
+	if (ip){
 		strncpy(tg->ip, ip,
 			sizeof(tg->ip) - 1);
+		free(ip);
+	}
 	else
 		strncpy(tg->ip, SERVER_IP,
 			sizeof(tg->ip) - 1);
@@ -194,8 +196,10 @@ tl_config_t *tg_get_config(tg_t *tg){
 }
 
 const char *tg_ip_address_for_dc(tg_t *tg, int dc){
-	if (!tg->config)
+	if (!tg->config){
+		ON_ERR(tg, "%s: no config!", __func__);
 		return NULL;
+	}
 	int i;
 	for (i = 0; i < tg->config->dc_options_len; ++i) {
 		tl_dcOption_t *dco = 
@@ -206,6 +210,7 @@ const char *tg_ip_address_for_dc(tg_t *tg, int dc){
 			return (const char *)dco->ip_address_.data;	
 	}
 
-	ON_ERR(tg, "can't get ip address for dc: %d", dc);
+	ON_ERR(tg, "%s: can't get ip address for dc: %d", 
+			__func__, dc);
 	return NULL;
 }

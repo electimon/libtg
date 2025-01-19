@@ -9,34 +9,6 @@
 #include "../mtx/include/api.h"
 #include <sys/socket.h>
 
-static bool tg_set_dc(tg_t *tg, int dc)
-{
-	ON_LOG(tg, "TG MIGRATE TO: %d", dc);
-	switch (dc) {
-		/*case 1:*/
-			/*strcpy(tg->ip, DC1);*/
-			/*return true;*/
-		/*case 2:*/
-			/*strcpy(tg->ip, DC2);*/
-			/*return true;*/
-		/*case 3:*/
-			/*strcpy(tg->ip, DC3);*/
-			/*return true;*/
-		/*case 4:*/
-			/*strcpy(tg->ip, DC4);*/
-			/*return true;*/
-		/*case 5:*/
-			/*strcpy(tg->ip, DC5);*/
-			/*return true;*/
-
-		default:
-			break;
-			
-	}
-	return false;
-}
-
-
 buf_t initConnection(tg_t *tg, buf_t query)
 {
 	buf_t initConnection = 

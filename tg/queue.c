@@ -43,33 +43,6 @@ static int cmp_msgid(void *msgidp, void *itemp)
 	return 0;
 }
 
-static bool set_dc(tg_queue_t *queue, int dc)
-{
-	ON_LOG(queue->tg, "MIGRATE TO: %d", dc);
-	//switch (dc) {
-		//case 1:
-			//strcpy(queue->ip, DC1);
-			//return true;
-		//case 2:
-			//strcpy(queue->ip, DC2);
-			//return true;
-		//case 3:
-			//strcpy(queue->ip, DC3);
-			//return true;
-		//case 4:
-			//strcpy(queue->ip, DC4);
-			//return true;
-		//case 5:
-			//strcpy(queue->ip, DC5);
-			//return true;
-
-		//default:
-			//break;
-			
-	//}
-	return false;
-}
-
 static int handle_rpc_error(
 		tg_queue_t *queue, tl_rpc_error_t *error)
 {
@@ -85,28 +58,30 @@ static int handle_rpc_error(
 	if (str){
 		str += strlen("FILE_MIGRATE_");
 		int dc = atoi(str);
-		if (set_dc(queue, dc))
-		{
-			// export auth to dc
-			buf_t export_auth = 
-				tl_auth_exportAuthorization(dc);
-			tl_t *ea = 
-				tg_send_query_sync(queue->tg, &export_auth);
-			buf_free(export_auth);
-			// handle answer
-			/* TODO: handle tl answer <16-01-25, kuzmich> */
+		const char *ip = tg_ip_address_for_dc(queue->tg, dc); 
+		if (ip == NULL)
+			return 1;
+		
+		// export auth to dc
+		buf_t export_auth = 
+			tl_auth_exportAuthorization(dc);
+		tl_t *ea = 
+			tg_send_query_sync(queue->tg, &export_auth);
+		buf_free(export_auth);
+		// handle answer
+		/* TODO: handle tl answer <16-01-25, kuzmich> */
 
-			// resend queue
-			tg_queue_new(
-					queue->tg, 
-					&queue->query, 
-					queue->ip,
-					queue->port,
-					queue->userdata, 
-					queue->on_done, 
-					queue->progressp, 
-					queue->progress);
-		}
+		// resend queue
+		tg_queue_new(
+				queue->tg, 
+				&queue->query, 
+				queue->ip,
+				queue->port,
+				queue->userdata, 
+				queue->on_done, 
+				queue->progressp, 
+				queue->progress);
+		
 		return 0;
 	}
 
@@ -322,6 +297,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				tl_msg_detailed_info_t *di = 
 					(tl_msg_detailed_info_t *)tl;
 				tg_add_msgid(queue->tg, di->msg_id_);
+				queue->loop = false; // stop receive data!
 				catched_tl(queue->tg, di->answer_msg_id_, NULL);
 			}
 			break;
@@ -329,6 +305,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_msg_new_detailed_info_t *di = 
 					(tl_msg_new_detailed_info_t *)tl;
+				queue->loop = false; // stop receive data!
 				catched_tl(queue->tg, di->answer_msg_id_, NULL);
 			}
 			break;
@@ -340,6 +317,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					ON_LOG(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
 							TL_NAME_FROM_ID(rpc_result->result_->_id), 
 							rpc_result->req_msg_id_);
+				queue->loop = false; // stop receive data!
 				catched_tl(queue->tg, rpc_result->req_msg_id_, rpc_result->result_);
 			}
 			break;
