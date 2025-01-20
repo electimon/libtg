@@ -143,6 +143,6 @@ int tg_contact_send(
 		const char *message);
 
 int tg_send_geopoint(tg_t *tg, tg_peer_t *peer, 
-		double lat, double lon, const char *message);
+		uint64_t lat, uint64_t lon, const char *message);
 
 #endif /* ifndef TG_FILES_H */

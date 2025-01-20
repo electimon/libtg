@@ -774,7 +774,7 @@ int tg_contact_send(
 }
 
 int tg_send_geopoint(tg_t *tg, tg_peer_t *peer, 
-		double lat, double lon, const char *message)
+		uint64_t lat, uint64_t lon, const char *message)
 {
 	InputGeoPoint inputGeoPoint = tl_inputGeoPoint(
 			lat, 

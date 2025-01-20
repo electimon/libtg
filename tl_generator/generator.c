@@ -647,7 +647,7 @@ int append_deserialize_table(
 				else if (strcmp(m->args[i].type, "double") == 0)
 				{
 					fputs(STR(buf, BLEN,
-					  "\t\tobj->%s_ = (double)deserialize_ui64(buf);\n"
+					  "\t\tobj->%s_ = deserialize_ui64(buf);\n"
 					, m->args[i].name)
 					, g->deserialize_table_c);				
 				}
@@ -746,10 +746,10 @@ int append_deserialize_table(
 					else if (strcmp(type, "double") == 0)
 					{
 						fputs(STR(buf, BLEN,
-							"\t\t\tobj->%s_ = (double *)MALLOC(obj->%s_len * sizeof(double), return NULL);\n"
+							"\t\t\tobj->%s_ = (uint64_t *)MALLOC(obj->%s_len * sizeof(uint64_t), return NULL);\n"
 							"\t\t\tint i;\n"
 							"\t\t\tfor(i=0; i<obj->%s_len; ++i){\n"
-							"\t\t\t\tobj->%s_[i] = (double)deserialize_ui64(buf);\n"
+							"\t\t\t\tobj->%s_[i] = deserialize_ui64(buf);\n"
 							"\t\t\t}\n"
 						, m->args[i].name, m->args[i].name, m->args[i].name, m->args[i].name)
 						, g->deserialize_table_c);
@@ -920,6 +920,9 @@ int append_struct(
 			type = "bool";
 		
 		if (strcmp(type, "long") == 0)
+			type = "uint64_t";
+		
+		if (strcmp(type, "double") == 0)
 			type = "uint64_t";
 		
 		if (strcmp(type, "int") == 0)
@@ -1094,6 +1097,9 @@ int append_methods_header(
 		if (strcmp(type, "long") == 0)
 			type = "uint64_t";
 		
+		if (strcmp(type, "double") == 0)
+			type = "uint64_t";
+		
 		if (strcmp(type, "int") == 0)
 			type = "uint32_t";
 		
@@ -1216,6 +1222,9 @@ int append_methods(
 			type = "bool";
 		
 		if (strcmp(type, "long") == 0)
+			type = "uint64_t";
+		
+		if (strcmp(type, "double") == 0)
 			type = "uint64_t";
 		
 		if (strcmp(type, "int") == 0)
