@@ -774,11 +774,11 @@ int tg_contact_send(
 }
 
 int tg_send_geopoint(tg_t *tg, tg_peer_t *peer, 
-		uint64_t lat, uint64_t lon, const char *message)
+		double lat, double lon, const char *message)
 {
 	InputGeoPoint inputGeoPoint = tl_inputGeoPoint(
-			(double)lat, 
-			(double)lon, 
+			lat, 
+			lon, 
 			NULL);
 	InputMedia inputMedia = 
 		tl_inputMediaGeoPoint(&inputGeoPoint);

@@ -647,7 +647,7 @@ int append_deserialize_table(
 				else if (strcmp(m->args[i].type, "double") == 0)
 				{
 					fputs(STR(buf, BLEN,
-					  "\t\tobj->%s_ = deserialize_ui64(buf);\n"
+					  "\t\tobj->%s_ = (double)deserialize_ui64(buf);\n"
 					, m->args[i].name)
 					, g->deserialize_table_c);				
 				}
@@ -749,7 +749,7 @@ int append_deserialize_table(
 							"\t\t\tobj->%s_ = (double *)MALLOC(obj->%s_len * sizeof(double), return NULL);\n"
 							"\t\t\tint i;\n"
 							"\t\t\tfor(i=0; i<obj->%s_len; ++i){\n"
-							"\t\t\t\tobj->%s_[i] = deserialize_ui64(buf);\n"
+							"\t\t\t\tobj->%s_[i] = (double)deserialize_ui64(buf);\n"
 							"\t\t\t}\n"
 						, m->args[i].name, m->args[i].name, m->args[i].name, m->args[i].name)
 						, g->deserialize_table_c);
