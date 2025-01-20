@@ -191,6 +191,9 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				//return; // do not run on_done!
 			}
 			break;
+		
+		default:
+			break;
 	}
 
 	if (queue->on_done)
