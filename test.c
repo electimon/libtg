@@ -304,17 +304,17 @@ int main(int argc, char *argv[])
 		/*return 1;*/
 	/*}*/
 
-	if (tg->config){
-		// handle config
-		int	i;
-		for (i = 0; i < tg->config->dc_options_len; ++i) {
-			tl_dcOption_t *option = 
-				(tl_dcOption_t *)tg->config->dc_options_[i];
+	/*if (tg->config){*/
+		/*// handle config*/
+		/*int	i;*/
+		/*for (i = 0; i < tg->config->dc_options_len; ++i) {*/
+			/*tl_dcOption_t *option = */
+				/*(tl_dcOption_t *)tg->config->dc_options_[i];*/
 
-			printf("%d: %s: %d\n", 
-					option->id_, option->ip_address_.data, option->port_);
-		}
-	}
+			/*printf("%d: %s: %d\n", */
+					/*option->id_, option->ip_address_.data, option->port_);*/
+		/*}*/
+	/*}*/
 
 	//InputUser iuser = tl_inputUserSelf();
 	//buf_t getUsers = 
@@ -390,10 +390,10 @@ int main(int argc, char *argv[])
 			 /*NULL, dialogs_callback);*/
 	/*printf("GOT %d dialogs\n", count);*/
 
-	/*tg_get_dialogs_async(tg, 40,*/
-			 /*time(NULL),*/
-			 /*NULL, NULL,*/
-			 /*NULL, dialogs_callback, on_done);*/
+	tg_get_dialogs_async(tg,100,
+			 time(NULL),
+			 NULL, NULL,
+			 NULL, dialogs_callback, on_done);
 
 
 

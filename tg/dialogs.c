@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 17.01.2025
+ * Last Modified Date: 19.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -74,6 +74,7 @@ static int tg_dialogs_from_tl(
 		{
 			tl_messages_dialogsSlice_t *mds = 
 				(tl_messages_dialogsSlice_t *)tl;
+			ON_LOG(tg, "DIALOG SLISE len: %d", mds->count_);
 			md.dialogs_ = mds->dialogs_; 
 			md.dialogs_len = mds->dialogs_len; 
 			md.chats_ = mds->chats_;
@@ -495,6 +496,19 @@ int tg_get_dialogs(
 
 	return i;
 }
+
+int tg_get_dialogs_all(
+		tg_t *tg, 
+		uint64_t * hash, 
+		void *data,
+		int (*callback)(void *data, const tg_dialog_t *dialog))
+{
+	// get slice
+	
+	// run get dialogs
+}
+
+
 
 void tg_dialogs_create_table(tg_t *tg){
 	// create table

@@ -43,7 +43,7 @@ static int cmp_msgid(void *msgidp, void *itemp)
 	return 0;
 }
 
-static int handle_rpc_error(
+static int handle_file_migrate(
 		tg_queue_t *queue, tl_rpc_error_t *error)
 {
 	if (!error || !error->error_message_.data)
@@ -140,6 +140,7 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				tl_t *ttl = NULL;
 				buf_t buf;
 				int _e = gunzip_buf(&buf, obj->packed_data_);
+				pthread_mutex_unlock(&queue->m); // unlock
 				if (_e)
 				{
 					char *err = gunzip_buf_err(_e);
@@ -148,16 +149,19 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				} else {
 					ttl = tl_deserialize(&buf);
 					buf_free(buf);
+					catched_tl(tg, msg_id, ttl);	
+					tl_free(ttl);
+					return;
 				}
 				
-				if (queue->on_done)
-					queue->on_done(queue->userdata, ttl);
-				if (ttl)
-					tl_free(ttl);
+				//if (queue->on_done)
+					//queue->on_done(queue->userdata, ttl);
+				//if (ttl)
+					//tl_free(ttl);
 
-				queue->loop = false; // stop receive data!
-				pthread_mutex_unlock(&queue->m); // unlock
-				return; // do not run on_done!
+				//queue->loop = false; // stop receive data!
+				//pthread_mutex_unlock(&queue->m); // unlock
+				//return; // do not run on_done!
 			}
 			break;
 		case id_bad_msg_notification:
@@ -176,7 +180,7 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				tl_rpc_error_t *rpc_error = 
 					(tl_rpc_error_t *)tl;
 				
-				if (handle_rpc_error(queue, rpc_error))
+				if (handle_file_migrate(queue, rpc_error))
 				{
 					char *err = tg_strerr(tl);
 					ON_ERR(queue->tg, "%s: %s", __func__, err);

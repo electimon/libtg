@@ -70,6 +70,13 @@ pthread_t tg_get_dialogs_async(
 		int (*callback)(void *data, const tg_dialog_t *dialog),
 		void (*on_done)(void *data));
 
+int tg_get_dialogs_all(
+		tg_t *tg, 
+		uint64_t * hash, 
+		void *data,
+		int (*callback)(void *data, const tg_dialog_t *dialog));
+
+
 int tg_get_dialogs_from_database(tg_t *tg, void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));
 
