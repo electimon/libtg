@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 19.01.2025
+ * Last Modified Date: 20.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -488,6 +488,8 @@ int tg_get_dialogs(
 		ON_ERR(tg, "%s: tl is NULL", __func__);
 		return 0;
 	}
+
+	ON_ERR(tg, "KKSJSJSSKLSK");
 	
 	i = tg_dialogs_from_tl(tg, tl, hash, data, callback);
 

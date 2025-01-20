@@ -152,8 +152,6 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 					buf_free(buf);
 				}
 
-				ON_ERR(tg, "SSSS");
-				
 				if (queue->on_done)
 					queue->on_done(queue->userdata, ttl);
 				if (ttl)
