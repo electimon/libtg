@@ -638,6 +638,7 @@ pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 
 static void tg_send_query_sync_cb(void *d, const tl_t *tl)
 {
+	fprintf(stderr, "%s\n", __func__);
 	tl_t **tlp = d;
 	*tlp = tl_deserialize((buf_t *)(&tl->_buf));
 }
@@ -650,6 +651,9 @@ tl_t *tg_send_query_sync(tg_t *tg, buf_t *query)
 				&tl, tg_send_query_sync_cb);
 	
 	pthread_join(p, NULL);
+
+	ON_LOG(tg, "%s got tl: %s"
+			, __func__, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
 
 	return tl;
 }
