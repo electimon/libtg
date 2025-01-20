@@ -359,11 +359,11 @@ int main(int argc, char *argv[])
 			//tg, query_cb, 
 			//NULL, NULL);
 
-	/*tg_peer_t peer = {*/
-		/*TG_PEER_TYPE_CHANNEL,*/
-		/*1326223284,*/
-		/*-5244509236001112417,*/
-	/*};*/
+	tg_peer_t peer = {
+		TG_PEER_TYPE_CHANNEL,
+		1326223284,
+		-5244509236001112417,
+	};
 
 	//tg_get_peer_photo_file(
 			//tg, 
@@ -430,22 +430,22 @@ int main(int argc, char *argv[])
 			//messages_callback_document);
 
 	/*for (int i = 0; i < 10; ++i) {*/
-	/*char s[20];*/
+	char s[20];
 	/*sprintf(s, "ID: %d", i);*/
 		
-	/*tg_messages_get_history_async(*/
-			/*tg,*/
-			/*peer, */
-			/*0, */
-			/*time(NULL), */
-			/*0, */
-			/*20, */
-			/*0, */
-			/*0, */
-			/*NULL, */
-			/*strdup(s), */
-			/*messages_callback_no_log,*/
-			/*on_done);*/
+	tg_messages_get_history_async(
+			tg,
+			peer, 
+			0, 
+			time(NULL), 
+			0, 
+			20, 
+			0, 
+			0, 
+			NULL, 
+			strdup(s), 
+			messages_callback_no_log,
+			on_done);
 	
 	/*tg_get_dialogs_async(tg, 40,*/
 			 /*time(NULL),*/

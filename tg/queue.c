@@ -108,7 +108,8 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 		
 
 	if (queue == NULL){
-		ON_ERR(tg, "can't find queue for msg_id: "_LD_"", msg_id);
+		ON_ERR(tg, "can't find queue for msg_id: "_LD_" with tl: %s"
+				, msg_id, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
 		pthread_mutex_unlock(&tg->queuem);
 		return;
 	}
@@ -179,9 +180,9 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				
 				//if (handle_file_migrate(queue, rpc_error))
 				//{
-					char *err = tg_strerr(tl);
-					ON_ERR(queue->tg, "%s: %s", __func__, err);
-					free(err);
+					/*char *err = tg_strerr(tl);*/
+					/*ON_ERR(queue->tg, "%s: %s", __func__, err);*/
+					/*free(err);*/
 					break; // run on_done
 				//}
 
