@@ -647,7 +647,7 @@ int append_deserialize_table(
 				else if (strcmp(m->args[i].type, "double") == 0)
 				{
 					fputs(STR(buf, BLEN,
-					  "\t\tobj->%s_ = (double)deserialize_ui64(buf);\n"
+					  "\t\tobj->%s_ = deserialize_double(buf);\n"
 					, m->args[i].name)
 					, g->deserialize_table_c);				
 				}
