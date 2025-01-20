@@ -773,3 +773,55 @@ int tg_contact_send(
 	return 0;
 }
 
+int tg_send_geopoint(tg_t *tg, tg_peer_t *peer, 
+		uint64_t lat, uint64_t lon, const char *message)
+{
+	InputGeoPoint inputGeoPoint = tl_inputGeoPoint(
+			(double)lat, 
+			(double)lon, 
+			NULL);
+	InputMedia inputMedia = 
+		tl_inputMediaGeoPoint(&inputGeoPoint);
+	buf_free(inputGeoPoint);
+
+	InputPeer inputPeer = tg_inputPeer(*peer);
+	buf_t random_id = buf_rand(8);
+
+	buf_t sendMedia = tl_messages_sendMedia(
+				false, 
+				false, 
+				false, 
+				false, 
+				false, 
+				false, 
+				&inputPeer, 
+				NULL, 
+				&inputMedia, 
+				message?message:"", 
+				buf_get_ui64(random_id), 
+				NULL, 
+				NULL, 
+				0, 
+				NULL, 
+				NULL, 
+				NULL, 
+				NULL);
+
+	buf_free(inputMedia);
+	buf_free(inputPeer);
+	buf_free(random_id);
+
+	tl_t *tl = tg_send_query_sync(tg, &sendMedia);
+	buf_free(sendMedia);
+
+	if (tl == NULL)
+		return 1;
+
+	if (tl->_id == id_rpc_error){
+		tl_free(tl);
+		return 1;
+	}
+
+	tl_free(tl);
+	return 0;
+}

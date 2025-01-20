@@ -1,5 +1,6 @@
 #include "../libtg.h"
 #include "../tl/alloc.h"
+#include "peer.h"
 #include "tg.h"
 #include "net.h"
 #include "queue.h"
@@ -214,3 +215,5 @@ const char *tg_ip_address_for_dc(tg_t *tg, int dc){
 			__func__, dc);
 	return NULL;
 }
+
+
