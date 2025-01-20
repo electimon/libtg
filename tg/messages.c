@@ -134,6 +134,7 @@ void tg_message_from_tl(
 					if (mmp->geo_ && mmp->geo_->_id == id_geoPoint)
 					{
 						tl_geoPoint_t *geo       = (tl_geoPoint_t *)mmp->geo_;
+						ON_ERR(tg, "GGGGGGGGGGGGGGGGGGEO: %lf", geo->lat_);
 						tgm->geo_long            = geo->long_;
 						tgm->geo_lat             = geo->lat_;
 						tgm->geo_access_hash     = geo->access_hash_;
