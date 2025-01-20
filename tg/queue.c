@@ -137,31 +137,27 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				tl_gzip_packed_t *obj =
 					(tl_gzip_packed_t *)tl;
 
-				tl_t *ttl = NULL;
 				buf_t buf;
 				int _e = gunzip_buf(&buf, obj->packed_data_);
-				pthread_mutex_unlock(&queue->m); // unlock
 				if (_e)
 				{
 					char *err = gunzip_buf_err(_e);
 					ON_ERR(tg, "%s: %s", __func__, err);
 					free(err);
+					if (queue->on_done)
+						queue->on_done(queue->userdata, tl);
+					pthread_mutex_unlock(&queue->m); // unlock
+					return;
+
 				} else {
-					ttl = tl_deserialize(&buf);
+					tl_t *ttl = tl_deserialize(&buf);
 					buf_free(buf);
 					catched_tl(tg, msg_id, ttl);	
-					tl_free(ttl);
+					if (ttl)
+						tl_free(ttl);
+					pthread_mutex_unlock(&queue->m); // unlock
 					return;
 				}
-				
-				//if (queue->on_done)
-					//queue->on_done(queue->userdata, ttl);
-				//if (ttl)
-					//tl_free(ttl);
-
-				//queue->loop = false; // stop receive data!
-				//pthread_mutex_unlock(&queue->m); // unlock
-				//return; // do not run on_done!
 			}
 			break;
 		case id_bad_msg_notification:
@@ -188,10 +184,13 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 					break; // run on_done
 				}
 
-				queue->loop = false; // stop receive data!
+				//queue->loop = false; // stop receive data!
 				pthread_mutex_unlock(&queue->m); // unlock
 				return; // do not run on_done!
 			}
+			break;
+
+		default:
 			break;
 	}
 
@@ -199,7 +198,7 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 		queue->on_done(queue->userdata, tl);
 	
 	// stop query
-	queue->loop = false;
+	//queue->loop = false;
 
 	pthread_mutex_unlock(&queue->m); // unlock
 }
@@ -301,7 +300,6 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				tl_msg_detailed_info_t *di = 
 					(tl_msg_detailed_info_t *)tl;
 				tg_add_msgid(queue->tg, di->msg_id_);
-				//queue->loop = false; // stop receive data!
 				catched_tl(queue->tg, di->answer_msg_id_, NULL);
 			}
 			break;
@@ -309,7 +307,6 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_msg_new_detailed_info_t *di = 
 					(tl_msg_new_detailed_info_t *)tl;
-				//queue->loop = false; // stop receive data!
 				catched_tl(queue->tg, di->answer_msg_id_, NULL);
 			}
 			break;
@@ -321,7 +318,6 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					ON_LOG(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
 							TL_NAME_FROM_ID(rpc_result->result_->_id), 
 							rpc_result->req_msg_id_);
-				//queue->loop = false; // stop receive data!
 				catched_tl(queue->tg, rpc_result->req_msg_id_, rpc_result->result_);
 			}
 			break;
