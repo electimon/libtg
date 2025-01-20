@@ -134,8 +134,8 @@ void tg_message_from_tl(
 					if (mmp->geo_ && mmp->geo_->_id == id_geoPoint)
 					{
 						tl_geoPoint_t *geo       = (tl_geoPoint_t *)mmp->geo_;
-						tgm->geo_long            = (uint64_t)geo->long_;
-						tgm->geo_lat             = (uint64_t)geo->lat_;
+						tgm->geo_long            = geo->long_;
+						tgm->geo_lat             = geo->lat_;
 						tgm->geo_access_hash     = geo->access_hash_;
 						tgm->geo_accuracy_radius = geo->accuracy_radius_;
 					}

@@ -196,6 +196,11 @@ buf_t buf_add_ui64(uint64_t v)
   return buf_add((uint8_t *)&v, 8);
 }
 
+buf_t buf_add_double(double v)
+{
+  return buf_add((uint8_t *)&v, 8);
+}
+
 uint32_t buf_get_ui32(buf_t b)
 {
   return *(uint32_t *)b.data;
@@ -204,6 +209,11 @@ uint32_t buf_get_ui32(buf_t b)
 uint64_t buf_get_ui64(buf_t b)
 {
   return *(uint64_t *)b.data;
+}
+
+double buf_get_double(buf_t b)
+{
+  return *(double *)b.data;
 }
 
 buf_t buf_rand(uint32_t s)
@@ -253,6 +263,13 @@ buf_t buf_cat_ui32(buf_t dest, uint32_t i)
 
 buf_t buf_cat_ui64(buf_t dest, uint64_t i){
 	buf_t src = buf_add_ui64(i);
+	buf_t buf = buf_cat(dest, src);
+	free(src.aptr);
+	return buf; 
+}
+
+buf_t buf_cat_double(buf_t dest, double i){
+	buf_t src = buf_add_double(i);
 	buf_t buf = buf_cat(dest, src);
 	free(src.aptr);
 	return buf; 

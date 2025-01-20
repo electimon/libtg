@@ -647,7 +647,7 @@ int append_deserialize_table(
 				else if (strcmp(m->args[i].type, "double") == 0)
 				{
 					fputs(STR(buf, BLEN,
-					  "\t\tobj->%s_ = deserialize_ui64(buf);\n"
+					  "\t\tobj->%s_ = (double)deserialize_ui64(buf);\n"
 					, m->args[i].name)
 					, g->deserialize_table_c);				
 				}
@@ -746,10 +746,10 @@ int append_deserialize_table(
 					else if (strcmp(type, "double") == 0)
 					{
 						fputs(STR(buf, BLEN,
-							"\t\t\tobj->%s_ = (uint64_t *)MALLOC(obj->%s_len * sizeof(uint64_t), return NULL);\n"
+							"\t\t\tobj->%s_ = (double *)MALLOC(obj->%s_len * sizeof(double), return NULL);\n"
 							"\t\t\tint i;\n"
 							"\t\t\tfor(i=0; i<obj->%s_len; ++i){\n"
-							"\t\t\t\tobj->%s_[i] = deserialize_ui64(buf);\n"
+							"\t\t\t\tobj->%s_[i] = deserialize_double(buf);\n"
 							"\t\t\t}\n"
 						, m->args[i].name, m->args[i].name, m->args[i].name, m->args[i].name)
 						, g->deserialize_table_c);
@@ -920,9 +920,6 @@ int append_struct(
 			type = "bool";
 		
 		if (strcmp(type, "long") == 0)
-			type = "uint64_t";
-		
-		if (strcmp(type, "double") == 0)
 			type = "uint64_t";
 		
 		if (strcmp(type, "int") == 0)
@@ -1097,9 +1094,6 @@ int append_methods_header(
 		if (strcmp(type, "long") == 0)
 			type = "uint64_t";
 		
-		if (strcmp(type, "double") == 0)
-			type = "uint64_t";
-		
 		if (strcmp(type, "int") == 0)
 			type = "uint32_t";
 		
@@ -1222,9 +1216,6 @@ int append_methods(
 			type = "bool";
 		
 		if (strcmp(type, "long") == 0)
-			type = "uint64_t";
-		
-		if (strcmp(type, "double") == 0)
 			type = "uint64_t";
 		
 		if (strcmp(type, "int") == 0)
@@ -1377,8 +1368,7 @@ int append_methods(
 			fputs("\t}\n",g->methods_c);
 		
 		} else if 
-			(strcmp(m->args[i].type, "long")   == 0 ||
-			 strcmp(m->args[i].type, "double") == 0)
+			(strcmp(m->args[i].type, "long")   == 0 )
 		{
 			if (m->args[i].flagn != 0)
 				fputs(
@@ -1398,6 +1388,41 @@ int append_methods(
 				fputs(
 						STR(buf, BLEN, 
 							"\t\tbuf = buf_cat_ui64(buf, %s_);\n", 
+							m->args[i].name), 
+						g->methods_c);
+
+
+			if (m->args[i].flagn)
+				fputs(
+					STR(buf, BLEN, 
+						"\t\t*flag%d |= (1 << %d);\n", 
+						m->args[i].flagn, m->args[i].flagb), 
+					g->methods_c);
+
+			fputs("\t}\n",g->methods_c);
+
+
+		} else if 
+			(strcmp(m->args[i].type, "double")   == 0 )
+		{
+			if (m->args[i].flagn != 0)
+				fputs(
+					STR(buf, BLEN, 
+						"\tif (%s_)\n", m->args[i].name), 
+					g->methods_c);
+			
+			fputs("\t{\n",g->methods_c);
+
+			if (m->args[i].flagn != 0)
+				fputs(
+						STR(buf, BLEN, 
+							"\t\tbuf = buf_cat_double(buf, *%s_);\n", 
+							m->args[i].name), 
+						g->methods_c);
+			else
+				fputs(
+						STR(buf, BLEN, 
+							"\t\tbuf = buf_cat_double(buf, %s_);\n", 
 							m->args[i].name), 
 						g->methods_c);
 
@@ -1533,13 +1558,20 @@ int append_methods(
 							m->args[i].name), 
 						g->methods_c);
 			
-			else if (strcmp(type, "long")   == 0 ||
-			         strcmp(type, "double") == 0) 
+			else if (strcmp(type, "long")   == 0 )
 				fputs(
 						STR(buf, BLEN, 
 							"\t\t\tbuf = buf_cat_ui64(buf, %s_[i]);\n", 
 							m->args[i].name), 
 						g->methods_c);
+
+			else if (strcmp(type, "double")   == 0 )
+				fputs(
+						STR(buf, BLEN, 
+							"\t\t\tbuf = buf_cat_double(buf, %s_[i]);\n", 
+							m->args[i].name), 
+						g->methods_c);
+
 
 			else // type X
 				fputs(

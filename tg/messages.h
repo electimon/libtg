@@ -56,8 +56,8 @@
 	TG_MESSAGE_SPA(uint32_t, photo_dc_id, "INT", "photo_dc_id") \
 	TG_MESSAGE_SPA(uint32_t, photo_date, "INT", "photo_date") \
 	TG_MESSAGE_SPS(char*,    photo_file_reference, "TEXT", "photo_file_reference") \
-	TG_MESSAGE_SPA(uint64_t, geo_long, "INT", "geo_long") \
-	TG_MESSAGE_SPA(uint64_t, geo_lat, "INT", "geo_lat") \
+	TG_MESSAGE_SPA(double,   geo_long, "INT", "geo_long") \
+	TG_MESSAGE_SPA(double,   geo_lat, "INT", "geo_lat") \
 	TG_MESSAGE_SPA(uint64_t, geo_access_hash, "INT", "geo_access_hash") \
 	TG_MESSAGE_SPA(uint32_t, geo_accuracy_radius, "INT", "geo_accuracy_radius") \
 	TG_MESSAGE_SPA(bool,     doc_isVideo, "INT", "doc_isVideo") \

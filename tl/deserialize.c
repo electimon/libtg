@@ -24,6 +24,15 @@ uint64_t deserialize_ui64(buf_t *b){
 	return c;
 }
 
+uint64_t deserialize_double(buf_t *b){
+	double c;
+	c = buf_get_double(*b);
+	b->data += 8;
+	b->size -= 8;
+	//*b = buf_add(b->data + 8, b->size - 8);
+	return c;
+}
+
 buf_t deserialize_buf(buf_t *b, int size){
 	buf_t ret = buf_add(b->data, size);
 	b->data += size;
