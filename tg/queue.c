@@ -43,7 +43,7 @@ static int cmp_msgid(void *msgidp, void *itemp)
 	return 0;
 }
 
-static int handle_rpc_error(
+static int handle_file_migrate(
 		tg_queue_t *queue, tl_rpc_error_t *error)
 {
 	if (!error || !error->error_message_.data)
@@ -71,6 +71,7 @@ static int handle_rpc_error(
 		// handle answer
 		/* TODO: handle tl answer <16-01-25, kuzmich> */
 
+		// P
 		// resend queue
 		tg_queue_new(
 				queue->tg, 
@@ -176,17 +177,17 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				tl_rpc_error_t *rpc_error = 
 					(tl_rpc_error_t *)tl;
 				
-				if (handle_rpc_error(queue, rpc_error))
-				{
+				//if (handle_file_migrate(queue, rpc_error))
+				//{
 					char *err = tg_strerr(tl);
 					ON_ERR(queue->tg, "%s: %s", __func__, err);
 					free(err);
 					break; // run on_done
-				}
+				//}
 
-				queue->loop = false; // stop receive data!
-				pthread_mutex_unlock(&queue->m); // unlock
-				return; // do not run on_done!
+				//queue->loop = false; // stop receive data!
+				//pthread_mutex_unlock(&queue->m); // unlock
+				//return; // do not run on_done!
 			}
 			break;
 	}
