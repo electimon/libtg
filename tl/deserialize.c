@@ -2,6 +2,7 @@
 #include "tl.h"
 #include "names.h"
 #include "free.h"
+#include "deserialize.h"
 #include "deserialize_table.h"
 #include <stdio.h>
 #include <string.h>
@@ -24,7 +25,7 @@ uint64_t deserialize_ui64(buf_t *b){
 	return c;
 }
 
-uint64_t deserialize_double(buf_t *b){
+double deserialize_double(buf_t *b){
 	double c;
 	c = buf_get_double(*b);
 	b->data += 8;
