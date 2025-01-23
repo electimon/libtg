@@ -612,6 +612,16 @@ static void * tg_run_queue(void * data)
 	pthread_exit(NULL);	
 }
 
+static void * tg_run_timer(void * data)
+{
+	tg_queue_t *queue = data;
+	ON_LOG(queue->tg, "%s", __func__);
+	//usleep(1000); // in microseconds
+	sleep(2);
+	queue->loop = false;
+	pthread_exit(NULL);	
+}
+
 tg_queue_t * tg_queue_new(
 		tg_t *tg, buf_t *query, 
 		const char *ip, int port,
@@ -649,6 +659,13 @@ tg_queue_t * tg_queue_new(
 		ON_ERR(tg, "%s: can't create thread", __func__);
 		return NULL;
 	}
+
+	// start timer
+	pthread_create(
+			&(queue->p), 
+			NULL, 
+			tg_run_timer, 
+			queue);
 
 	return queue;
 }

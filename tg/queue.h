@@ -9,6 +9,7 @@ typedef struct tg_queue_{
 	char ip[16];
 	int port;
 	pthread_t p;
+	pthread_t timer;
 	int socket;
 	bool loop;
 	buf_t query;
