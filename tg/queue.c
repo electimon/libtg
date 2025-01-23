@@ -434,12 +434,12 @@ static void tg_send_ack(void *data)
 	tg_queue_t *queue = data;
 	ON_LOG(queue->tg, "%s", __func__);
 	buf_t ack = tg_ack(queue->tg);
-	if (!ack.size)
-		return;
-
-	int s = 
-		send(queue->socket, ack.data, ack.size, 0);
-	buf_free(ack);
+	while (ack.size){
+		int s = 
+			send(queue->socket, ack.data, ack.size, 0);
+		buf_free(ack);
+		ack = tg_ack(queue->tg);
+	}
 }
 
 static int tg_send(void *data)

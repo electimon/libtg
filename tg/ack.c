@@ -13,7 +13,7 @@ buf_t tg_ack(tg_t *tg)
 		return ret;
 	}
 
-	int len = arrlen(tg->msgids);
+	int i, len = arrlen(tg->msgids);
 	if (len < 1){
 		pthread_mutex_unlock(&tg->msgidsm);
 		return ret;
@@ -21,11 +21,11 @@ buf_t tg_ack(tg_t *tg)
 
 	if (len > 20)
 		len = 20;
-
 	buf_t ack = tl_msgs_ack(tg->msgids, len);
-	// remove from array
-	arrfree(tg->msgids);
-	tg->msgids = NULL;
+	for (i = 0; i < len; ++i) {
+		// remove from array
+		arrdel(tg->msgids, i);	
+	}
 	pthread_mutex_unlock(&tg->msgidsm);
 
 	buf_free(ret);
