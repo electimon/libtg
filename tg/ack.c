@@ -9,6 +9,6 @@ void tg_add_msgid(tg_t *tg, uint64_t msgid){
 		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
 		return;
 	}
-	arrput(tg->msgids, msgid);
+	/*arrput(tg->msgids, msgid);*/
 	pthread_mutex_unlock(&tg->msgidsm);
 }
