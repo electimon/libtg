@@ -18,6 +18,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include "stb_ds.h"
 #if INTPTR_MAX == INT32_MAX
     #define THIS_IS_32_BIT_ENVIRONMENT
 		#define _LD_ "%lld"
@@ -430,16 +431,47 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 
 static void tg_send_ack(void *data)
 {
-	// send ACK
 	tg_queue_t *queue = data;
 	ON_LOG(queue->tg, "%s", __func__);
-	buf_t ack = tg_ack(queue->tg);
-	while (ack.size){
-		int s = 
-			send(queue->socket, ack.data, ack.size, 0);
-		buf_free(ack);
-		ack = tg_ack(queue->tg);
+	
+	// send ACK
+	int err = pthread_mutex_lock(&queue->tg->msgidsm);
+	if (err){
+		ON_ERR(queue->tg, "%s: can't lock mutex: %d", __func__, err);
+		return;
 	}
+
+	int i, len = arrlen(queue->tg->msgids), c = len/20;
+	if (len < 1){
+		// no messages to acknolage
+		pthread_mutex_unlock(&queue->tg->msgidsm);
+		return;
+	}
+
+	// send no more then 20 msgids
+	for (i=0; i <= c; ++i) {
+		int l = len > (i+1)*20 ? 20 : len;
+		buf_t ack = tl_msgs_ack(
+				queue->tg->msgids, l);
+		buf_t query = tg_prepare_query(
+				queue->tg, ack, true, NULL);
+		buf_free(ack);
+	
+		int s = 
+			send(queue->socket, query.data, query.size, 0);
+		buf_free(query);
+		
+		if (s < 0){
+			ON_ERR(queue->tg, "%s: socket error", __func__);
+			pthread_mutex_unlock(&queue->tg->msgidsm);
+			return;
+		}
+	}
+
+	// free msgids
+	arrfree(queue->tg->msgids);
+	queue->tg->msgids = NULL;
+	pthread_mutex_unlock(&queue->tg->msgidsm);
 }
 
 static int tg_send(void *data)
