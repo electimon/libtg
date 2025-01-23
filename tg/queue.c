@@ -125,6 +125,7 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 
 	if (tl == NULL){
 		ON_ERR(tg, "%s: tl is NULL", __func__);
+		tg_add_msgid(queue->tg, queue->msgid);
 		if (queue->on_done)
 			queue->on_done(queue->userdata, tl);
 		pthread_mutex_unlock(&queue->m); // unlock
@@ -158,6 +159,7 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				ON_LOG(tg, "ON_DONE: %p", queue->on_done);
 				ON_LOG(tg, "USERDATA: %p", queue->userdata);
 
+				tg_add_msgid(queue->tg, queue->msgid);
 				if (queue->on_done)
 					queue->on_done(queue->userdata, ttl);
 				if (ttl)
@@ -202,6 +204,7 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 			break;
 	}
 
+	tg_add_msgid(queue->tg, queue->msgid);
 	if (queue->on_done)
 		queue->on_done(queue->userdata, tl);
 	
