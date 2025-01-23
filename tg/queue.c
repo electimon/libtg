@@ -454,11 +454,11 @@ static void tg_send_ack(void *data)
 	// send no more then 20 msgids
 	for (i=0; i <= c; ++i) {
 		int l = len > (i+1)*20 ? 20 : len;
-		int k;
-		for (k = 0; k < l; ++k) {
-			ON_ERR(queue->tg, "ACK msgid: "_LD_"", 
-					queue->tg->msgids[i+k]);
-		}
+		//int k;
+		//for (k = 0; k < l; ++k) {
+			//ON_ERR(queue->tg, "ACK msgid: "_LD_"", 
+					//queue->tg->msgids[i+k]);
+		//}
 		buf_t ack = tl_msgs_ack(
 				queue->tg->msgids, l);
 		buf_t query = tg_prepare_query(
