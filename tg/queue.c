@@ -661,11 +661,11 @@ tg_queue_t * tg_queue_new(
 	}
 
 	// start timer
-	pthread_create(
-			&(queue->p), 
-			NULL, 
-			tg_run_timer, 
-			queue);
+	//pthread_create(
+			//&(queue->p), 
+			//NULL, 
+			//tg_run_timer, 
+			//queue);
 
 	return queue;
 }
