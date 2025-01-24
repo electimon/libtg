@@ -324,6 +324,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_rpc_result_t *rpc_result = 
 					(tl_rpc_result_t *)tl;
+				tg_add_msgid(queue->tg, rpc_result->req_msg_id_);
 				if (rpc_result->result_)
 					ON_LOG(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
 							TL_NAME_FROM_ID(rpc_result->result_->_id), 
