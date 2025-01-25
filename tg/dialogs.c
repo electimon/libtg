@@ -324,6 +324,8 @@ static int tg_dialogs_from_tl(
 							d.top_message_text = strdup(tgm.doc_title);
 						else if (tgm.doc_id)
 							d.top_message_text = strdup("*document*");
+						else if (tgm.media_type == id_messageMediaDocument)
+							d.top_message_text = strdup("*document*");
 						else if (tgm.media_type == id_messageMediaContact)
 							d.top_message_text = strdup("*contact*");
 						else if (tgm.media_type == id_messageMediaPhoto)
