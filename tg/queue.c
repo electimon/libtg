@@ -608,8 +608,17 @@ static void * tg_run_queue(void * data)
 	if (queue->socket >= 0)
 		tg_net_close(queue->tg, queue->socket);
 
+	tg_t *tg = queue->tg;
+	err = pthread_mutex_lock(&tg->queuem);
+	if (err){
+		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+		pthread_exit(NULL);	
+	}
+	list_cut(&tg->queue, &queue->msgid, cmp_msgid);
+		
 	buf_free(queue->query);
 	free(queue);
+	pthread_mutex_unlock(&tg->queuem);
 	pthread_exit(NULL);	
 }
 

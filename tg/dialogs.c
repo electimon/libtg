@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 23.01.2025
+ * Last Modified Date: 25.01.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -310,7 +310,27 @@ static int tg_dialogs_from_tl(
 
 						// update dialog
 						d.top_message_date = message->date_;
-						d.top_message_text = BUF2STR(message->message_);
+
+						// set message text
+						if (message->message_.size)
+							d.top_message_text = BUF2STR(message->message_);
+						else if (tgm.doc_isVideo)
+							d.top_message_text = strdup("*video*");
+						else if (tgm.doc_isRound)
+							d.top_message_text = strdup("*round*");
+						else if (tgm.doc_isVoice)
+							d.top_message_text = strdup("*voice message*");
+						else if (tgm.doc_title)
+							d.top_message_text = strdup(tgm.doc_title);
+						else if (tgm.doc_id)
+							d.top_message_text = strdup("*document*");
+						else if (tgm.media_type == id_messageMediaContact)
+							d.top_message_text = strdup("*contact*");
+						else if (tgm.media_type == id_messageMediaPhoto)
+							d.top_message_text = strdup("*photo*");
+						else if (tgm.media_type == id_messageMediaGeo)
+							d.top_message_text = strdup("*geopoint*");
+
 						if (message->from_id_){
 							switch (message->from_id_->_id) {
 								case id_peerUser:
@@ -506,6 +526,7 @@ int tg_get_dialogs_all(
 	// get slice
 	
 	// run get dialogs
+	return 0;
 }
 
 
