@@ -182,9 +182,9 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				/*handle_file_migrate(queue, rpc_error);*/
 				//if (handle_file_migrate(queue, rpc_error))
 				//{
-					char *err = tg_strerr(tl);
-					ON_ERR(queue->tg, "%s: %s", __func__, err);
-					free(err);
+					/*char *err = tg_strerr(tl);*/
+					/*ON_ERR(queue->tg, "%s: %s", __func__, err);*/
+					/*free(err);*/
 					break; // run on_done
 				//}
 
