@@ -60,7 +60,7 @@ int tg_get_dialogs(
 		void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));
 
-pthread_t tg_get_dialogs_async(
+tg_queue_t *tg_get_dialogs_async(
 		tg_t *tg, 
 		int limit,
 		time_t date, 

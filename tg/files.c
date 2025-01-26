@@ -11,6 +11,7 @@
 #include "../tl/alloc.h"
 #include "peer.h"
 #include "tg.h"
+#include "queue.h"
 
 static void tg_file_from_tl(tg_file_t *f, const tl_t *tl)
 {
@@ -108,12 +109,12 @@ int tg_get_file_with_progress(
 					return 1);
 		t->tg = tg;
 
-		pthread_t p = tg_send_query_async_with_progress(
+		tg_queue_t * p = tg_send_query_async_with_progress(
 				tg, &getFile,
 				t, tg_get_file_with_progress_on_done,	
 				progressp, progress);
 		buf_free(getFile);
-		pthread_join(p, NULL);
+		pthread_join(p->p, NULL);
 
 		if (!t->result){
 			free(t);
@@ -448,7 +449,7 @@ tg_document_send_with_progress_saveBigFilePart:;
 						return 1;);
 			ondone->tg = tg;
 			
-			pthread_t p = tg_send_query_async_with_progress(
+			tg_queue_t * p = tg_send_query_async_with_progress(
 					tg, 
 					&saveFilePart, 
 					ondone,
@@ -456,7 +457,7 @@ tg_document_send_with_progress_saveBigFilePart:;
 					t, 
 					tg_document_send_with_progress_progress);
 			buf_free(saveFilePart);
-			pthread_join(p, NULL);
+			pthread_join(p->p, NULL);
 			bool result = ondone->result;
 			free(ondone);
 
@@ -514,7 +515,7 @@ tg_document_send_with_progress_saveFilePart:;
 						return 1;);
 			ondone->tg = tg;
 			
-			pthread_t p = tg_send_query_async_with_progress(
+			tg_queue_t * p = tg_send_query_async_with_progress(
 					tg, 
 					&saveFilePart, 
 					ondone,
@@ -522,7 +523,7 @@ tg_document_send_with_progress_saveFilePart:;
 					t, 
 					tg_document_send_with_progress_progress);
 			buf_free(saveFilePart);
-			pthread_join(p, NULL);
+			pthread_join(p->p, NULL);
 			bool result = ondone->result;
 			free(ondone);
 

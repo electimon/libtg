@@ -96,7 +96,7 @@ void tg_channel_free(tg_channel_t *c);
 int tg_channel_save(tg_t *tg, const tg_channel_t *channel);
 tg_channel_t * tg_channel_get(tg_t *tg, uint64_t chat_id);
 
-pthread_t 
+tg_queue_t * 
 tg_channel_search_global(tg_t *tg, const char *query, 
 		MessagesFilter *filter, 
 		int offset, int limit, 
@@ -104,6 +104,6 @@ tg_channel_search_global(tg_t *tg, const char *query,
 		int (*callback)(void *data, const tg_channel_t *cannel),
 		void (*on_done)(void *data));
 
-pthread_t tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id);
+tg_queue_t * tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id);
 
 #endif /* ifndef TG_CHANNEL_H */

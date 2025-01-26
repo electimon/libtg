@@ -4,7 +4,7 @@
 #include "tg.h"
 #include <stdint.h>
 
-typedef struct tg_queue_{
+struct tg_queue_{
 	tg_t *tg;
 	char ip[16];
 	int port;
@@ -19,7 +19,7 @@ typedef struct tg_queue_{
 	void (*on_done)(void *userdata, const tl_t *tl);
 	void *progressp;
 	int (*progress)(void *progressp, int size, int total);
-} tg_queue_t;
+};
 
 tg_queue_t * tg_queue_new(
 		tg_t *tg, buf_t *query, 
@@ -31,5 +31,6 @@ tg_queue_t * tg_queue_new(
 int tg_queue_send(tg_t *tg, buf_t *query, 
 		void *userdata, void (*callback)(void *userdata, tl_t *tl));
 
+int tg_queue_cancell_queue(tg_t *tg, uint64_t msg_id);
 void tg_queue_cancell_all(tg_t *tg);
 #endif /* ifndef TG_QUEUE_H */

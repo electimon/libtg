@@ -568,7 +568,7 @@ void tg_messages_get_history_async_cb(void *d, const tl_t *tl)
 	free(t);
 }	
 
-pthread_t tg_messages_get_history_async(
+tg_queue_t * tg_messages_get_history_async(
 		tg_t *tg,
 		tg_peer_t peer,
 		int offset_id,
@@ -612,7 +612,7 @@ pthread_t tg_messages_get_history_async(
 	t->callback = callback;
 	t->on_done = on_done;
 
-	pthread_t p = tg_send_query_async(
+	tg_queue_t * p = tg_send_query_async(
 			tg,
 		 	&getHistory, 
 			t, 
@@ -621,7 +621,7 @@ pthread_t tg_messages_get_history_async(
 	return p;
 }
 
-pthread_t tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
+tg_queue_t * tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 {
 	ON_LOG(tg, "%s", __func__);
 	buf_t peer = tg_inputPeer(peer_); 
@@ -648,7 +648,7 @@ pthread_t tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 	buf_free(peer);
 	buf_free(random_id);
 
-	pthread_t p = 
+	tg_queue_t * p = 
 		tg_send_query_async(tg, &m, NULL, NULL);
 	buf_free(m);
 	return p;
@@ -870,7 +870,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 	return i;
 }
 
-pthread_t tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
+tg_queue_t * tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
 {
 	Peer peer = tg_inputPeer(peer_); 
 	SendMessageAction action;
@@ -887,13 +887,13 @@ pthread_t tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
 	buf_free(peer);
 	buf_free(action);
 
-	pthread_t p = tg_send_query_async(
+	tg_queue_t * p = tg_send_query_async(
 			tg, &setTyping, NULL, NULL);
 	buf_free(setTyping);
 	return p;
 }
 
-pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
+tg_queue_t * tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 {
 	InputPeer inputPeer = tg_inputPeer(peer); 
 
@@ -901,7 +901,7 @@ pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 			&inputPeer, max_id);
 	buf_free(inputPeer);
 	
-	pthread_t p = tg_send_query_async(
+	tg_queue_t * p = tg_send_query_async(
 			tg, &readHistory, NULL, NULL);
 	buf_free(readHistory);
 	

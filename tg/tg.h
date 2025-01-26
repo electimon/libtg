@@ -40,6 +40,7 @@ struct tg_ {
 	pthread_mutex_t msgidsm;
 };
 
+
 int database_init(tg_t *tg, const char *database_path);
 buf_t auth_key_from_database(tg_t *tg);
 char * phone_number_from_database(tg_t *tg);

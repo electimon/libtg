@@ -1,5 +1,7 @@
 #include "../tg/tg.h"
+#include "transport.h"
 #include <pthread.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <time.h>
 #include <assert.h>
@@ -27,7 +29,7 @@ static long long tg_get_current_time()
 				tg_get_utime(CLOCK_REALTIME)) & -4;
 }
 
-buf_t tg_mtp_message(tg_t *tg, buf_t payload, bool content){
+buf_t tg_mtp_message(tg_t *tg, buf_t *payload, bool content){
 	/*ON_LOG(tg, "%s", __func__);*/
 	//message msg_id:long seqno:int bytes:int body:Object = Message;
   buf_t msg = buf_new();
@@ -50,10 +52,10 @@ buf_t tg_mtp_message(tg_t *tg, buf_t payload, bool content){
 	}
 
 	// bytes
-	msg = buf_cat_ui32(msg, payload.size);	
+	msg = buf_cat_ui32(msg, payload->size);	
 
 	// body
-	msg = buf_cat(msg, payload);
+	msg = buf_cat(msg, *payload);
 
 	return msg;
 }
@@ -86,10 +88,19 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 	 * messages to a new connection if the current 
 	 * connection is closed and then re-opened.
 	 */
-		/*if (tg->msgids[0]){ // need to add acknolege*/
-			/*content = false;*/
-			/*b = tg_ack(tg, b);*/
-		/*}*/
+	buf_t ack = tg_ack(tg);
+	if (ack.size > 0){ // need to add acknolege
+		content = false;
+		// create container
+		buf_t msgs[2];
+		msgs[0] = tg_mtp_message(tg, &b, true);	
+		msgs[1] = tg_mtp_message(tg, &ack, false);	
+		buf_free(b);
+		buf_free(ack);
+		b = tl_msg_container(msgs, 2);
+		buf_free(msgs[0]);
+		buf_free(msgs[1]);
+	}
 		// salt  session_id message_id seq_no message_data_length  message_data padding12..1024
 		// int64 int64      int64      int32  int32                bytes        bytes
 		

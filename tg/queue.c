@@ -152,11 +152,6 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 					buf_free(buf);
 				}
 		
-				//ON_LOG(tg, "SSSSSSSSSSSS");
-				//ON_LOG(tg, "QUEUE: %p", queue);
-				//ON_LOG(tg, "ON_DONE: %p", queue->on_done);
-				//ON_LOG(tg, "USERDATA: %p", queue->userdata);
-
 				tg_add_msgid(queue->tg, queue->msgid);
 				if (queue->on_done)
 					queue->on_done(queue->userdata, ttl);
@@ -432,56 +427,6 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 	return RTL_RQ; // read socket again
 }
 
-static void tg_send_ack(void *data)
-{
-	tg_queue_t *queue = data;
-	ON_LOG(queue->tg, "%s", __func__);
-	
-	// send ACK
-	int err = pthread_mutex_lock(&queue->tg->msgidsm);
-	if (err){
-		ON_ERR(queue->tg, "%s: can't lock mutex: %d", __func__, err);
-		return;
-	}
-
-	int i, len = arrlen(queue->tg->msgids), c = len/20;
-	if (len < 1){
-		// no messages to acknolage
-		pthread_mutex_unlock(&queue->tg->msgidsm);
-		return;
-	}
-
-	// send no more then 20 msgids
-	for (i=0; i <= c; ++i) {
-		int l = len > (i+1)*20 ? 20 : len;
-		//int k;
-		//for (k = 0; k < l; ++k) {
-			//ON_ERR(queue->tg, "ACK msgid: "_LD_"", 
-					//queue->tg->msgids[i+k]);
-		//}
-		buf_t ack = tl_msgs_ack(
-				queue->tg->msgids, l);
-		buf_t query = tg_prepare_query(
-				queue->tg, ack, true, NULL);
-		buf_free(ack);
-	
-		int s = 
-			send(queue->socket, query.data, query.size, 0);
-		buf_free(query);
-		
-		if (s < 0){
-			ON_ERR(queue->tg, "%s: socket error", __func__);
-			pthread_mutex_unlock(&queue->tg->msgidsm);
-			return;
-		}
-	}
-
-	// free msgids
-	arrfree(queue->tg->msgids);
-	queue->tg->msgids = NULL;
-	pthread_mutex_unlock(&queue->tg->msgidsm);
-}
-
 static int tg_send(void *data)
 {
 	int err = 0;
@@ -581,9 +526,6 @@ static void * tg_run_queue(void * data)
 	list_add(&queue->tg->queue, data);
 	pthread_mutex_unlock(&queue->tg->queuem);
 
-	// send ack
-	tg_send_ack(data);
-	
 	// send
 	if (tg_send(data))
 		queue->loop = false;
@@ -680,7 +622,7 @@ tg_queue_t * tg_queue_new(
 	return queue;
 }
 
-pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
+tg_queue_t * tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl),
 		void *progressp, 
 		int (*progress)(void *progressp, int size, int total))
@@ -693,10 +635,10 @@ pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 				tg->ip, tg->port,
 				userdata, callback,
 			 	progressp, progress);
-	return queue->p;
+	return queue;
 }
 
-pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
+tg_queue_t * tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
 {
 	ON_LOG(tg, "%s: tg: %p, query: %p, userdata: %p, callback: %p",
@@ -717,11 +659,11 @@ static void tg_send_query_sync_cb(void *d, const tl_t *tl)
 tl_t *tg_send_query_sync(tg_t *tg, buf_t *query)
 {
 	tl_t *tl = NULL;
-	pthread_t p = 
+	tg_queue_t *queue = 
 		tg_send_query_async(tg, query, 
 				&tl, tg_send_query_sync_cb);
 	
-	pthread_join(p, NULL);
+	pthread_join(queue->p, NULL);
 
 	ON_LOG(tg, "%s got tl: %s"
 			, __func__, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
@@ -749,4 +691,40 @@ void tg_queue_cancell_all(tg_t *tg)
 
 	list_free(&tg->queue);
 	pthread_mutex_unlock(&tg->queuem);
+}
+
+int tg_queue_cancell_queue(tg_t *tg, uint64_t msg_id){
+
+	int err = pthread_mutex_lock(&tg->queuem);
+	if (err){
+		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+		return 1;
+	}
+	
+	tg_queue_t *queue = list_cut(
+				&tg->queue, 
+				&msg_id, 
+				cmp_msgid);
+		
+
+	if (queue == NULL){
+		ON_ERR(tg, "%s: can't find queue for msg_id: "_LD_""
+				, __func__, msg_id);
+		pthread_mutex_unlock(&tg->queuem);
+		return 1;
+	}
+
+	// lock queue
+	err = pthread_mutex_lock(&queue->m);
+	pthread_mutex_unlock(&tg->queuem); // unlock list
+	if (err){
+		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+		return 1;
+	}
+	
+	// stop query
+	queue->loop = false;
+	pthread_mutex_unlock(&queue->m); // unlock
+	
+	return 0;
 }
