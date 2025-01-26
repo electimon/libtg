@@ -427,6 +427,7 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 	return RTL_RQ; // read socket again
 }
 
+/*
 static void tg_send_ack(void *data)
 {
 	tg_queue_t *queue = data;
@@ -467,6 +468,7 @@ static void tg_send_ack(void *data)
 	queue->tg->msgids = NULL;
 	pthread_mutex_unlock(&queue->tg->msgidsm);
 }
+*/
 
 static int tg_send(void *data)
 {
@@ -567,7 +569,7 @@ static void * tg_run_queue(void * data)
 	list_add(&queue->tg->queue, data);
 	pthread_mutex_unlock(&queue->tg->queuem);
 
-	// send ack
+	// send ack - use container method in header.c
 	/*tg_send_ack(data);*/
 	
 	// send
