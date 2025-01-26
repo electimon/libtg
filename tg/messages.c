@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include "peer.h"
@@ -902,6 +903,17 @@ pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 	pthread_t p = tg_send_query_async(
 			tg, &readHistory, NULL, NULL);
 	buf_free(readHistory);
+
+	// update database
+	char sql[BUFSIZ];
+	sprintf(sql, 
+			"UPDATE TABLE \'dialogs\' "
+			"SET \'unread_count\' = 0 "
+			"WHERE \'peer_id\' = "_LD_" AND id = %d;"
+			, peer.id, tg->id);
+	pthread_mutex_lock(&tg->databasem); // lock
+	tg_sqlite3_exec(tg, sql);
+	pthread_mutex_unlock(&tg->databasem); // unlock
 	
 	/* TODO: messages.AffectedMessages */
 	
