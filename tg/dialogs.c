@@ -439,7 +439,7 @@ void tg_get_dialogs_async_cb(void *data, const tl_t *tl)
 	free(t);
 }
 
-tg_queue_t * tg_get_dialogs_async(
+pthread_t tg_get_dialogs_async(
 		tg_t *tg, 
 		int limit,
 		time_t date, 
@@ -473,7 +473,7 @@ tg_queue_t * tg_get_dialogs_async(
 	t->callback = callback;
 	t->on_done = on_done;
 
-	tg_queue_t * p = tg_send_query_async(
+	pthread_t p = tg_send_query_async(
 			tg, 
 			&getDialogs, 
 			t, tg_get_dialogs_async_cb);

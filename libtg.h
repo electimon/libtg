@@ -49,10 +49,10 @@ tl_t *tg_send_query_sync(tg_t *tg, buf_t *query);
  * portion of TL query to be send as chunk callback return
  * value 
  * you may handle upload/download progress via progress callback */
-tg_queue_t * tg_send_query_async(tg_t *tg, buf_t *query,
+pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl));
 
-tg_queue_t * tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
+pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl),
 		void *progressp, 
 		int (*progress)(void *progressp, int size, int total));

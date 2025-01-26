@@ -10,6 +10,7 @@
 #include "tg.h"
 #include "updates.h"
 #include <assert.h>
+#include <bits/pthreadtypes.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -666,7 +667,7 @@ tg_queue_t * tg_queue_new(
 	return queue;
 }
 
-tg_queue_t * tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
+pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl),
 		void *progressp, 
 		int (*progress)(void *progressp, int size, int total))
@@ -679,10 +680,10 @@ tg_queue_t * tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 				tg->ip, tg->port,
 				userdata, callback,
 			 	progressp, progress);
-	return queue;
+	return queue->p;
 }
 
-tg_queue_t * tg_send_query_async(tg_t *tg, buf_t *query,
+pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl))
 {
 	ON_LOG(tg, "%s: tg: %p, query: %p, userdata: %p, callback: %p",
@@ -703,11 +704,11 @@ static void tg_send_query_sync_cb(void *d, const tl_t *tl)
 tl_t *tg_send_query_sync(tg_t *tg, buf_t *query)
 {
 	tl_t *tl = NULL;
-	tg_queue_t *queue = 
+	pthread_t p = 
 		tg_send_query_async(tg, query, 
 				&tl, tg_send_query_sync_cb);
 	
-	pthread_join(queue->p, NULL);
+	pthread_join(p, NULL);
 
 	ON_LOG(tg, "%s got tl: %s"
 			, __func__, tl?TL_NAME_FROM_ID(tl->_id):"NULL");

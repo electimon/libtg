@@ -373,7 +373,7 @@ void tg_channel_search_global_cb(void *d, const tl_t *tl)
 	free(t);
 }
 
-tg_queue_t * 
+pthread_t 
 tg_channel_search_global(tg_t *tg, const char *query, 
 		MessagesFilter *filter, 
 		int offset, int limit, 
@@ -405,7 +405,7 @@ tg_channel_search_global(tg_t *tg, const char *query,
 	t->callback = callback;
 	t->on_done = on_done;
 	
-	tg_queue_t * p = tg_send_query_async(
+	pthread_t p = tg_send_query_async(
 			tg, &search,
 		 	data, tg_channel_search_global_cb);
 	buf_free(search);
@@ -413,7 +413,7 @@ tg_channel_search_global(tg_t *tg, const char *query,
 	return p;
 }
 
-tg_queue_t * tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
+pthread_t tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 {
 	InputChannel inputChannel = tl_inputChannel(
 			peer.id, peer.access_hash);
@@ -422,7 +422,7 @@ tg_queue_t * tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 			&inputChannel, max_id);
 	buf_free(inputChannel);
 	
-	tg_queue_t * p = tg_send_query_async(
+	pthread_t p = tg_send_query_async(
 			tg, &query, NULL, NULL);
 	buf_free(query);
 	
