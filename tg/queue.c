@@ -152,10 +152,10 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 					buf_free(buf);
 				}
 		
-				ON_LOG(tg, "SSSSSSSSSSSS");
-				ON_LOG(tg, "QUEUE: %p", queue);
-				ON_LOG(tg, "ON_DONE: %p", queue->on_done);
-				ON_LOG(tg, "USERDATA: %p", queue->userdata);
+				//ON_LOG(tg, "SSSSSSSSSSSS");
+				//ON_LOG(tg, "QUEUE: %p", queue);
+				//ON_LOG(tg, "ON_DONE: %p", queue->on_done);
+				//ON_LOG(tg, "USERDATA: %p", queue->userdata);
 
 				tg_add_msgid(queue->tg, queue->msgid);
 				if (queue->on_done)
