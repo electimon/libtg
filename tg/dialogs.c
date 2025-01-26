@@ -668,14 +668,14 @@ void tg_dialog_free(tg_dialog_t *d)
 
 
 int tg_dialog_set_top_message(
-		tg_t *tg, uint64_t peer_id, const char *msg)
+		tg_t *tg, uint64_t peer_id, uint32_t msg_id, const char *msg)
 {
 	// update database
 	struct str str;
 	str_init(&str);
 	str_appendf(&str, 
 			"UPDATE TABLE \'dialogs\' "
-			"SET \'top_message_text\' = ");
+			"SET top_message_id = %d, \'top_message_text\' = ", msg_id);
 	str_append(&str, msg, strlen(msg));
 	str_appendf(&str,
 			"WHERE \'peer_id\' = "_LD_" AND id = %d;"

@@ -81,6 +81,6 @@ int tg_get_dialogs_from_database(tg_t *tg, void *data,
 		int (*callback)(void *data, const tg_dialog_t *dialog));
 
 int tg_dialog_set_top_message(
-		tg_t *tg, uint64_t peer_id, const char *msg);
+		tg_t *tg, uint64_t peer_id, uint32_t msg_id, const char *msg);
 
 #endif /* ifndef TG_DIALOGS_H_ */
