@@ -182,9 +182,9 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				/*handle_file_migrate(queue, rpc_error);*/
 				//if (handle_file_migrate(queue, rpc_error))
 				//{
-					/*char *err = tg_strerr(tl);*/
-					/*ON_ERR(queue->tg, "%s: %s", __func__, err);*/
-					/*free(err);*/
+					char *err = tg_strerr(tl);
+					ON_ERR(queue->tg, "%s: %s", __func__, err);
+					free(err);
 					break; // run on_done
 				//}
 
@@ -711,6 +711,7 @@ int tg_queue_cancell_queue(tg_t *tg, uint64_t msg_id){
 		ON_ERR(tg, "%s: can't find queue for msg_id: "_LD_""
 				, __func__, msg_id);
 		pthread_mutex_unlock(&tg->queuem);
+		tg_add_msgid(tg, msg_id);
 		return 1;
 	}
 
