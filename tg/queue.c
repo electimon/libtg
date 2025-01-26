@@ -711,7 +711,7 @@ int tg_queue_cancell_queue(tg_t *tg, uint64_t msg_id){
 		ON_ERR(tg, "%s: can't find queue for msg_id: "_LD_""
 				, __func__, msg_id);
 		pthread_mutex_unlock(&tg->queuem);
-		tg_add_msgid(tg, msg_id);
+		/*tg_add_msgid(tg, msg_id);*/
 		return 1;
 	}
 
