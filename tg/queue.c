@@ -427,6 +427,47 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 	return RTL_RQ; // read socket again
 }
 
+static void tg_send_ack(void *data)
+{
+	tg_queue_t *queue = data;
+	ON_LOG(queue->tg, "%s", __func__);
+	
+	// send ACK
+	int err = pthread_mutex_lock(&queue->tg->msgidsm);
+	if (err){
+		ON_ERR(queue->tg, "%s: can't lock mutex: %d", __func__, err);
+		return;
+	}
+
+	int i, len = arrlen(queue->tg->msgids);
+	if (len < 1){
+		// no messages to acknolage
+		pthread_mutex_unlock(&queue->tg->msgidsm);
+		return;
+	}
+
+	buf_t ack = tl_msgs_ack(
+			queue->tg->msgids, len);
+	buf_t query = tg_prepare_query(
+			queue->tg, ack, true, NULL);
+	buf_free(ack);
+
+	int s = 
+		send(queue->socket, query.data, query.size, 0);
+	buf_free(query);
+	
+	if (s < 0){
+		ON_ERR(queue->tg, "%s: socket error", __func__);
+		pthread_mutex_unlock(&queue->tg->msgidsm);
+		return;
+	}
+
+	// free msgids
+	arrfree(queue->tg->msgids);
+	queue->tg->msgids = NULL;
+	pthread_mutex_unlock(&queue->tg->msgidsm);
+}
+
 static int tg_send(void *data)
 {
 	int err = 0;
@@ -526,6 +567,9 @@ static void * tg_run_queue(void * data)
 	list_add(&queue->tg->queue, data);
 	pthread_mutex_unlock(&queue->tg->queuem);
 
+	// send ack
+	tg_send_ack(data);
+	
 	// send
 	if (tg_send(data))
 		queue->loop = false;
@@ -711,7 +755,7 @@ int tg_queue_cancell_queue(tg_t *tg, uint64_t msg_id){
 		ON_ERR(tg, "%s: can't find queue for msg_id: "_LD_""
 				, __func__, msg_id);
 		pthread_mutex_unlock(&tg->queuem);
-		/*tg_add_msgid(tg, msg_id);*/
+		tg_add_msgid(tg, msg_id);
 		return 1;
 	}
 

@@ -88,19 +88,19 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 	 * messages to a new connection if the current 
 	 * connection is closed and then re-opened.
 	 */
-	buf_t ack = tg_ack(tg);
-	if (ack.size > 0){ // need to add acknolege
-		content = false;
-		// create container
-		buf_t msgs[2];
-		msgs[0] = tg_mtp_message(tg, &b, true);	
-		msgs[1] = tg_mtp_message(tg, &ack, false);	
-		buf_free(b);
-		buf_free(ack);
-		b = tl_msg_container(msgs, 2);
-		buf_free(msgs[0]);
-		buf_free(msgs[1]);
-	}
+	/*buf_t ack = tg_ack(tg);*/
+	/*if (ack.size > 0){ // need to add acknolege*/
+		/*content = false;*/
+		/*// create container*/
+		/*buf_t msgs[2];*/
+		/*msgs[0] = tg_mtp_message(tg, &b, true);	*/
+		/*msgs[1] = tg_mtp_message(tg, &ack, false);	*/
+		/*buf_free(b);*/
+		/*buf_free(ack);*/
+		/*b = tl_msg_container(msgs, 2);*/
+		/*buf_free(msgs[0]);*/
+		/*buf_free(msgs[1]);*/
+	/*}*/
 		// salt  session_id message_id seq_no message_data_length  message_data padding12..1024
 		// int64 int64      int64      int32  int32                bytes        bytes
 		
