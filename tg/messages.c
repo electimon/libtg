@@ -23,6 +23,11 @@
     #error "Environment not 32 or 64-bit."
 #endif
 
+#define BUF2STR(_b) strndup((char*)_b.data, _b.size)
+#define BUF2IMG(_b) \
+	({buf_t i = image_from_photo_stripped(_b); \
+	 buf_to_base64(i);}) 
+
 void tg_message_fwd(
 		tg_t *tg, tg_message_fwd_header_t *tgh, tl_messageFwdHeader_t *tlh)
 {
@@ -125,6 +130,56 @@ void tg_message_from_tl(
 						tgm->photo_date = photo->date_;
 						tgm->photo_file_reference = 
 							buf_to_base64(photo->file_reference_);
+
+						// get photo sizes
+						struct str photo_sizes;
+						if (str_init(&photo_sizes))
+							break;
+
+						int i;
+						for (i = 0; i < photo->sizes_len; ++i) {
+							if (!photo->sizes_ || !photo->sizes_[i])
+								continue;
+							
+							switch (photo->sizes_[i]->_id) {
+								case id_photoSize:
+									{
+										tl_photoSize_t *ps = 
+											(tl_photoSize_t *)photo->sizes_[i];
+										str_appendf(&photo_sizes, "%dx%d", ps->w_, ps->h_);
+									}
+									break;
+								case id_photoCachedSize:
+									{
+										tl_photoCachedSize_t *ps = 
+											(tl_photoCachedSize_t *)photo->sizes_[i];
+										
+										tgm->photo_cached_size = MALLOC(32, break;);
+										snprintf(tgm->photo_cached_size,
+											 	31, "%dx%d", ps->w_, ps->h_);
+									}
+									break;
+								case id_photoStrippedSize:
+									{
+										tl_photoStrippedSize_t *ps = 
+											(tl_photoStrippedSize_t *)photo->sizes_[i];
+										tgm->photo_stripped = BUF2IMG(ps->bytes_);
+									}
+									break;
+								case id_photoPathSize:
+									{
+										tl_photoPathSize_t *ps = 
+											(tl_photoPathSize_t *)photo->sizes_[i];
+										tgm->photo_svg = 
+											image_from_svg_path(ps->bytes_);
+									}
+									break;
+
+								default:
+									break;
+							}
+						}
+						tgm->photo_sizes = photo_sizes.str;
 					}
 				}
 				break;

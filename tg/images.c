@@ -1,6 +1,10 @@
 #include "tg.h"
+#include "../tl/alloc.h"
+#include "../tl/str.h"
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 buf_t image_from_photo_stripped(buf_t bytes){
 	static const char header[] =
@@ -66,4 +70,75 @@ buf_t image_from_photo_stripped(buf_t bytes){
 		 	sizeof(footer) - 1);
 	
 	return buf;
+}
+
+
+char *image_from_svg_path(buf_t encoded){
+
+/* encoded := photoPathSize.bytes
+ * lookup := "AACAAAAHAAALMAAAQASTAVAAAZaacaaaahaaalmaaaqastava.az0123456789-,"
+ * path := "M"
+ *
+ * len := strlen(encoded)
+ * for (i = 0; i < len; i++) {
+ *	num := ord(encoded[i])
+ *	if (num >= 128 + 64) {
+ *		path += lookup[num - 128 - 64]
+ *	} else {
+ *		if (num >= 128) {
+ *			path += ','
+ *		} else if (num >= 64) {
+ *			path += '-'
+ *		}
+ *	path += itoa(num & 63)
+ *	}
+ * }
+ * path += "z"
+ *
+ * path will contain the actual SVG path that can be 
+ * directly inserted in the d attribute of an svg <path> 
+ * element:
+ * <?xml version="1.0" encoding="utf-8"?>
+ * <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+ *	viewBox="0 0 512 512" xml:space="preserve">
+ * <path d="{$path}"/>
+ * </svg>
+ */
+
+	char lookup[] = 
+		"AACAAAAHAAALMAAAQASTAVAAAZaacaaaahaaalmaaaqastava.az0123456789-,";
+	
+	struct str svg;
+	if (str_init(&svg))
+		return NULL;
+
+	str_appendf(&svg,
+		"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+		"<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n"
+			 "viewBox=\"0 0 512 512\" xml:space=\"preserve\">\n"
+		"<path d=\"");
+
+	str_appendf(&svg, "M");
+	
+	int i, len = encoded.size;
+	for (i = 0; i < len; i++) {
+		int num = encoded.data[i];
+		if (num >= 128 + 64) {
+			str_append(&svg, &lookup[num - 128 - 64], 1);
+		} else {
+			if (num >= 128) {
+				str_append(&svg, ",", 1);
+			} else if (num >= 64) {
+				str_append(&svg, "-", 1);
+			}
+			char v = (num & 63);
+			str_append(&svg, &v, 1);
+		}
+	}
+	str_append(&svg, "z", 1);
+
+	str_appendf(&svg, "\"/>\n");
+	str_appendf(&svg, "</svg>\n");
+
+	return svg.str;
 }

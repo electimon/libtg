@@ -4,6 +4,10 @@
 #include "tg.h"
 #include "peer.h"
 
+/*
+ * photo_sizes is string with "WxH" space separated
+ */
+
 #define TG_MESSAGE_FWD_HEADER_ARGS\
 	TG_MESSAGE_FWD_HEADER_ARG(bool, imported_, "INT", "imported") \
 	TG_MESSAGE_FWD_HEADER_ARG(bool, saved_out_, "INT", "saved_out") \
@@ -56,6 +60,10 @@
 	TG_MESSAGE_SPA(uint32_t, photo_dc_id, "INT", "photo_dc_id") \
 	TG_MESSAGE_SPA(uint32_t, photo_date, "INT", "photo_date") \
 	TG_MESSAGE_SPS(char*,    photo_file_reference, "TEXT", "photo_file_reference") \
+	TG_MESSAGE_SPS(char*,    photo_stripped, "TEXT", "photo_stripped") \
+	TG_MESSAGE_SPS(char*,    photo_cached_size, "TEXT", "photo_cached_size") \
+	TG_MESSAGE_SPS(char*,    photo_sizes, "TEXT", "photo_sizes") \
+	TG_MESSAGE_SPS(char*,    photo_svg, "TEXT", "photo_svg") \
 	TG_MESSAGE_SPA(double,   geo_long, "INT", "geo_long") \
 	TG_MESSAGE_SPA(double,   geo_lat, "INT", "geo_lat") \
 	TG_MESSAGE_SPA(uint64_t, geo_access_hash, "INT", "geo_access_hash") \

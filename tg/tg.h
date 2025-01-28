@@ -116,6 +116,7 @@ tl_t * tg_send_query_to_net(
 	})
 
 buf_t image_from_photo_stripped(buf_t photoStreppedData);
+char *image_from_svg_path(buf_t encoded);
 
 tl_config_t *tg_get_config(tg_t *tg);
 const char *tg_ip_address_for_dc(tg_t *tg, int dc);
