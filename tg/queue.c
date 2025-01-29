@@ -93,9 +93,6 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 	assert(tg);
 	ON_LOG(tg, "%s", __func__);
 
-	// add msgid
-	tg_add_msgid(tg, msg_id);
-	
 	// get queue
 	int err = pthread_mutex_lock(&tg->queuem);
 	if (err){
@@ -137,7 +134,6 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 
 	if (tl == NULL){
 		ON_ERR(tg, "%s: tl is NULL", __func__);
-		tg_add_msgid(queue->tg, queue->msgid);
 		if (queue->on_done)
 			queue->on_done(queue->userdata, tl);
 		pthread_mutex_unlock(&queue->m); // unlock
@@ -166,7 +162,6 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 					buf_free(buf);
 				}
 		
-				tg_add_msgid(queue->tg, queue->msgid);
 				if (queue->on_done)
 					queue->on_done(queue->userdata, ttl);
 				if (ttl)
@@ -212,7 +207,6 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 			break;
 	}
 
-	tg_add_msgid(queue->tg, queue->msgid);
 	if (queue->on_done)
 		queue->on_done(queue->userdata, tl);
 	
@@ -285,7 +279,6 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					(tl_pong_t *)tl;
 				// handle pong
 				ON_LOG(queue->tg, "pong...");
-				tg_add_msgid(queue->tg, obj->msg_id_);
 			}
 			break;
 		case id_bad_msg_notification:
@@ -293,7 +286,6 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				tl_bad_msg_notification_t *obj = 
 					(tl_bad_msg_notification_t *)tl;
 				// handle bad msg notification
-				tg_add_msgid(queue->tg, obj->bad_msg_id_);
 				char *err = tg_strerr(tl);
 				ON_ERR(queue->tg, "%s", err);
 				free(err);
@@ -318,7 +310,6 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_msg_detailed_info_t *di = 
 					(tl_msg_detailed_info_t *)tl;
-				tg_add_msgid(queue->tg, di->msg_id_);
 				catched_tl(queue->tg, di->answer_msg_id_, NULL);
 			}
 			break;
@@ -771,7 +762,6 @@ int tg_queue_cancell_queue(tg_t *tg, uint64_t msg_id){
 		ON_ERR(tg, "%s: can't find queue for msg_id: "_LD_""
 				, __func__, msg_id);
 		pthread_mutex_unlock(&tg->queuem);
-		tg_add_msgid(tg, msg_id);
 		return 1;
 	}
 
