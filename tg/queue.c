@@ -110,6 +110,12 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 		ON_ERR(tg, "can't find queue for msg_id: "_LD_" with tl: %s"
 				, msg_id, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
 		pthread_mutex_unlock(&tg->queuem);
+		// drop answer
+		buf_t drop = tl_rpc_drop_answer(msg_id);
+		buf_t query = tg_prepare_query(tg, drop, true, NULL);
+		buf_free(drop);
+		tg_send_query_async(tg, &query, NULL, NULL);
+		buf_free(query);
 		return;
 	}
 
@@ -182,9 +188,9 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				/*handle_file_migrate(queue, rpc_error);*/
 				//if (handle_file_migrate(queue, rpc_error))
 				//{
-					/*char *err = tg_strerr(tl);*/
-					/*ON_ERR(queue->tg, "%s: %s", __func__, err);*/
-					/*free(err);*/
+					char *err = tg_strerr(tl);
+					ON_ERR(queue->tg, "%s: %s", __func__, err);
+					free(err);
 					break; // run on_done
 				//}
 
@@ -321,7 +327,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 					(tl_rpc_result_t *)tl;
 				tg_add_msgid(queue->tg, rpc_result->req_msg_id_);
 				if (rpc_result->result_)
-					ON_LOG(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
+					ON_ERR(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
 							TL_NAME_FROM_ID(rpc_result->result_->_id), 
 							rpc_result->req_msg_id_);
 				catched_tl(queue->tg, rpc_result->req_msg_id_, rpc_result->result_);
