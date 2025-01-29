@@ -232,7 +232,6 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 
 		// message_id
 		uint64_t msg_id = deserialize_ui64(&b);
-		tg_add_msgid(tg, msg_id);
 
 		// message_data_length
 		uint32_t msg_data_len = deserialize_ui32(&b);

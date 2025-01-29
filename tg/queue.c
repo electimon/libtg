@@ -257,7 +257,6 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				for (i = 0; i < container->messages_len; ++i) {
 					mtp_message_t m = container->messages_[i];
 					// add to ack
-					tg_add_msgid(queue->tg, m.msg_id);
 					tl_t *ttl = tl_deserialize(&m.body);
 					handle_tl(queue, ttl);
 					if (ttl)
