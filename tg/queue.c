@@ -92,6 +92,9 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 {
 	assert(tg);
 	ON_LOG(tg, "%s", __func__);
+
+	// add msgid
+	tg_add_msgid(tg, msg_id);
 	
 	// get queue
 	int err = pthread_mutex_lock(&tg->queuem);

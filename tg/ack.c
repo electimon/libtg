@@ -1,6 +1,18 @@
+#include "tg.h"
 #include "transport.h"
 #include "stb_ds.h"
 #include <pthread.h>
+
+#if INTPTR_MAX == INT32_MAX
+    #define THIS_IS_32_BIT_ENVIRONMENT
+		#define _LD_ "%lld"
+#elif INTPTR_MAX == INT64_MAX
+    #define THIS_IS_64_BIT_ENVIRONMENT
+		#define _LD_ "%ld"
+#else
+    #error "Environment not 32 or 64-bit."
+#endif
+
 
 void tg_add_msgid(tg_t *tg, uint64_t msgid){
 	ON_LOG(tg, "%s", __func__);
@@ -30,6 +42,10 @@ buf_t tg_ack(tg_t *tg)
 		// no messages to acknolage
 		pthread_mutex_unlock(&tg->msgidsm);
 		return buf;
+	}
+
+	for (i = 0; i < len; ++i) {
+		ON_ERR(tg, "ACK: "_LD_"", tg->msgids[i]);
 	}
 
 	buf_t ack = tl_msgs_ack(
