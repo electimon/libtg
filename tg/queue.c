@@ -111,11 +111,7 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				, msg_id, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
 		pthread_mutex_unlock(&tg->queuem);
 		// drop answer
-		//buf_t drop = tl_rpc_drop_answer(msg_id);
-		//buf_t query = tg_prepare_query(tg, drop, true, NULL);
-		//buf_free(drop);
-		//tg_send_query_async(tg, &query, NULL, NULL);
-		//buf_free(query);
+		tg_rpc_drop_answer(tg, msg_id);	
 		return;
 	}
 

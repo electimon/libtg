@@ -12,8 +12,6 @@ buf_t tg_transport  (tg_t *tg, buf_t b);
 buf_t tg_detransport(tg_t *tg, buf_t b);
 buf_t tg_ack(tg_t *tg);
 
-buf_t tg_prepare_query(tg_t *tg, buf_t query, bool enc, 
-											 uint64_t *msgid);
 tl_t * tg_handle_deserialized_message(tg_t *tg, tl_t *tl);
 tl_t * tg_handle_serialized_message(tg_t *tg, buf_t msg);
 
