@@ -767,6 +767,9 @@ int tg_queue_cancell_queue(tg_t *tg, uint64_t msg_id){
 		return 1;
 	}
 
+	ON_ERR(tg, "%s: fond queue for msg_id: "_LD_"!"
+				, __func__, msg_id);
+
 	// lock queue
 	err = pthread_mutex_lock(&queue->m);
 	pthread_mutex_unlock(&tg->queuem); // unlock list
