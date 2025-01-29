@@ -252,11 +252,14 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_msg_container_t *container = 
 					(tl_msg_container_t *)tl; 
+				ON_LOG_BUF(queue->tg, container->_buf, "CONTAINER: ");
 				ON_LOG(queue->tg, "%s: container %d long", 
 						__func__, container->messages_len);
 				for (i = 0; i < container->messages_len; ++i) {
 					mtp_message_t m = container->messages_[i];
 					// add to ack
+					tg_add_msgid(queue->tg, m.msg_id);
+					
 					tl_t *ttl = tl_deserialize(&m.body);
 					handle_tl(queue, ttl);
 					if (ttl)
@@ -303,6 +306,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_msgs_ack_t *msgs_ack = 
 					(tl_msgs_ack_t *)tl;
+				ON_LOG_BUF(queue->tg, tl->_buf, "GOT ACK:");
 			}
 			break;
 		case id_msg_detailed_info:
@@ -323,7 +327,6 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_rpc_result_t *rpc_result = 
 					(tl_rpc_result_t *)tl;
-				tg_add_msgid(queue->tg, rpc_result->req_msg_id_);
 				if (rpc_result->result_)
 					ON_ERR(queue->tg, "got msg result: (%s) for msg_id: "_LD_"",
 							TL_NAME_FROM_ID(rpc_result->result_->_id), 

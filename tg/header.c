@@ -92,19 +92,34 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 	 * messages to a new connection if the current 
 	 * connection is closed and then re-opened.
 	 */
-	/*buf_t ack = tg_ack(tg);*/
-	/*if (ack.size > 0){ // need to add acknolege*/
-		/*content = false;*/
-		/*// create container*/
-		/*buf_t msgs[2];*/
-		/*msgs[0] = tg_mtp_message(tg, &b, true);	*/
-		/*msgs[1] = tg_mtp_message(tg, &ack, false);	*/
-		/*buf_free(b);*/
-		/*b = tl_msg_container(msgs, 2);*/
-		/*buf_free(msgs[0]);*/
-		/*buf_free(msgs[1]);*/
-	/*}*/
-	/*buf_free(ack);*/
+	/*
+	buf_t ack = tg_ack(tg);
+	if (ack.size > 0){ // need to add acknolege
+		ON_LOG_BUF(tg, b, "SEND DATA:");
+		ON_LOG_BUF(tg, ack, "SEND ACK:");
+		content = false;
+		// create container - do not use tl_generator -
+		// container does not have vertor serialization in in
+		buf_t msgs[2];
+		msgs[0] = tg_mtp_message(tg, &b, true);	
+		msgs[1] = tg_mtp_message(tg, &ack, false);	
+		buf_free(b);
+		
+		// add container id size
+		b = buf_add_ui32(id_msg_container);
+		// add size
+		b =  buf_cat_ui32(b, 3);
+
+		// add data
+		b =  buf_cat(b,msgs[0]);
+		b =  buf_cat(b,msgs[1]);
+
+		buf_free(msgs[0]);
+		buf_free(msgs[1]);
+		ON_LOG_BUF(tg, b, "CONTAINER TO SEND: ");
+	}
+	buf_free(ack);
+	*/
 		// salt  session_id message_id seq_no message_data_length  message_data padding12..1024
 		// int64 int64      int64      int32  int32                bytes        bytes
 		
@@ -205,7 +220,7 @@ buf_t tg_deheader(tg_t *tg, buf_t b, bool enc)
 		// message_id
 		uint64_t msg_id = deserialize_ui64(&b);
 		// add message id to array
-		/*tg_add_msgid(tg, msg_id);*/
+		tg_add_msgid(tg, msg_id);
 		
 		// seq_no
 		uint32_t seq_no = deserialize_ui32(&b);
