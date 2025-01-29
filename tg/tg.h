@@ -31,6 +31,7 @@ struct tg_ {
 	void *on_update_data;
 	void (*on_update)(void *on_update_data, int type, void *data);
 	int seqn;
+	pthread_mutex_t seqnm;
 	buf_t key;
 	uint64_t key_id;
 	buf_t salt;
