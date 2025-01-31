@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <time.h>
 #include <assert.h>
 #ifdef __APPLE__
@@ -29,13 +30,18 @@ static long long tg_get_current_time()
 				tg_get_utime(CLOCK_REALTIME)) & -4;
 }
 
-buf_t tg_mtp_message(tg_t *tg, buf_t *payload, bool content){
+buf_t tg_mtp_message(tg_t *tg, buf_t *payload, 
+		uint64_t *msgid, bool content)
+{
 	/*ON_LOG(tg, "%s", __func__);*/
 	//message msg_id:long seqno:int bytes:int body:Object = Message;
   buf_t msg = buf_new();
 	
 	// msg_id
-	msg = buf_cat_ui64(msg, tg_get_current_time());	
+	uint64_t msg_id = tg_get_current_time();
+	msg = buf_cat_ui64(msg, msg_id);	
+	if (msgid)
+		*msgid = msg_id;
 
 	// seqno
 	/* The seqno of a content-related message is thus
@@ -92,34 +98,42 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 	 * messages to a new connection if the current 
 	 * connection is closed and then re-opened.
 	 */
-	/*
+	if (*msgid)
+		*msgid = 0;
+
 	buf_t ack = tg_ack(tg);
 	if (ack.size > 0){ // need to add acknolege
-		ON_LOG_BUF(tg, b, "SEND DATA:");
+		//ON_LOG_BUF(tg, b, "SEND DATA:");
 		ON_LOG_BUF(tg, ack, "SEND ACK:");
 		content = false;
 		// create container - do not use tl_generator -
 		// container does not have vertor serialization in in
 		buf_t msgs[2];
-		msgs[0] = tg_mtp_message(tg, &b, true);	
-		msgs[1] = tg_mtp_message(tg, &ack, false);	
+		uint64_t msg_id;
+		msgs[0] = tg_mtp_message(tg, &b, 
+				&msg_id, true);	
+		msgs[1] = tg_mtp_message(tg, &ack, 
+				NULL, false);	
 		buf_free(b);
 		
-		// add container id size
+		// add container id
 		b = buf_add_ui32(id_msg_container);
 		// add size
-		b =  buf_cat_ui32(b, 3);
+		b =  buf_cat_ui32(b, 2);
 
 		// add data
 		b =  buf_cat(b,msgs[0]);
 		b =  buf_cat(b,msgs[1]);
 
+		//ON_LOG_BUF(tg, b, "CONTAINER TO SEND: ");
+		// set msgid
+		if (msgid)
+		 *msgid = msg_id;	
+		
 		buf_free(msgs[0]);
 		buf_free(msgs[1]);
-		ON_LOG_BUF(tg, b, "CONTAINER TO SEND: ");
 	}
 	buf_free(ack);
-	*/
 		// salt  session_id message_id seq_no message_data_length  message_data padding12..1024
 		// int64 int64      int64      int32  int32                bytes        bytes
 		
@@ -132,7 +146,7 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 		//message_id
 		uint64_t _msgid = tg_get_current_time();
 		s = buf_cat_ui64(s, _msgid);
-		if (msgid)
+		if (msgid && *msgid == 0) // set msgid if not container
 			*msgid = _msgid;
 		
 	 /* The seqno of a content-related message is thus

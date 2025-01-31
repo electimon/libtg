@@ -556,7 +556,7 @@ static void * tg_run_queue(void * data)
 	pthread_mutex_unlock(&queue->tg->queuem);
 
 	// send ack - use container method in header.c
-	tg_send_ack(data);
+	//tg_send_ack(data);
 	
 	// send
 	if (tg_send(data))
@@ -590,7 +590,7 @@ static void * tg_run_queue(void * data)
 	}
 	list_cut(&tg->queue, &queue->msgid, cmp_msgid);
 		
-	buf_free(queue->query);
+	/*buf_free(queue->query);*/
 	free(queue);
 	pthread_mutex_unlock(&tg->queuem);
 	pthread_exit(NULL);	
