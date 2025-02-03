@@ -189,9 +189,9 @@ static void rpc_result_from_container(
 					{
 						// handle gzip
 						tl_gzip_packed_t *obj =
-							(tl_gzip_packed_t *)tl;
+							(tl_gzip_packed_t *)ttl;
 
-						tl_t *ttl = NULL;
+						tl_t *tttl = NULL;
 						buf_t buf;
 						int _e = gunzip_buf(&buf, obj->packed_data_);
 						if (_e)
@@ -200,7 +200,7 @@ static void rpc_result_from_container(
 							ON_ERR(tg, "%s: %s", __func__, err);
 							free(err);
 						} else {
-							ttl = tl_deserialize(&buf);
+							tttl = tl_deserialize(&buf);
 							buf_free(buf);
 						}
 						tl_free(*tl);
