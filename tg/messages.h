@@ -209,14 +209,11 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 
 /* send text message and update local database 
  * return non-null on error */
-pthread_t 
-tg_message_send(tg_t *tg, tg_peer_t peer, const char *message);
+int tg_message_send(tg_t *tg, tg_peer_t peer, const char *message);
 
-pthread_t 
-tg_messages_set_typing(tg_t *tg, tg_peer_t peer, bool typing);
+int tg_messages_set_typing(tg_t *tg, tg_peer_t peer, bool typing);
 
-pthread_t 
-tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id);
+int tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id);
 
 /* return -1 on error, 0 if message is unread and date if 
  * message is read */

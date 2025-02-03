@@ -675,7 +675,7 @@ pthread_t tg_messages_get_history_async(
 	return p;
 }
 
-pthread_t tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
+int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 {
 	ON_LOG(tg, "%s", __func__);
 	buf_t peer = tg_inputPeer(peer_); 
@@ -702,10 +702,9 @@ pthread_t tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 	buf_free(peer);
 	buf_free(random_id);
 
-	pthread_t p = 
-		tg_send_query_async(tg, &m, NULL, NULL);
+	tg_send_query_sync(tg, &m);
 	buf_free(m);
-	return p;
+	return 0;
 }
 
 int tg_message_to_database(tg_t *tg, const tg_message_t *m)
@@ -924,7 +923,7 @@ int tg_get_messages_from_database(tg_t *tg, tg_peer_t peer, void *data,
 	return i;
 }
 
-pthread_t tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
+int tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
 {
 	Peer peer = tg_inputPeer(peer_); 
 	SendMessageAction action;
@@ -941,13 +940,12 @@ pthread_t tg_messages_set_typing(tg_t *tg, tg_peer_t peer_, bool typing)
 	buf_free(peer);
 	buf_free(action);
 
-	pthread_t p = tg_send_query_async(
-			tg, &setTyping, NULL, NULL);
+	tg_send_query_sync(tg, &setTyping);
 	buf_free(setTyping);
-	return p;
+	return 0;
 }
 
-pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
+int tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 {
 	InputPeer inputPeer = tg_inputPeer(peer); 
 
@@ -955,8 +953,7 @@ pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 			&inputPeer, max_id);
 	buf_free(inputPeer);
 	
-	pthread_t p = tg_send_query_async(
-			tg, &readHistory, NULL, NULL);
+	tg_send_query_sync(tg, &readHistory);
 	buf_free(readHistory);
 
 	// update database
@@ -971,8 +968,7 @@ pthread_t tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 	pthread_mutex_unlock(&tg->databasem); // unlock
 	
 	/* TODO: messages.AffectedMessages */
-	
-	return p;
+	return 0;
 }
 
 int tg_messages_get_read_date(

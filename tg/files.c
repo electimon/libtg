@@ -668,7 +668,7 @@ tg_document_send_with_progress_saveFilePart:;
 		buf_free(peer_);
 		buf_free(random_id);
 
-		tg_send_query_async(tg, &sendMedia, NULL, NULL);
+		tg_send_query_sync(tg, &sendMedia);
 		buf_free(sendMedia);
 	}
 
