@@ -185,28 +185,28 @@ static void rpc_result_from_container(
 					}
 					break;
 
-				case id_gzip_packed:
-					{
-						// handle gzip
-						tl_gzip_packed_t *obj =
-							(tl_gzip_packed_t *)ttl;
+				//case id_gzip_packed:
+					//{
+						//// handle gzip
+						//tl_gzip_packed_t *obj =
+							//(tl_gzip_packed_t *)ttl;
 
-						tl_t *tttl = NULL;
-						buf_t buf;
-						int _e = gunzip_buf(&buf, obj->packed_data_);
-						if (_e)
-						{
-							char *err = gunzip_buf_err(_e);
-							ON_ERR(tg, "%s: %s", __func__, err);
-							free(err);
-						} else {
-							tttl = tl_deserialize(&buf);
-							buf_free(buf);
-						}
-						tl_free(*tl);
-						*tl = ttl;
-					}
-					break;
+						//tl_t *tttl = NULL;
+						//buf_t buf;
+						//int _e = gunzip_buf(&buf, obj->packed_data_);
+						//if (_e)
+						//{
+							//char *err = gunzip_buf_err(_e);
+							//ON_ERR(tg, "%s: %s", __func__, err);
+							//free(err);
+						//} else {
+							//tttl = tl_deserialize(&buf);
+							//buf_free(buf);
+						//}
+						//tl_free(*tl);
+						//*tl = ttl;
+					//}
+					//break;
 
 				case id_updatesTooLong: case id_updateShort:
 				case id_updateShortMessage: case id_updateShortChatMessage:
