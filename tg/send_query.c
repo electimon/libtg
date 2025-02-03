@@ -185,28 +185,41 @@ static void rpc_result_from_container(
 					}
 					break;
 
-				//case id_gzip_packed:
-					//{
-						//// handle gzip
-						//tl_gzip_packed_t *obj =
-							//(tl_gzip_packed_t *)ttl;
+				case id_gzip_packed:
+					{
+						// handle gzip
+						tl_gzip_packed_t *obj =
+							(tl_gzip_packed_t *)ttl;
 
-						//tl_t *tttl = NULL;
-						//buf_t buf;
-						//int _e = gunzip_buf(&buf, obj->packed_data_);
-						//if (_e)
-						//{
-							//char *err = gunzip_buf_err(_e);
-							//ON_ERR(tg, "%s: %s", __func__, err);
-							//free(err);
-						//} else {
-							//tttl = tl_deserialize(&buf);
-							//buf_free(buf);
-						//}
-						//tl_free(*tl);
-						//*tl = ttl;
-					//}
-					//break;
+						buf_t buf;
+						int _e = gunzip_buf(&buf, obj->packed_data_);
+						if (_e)
+						{
+							char *err = gunzip_buf_err(_e);
+							ON_ERR(tg, "%s: %s", __func__, err);
+							free(err);
+						} else {
+							tl_t *tttl = tl_deserialize(&buf);
+							buf_free(buf);
+							if (tttl->_id == id_rpc_result){
+								tl_rpc_result_t *result =
+									(tl_rpc_result_t *)tttl;
+								if (result->req_msg_id_ == msg_id){
+									// ok - we got result
+									tl_free(*tl);
+									*tl = tttl;
+								} else {
+									ON_ERR(tg, "got rpc_result with wrong msgid");
+								}
+							} else {
+								ON_LOG(tg, "got gzip with: %s", 
+										TL_NAME_FROM_ID(tttl->_id));
+								// do updates
+								tg_do_updates(tg, tttl);
+							}
+						}
+					}
+					break;
 
 				case id_updatesTooLong: case id_updateShort:
 				case id_updateShortMessage: case id_updateShortChatMessage:
