@@ -239,11 +239,6 @@ static void rpc_result_from_container(
 							// drop!
 							tg_rpc_drop_answer(tg, rpc_result->req_msg_id_);
 							tl_free(ttl);
-							tl_free(*tl);
-							// resend query
-							*tl = tg_send_query_via_with_progress(
-									tg, query, ip, port, 
-									progressp, progress);
 						}
 					}
 					break;
