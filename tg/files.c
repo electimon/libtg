@@ -102,40 +102,31 @@ int tg_get_file_with_progress(
 				limit);
 			
 		// net send
-		struct tg_get_file_with_progress_t *t =
-			NEW(struct tg_get_file_with_progress_t,
-					ON_ERR(tg, "%s: can't allocate memory", __func__); 
-					return 1);
-		t->tg = tg;
-
 		tl_t *tl = tg_send_query_with_progress(
 				tg, &getFile,
 				progressp, progress);
 		buf_free(getFile);
 
 		if (tl == NULL && tl->_id != id_upload_file){
-			free(t);
 			if (tl)
 				tl_free(tl);
 			return offset;
 		}
 		
-		memset(&t->file, 0, sizeof(tg_file_t));
-		tg_file_from_tl(&t->file, tl);
+		tg_file_t file;
+		memset(&file, 0, sizeof(tg_file_t));
+		tg_file_from_tl(&file, tl);
 		tl_free(tl);
 
 		// add offset
-		offset += t->file.bytes_.size;
+		offset += file.bytes_.size;
 
-		printf("FILE TYPE: %s\n", TL_NAME_FROM_ID(t->file.type_));
+		printf("FILE TYPE: %s\n", TL_NAME_FROM_ID(file.type_));
 		if (callback)
-			if (callback(userdata, &t->file))
+			if (callback(userdata, &file))
 				break;
 
-		tg_file_free(&t->file);
-		
-		// free t
-		free(t);
+		tg_file_free(&file);
 	}
 	
 	/*return file;*/
