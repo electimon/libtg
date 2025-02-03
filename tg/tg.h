@@ -40,6 +40,8 @@ struct tg_ {
 	uint64_t fingerprint;
 	uint64_t *msgids; 
 	pthread_mutex_t msgidsm;
+	uint64_t *todrop; 
+	pthread_mutex_t todropm;
 };
 
 
@@ -126,6 +128,11 @@ const char *tg_ip_address_for_dc(tg_t *tg, int dc);
 buf_t tg_prepare_query(tg_t *tg, buf_t *query, bool enc, 
 											 uint64_t *msgid);
 
+buf_t tg_mtp_message(tg_t *tg, buf_t *payload, 
+		uint64_t *msgid, bool content);
+
 void tg_rpc_drop_answer(tg_t *tg, uint64_t msg_id);
+void tg_add_todrop(tg_t *tg, uint64_t msgid);
+int tg_to_drop(tg_t *tg, buf_t *buf);
 
 #endif /* ifndef TG_H_ */

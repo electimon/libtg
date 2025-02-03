@@ -112,6 +112,14 @@ tg_t *tg_new(
 		return NULL;
 	}
 
+	if (pthread_mutex_init(
+				&tg->todropm, NULL))
+	{
+		ON_ERR(tg, "%s: can't init mutex", __func__);
+		return NULL;
+	}
+
+
 
 	return tg;
 }

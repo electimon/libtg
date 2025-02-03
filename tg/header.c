@@ -107,7 +107,7 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 		ON_LOG_BUF(tg, ack, "SEND ACK:");
 		content = false;
 		// create container - do not use tl_generator -
-		// container does not have vertor serialization in in
+		// container does not have vertor serialization in it
 		buf_t msgs[2];
 		uint64_t msg_id;
 		msgs[0] = tg_mtp_message(tg, &b, 
@@ -118,12 +118,18 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 		
 		// add container id
 		b = buf_add_ui32(id_msg_container);
+
 		// add size
-		b =  buf_cat_ui32(b, 2);
+		buf_t todrop = buf_new();
+		int len = tg_to_drop(tg, &todrop);
+		b =  buf_cat_ui32(b, 2+len);
 
 		// add data
 		b =  buf_cat(b,msgs[0]);
 		b =  buf_cat(b,msgs[1]);
+
+		// add tg_to_drop
+		b = buf_cat(b, todrop);
 
 		//ON_LOG_BUF(tg, b, "CONTAINER TO SEND: ");
 		// set msgid
@@ -132,6 +138,7 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 		
 		buf_free(msgs[0]);
 		buf_free(msgs[1]);
+		buf_free(todrop);
 	}
 	buf_free(ack);
 		// salt  session_id message_id seq_no message_data_length  message_data padding12..1024
