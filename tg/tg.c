@@ -226,9 +226,6 @@ const char *tg_ip_address_for_dc(tg_t *tg, int dc){
 void tg_rpc_drop_answer(tg_t *tg, uint64_t msg_id)
 {
 	buf_t drop = tl_rpc_drop_answer(msg_id);
-	buf_t query = 
-		tg_prepare_query(tg, &drop, true, NULL);
+	tg_send_query_sync(tg, &drop);
 	buf_free(drop);
-
-	tg_send_query_async(tg, &query, NULL, NULL);
 }
