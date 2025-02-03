@@ -23,6 +23,7 @@ struct tg_ {
 	int port;
 	list_t *queue;
 	pthread_mutex_t queuem;
+	pthread_mutex_t send_query;
 	tl_config_t *config;
 	void *on_err_data;
 	void (*on_err)(void *on_err_data, const char *err);

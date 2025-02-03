@@ -6,6 +6,7 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
+#include <pthread.h>
 #if INTPTR_MAX == INT32_MAX
     #define THIS_IS_32_BIT_ENVIRONMENT
 		#define _LD_ "%lld"
@@ -287,8 +288,10 @@ tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
 	}
 
 	// send query
+	pthread_mutex_lock(&tg->send_query);
 	uint64_t msg_id = tg_send(tg, query, &socket);
 	if (msg_id == 0){
+		pthread_mutex_unlock(&tg->send_query);
 		return NULL;
 	}
 
@@ -304,6 +307,7 @@ recevive_data:;
 	buf_free(r);
 
 	if (tl == NULL){
+		pthread_mutex_unlock(&tg->send_query);
 		return NULL;
 	}
 
@@ -312,10 +316,13 @@ recevive_data:;
 		ON_LOG(tg, "BAD SERVER SALT: resend query");
 		// resend query
 		tg_net_close(tg, socket);
+		pthread_mutex_unlock(&tg->send_query);
 		return tg_send_query_via_with_progress(
 				tg, query, ip, port, progressp, progress);
 	}
 				
+	// unlock mutex
+	pthread_mutex_unlock(&tg->send_query);
 	ON_LOG(tg, "got answer with: %s", TL_NAME_FROM_ID(tl->_id));
 
 	// check container
