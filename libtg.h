@@ -43,7 +43,10 @@ tl_t *tg_send_query_sync(tg_t *tg, buf_t *query);
 tl_t *tg_send_query_with_progress(tg_t *tg, buf_t *query,
 		void *progressp, 
 		void (*progress)(void *progressp, int size, int total));
-
+tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
+		const char *ip, int port,
+		void *progressp, 
+		void (*progress)(void *progressp, int size, int total));
 /* send TL query via queue manager in thread and run
  * callback on done.
  * set callback return to non-null to resend query

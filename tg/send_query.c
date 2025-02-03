@@ -173,7 +173,10 @@ static buf_t tg_receive(tg_t *tg, int sockfd,
 }
 
 static void rpc_result_from_container(
-		tg_t *tg, tl_t **tl, uint64_t msg_id)
+		tg_t *tg, tl_t **tl, uint64_t msg_id,
+		buf_t *query, const char *ip, int port, 
+		void *progressp, 
+		void(*progress)(void*,int,int))
 {
 	assert(tl);
 	if (tl[0]->_id == id_msg_container) 
@@ -234,8 +237,13 @@ static void rpc_result_from_container(
 							ON_ERR(tg, "rpc_result: (%s) for wrong msg_id",
 								rpc_result->result_?TL_NAME_FROM_ID(rpc_result->result_->_id):"NULL"); 
 							// drop!
-							//tg_rpc_drop_answer(tg, rpc_result->req_msg_id_);
+							tg_rpc_drop_answer(tg, rpc_result->req_msg_id_);
 							tl_free(ttl);
+							tl_free(*tl);
+							// resend query
+							*tl = tg_send_query_via_with_progress(
+									tg, query, ip, port, 
+									progressp, progress);
 						}
 					}
 					break;
@@ -316,7 +324,8 @@ recevive_data:;
 	ON_LOG(tg, "got answer with: %s", TL_NAME_FROM_ID(tl->_id));
 
 	// check container
-	rpc_result_from_container(tg, &tl, msg_id);
+	rpc_result_from_container(
+			tg, &tl, msg_id, query, ip, port, progressp, progress);
 
 	// handle rpc_result
 	if (tl->_id == id_rpc_result){
