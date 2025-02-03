@@ -122,7 +122,7 @@ char *image_from_svg_path(buf_t encoded);
 tl_config_t *tg_get_config(tg_t *tg);
 const char *tg_ip_address_for_dc(tg_t *tg, int dc);
 
-buf_t tg_prepare_query(tg_t *tg, buf_t query, bool enc, 
+buf_t tg_prepare_query(tg_t *tg, buf_t *query, bool enc, 
 											 uint64_t *msgid);
 
 void tg_rpc_drop_answer(tg_t *tg, uint64_t msg_id);

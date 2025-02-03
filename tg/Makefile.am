@@ -19,6 +19,7 @@ libtg_la_SOURCES = tg.c \
 				   transport.c \
 				   ack.c \
 				   net.c \
+				   send_query.c \
 				   queue.c \
 				   ds.c \
 				   prepare_query.c \
