@@ -373,13 +373,11 @@ void tg_channel_search_global_cb(void *d, const tl_t *tl)
 	free(t);
 }
 
-pthread_t 
-tg_channel_search_global(tg_t *tg, const char *query, 
+int tg_channel_search_global(tg_t *tg, const char *query, 
 		MessagesFilter *filter, 
 		int offset, int limit, 
 		void *data, 
-		int (*callback)(void *data, const tg_channel_t *cannel),
-		void (*on_done)(void *data))
+		int (*callback)(void *data, const tg_channel_t *cannel))
 {
 	InputPeer inputPeer = tl_inputPeerEmpty();
 	buf_t search = tl_messages_searchGlobal(
@@ -395,25 +393,61 @@ tg_channel_search_global(tg_t *tg, const char *query,
 			limit);
 	buf_free(inputPeer);
 
-	struct tg_channel_search_global_t *t = 
-		NEW(struct tg_channel_search_global_t, 
-				ON_ERR(tg, "%s: can't allocate memory", __func__);
-				return 0);
-	
-	t->tg = tg;
-	t->data = data;
-	t->callback = callback;
-	t->on_done = on_done;
-	
-	pthread_t p = tg_send_query_async(
-			tg, &search,
-		 	data, tg_channel_search_global_cb);
+	tl_t *tl = tg_send_query_sync(tg, &search);
 	buf_free(search);
-	
-	return p;
+
+	if (tl == NULL)
+		return 0;
+
+	int n = 0;
+
+	switch (tl->_id) {
+		case id_messages_channelMessages:
+			{
+				tl_messages_channelMessages_t *msgs = 
+					(tl_messages_channelMessages_t *)tl;
+				n = tg_parse_chennels(tg, 
+						msgs->chats_len, 
+						msgs->chats_, 
+						data, 
+						callback);
+			}
+			break;
+			
+		case id_messages_messages:
+			{
+				tl_messages_messages_t *msgs = 
+					(tl_messages_messages_t *)tl;
+
+				n = tg_parse_chennels(tg, 
+						msgs->chats_len, 
+						msgs->chats_, 
+						data, 
+						callback);
+			}
+			break;
+			
+		case id_messages_messagesSlice:
+			{
+				tl_messages_messagesSlice_t *msgs = 
+					(tl_messages_messagesSlice_t *)tl;
+					
+				n = tg_parse_chennels(tg, 
+						msgs->chats_len, 
+						msgs->chats_, 
+						data, 
+						callback);
+			}
+			break;
+			
+		default:
+			break;
+	}
+
+	return n;
 }
 
-pthread_t tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
+int tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 {
 	InputChannel inputChannel = tl_inputChannel(
 			peer.id, peer.access_hash);
@@ -422,10 +456,10 @@ pthread_t tg_channel_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id)
 			&inputChannel, max_id);
 	buf_free(inputChannel);
 	
-	pthread_t p = tg_send_query_async(
-			tg, &query, NULL, NULL);
+	tg_send_query_sync(
+			tg, &query);
 	buf_free(query);
 	
-	return p;
+	return 0;
 }
 
