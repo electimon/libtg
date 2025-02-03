@@ -121,6 +121,7 @@ static buf_t tg_receive(tg_t *tg, int sockfd,
 				0);	
 		if (s<0){
 			ON_ERR(tg, "%s: socket error: %d", __func__, s);
+			r.size = 0;
 			return r;
 		}
 		received += s;
@@ -181,6 +182,29 @@ static void rpc_result_from_container(
 						ON_ERR(tg, "%s", err);
 						free(err);
 						tl_free(ttl);
+					}
+					break;
+
+				case id_gzip_packed:
+					{
+						// handle gzip
+						tl_gzip_packed_t *obj =
+							(tl_gzip_packed_t *)tl;
+
+						tl_t *ttl = NULL;
+						buf_t buf;
+						int _e = gunzip_buf(&buf, obj->packed_data_);
+						if (_e)
+						{
+							char *err = gunzip_buf_err(_e);
+							ON_ERR(tg, "%s: %s", __func__, err);
+							free(err);
+						} else {
+							ttl = tl_deserialize(&buf);
+							buf_free(buf);
+						}
+						tl_free(*tl);
+						*tl = ttl;
 					}
 					break;
 

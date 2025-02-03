@@ -54,6 +54,10 @@ buf_t tg_mtp_message(tg_t *tg, buf_t *payload,
 
 	// lock header for seqno
 	int err = pthread_mutex_lock(&tg->seqnm);
+	if (err){
+		ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
+		return msg;
+	}
 	if (content)
 		msg = buf_cat_ui32(msg, tg->seqn++ * 2 + 1);
 	else {
