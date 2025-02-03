@@ -122,9 +122,9 @@ int tg_get_file_with_progress(
 			if (str){
 				str += strlen("FILE_MIGRATE_");
 				int dc = atoi(str);
+				tl_free(tl);
 				const char *ip = tg_ip_address_for_dc(tg, dc); 
 				if (ip == NULL){
-					tl_free(tl);
 					return offset;
 				}
 				return tg_get_file_with_progress(
