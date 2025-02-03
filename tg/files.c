@@ -108,17 +108,21 @@ int tg_get_file_with_progress(
 					return 1);
 		t->tg = tg;
 
-		pthread_t p = tg_send_query_async_with_progress(
+		tl_t *tl = tg_send_query_with_progress(
 				tg, &getFile,
-				t, tg_get_file_with_progress_on_done,	
 				progressp, progress);
 		buf_free(getFile);
-		pthread_join(p, NULL);
 
-		if (!t->result){
+		if (tl == NULL && tl->_id != id_upload_file){
 			free(t);
+			if (tl)
+				tl_free(tl);
 			return offset;
 		}
+		
+		memset(&t->file, 0, sizeof(tg_file_t));
+		tg_file_from_tl(&t->file, tl);
+		tl_free(tl);
 
 		// add offset
 		offset += t->file.bytes_.size;
