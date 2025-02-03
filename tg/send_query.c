@@ -238,7 +238,7 @@ static void rpc_result_from_container(
 							ON_ERR(tg, "rpc_result: (%s) for wrong msg_id",
 								rpc_result->result_?TL_NAME_FROM_ID(rpc_result->result_->_id):"NULL"); 
 							// drop!
-							tg_rpc_drop_answer(tg, rpc_result->req_msg_id_);
+							/*tg_rpc_drop_answer(tg, rpc_result->req_msg_id_);*/
 							tl_free(ttl);
 						}
 					}
