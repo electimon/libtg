@@ -39,11 +39,6 @@ static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
 	ON_LOG(tg, "%s: socket: %d", __func__, *socket);
 	// auth_key
 	if (!tg->key.size){
-		err = pthread_mutex_lock(&tg->queuem);
-		if (err){
-			ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
-			return 0;
-		}
 		tg_net_close(tg, *socket);
 		api.app.open(tg->ip, tg->port);	
 		tg->key = 
@@ -52,29 +47,16 @@ static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
 			buf_add(shared_rc.salt.data, shared_rc.salt.size);
 		*socket = shared_rc.net.sockfd;
 		tg->seqn = shared_rc.seqnh + 1;
-		pthread_mutex_unlock(&tg->queuem);
 	}
 
 	// session id
 	if (!tg->ssid.size){
-		err = pthread_mutex_lock(&tg->queuem);
-		if (err){
-			ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
-			return 0;
-		}
 		tg->ssid = buf_rand(8);
-		pthread_mutex_unlock(&tg->queuem);
 	}
 
 	// server salt
 	if (!tg->salt.size){
-		err = pthread_mutex_lock(&tg->queuem);
-		if (err){
-			ON_ERR(tg, "%s: can't lock mutex: %d", __func__, err);
-			return 0;
-		}
 		tg->salt = buf_rand(8);
-		pthread_mutex_unlock(&tg->queuem);
 	}
 
 	// prepare query
@@ -274,15 +256,11 @@ tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
 		void *progressp, 
 		void (*progress)(void *progressp, int size, int total))
 {
-	assert(tg);
-	assert(query);
-	assert(ip);
-
+	assert(tg && query && ip);
 	ON_LOG(tg, "%s: %s: %d", __func__, ip, port);
 	
 	// open socket
-	int socket = 
-		tg_net_open(tg, ip, port);
+	int socket = tg_net_open(tg, ip, port);
 	if (socket < 0)
 	{
 		ON_ERR(tg, "%s: can't open socket", __func__);
@@ -301,6 +279,8 @@ recevive_data:;
 	// reseive
 	buf_t r = tg_receive(tg, socket, progressp, progress);
 	if (r.size == 0){
+		pthread_mutex_unlock(&tg->send_query);
+		buf_free(r);
 		return NULL;
 	}
 
@@ -324,7 +304,6 @@ recevive_data:;
 	}
 				
 	// unlock mutex
-	pthread_mutex_unlock(&tg->send_query);
 	ON_LOG(tg, "got answer with: %s", TL_NAME_FROM_ID(tl->_id));
 
 	// check container
@@ -366,6 +345,7 @@ recevive_data:;
 	// check bad msg
 	if (tl->_id == id_bad_msg_notification){
 		/* TODO: update time for correct msgid <03-02-25, yourname> */
+		pthread_mutex_unlock(&tg->send_query);
 		char *err = tg_strerr(tl);
 		ON_ERR(tg, "%s", err);
 		free(err);
@@ -386,6 +366,7 @@ recevive_data:;
 			}
 		}
 		tl_free(tl);
+		pthread_mutex_unlock(&tg->send_query);
 		return NULL;
 	}
 
@@ -405,6 +386,7 @@ recevive_data:;
 		}
 
 		tl_free(tl);
+		pthread_mutex_unlock(&tg->send_query);
 		return NULL;
 	}
 	
@@ -425,6 +407,7 @@ recevive_data:;
 			break;
 	}
 
+	pthread_mutex_unlock(&tg->send_query);
 	return tl;
 }
 
