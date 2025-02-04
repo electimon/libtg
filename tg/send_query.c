@@ -343,10 +343,6 @@ recevive_data:;
 		pthread_mutex_unlock(&tg->send_query);
 		return NULL;
 	}
-	if (r.size < 1){
-		pthread_mutex_unlock(&tg->send_query);
-		return NULL;
-	}
 
 	// deserialize 
 	tl_t *tl = tl_deserialize(&r);
