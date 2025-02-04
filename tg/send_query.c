@@ -86,13 +86,12 @@ static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
 	return msg_id;
 }
 
-static buf_t tg_receive(tg_t *tg, int sockfd,
+static int tg_receive(tg_t *tg, int sockfd, buf_t *msg,
 		void *progressp, 
 		void (*progress)(void *progressp, int size, int total))
 {
 	assert(tg);
 	ON_LOG(tg, "%s: socket: %d", __func__, sockfd);
-	buf_t r = buf_new();
 	
 	// get length of the package
 	uint32_t len;
@@ -101,14 +100,15 @@ static buf_t tg_receive(tg_t *tg, int sockfd,
 	if (len < 0) {
 		// this is error - report it
 		ON_ERR(tg, "%s: received wrong length: %d", __func__, len);
-		return r;
+		return 1;
 	}
 
 	// realloc buf to be enough size
-	if (buf_realloc(&r, len)){
+	buf_t buf;
+	if (buf_realloc(&buf, len)){
 		// handle error
 		ON_ERR(tg, "%s: error buf realloc to size: %d", __func__, len);
-		return r;
+		return 1;
 	}
 
 	// get data
@@ -116,13 +116,13 @@ static buf_t tg_receive(tg_t *tg, int sockfd,
 	while (received < len){
 		int s = recv(
 				sockfd, 
-				&r.data[received], 
+				&buf.data[received], 
 				len - received, 
 				0);	
 		if (s<0){
 			ON_ERR(tg, "%s: socket error: %d", __func__, s);
-			r.size = 0;
-			return r;
+			buf_free(buf);
+			return 1;
 		}
 		received += s;
 		
@@ -134,26 +134,25 @@ static buf_t tg_receive(tg_t *tg, int sockfd,
 	}
 
 	// get payload 
-	r.size = len;
-	if (r.size == 4 && buf_get_ui32(r) == 0xfffffe6c){
+	buf.size = len;
+	if (buf.size == 4 && buf_get_ui32(buf) == 0xfffffe6c){
 		ON_ERR(tg, "%s: 404 ERROR", __func__);
-		r.size = 0;
-		return r;
+		buf_free(buf);
+		return 1;
 	}
 
 	// decrypt
-	buf_t d = tg_decrypt(tg, r, true);
+	buf_t d = tg_decrypt(tg, buf, true);
+	buf_free(buf);
 	if (!d.size){
-		r.size = 0;
-		return r;
+		return 1;
 	}
-	buf_free(r);
 
 	// deheader
-	buf_t msg = tg_deheader(tg, d, true);
+	*msg = tg_deheader(tg, d, true);
 	buf_free(d);
 
-	return msg;
+	return 0;
 }
 
 static void rpc_result_from_container(
@@ -314,10 +313,10 @@ tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
 
 recevive_data:;
 	// reseive
-	buf_t r = tg_receive(tg, socket, progressp, progress);
-	if (r.size == 0){
+	buf_t r;
+	if (tg_receive(tg, socket, &r, progressp, progress))
+	{
 		pthread_mutex_unlock(&tg->send_query);
-		buf_free(r);
 		return NULL;
 	}
 
