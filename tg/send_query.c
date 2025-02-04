@@ -245,6 +245,7 @@ static void rpc_result_from_container(
 				case id_msg_new_detailed_info:
 					// add to ack
 					tg_add_msgid(tg, m.msg_id);
+					tl_free(ttl);
 					break;
 				case id_rpc_error:
 					{
@@ -254,6 +255,7 @@ static void rpc_result_from_container(
 						char *err = tg_strerr(ttl);
 						ON_ERR(tg, "%s: %s", __func__, err);
 						free(err);
+						tl_free(ttl);
 					}
 					break; // run on_done
 			
@@ -271,37 +273,38 @@ static void rpc_result_from_container(
 							// got result!
 							ON_LOG(tg, "OK! We have result!");
 							// update tl
-							//tl_free(*tl);
+							tl_free(*tl);
 							*tl = ttl;
 						} else {
 							ON_ERR(tg, "rpc_result: (%s) for wrong msg_id",
 								rpc_result->result_?TL_NAME_FROM_ID(rpc_result->result_->_id):"NULL"); 
 							// drop!
-							/*tg_rpc_drop_answer(tg, rpc_result->req_msg_id_);*/
 							tg_add_todrop(tg, rpc_result->req_msg_id_);
-
 							tl_free(ttl);
 						}
 					}
 					break;
 				case id_new_session_created:
-				{
-					tl_new_session_created_t *obj = 
-						(tl_new_session_created_t *)tl;
-					// handle new session
-					ON_LOG(tg, "new session created...");
-				}
+					{
+						tl_new_session_created_t *obj = 
+							(tl_new_session_created_t *)ttl;
+						// handle new session
+						ON_LOG(tg, "new session created...");
+						tl_free(ttl);
+					}
 					break;
 				case id_msgs_ack:
-				{
-					ON_LOG(tg, "ACK in container");
-					*tl = ttl;	
-				}
+					{
+						ON_LOG(tg, "ACK in container");
+						tl_free(*tl);
+						*tl = ttl;	
+					}
 					break;
 
 				default:
 					ON_LOG(tg, "don't know how to handle: %s", 
 							TL_NAME_FROM_ID(ttl->_id));
+					tl_free(ttl);
 					break;
 			}
 		}
@@ -337,6 +340,10 @@ recevive_data:;
 	buf_t r;
 	if (tg_receive(tg, socket, &r, progressp, progress))
 	{
+		pthread_mutex_unlock(&tg->send_query);
+		return NULL;
+	}
+	if (r.size < 1){
 		pthread_mutex_unlock(&tg->send_query);
 		return NULL;
 	}
@@ -394,19 +401,19 @@ recevive_data:;
 		} else {
 			ttl = tl_deserialize(&buf);
 			buf_free(buf);
+			tl_free(tl);
+			tl = ttl;
 		}
-		tl_free(tl);
-		tl = ttl;
 	}
 
 	// check bad msg
 	if (tl->_id == id_bad_msg_notification){
 		/* TODO: update time for correct msgid <03-02-25, yourname> */
-		pthread_mutex_unlock(&tg->send_query);
 		char *err = tg_strerr(tl);
 		ON_ERR(tg, "%s", err);
 		free(err);
 		tl_free(tl);
+		pthread_mutex_unlock(&tg->send_query);
 		return NULL;
 	}
 	
