@@ -198,20 +198,7 @@ static int tg_dialogs_from_tl(
 							}
 						}
 						break;
-					case id_userEmpty:
-						{
-							tl_userEmpty_t *user =
-								(tl_userEmpty_t *)md.users_[k];
-							
-							if (d.peer_id == user->id_)
-							{
-								d.peer_type = TG_PEER_TYPE_USER;
-								d.name = strdup("empty"); 
-							}
-						}
-						break;
-					
-					default:
+				 default:
 						break;
 				}
 			}
@@ -245,18 +232,6 @@ static int tg_dialogs_from_tl(
 						}
 						break;
 					
-					case id_channelForbidden:
-						{
-							tl_channelForbidden_t *channel = 
-								(tl_channelForbidden_t *)md.chats_[k];
-							if (d.peer_id == channel->id_)
-							{
-								d.peer_type = TG_PEER_TYPE_CHANNEL;
-								d.name = BUF2STR(channel->title_);
-							}
-						}
-						break;
-					
 					case id_chat:
 						{
 							tl_chat_t *chat = 
@@ -277,24 +252,20 @@ static int tg_dialogs_from_tl(
 						}
 						break;
 					
-					case id_chatForbidden:
-						{
-							tl_chatForbidden_t *chat = 
-								(tl_chatForbidden_t *)md.chats_[k];
-							if (d.peer_id == chat->id_){
-								d.peer_type = TG_PEER_TYPE_CHAT;
-								d.name = BUF2STR(chat->title_);
-							}
-						}
-						break;
-					
-
 					default:
 						break;
 				}
 			}
 
-				
+			if (d.peer_type == TG_PEER_TYPE_NULL) {
+				ON_LOG(tg, "%s: can't find dialog data "
+						"for peer: (%s): "_LD_"",
+						__func__, TL_NAME_FROM_ID(peer->_id), peer->chat_id_);
+				// free
+				tg_dialog_free(&d);
+				continue;
+			}
+
 			// iterate messages
 			for (k = 0; k < md.messages_len; ++k){
 				if (md.messages_[k] && 
@@ -370,15 +341,7 @@ static int tg_dialogs_from_tl(
 				}
 			} // done messages 
 
-			if (d.peer_type == TG_PEER_TYPE_NULL) {
-				ON_LOG(tg, "%s: can't find dialog data "
-						"for peer: (%s): "_LD_"",
-						__func__, TL_NAME_FROM_ID(peer->_id), peer->chat_id_);
-				// free
-				tg_dialog_free(&d);
-				continue;
-			}
-			// save dialog to database
+		  // save dialog to database
 			tg_dialog_to_database(tg, &d);
 
 			// update hash
