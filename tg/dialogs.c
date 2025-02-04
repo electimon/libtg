@@ -375,7 +375,7 @@ static int tg_dialogs_from_tl(
 						"for peer: (%s): "_LD_"",
 						__func__, TL_NAME_FROM_ID(peer->_id), peer->chat_id_);
 				// free
-				// tg_dialog_free(&d);
+				tg_dialog_free(&d);
 				continue;
 			}
 			// save dialog to database
@@ -393,7 +393,7 @@ static int tg_dialogs_from_tl(
 					break;
 
 			// free dialog
-			/*tg_dialog_free(&d);*/
+			tg_dialog_free(&d);
 
 			// counter
 			n++;

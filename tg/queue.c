@@ -248,7 +248,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_msg_container_t *container = 
 					(tl_msg_container_t *)tl; 
-				ON_LOG_BUF(queue->tg, container->_buf, "CONTAINER: ");
+				/*ON_LOG_BUF(queue->tg, container->_buf, "CONTAINER: ");*/
 				ON_LOG(queue->tg, "%s: container %d long", 
 						__func__, container->messages_len);
 				for (i = 0; i < container->messages_len; ++i) {
@@ -302,7 +302,7 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 			{
 				tl_msgs_ack_t *msgs_ack = 
 					(tl_msgs_ack_t *)tl;
-				ON_LOG_BUF(queue->tg, tl->_buf, "GOT ACK:");
+				/*ON_LOG_BUF(queue->tg, tl->_buf, "GOT ACK:");*/
 			}
 			break;
 		case id_msg_detailed_info:
