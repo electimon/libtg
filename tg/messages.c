@@ -709,6 +709,9 @@ int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 
 int tg_message_to_database(tg_t *tg, const tg_message_t *m)
 {
+	ON_LOG(tg, "%s: disabled", __func__);
+	return 0;
+
 	ON_LOG(tg, "%s", __func__);
 	// save message to database
 	pthread_mutex_lock(&tg->databasem); // lock
