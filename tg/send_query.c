@@ -523,6 +523,6 @@ tl_t *tg_send_query(tg_t *tg, buf_t *query)
 			NULL, NULL);
 }
 
-//tl_t *tg_send_query_sync(tg_t *tg, buf_t *query){
-	//return tg_send_query(tg, query);
-//}
+tl_t *tg_send_query_sync(tg_t *tg, buf_t *query){
+	return tg_send_query(tg, query);
+}
