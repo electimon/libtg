@@ -113,6 +113,7 @@ int tg_get_file_with_progress(
 			return offset;
 
 		if (tl->_id == id_rpc_error){
+			ON_LOG(tg, "%s: check FILE_MIGRATE", __func__);
 			// check FILE MIGRATE
 			tl_rpc_error_t *error =
 				(tl_rpc_error_t *)tl;
