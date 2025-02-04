@@ -337,6 +337,7 @@ tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
 	FD_SET(socket, &fdset);
 
 	// lock mutex
+	ON_LOG(tg, "%s: try to lock mutex...", __func__);
 	if (pthread_mutex_lock(&tg->send_query))
 	{
 		ON_ERR(tg, "%s: can't lock mutex", __func__);
