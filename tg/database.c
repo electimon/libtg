@@ -24,6 +24,7 @@
 
 sqlite3 * tg_sqlite3_open(tg_t *tg) 
 {
+	ON_LOG(tg, "%s", __func__);
 	sqlite3 *db = NULL;
 	int err = sqlite3_open_v2(
 			tg->database_path,
@@ -41,6 +42,7 @@ sqlite3 * tg_sqlite3_open(tg_t *tg)
 int tg_sqlite3_prepare(
 		tg_t *tg, sqlite3 *db, const char *sql, sqlite3_stmt **stmt) 
 {
+	ON_LOG(tg, "%s", __func__);
 	int res = sqlite3_prepare_v2(
 			db, 
 			sql, 
@@ -59,6 +61,7 @@ int tg_sqlite3_prepare(
 int tg_sqlite3_exec(
 		tg_t *tg, const char *sql) 
 {
+	ON_LOG(tg, "%s", __func__);
 	sqlite3 *db =	tg_sqlite3_open(tg);
 	if (!db)
 		return 1;
@@ -130,6 +133,7 @@ int database_init(tg_t *tg, const char *database_path)
 
 buf_t auth_key_from_database(tg_t *tg)
 {
+	ON_LOG(tg, "%s", __func__);
 	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -149,6 +153,7 @@ buf_t auth_key_from_database(tg_t *tg)
 
 char * phone_number_from_database(tg_t *tg)
 {
+	ON_LOG(tg, "%s", __func__);
 	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -169,6 +174,7 @@ char * phone_number_from_database(tg_t *tg)
 int phone_number_to_database(
 		tg_t *tg, const char *phone_number)
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 	
 	tg_sqlite3_exec(tg,
@@ -188,6 +194,7 @@ int phone_number_to_database(
 
 char * auth_tokens_from_database(tg_t *tg)
 {
+	ON_LOG(tg, "%s", __func__);
 	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -226,6 +233,7 @@ char * auth_tokens_from_database(tg_t *tg)
 int auth_token_to_database(
 		tg_t *tg, const char *auth_token)
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 	tg_sqlite3_exec(tg,
 "ALTER TABLE \'auth_tokens\' ADD COLUMN \'auth_token\' TEXT; ");
@@ -242,6 +250,7 @@ int auth_token_to_database(
 int auth_key_to_database(
 		tg_t *tg, buf_t auth_key)
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 	tg_sqlite3_exec(tg, 
 			"ALTER TABLE \'auth_keys\' ADD COLUMN \'auth_key\' BLOB; ");	
@@ -289,6 +298,7 @@ int auth_key_to_database(
 
 uint64_t dialogs_hash_from_database(tg_t *tg)
 {
+	ON_LOG(tg, "%s", __func__);
 	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -304,6 +314,7 @@ uint64_t dialogs_hash_from_database(tg_t *tg)
 
 int dialogs_hash_to_database(tg_t *tg, uint64_t hash)
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -321,6 +332,7 @@ int dialogs_hash_to_database(tg_t *tg, uint64_t hash)
 
 uint64_t messages_hash_from_database(tg_t *tg, uint64_t peer_id)
 {
+	ON_LOG(tg, "%s", __func__);
 	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -337,6 +349,7 @@ uint64_t messages_hash_from_database(tg_t *tg, uint64_t peer_id)
 
 int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash)
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -356,6 +369,7 @@ int messages_hash_to_database(tg_t *tg, uint64_t peer_id, uint64_t hash)
 
 char *photo_file_from_database(tg_t *tg, uint64_t photo_id)
 {
+	ON_LOG(tg, "%s", __func__);
 	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -379,6 +393,7 @@ char *photo_file_from_database(tg_t *tg, uint64_t photo_id)
 
 int photo_to_database(tg_t *tg, uint64_t photo_id, const char *data)
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 	tg_sqlite3_exec(tg, 
 			"ALTER TABLE \'photos\' ADD COLUMN \'data\' TEXT; "
@@ -406,6 +421,7 @@ int photo_to_database(tg_t *tg, uint64_t photo_id, const char *data)
 char *peer_photo_file_from_database(
 		tg_t *tg, uint64_t peer_id, uint64_t photo_id)
 {
+	ON_LOG(tg, "%s", __func__);
 	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
@@ -431,6 +447,7 @@ int peer_photo_to_database(tg_t *tg,
 		uint64_t peer_id, uint64_t photo_id,
 		const char *data)
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 	printf("%s\n", __func__);
 	tg_sqlite3_exec(tg, 
@@ -461,6 +478,7 @@ int peer_photo_to_database(tg_t *tg,
 
 int ip_address_to_database(tg_t *tg, const char *ip)
 {
+	ON_LOG(tg, "%s", __func__);
 	pthread_mutex_lock(&tg->databasem); // lock
 
 	tg_sqlite3_exec(tg,
@@ -480,6 +498,7 @@ int ip_address_to_database(tg_t *tg, const char *ip)
 
 char *ip_address_from_database(tg_t *tg)
 {
+	ON_LOG(tg, "%s", __func__);
 	//pthread_mutex_lock(&tg->databasem); // lock
 	char sql[BUFSIZ];
 	sprintf(sql, 
