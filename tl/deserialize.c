@@ -158,6 +158,7 @@ mtp_message_t deserialize_mtp_message(buf_t *b){
 }
 
 static tl_free_function *get_free_fun(unsigned int id){
+	fprintf(stderr, "tl_free\n");
 	int i,
 			len = sizeof(tl_deserialize_table)/
 				    sizeof(*tl_deserialize_table);

@@ -291,6 +291,7 @@ buf_t buf_cat_rand(buf_t dest, uint32_t s)
 }
 
 void buf_free(buf_t b){
+	fprintf(stderr, "buf_free\n");
 	if (b.aptr)
 		free(b.aptr);
 	b.aptr = NULL;
