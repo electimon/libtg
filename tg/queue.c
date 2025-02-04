@@ -688,20 +688,20 @@ static void tg_send_query_sync_cb(void *d, const tl_t *tl)
 	*tlp = tl_deserialize((buf_t *)(&tl->_buf));
 }
 
-/*tl_t *tg_send_query_sync(tg_t *tg, buf_t *query)*/
-/*{*/
-	/*tl_t *tl = NULL;*/
-	/*pthread_t p = */
-		/*tg_send_query_async(tg, query, */
-				/*&tl, tg_send_query_sync_cb);*/
+tl_t *tg_send_query_sync(tg_t *tg, buf_t *query)
+{
+	tl_t *tl = NULL;
+	pthread_t p = 
+		tg_send_query_async(tg, query, 
+				&tl, tg_send_query_sync_cb);
 	
-	/*pthread_join(p, NULL);*/
+	pthread_join(p, NULL);
 
-	/*ON_LOG(tg, "%s got tl: %s"*/
-			/*, __func__, tl?TL_NAME_FROM_ID(tl->_id):"NULL");*/
+	ON_LOG(tg, "%s got tl: %s"
+			, __func__, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
 
-	/*return tl;*/
-/*}*/
+	return tl;
+}
 
 void tg_queue_cancell_all(tg_t *tg)
 {
