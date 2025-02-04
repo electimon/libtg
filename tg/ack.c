@@ -82,6 +82,10 @@ int tg_to_drop(tg_t *tg, buf_t *buf)
 	}
 
 	int i, len = arrlen(tg->todrop);
+	if (len < 1){
+		pthread_mutex_unlock(&tg->todropm);
+		return 0;
+	}
 	for (i = 0; i < len; ++i) {
 		ON_ERR(tg, "TO DROP: "_LD_"", tg->todrop[i]);
 		buf_t drop = tl_rpc_drop_answer(tg->todrop[i]);
