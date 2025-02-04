@@ -7,6 +7,7 @@
  */
 
 #include <pthread.h>
+#include <sys/select.h>
 #if INTPTR_MAX == INT32_MAX
     #define THIS_IS_32_BIT_ENVIRONMENT
 		#define _LD_ "%lld"
@@ -89,16 +90,20 @@ static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
 	return msg_id;
 }
 
-static int tg_receive(tg_t *tg, int sockfd, buf_t *msg,
+static int tg_receive(tg_t *tg, int *sockfd, fd_set *fdset, buf_t *msg,
 		void *progressp, 
 		void (*progress)(void *progressp, int size, int total))
 {
 	assert(tg);
-	ON_LOG(tg, "%s: socket: %d", __func__, sockfd);
+	ON_LOG(tg, "%s: socket: %d", __func__, *sockfd);
 	
 	// get length of the package
 	uint32_t len;
-	int s = recv(sockfd, &len, 4, 0);
+	if (!FD_ISSET(*sockfd, fdset)){
+		ON_ERR(tg, "%s: socket is closed!", __func__);
+		return 1;
+	}
+	int s = recv(*sockfd, &len, 4, 0);
 	if (s<0){
 		ON_ERR(tg, "%s: %d: socket error: %d"
 				, __func__, __LINE__, s);
@@ -124,7 +129,7 @@ static int tg_receive(tg_t *tg, int sockfd, buf_t *msg,
 	uint32_t received = 0; 
 	while (received < len){
 		int s = recv(
-				sockfd, 
+				*sockfd, 
 				&buf.data[received], 
 				len - received, 
 				0);	
@@ -318,6 +323,9 @@ tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
 {
 	assert(tg && query && ip);
 	ON_LOG(tg, "%s: %s: %d", __func__, ip, port);
+
+	fd_set fdset;
+	FD_ZERO(&fdset);
 	
 	// open socket
 	int socket = tg_net_open(tg, ip, port);
@@ -326,6 +334,7 @@ tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
 		ON_ERR(tg, "%s: can't open socket", __func__);
 		return NULL;
 	}
+	FD_SET(socket, &fdset);
 
 	// lock mutex
 	if (pthread_mutex_lock(&tg->send_query))
@@ -345,7 +354,7 @@ tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
 recevive_data:;
 	// reseive
 	buf_t r;
-	if (tg_receive(tg, socket, &r, progressp, progress))
+	if (tg_receive(tg, &socket, &fdset, &r, progressp, progress))
 	{
 		pthread_mutex_unlock(&tg->send_query);
 		return NULL;
