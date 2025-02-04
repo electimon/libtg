@@ -30,15 +30,16 @@
 // return msg_id or 0 on error
 static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
 {
-	assert(tg);
-	assert(query);
-
+	assert(tg && query);
 	int err = 0;
 	
 	// send query
-	ON_LOG(tg, "%s: socket: %d", __func__, *socket);
+	ON_LOG(tg, "%s: query: %s, socket: %d", 
+			__func__, TL_NAME_FROM_ID(buf_get_ui32(*query)), *socket);
+
 	// auth_key
 	if (!tg->key.size){
+		ON_LOG(tg, "NO AUTH KEY");
 		tg_net_close(tg, *socket);
 		api.app.open(tg->ip, tg->port);	
 		tg->key = 
@@ -51,11 +52,13 @@ static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
 
 	// session id
 	if (!tg->ssid.size){
+		ON_LOG(tg, "NO SESSION ID");
 		tg->ssid = buf_rand(8);
 	}
 
 	// server salt
 	if (!tg->salt.size){
+		ON_LOG(tg, "NO SERVER SALT");
 		tg->salt = buf_rand(8);
 	}
 
