@@ -95,7 +95,13 @@ static int tg_receive(tg_t *tg, int sockfd, buf_t *msg,
 	
 	// get length of the package
 	uint32_t len;
-	recv(sockfd, &len, 4, 0);
+	int s = recv(sockfd, &len, 4, 0);
+	if (s<0){
+		ON_ERR(tg, "%s: %d: socket error: %d"
+				, __func__, __LINE__, s);
+		return 1;
+	}
+
 	ON_LOG(tg, "%s: prepare to receive len: %d", __func__, len);
 	if (len < 0) {
 		// this is error - report it
@@ -120,7 +126,8 @@ static int tg_receive(tg_t *tg, int sockfd, buf_t *msg,
 				len - received, 
 				0);	
 		if (s<0){
-			ON_ERR(tg, "%s: socket error: %d", __func__, s);
+			ON_ERR(tg, "%s: %d: socket error: %d"
+					, __func__, __LINE__, s);
 			buf_free(buf);
 			return 1;
 		}
