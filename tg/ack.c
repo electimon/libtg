@@ -44,9 +44,9 @@ buf_t tg_ack(tg_t *tg)
 		return ack;
 	}
 
-	for (i = 0; i < len; ++i) {
-		ON_ERR(tg, "ACK: "_LD_"", tg->msgids[i]);
-	}
+	//for (i = 0; i < len; ++i) {
+		//ON_ERR(tg, "ACK: "_LD_"", tg->msgids[i]);
+	//}
 
 	ack = tl_msgs_ack(
 			tg->msgids, len);
@@ -87,7 +87,6 @@ int tg_to_drop(tg_t *tg, buf_t *buf)
 		return 0;
 	}
 	for (i = 0; i < len; ++i) {
-		ON_ERR(tg, "TO DROP: "_LD_"", tg->todrop[i]);
 		buf_t drop = tl_rpc_drop_answer(tg->todrop[i]);
 		buf_t msg = tg_mtp_message(
 				tg, &drop, NULL, true);

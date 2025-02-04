@@ -112,31 +112,31 @@ int tg_get_file_with_progress(
 		if (tl == NULL)
 			return offset;
 
-		if (tl->_id == id_rpc_error){
-			ON_LOG(tg, "%s: check FILE_MIGRATE", __func__);
-			// check FILE MIGRATE
-			tl_rpc_error_t *error =
-				(tl_rpc_error_t *)tl;
+		//if (tl->_id == id_rpc_error){
+			//ON_LOG(tg, "%s: check FILE_MIGRATE", __func__);
+			//// check FILE MIGRATE
+			//tl_rpc_error_t *error =
+				//(tl_rpc_error_t *)tl;
 
-			char *str;
-			str = strstr(
-				(char *)error->error_message_.data, 
-				"FILE_MIGRATE_");
-			if (str){
-				str += strlen("FILE_MIGRATE_");
-				int dc = atoi(str);
-				tl_free(tl);
-				const char *ip = tg_ip_address_for_dc(tg, dc); 
-				if (ip == NULL){
-					return offset;
-				}
-				return tg_get_file_with_progress(
-						tg, location, size, 
-						ip, tg->port,
-						userdata, callback, 
-						progressp, progress); 
-			}
-		}
+			//char *str;
+			//str = strstr(
+				//(char *)error->error_message_.data, 
+				//"FILE_MIGRATE_");
+			//if (str){
+				//str += strlen("FILE_MIGRATE_");
+				//int dc = atoi(str);
+				//tl_free(tl);
+				//const char *ip = tg_ip_address_for_dc(tg, dc); 
+				//if (ip == NULL){
+					//return offset;
+				//}
+				//return tg_get_file_with_progress(
+						//tg, location, size, 
+						//ip, tg->port,
+						//userdata, callback, 
+						//progressp, progress); 
+			//}
+		//}
 
 		if (tl->_id != id_upload_file){
 			tl_free(tl);

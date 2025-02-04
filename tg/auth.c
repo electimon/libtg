@@ -24,15 +24,15 @@ buf_t initConnection(tg_t *tg, buf_t query)
 				NULL, 
 				&query);
 	
-	ON_LOG_BUF(tg, initConnection, 
-			"%s: initConnection: ", __func__);
+	/*ON_LOG_BUF(tg, initConnection, */
+			/*"%s: initConnection: ", __func__);*/
 	
 	buf_t invokeWithLayer = 
 		tl_invokeWithLayer(
 				API_LAYER, &initConnection);
 	
-	ON_LOG_BUF(tg, invokeWithLayer, 
-			"%s: invokeWithLayer: ", __func__);
+	/*ON_LOG_BUF(tg, invokeWithLayer, */
+			/*"%s: invokeWithLayer: ", __func__);*/
 	
 	return invokeWithLayer;
 }
@@ -135,8 +135,8 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 		 	NULL,
 		 	NULL);
 
-  	ON_LOG_BUF(tg, codeSettings, 
-			"%s: codeSettings: ", __func__);
+    /*ON_LOG_BUF(tg, codeSettings, */
+			/*"%s: codeSettings: ", __func__);*/
 
 	buf_t sendCode = 
 		tl_auth_sendCode(
@@ -144,8 +144,8 @@ tg_auth_sendCode(tg_t *tg, const char *phone_number)
 				tg->apiId, 
 				tg->apiHash, 
 				&codeSettings);
-	ON_LOG_BUF(tg, sendCode, 
-			"%s: sendCode: ", __func__);
+	/*ON_LOG_BUF(tg, sendCode, */
+			/*"%s: sendCode: ", __func__);*/
 	buf_free(codeSettings);
 
 	tl = tg_send_query_sync(tg, &sendCode); 
