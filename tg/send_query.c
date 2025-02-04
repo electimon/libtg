@@ -243,6 +243,17 @@ static void rpc_result_from_container(
 					// add to ack
 					tg_add_msgid(tg, m.msg_id);
 					break;
+				case id_rpc_error:
+					{
+						tl_rpc_error_t *rpc_error = 
+							(tl_rpc_error_t *)ttl;
+						
+						char *err = tg_strerr(ttl);
+						ON_ERR(tg, "%s: %s", __func__, err);
+						free(err);
+					}
+					break; // run on_done
+			
 				case id_rpc_result:
 					{
 						// add to ack
@@ -444,6 +455,16 @@ recevive_data:;
 			tl_free(tl);
 			// get data again
 			goto recevive_data;
+			break;
+		case id_rpc_error:
+			{
+				tl_rpc_error_t *rpc_error = 
+					(tl_rpc_error_t *)tl;
+				
+				char *err = tg_strerr(tl);
+				ON_ERR(tg, "%s: %s", __func__, err);
+				free(err);
+			}
 			break;
 
 		default:
