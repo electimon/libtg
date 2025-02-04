@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <sys/socket.h>
+#include "answer.h"
 
 // return msg_id or 0 on error
 static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
@@ -170,150 +171,11 @@ static int tg_receive(tg_t *tg, int *sockfd, fd_set *fdset, buf_t *msg,
 	return 0;
 }
 
-static void rpc_result_from_container(
-		tg_t *tg, tl_t **tl, uint64_t msg_id,
-		buf_t *query, const char *ip, int port, 
-		void *progressp, 
-		void(*progress)(void*,int,int))
+static int tg_parse_answer_callback(void *d, const tl_t *tl)
 {
-	assert(tl);
-	if (tl[0]->_id == id_msg_container) 
-	{
-		tl_msg_container_t *container = 
-			(tl_msg_container_t *)tl[0]; 
-		//ON_LOG_BUF(tg, container->_buf, "CONTAINER: ");
-		ON_LOG(tg, "%s: container %d long", 
-				__func__, container->messages_len);
-		int i;
-		for (i = 0; i < container->messages_len; ++i) {
-			mtp_message_t m = container->messages_[i];
-			
-			tl_t *ttl = tl_deserialize(&m.body);
-			switch (ttl->_id) {
-				case id_bad_msg_notification:
-					{
-						char *err = tg_strerr(ttl);
-						ON_ERR(tg, "%s", err);
-						free(err);
-						tl_free(ttl);
-					}
-					break;
-
-				case id_gzip_packed:
-					{
-						// handle gzip
-						tl_gzip_packed_t *obj =
-							(tl_gzip_packed_t *)ttl;
-
-						buf_t buf;
-						int _e = gunzip_buf(&buf, obj->packed_data_);
-						if (_e)
-						{
-							char *err = gunzip_buf_err(_e);
-							ON_ERR(tg, "%s: %s", __func__, err);
-							free(err);
-						} else {
-							tl_t *tttl = tl_deserialize(&buf);
-							buf_free(buf);
-							if (tttl->_id == id_rpc_result){
-								tl_rpc_result_t *result =
-									(tl_rpc_result_t *)tttl;
-								if (result->req_msg_id_ == msg_id){
-									// ok - we got result
-									tl_free(*tl);
-									*tl = tttl;
-								} else {
-									ON_ERR(tg, "got rpc_result with wrong msgid");
-								}
-							} else {
-								ON_LOG(tg, "got gzip with: %s", 
-										TL_NAME_FROM_ID(tttl->_id));
-								// do updates
-								tg_do_updates(tg, tttl);
-							}
-						}
-					}
-					break;
-
-				case id_updatesTooLong: case id_updateShort:
-				case id_updateShortMessage: case id_updateShortChatMessage:
-				case id_updateShortSentMessage: case id_updatesCombined:
-				case id_updates:
-					// add to ack
-					tg_add_msgid(tg, m.msg_id);
-					// do updates
-					tg_do_updates(tg, ttl);
-					tl_free(ttl);
-					break;
-		
-				case id_msg_detailed_info:
-				case id_msg_new_detailed_info:
-					// add to ack
-					tg_add_msgid(tg, m.msg_id);
-					tl_free(ttl);
-					break;
-				case id_rpc_error:
-					{
-						tl_rpc_error_t *rpc_error = 
-							(tl_rpc_error_t *)ttl;
-						
-						char *err = tg_strerr(ttl);
-						ON_ERR(tg, "%s: %s", __func__, err);
-						free(err);
-						tl_free(ttl);
-					}
-					break; // run on_done
-			
-				case id_rpc_result:
-					{
-						// add to ack
-						tg_add_msgid(tg, m.msg_id);
-						// handle result
-						tl_rpc_result_t *rpc_result = 
-							(tl_rpc_result_t *)ttl;
-						ON_LOG(tg, "got msg result: (%s) for msg_id: "_LD_"",
-							rpc_result->result_?TL_NAME_FROM_ID(rpc_result->result_->_id):"NULL", 
-							rpc_result->req_msg_id_);
-						if (msg_id == rpc_result->req_msg_id_){
-							// got result!
-							ON_LOG(tg, "OK! We have result!");
-							// update tl
-							tl_free(*tl);
-							*tl = ttl;
-						} else {
-							ON_ERR(tg, "rpc_result: (%s) for wrong msg_id",
-								rpc_result->result_?TL_NAME_FROM_ID(rpc_result->result_->_id):"NULL"); 
-							// drop!
-							tg_add_todrop(tg, rpc_result->req_msg_id_);
-							tl_free(ttl);
-						}
-					}
-					break;
-				case id_new_session_created:
-					{
-						tl_new_session_created_t *obj = 
-							(tl_new_session_created_t *)ttl;
-						// handle new session
-						ON_LOG(tg, "new session created...");
-						tl_free(ttl);
-					}
-					break;
-				case id_msgs_ack:
-					{
-						ON_LOG(tg, "ACK in container");
-						tl_free(*tl);
-						*tl = ttl;	
-					}
-					break;
-
-				default:
-					ON_LOG(tg, "don't know how to handle: %s", 
-							TL_NAME_FROM_ID(ttl->_id));
-					tl_free(ttl);
-					break;
-			}
-		}
-	}
+	tl_t **answer = d;
+	*answer = tl_deserialize((buf_t *)(&tl->_buf));
+	return 0;
 }
 
 tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
@@ -365,14 +227,30 @@ recevive_data:;
 	tl_t *tl = tl_deserialize(&r);
 	buf_free(r);
 
+	tl_t *answer = NULL;
+	tg_parse_answer(tg, tl, msg_id,
+		 	&answer, tg_parse_answer_callback);
+	if (answer){
+		tl_free(tl);
+		tl = answer;
+	}
+	
 	if (tl == NULL){
 		pthread_mutex_unlock(&tg->send_query);
 		return NULL;
 	}
 
+	// check gzip
+	if (tl->_id == id_gzip_packed){
+		ON_LOG(tg, "%s: got GZIP", __func__);
+		tl = tg_tl_from_gzip(tg, tl);
+	}
+
 	// check server salt
 	if (tl->_id == id_bad_server_salt){
 		ON_LOG(tg, "BAD SERVER SALT: resend query");
+		// free tl
+		tl_free(tl);
 		// resend query
 		tg_net_close(tg, socket);
 		pthread_mutex_unlock(&tg->send_query);
@@ -380,92 +258,21 @@ recevive_data:;
 				tg, query, ip, port, progressp, progress);
 	}
 				
-	ON_LOG(tg, "got answer with: %s", TL_NAME_FROM_ID(tl->_id));
-
-	// check container
-	rpc_result_from_container(
-			tg, &tl, msg_id, query, ip, port, progressp, progress);
-
-	// handle rpc_result
-	if (tl->_id == id_rpc_result){
-		tl_rpc_result_t *result = 
-			(tl_rpc_result_t *)tl;
-		ON_LOG(tg, "rpc_result with: %s",
-				result->result_?TL_NAME_FROM_ID(result->result_->_id):"NULL");
-		tl = result->result_;
-	}
-
-	// handle GZIP
-	if (tl->_id == id_gzip_packed)
-	{
-		// handle gzip
-		tl_gzip_packed_t *obj =
-			(tl_gzip_packed_t *)tl;
-
-		tl_t *ttl = NULL;
-		buf_t buf;
-		int _e = gunzip_buf(&buf, obj->packed_data_);
-		if (_e)
-		{
-			char *err = gunzip_buf_err(_e);
-			ON_ERR(tg, "%s: %s", __func__, err);
-			free(err);
-		} else {
-			ttl = tl_deserialize(&buf);
-			buf_free(buf);
-			tl_free(tl);
-			tl = ttl;
-		}
-	}
-
-	// check bad msg
-	if (tl->_id == id_bad_msg_notification){
-		/* TODO: update time for correct msgid <03-02-25, yourname> */
-		char *err = tg_strerr(tl);
-		ON_ERR(tg, "%s", err);
-		free(err);
-		tl_free(tl);
-		pthread_mutex_unlock(&tg->send_query);
-		return NULL;
-	}
-	
 	// check ack
 	if (tl->_id == id_msgs_ack){
-		tl_msgs_ack_t *ack = (tl_msgs_ack_t *)tl;
-		// check msg_id
-		int i;
-		for (i = 0; i < ack->msg_ids_len; ++i) {
-			if (msg_id == ack->msg_ids_[i]){
-				ON_LOG(tg, "%s: got ACK - receive data again", __func__);
-				// get data again
-				tl_free(tl);
-				goto recevive_data;
-			}
-		}
+		ON_LOG(tg, "%s: got ACK - receive data again", __func__);
 		tl_free(tl);
-		pthread_mutex_unlock(&tg->send_query);
-		return NULL;
+		goto recevive_data;
 	}
 
 	// check detailed info
-	if (tl->_id == id_msg_detailed_info ||
-	    tl->_id == id_msg_new_detailed_info)
-	{
-		uint64_t msg_id_;
-		if (tl->_id == id_msg_detailed_info)
-			msg_id = ((tl_msg_detailed_info_t *)tl)->answer_msg_id_;
-		else
-			msg_id = ((tl_msg_new_detailed_info_t *)tl)->answer_msg_id_;
-		if (msg_id == msg_id_){
-			ON_LOG(tg, "answer has been already sended!");
-		} else {
-			ON_ERR(tg, "answer for wrong msgid");
-		}
-
-		tl_free(tl);
-		pthread_mutex_unlock(&tg->send_query);
-		return NULL;
-	}
+	//if (tl->_id == id_msg_detailed_info ||
+			//tl->_id == id_msg_new_detailed_info)
+	//{
+		//tl_free(tl);
+		//pthread_mutex_unlock(&tg->send_query);
+		//return NULL;
+	//}
 	
 	// check other
 	switch (tl->_id) {
@@ -473,24 +280,11 @@ recevive_data:;
 		case id_updateShortMessage: case id_updateShortChatMessage:
 		case id_updateShortSentMessage: case id_updatesCombined:
 		case id_updates:
-			// do updates
-			ON_LOG(tg, "%s: got updates", __func__);
-			tg_do_updates(tg, tl);
-			tl_free(tl);
 			// get data again
+			tl_free(tl);
 			goto recevive_data;
 			break;
-		case id_rpc_error:
-			{
-				tl_rpc_error_t *rpc_error = 
-					(tl_rpc_error_t *)tl;
-				
-				char *err = tg_strerr(tl);
-				ON_ERR(tg, "%s: %s", __func__, err);
-				free(err);
-			}
-			break;
-
+			
 		default:
 			break;
 	}

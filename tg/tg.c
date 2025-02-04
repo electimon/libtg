@@ -245,3 +245,35 @@ void tg_rpc_drop_answer(tg_t *tg, uint64_t msg_id)
 	tg_send_query_sync(tg, &drop);
 	buf_free(drop);
 }
+
+tl_t *tg_tl_from_gzip(tg_t *tg, tl_t *tl)
+{
+	if (tl == NULL){
+		ON_ERR(tg, "%s: tl is NULL", __func__);
+		return NULL;
+	}
+
+	if (tl->_id != id_gzip_packed){
+		ON_ERR(tg, "%s: is not GZIP", __func__);
+		return NULL;
+	}
+
+	// handle gzip
+	tl_gzip_packed_t *gzip =
+		(tl_gzip_packed_t *)tl;
+
+	buf_t buf;
+	int _e = 
+		gunzip_buf(&buf, gzip->packed_data_);
+	if (_e) {
+		char *err = gunzip_buf_err(_e);
+		ON_ERR(tg, "%s: %s", __func__, err);
+		free(err);
+	} else {
+		tl_t *tl = tl_deserialize(&buf);
+		buf_free(buf);
+		return tl;
+	}
+
+	return NULL;
+}
