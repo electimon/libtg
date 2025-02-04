@@ -426,8 +426,9 @@ recevive_data:;
 		int i;
 		for (i = 0; i < ack->msg_ids_len; ++i) {
 			if (msg_id == ack->msg_ids_[i]){
-				ON_LOG(tg, "GOT ACK");
+				ON_LOG(tg, "%s: got ACK - receive data again", __func__);
 				// get data again
+				tl_free(tl);
 				goto recevive_data;
 			}
 		}
@@ -463,6 +464,7 @@ recevive_data:;
 		case id_updateShortSentMessage: case id_updatesCombined:
 		case id_updates:
 			// do updates
+			ON_LOG(tg, "%s: got updates", __func__);
 			tg_do_updates(tg, tl);
 			tl_free(tl);
 			// get data again
