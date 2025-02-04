@@ -104,7 +104,7 @@ static int tg_receive(tg_t *tg, int sockfd, buf_t *msg,
 	}
 
 	// realloc buf to be enough size
-	buf_t buf;
+	buf_t buf = buf_new();
 	if (buf_realloc(&buf, len)){
 		// handle error
 		ON_ERR(tg, "%s: error buf realloc to size: %d", __func__, len);
