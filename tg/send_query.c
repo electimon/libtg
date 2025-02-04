@@ -2,7 +2,7 @@
  * File              : send_query.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 03.02.2025
- * Last Modified Date: 03.02.2025
+ * Last Modified Date: 04.02.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -167,7 +167,7 @@ static void rpc_result_from_container(
 	{
 		tl_msg_container_t *container = 
 			(tl_msg_container_t *)tl[0]; 
-		ON_LOG_BUF(tg, container->_buf, "CONTAINER: ");
+		//ON_LOG_BUF(tg, container->_buf, "CONTAINER: ");
 		ON_LOG(tg, "%s: container %d long", 
 				__func__, container->messages_len);
 		int i;

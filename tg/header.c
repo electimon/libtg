@@ -108,7 +108,7 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 	buf_t ack = tg_ack(tg);
 	if (ack.size > 0){ // need to add acknolege
 		//ON_LOG_BUF(tg, b, "SEND DATA:");
-		ON_LOG_BUF(tg, ack, "SEND ACK:");
+		/*ON_LOG_BUF(tg, ack, "SEND ACK:");*/
 		content = false;
 		// create container - do not use tl_generator -
 		// container does not have vertor serialization in it
