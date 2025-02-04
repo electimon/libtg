@@ -61,6 +61,8 @@ int tg_get_file_with_progress(
 		tg_t *tg, 
 		InputFileLocation *location,
 		int size,
+		const char *ip,
+		int port,
 		void *userdata,
 		int (*callback)(
 			void *userdata, const tg_file_t *file),
@@ -129,6 +131,7 @@ int tg_get_file_with_progress(
 				}
 				return tg_get_file_with_progress(
 						tg, location, size, 
+						ip, tg->port,
 						userdata, callback, 
 						progressp, progress); 
 			}
@@ -172,6 +175,8 @@ int tg_get_file(
 			tg, 
 			location, 
 			size, 
+			tg->ip,
+			tg->port,
 			userdata, 
 			callback, 
 			NULL, 
@@ -265,6 +270,8 @@ void tg_get_document(tg_t *tg,
 			tg, 
 			&location, 
 			size,
+			tg->ip,
+			tg->port,
 			userdata, 
 			callback,
 			progressp,
