@@ -61,8 +61,6 @@ int tg_get_file_with_progress(
 		tg_t *tg, 
 		InputFileLocation *location,
 		int size,
-		const char *ip,
-		int port,
 		void *userdata,
 		int (*callback)(
 			void *userdata, const tg_file_t *file),
@@ -90,9 +88,6 @@ int tg_get_file_with_progress(
 
 	/*int i, limit = 1024*4, offset = 0; // for testing */
 	int i, limit = 1048576, offset = 0;
-
-	char ip_address[128];
-	strcpy(ip_address, tg->ip);
 		
 	for (i = 0; size>0?offset<size:1; ++i) 
 	{
@@ -107,58 +102,36 @@ int tg_get_file_with_progress(
 				limit);
 			
 		// net send
-		tl_t *tl = tg_send_query_via_with_progress(
-				tg, &getFile, ip_address, tg->port,
+		struct tg_get_file_with_progress_t *t =
+			NEW(struct tg_get_file_with_progress_t,
+					ON_ERR(tg, "%s: can't allocate memory", __func__); 
+					return 1);
+		t->tg = tg;
+
+		pthread_t p = tg_send_query_async_with_progress(
+				tg, &getFile,
+				t, tg_get_file_with_progress_on_done,	
 				progressp, progress);
 		buf_free(getFile);
+		pthread_join(p, NULL);
 
-		if (tl == NULL)
-			return 0;
-
-		//if (tl->_id == id_rpc_error){
-			//ON_LOG(tg, "%s: check FILE_MIGRATE", __func__);
-			//// check FILE MIGRATE
-			//tl_rpc_error_t *error =
-				//(tl_rpc_error_t *)tl;
-
-			//char *str;
-			//str = strstr(
-				//(char *)error->error_message_.data, 
-				//"FILE_MIGRATE_");
-			//if (str){
-				//str += strlen("FILE_MIGRATE_");
-				//int dc = atoi(str);
-				//tl_free(tl);
-				//const char *ip = tg_ip_address_for_dc(tg, dc); 
-				//if (ip == NULL){
-					//return 0;
-				//}
-				//strcpy(ip_address, ip);
-				//// resend query
-				//offset = 0;
-				//continue;
-			//}
-		//}
-
-		if (tl->_id != id_upload_file){
-			tl_free(tl);
+		if (!t->result){
+			free(t);
 			return offset;
 		}
-		
-		tg_file_t file;
-		memset(&file, 0, sizeof(tg_file_t));
-		tg_file_from_tl(&file, tl);
-		tl_free(tl);
 
 		// add offset
-		offset += file.bytes_.size;
+		offset += t->file.bytes_.size;
 
-		printf("FILE TYPE: %s\n", TL_NAME_FROM_ID(file.type_));
+		printf("FILE TYPE: %s\n", TL_NAME_FROM_ID(t->file.type_));
 		if (callback)
-			if (callback(userdata, &file))
+			if (callback(userdata, &t->file))
 				break;
 
-		tg_file_free(&file);
+		tg_file_free(&t->file);
+		
+		// free t
+		free(t);
 	}
 	
 	/*return file;*/
@@ -178,8 +151,6 @@ int tg_get_file(
 			tg, 
 			location, 
 			size, 
-			tg->ip,
-			tg->port,
 			userdata, 
 			callback, 
 			NULL, 
@@ -273,8 +244,6 @@ void tg_get_document(tg_t *tg,
 			tg, 
 			&location, 
 			size,
-			tg->ip,
-			tg->port,
 			userdata, 
 			callback,
 			progressp,
