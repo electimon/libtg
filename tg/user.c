@@ -145,9 +145,19 @@ int tg_user_save(tg_t *tg, const tg_user_t *m)
 {
 	ON_LOG(tg, "%s", __func__);	
 	// save chat to database
-	pthread_mutex_lock(&tg->databasem); // lock
+	if (pthread_mutex_lock(&tg->databasem)) // lock
+	{
+		ON_ERR(tg, "%s: can't lock mutex", __func__);
+		return 1;
+	}
+	ON_LOG(tg, "%s: catched mutex!", __func__);
 	struct str s;
-	str_init(&s);
+	if (str_init(&s))
+	{
+		ON_LOG(tg, "%s: can't allocate memmory", __func__);
+		pthread_mutex_unlock(&tg->databasem); // unlock
+		return 1;
+	}
 
 	str_appendf(&s,
 		"INSERT INTO \'users\' (\'user_id\') "

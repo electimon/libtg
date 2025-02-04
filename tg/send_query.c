@@ -39,7 +39,7 @@ static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
 
 	// auth_key
 	if (!tg->key.size){
-		ON_LOG(tg, "NO AUTH KEY");
+		ON_LOG(tg, "new auth key");
 		tg_net_close(tg, *socket);
 		api.app.open(tg->ip, tg->port);	
 		tg->key = 
@@ -52,13 +52,13 @@ static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
 
 	// session id
 	if (!tg->ssid.size){
-		ON_LOG(tg, "NO SESSION ID");
+		ON_LOG(tg, "new session id");
 		tg->ssid = buf_rand(8);
 	}
 
 	// server salt
 	if (!tg->salt.size){
-		ON_LOG(tg, "NO SERVER SALT");
+		ON_LOG(tg, "new server salt");
 		tg->salt = buf_rand(8);
 	}
 
@@ -327,8 +327,15 @@ tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
 		return NULL;
 	}
 
+	// lock mutex
+	if (pthread_mutex_lock(&tg->send_query))
+	{
+		ON_ERR(tg, "%s: can't lock mutex", __func__);
+		return NULL;
+	}
+	ON_LOG(tg, "%s: %s: %d: catched mutex!", __func__, ip, port);
+	
 	// send query
-	pthread_mutex_lock(&tg->send_query);
 	uint64_t msg_id = tg_send(tg, query, &socket);
 	if (msg_id == 0){
 		pthread_mutex_unlock(&tg->send_query);
@@ -363,7 +370,6 @@ recevive_data:;
 				tg, query, ip, port, progressp, progress);
 	}
 				
-	// unlock mutex
 	ON_LOG(tg, "got answer with: %s", TL_NAME_FROM_ID(tl->_id));
 
 	// check container
