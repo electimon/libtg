@@ -46,7 +46,7 @@ void tg_parse_answer(tg_t *tg, tl_t *tl, uint64_t msg_id,
 						result?TL_NAME_FROM_ID(result->_id):"NULL",
 						rpc_result->req_msg_id_); 
 					// drop!
-					tg_add_todrop(tg, rpc_result->req_msg_id_);
+					/*tg_add_todrop(tg, rpc_result->req_msg_id_);*/
 				}
 			}
 			break;
