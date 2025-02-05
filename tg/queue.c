@@ -31,6 +31,7 @@
 
 enum RTL{
 	RTL_EX, // exit loop
+	RTL_ER, // error socket
 	RTL_RQ, // read socket again
 	RTL_RS, // resend query
 };
@@ -351,7 +352,14 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 	buf_t r = buf_new();
 	// get length of the package
 	uint32_t len;
-	recv(sockfd, &len, 4, 0);
+	int s = recv(sockfd, &len, 4, 0);
+	if (s<0){
+		ON_ERR(queue->tg, "%s: %d: socket error: %d", 
+				__func__, __LINE__, s);
+		buf_free(r);
+		return RTL_ER;
+	}
+
 	ON_LOG(queue->tg, "%s: prepare to receive len: %d", __func__, len);
 	if (len < 0) {
 		// this is error - report it
@@ -377,9 +385,10 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 				len - received, 
 				0);	
 		if (s<0){
-			ON_ERR(queue->tg, "%s: socket error: %d", __func__, s);
+			ON_ERR(queue->tg, "%s: %d: socket error: %d", 
+					__func__, __LINE__, s);
 			buf_free(r);
-			return RTL_EX;
+			return RTL_ER;
 		}
 		received += s;
 		
@@ -563,23 +572,22 @@ static void * tg_run_queue(void * data)
 		queue->loop = false;
 
 	// receive loop
+	enum RTL res; 
 	while (queue->loop) {
 		// receive
 		/*ON_LOG(queue->tg, "%s: receive...", __func__);*/
 		//usleep(1000); // in microseconds
-		enum RTL res = 
-			_tg_receive(queue, queue->socket);
-		
+		res = _tg_receive(queue, queue->socket);
 		if (res == RTL_RS)
 		{	
 			if (tg_send(data))
 				break;
 		}
 
-		if (res == RTL_EX)
+		if (res == RTL_EX || res == RTL_ER)
 			break;
 	}
-	if (queue->socket >= 0)
+	if (queue->socket >= 0 && res != RTL_ER)
 		tg_net_close(queue->tg, queue->socket);
 
 	tg_t *tg = queue->tg;
