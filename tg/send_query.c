@@ -2,7 +2,7 @@
  * File              : send_query.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 03.02.2025
- * Last Modified Date: 04.02.2025
+ * Last Modified Date: 05.02.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -317,6 +317,6 @@ tl_t *tg_send_query(tg_t *tg, buf_t *query)
 			NULL, NULL);
 }
 
-tl_t *tg_send_query_sync(tg_t *tg, buf_t *query){
-	return tg_send_query(tg, query);
-}
+//tl_t *tg_send_query_sync(tg_t *tg, buf_t *query){
+	//return tg_send_query(tg, query);
+//}

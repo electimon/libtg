@@ -398,11 +398,9 @@ tg_document_send_with_progress_saveBigFilePart:;
 					&bytes);
 			buf_free(saveFilePart);
 
-			tl_t *tl = tg_send_query_with_progress(
+			tl_t *tl = tg_send_query_sync(
 					tg, 
-					&saveFilePart, 
-					NULL, 
-					NULL);
+					&saveFilePart); 
 			
 			if (!tl || tl->_id != id_boolTrue){
 				ON_ERR(tg, "%s: expected tl_true but got: %s", 
@@ -451,11 +449,9 @@ tg_document_send_with_progress_saveFilePart:;
 					file_part, 
 					&bytes);
 
-			tl_t *tl = tg_send_query_with_progress(
+			tl_t *tl = tg_send_query_sync(
 					tg, 
-					&saveFilePart, 
-					NULL, 
-					NULL);
+					&saveFilePart); 
 			buf_free(saveFilePart);
 			
 			if (!tl || tl->_id != id_boolTrue){
