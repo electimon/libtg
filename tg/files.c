@@ -69,8 +69,6 @@ int tg_get_file_with_progress(
 		void *progressp,
 			int (*progress)(void *progressp, int size, int total))
 {
-	return 0;
-
 	ON_LOG(tg, "%s", __func__);
 	/* If precise flag is not specified, then
 
