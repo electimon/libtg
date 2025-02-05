@@ -40,7 +40,7 @@ int tg_get_file_with_progress(
 		int (*callback)(
 			void *userdata, const tg_file_t *file),
 		void *progressp,
-			void (*progress)(void *progressp, int size, int total))
+			int (*progress)(void *progressp, int size, int total))
 {
 	ON_LOG(tg, "%s", __func__);
 	/* If precise flag is not specified, then
@@ -231,7 +231,7 @@ void tg_get_document(tg_t *tg,
 		int (*callback)(
 			void *userdata, const tg_file_t *file),	
 		void *progressp,
-			void (*progress)(void *progressp, int size, int total))
+			int (*progress)(void *progressp, int size, int total))
 {
 	ON_LOG(tg, "%s", __func__);
 	buf_t fr = buf_from_base64(file_reference);
@@ -301,7 +301,7 @@ int tg_document_send(
 		tg_t *tg, tg_peer_t *peer, 
 		tg_document_t *document,
 		const char *message,
-		void *progressp, void (*progress)(void *, int, int))
+		void *progressp, int (*progress)(void *, int, int))
 {
 	ON_LOG(tg, "%s", __func__);
 	assert(document && peer && document->filepath[0]);
@@ -415,8 +415,13 @@ tg_document_send_with_progress_saveBigFilePart:;
 			if (tl)
 				tl_free(tl);
 
-			if (progress)
-				progress(progressp, len, size);
+			if (progress){
+				if (progress(progressp, len, size)){
+					buf_free(bytes);
+					ON_LOG(tg, "%s: upload canceled", __func__);
+					return 1;
+				}
+			}
 
 			file_part++;
 		}	

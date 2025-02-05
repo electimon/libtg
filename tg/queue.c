@@ -392,12 +392,19 @@ static enum RTL _tg_receive(tg_queue_t *queue, int sockfd)
 		}
 		received += s;
 		
-		ON_LOG(queue->tg, "%s: expected: %d, received: %d, total: %d (%d%%)", 
+		ON_LOG(queue->tg, 
+				"%s: expected: %d, received: %d, total: %d (%d%%)", 
 				__func__, len, s, received, received*100/len);
 
-		if (queue->progress)
-			if(queue->progress(queue->progressp, received, len))
-				break;
+		if (queue->progress){
+			if(queue->progress(queue->progressp, received, len)){
+				buf_free(r);
+				ON_LOG(queue->tg, "%s: download canceled", __func__);
+				// drop
+				tg_add_todrop(queue->tg, queue->msgid);
+				return RTL_EX;
+			}
+		}
 	}
 
 	// get payload 
@@ -665,7 +672,7 @@ tg_queue_t * tg_queue_new(
 pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl),
 		void *progressp, 
-		void (*progress)(void *progressp, int size, int total))
+		int (*progress)(void *progressp, int size, int total))
 {
 	ON_LOG(tg, "%s: tg: %p, query: %p, userdata: %p, callback: %p"
 			       "progressp: %p, progress: %p",
@@ -698,7 +705,7 @@ static void tg_send_query_sync_cb(void *d, const tl_t *tl)
 
 tl_t *tg_send_query_sync_with_progress(tg_t *tg, buf_t *query,
 		void *progressp, 
-		void (*progress)(void *progressp, int size, int total))
+		int (*progress)(void *progressp, int size, int total))
 {
 	tl_t *tl = NULL;
 	pthread_t p = 

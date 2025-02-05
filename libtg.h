@@ -43,16 +43,10 @@ typedef struct tg_queue_ tg_queue_t;
 
 /* send TL query to server and return answer */
 tl_t *tg_send_query_sync(tg_t *tg, buf_t *query);
-tl_t *tg_send_query_with_progress(tg_t *tg, buf_t *query,
-		void *progressp, 
-		void (*progress)(void *progressp, int size, int total));
-tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
-		const char *ip, int port,
-		void *progressp, 
-		void (*progress)(void *progressp, int size, int total));
 tl_t *tg_send_query_sync_with_progress(tg_t *tg, buf_t *query,
 		void *progressp, 
-		void (*progress)(void *progressp, int size, int total));
+		int (*progress)(void *progressp, int size, int total));
+
 /* send TL query via queue manager in thread and run
  * callback on done.
  * set callback return to non-null to resend query
@@ -67,7 +61,7 @@ pthread_t tg_send_query_async(tg_t *tg, buf_t *query,
 pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl),
 		void *progressp, 
-		void (*progress)(void *progressp, int size, int total));
+		int (*progress)(void *progressp, int size, int total));
 
 /* return true if has auth key */
 bool tg_has_auth_key(tg_t *tg); 
