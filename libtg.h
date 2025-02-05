@@ -36,6 +36,9 @@ void tg_close(tg_t *tg);
 /* return allocated string with error from tl object */
 char * tg_strerr(const tl_t *tl);
 
+/* start new session */
+void tg_new_session(tg_t *tg);
+
 typedef struct tg_queue_ tg_queue_t;
 
 /* send TL query to server and return answer */

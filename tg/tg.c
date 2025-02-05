@@ -6,6 +6,7 @@
 #include "queue.h"
 #include "../crypto/cry.h"
 #include "../crypto/hsh.h"
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -276,4 +277,11 @@ tl_t *tg_tl_from_gzip(tg_t *tg, tl_t *tl)
 	}
 
 	return NULL;
+}
+
+void tg_new_session(tg_t *tg)
+{
+	assert(tg);
+	buf_free(tg->ssid);	
+	tg->ssid = buf_rand(8);
 }
