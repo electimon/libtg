@@ -712,19 +712,19 @@ int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 		ON_ERR(tg, "%s: answer is NULL", __func__);
 		return 1;
 	}
-	if (tl->_id != id_updatesTooLong &&
-			tl->_id != id_updateShortMessage &&
-			tl->_id != id_updateShortChatMessage &&
-			tl->_id != id_updateShort &&
-			tl->_id != id_updatesCombined &&
-			tl->_id != id_updates &&
-			tl->_id != id_updateShortSentMessage)
-	{
-		ON_ERR(tg, "%s: expected Updates but got: %s", 
-				__func__, TL_NAME_FROM_ID(tl->_id));
-		tl_free(tl);
-		return 1;
-	}
+	/*if (tl->_id != id_updatesTooLong &&*/
+			/*tl->_id != id_updateShortMessage &&*/
+			/*tl->_id != id_updateShortChatMessage &&*/
+			/*tl->_id != id_updateShort &&*/
+			/*tl->_id != id_updatesCombined &&*/
+			/*tl->_id != id_updates &&*/
+			/*tl->_id != id_updateShortSentMessage)*/
+	/*{*/
+		/*ON_ERR(tg, "%s: expected Updates but got: %s", */
+				/*__func__, TL_NAME_FROM_ID(tl->_id));*/
+		/*tl_free(tl);*/
+		/*return 1;*/
+	/*}*/
 
 	// do updates
 	tg_do_updates(tg, tl);
