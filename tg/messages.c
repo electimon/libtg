@@ -146,7 +146,8 @@ void tg_message_from_tl(
 									{
 										tl_photoSize_t *ps = 
 											(tl_photoSize_t *)photo->sizes_[i];
-										str_appendf(&photo_sizes, "%dx%d ", ps->w_, ps->h_);
+										str_appendf(&photo_sizes, "%s=%dx%d "
+												, ps->type_.data , ps->w_, ps->h_);
 									}
 									break;
 								case id_photoCachedSize:
