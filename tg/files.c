@@ -401,8 +401,8 @@ tg_document_send_with_progress_saveBigFilePart:;
 			tl_t *tl = tg_send_query_with_progress(
 					tg, 
 					&saveFilePart, 
-					progressp, 
-					progress);
+					NULL, 
+					NULL);
 			
 			if (!tl || tl->_id != id_boolTrue){
 				ON_ERR(tg, "%s: expected tl_true but got: %s", 
@@ -416,6 +416,9 @@ tg_document_send_with_progress_saveBigFilePart:;
 				
 			if (tl)
 				tl_free(tl);
+
+			if (progress)
+				progress(progressp, len, size);
 
 			file_part++;
 		}	
@@ -451,8 +454,8 @@ tg_document_send_with_progress_saveFilePart:;
 			tl_t *tl = tg_send_query_with_progress(
 					tg, 
 					&saveFilePart, 
-					progressp, 
-					progress);
+					NULL, 
+					NULL);
 			buf_free(saveFilePart);
 			
 			if (!tl || tl->_id != id_boolTrue){
@@ -467,6 +470,9 @@ tg_document_send_with_progress_saveFilePart:;
 
 			if (tl)
 				tl_free(tl);
+			
+			if (progress)
+				progress(progressp, len, size);
 
 			file_part++;
 		}	
