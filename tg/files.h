@@ -65,7 +65,7 @@ void tg_get_document(tg_t *tg,
 		int (*callback)(
 			void *userdata, const tg_file_t *file),	
 		void *progressp,
-			int (*progress)(void *progressp, int size, int total));
+			void (*progress)(void *progressp, int size, int total));
 
 char * tg_get_document_thumb(tg_t *tg, 
 		uint64_t id, 
@@ -132,7 +132,7 @@ int tg_document_send(
 		tg_t *tg, tg_peer_t *peer, 
 		tg_document_t *document,
 		const char *message,
-		void *progressp, int (*progress)(void *, int, int));
+		void *progressp, void (*progress)(void *, int, int));
 
 int tg_contact_send(
 		tg_t *tg, tg_peer_t *peer, 

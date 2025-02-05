@@ -11,6 +11,7 @@
 #include "../tl/alloc.h"
 #include "peer.h"
 #include "tg.h"
+#include "updates.h"
 
 static void tg_file_from_tl(tg_file_t *f, const tl_t *tl)
 {
@@ -29,34 +30,6 @@ static void tg_file_from_tl(tg_file_t *f, const tl_t *tl)
 	#undef TG_FILE_BUF
 }
 
-struct tg_get_file_with_progress_t {
-	tg_t *tg;
-	tg_file_t file;
-	bool result;
-};
-
-void tg_get_file_with_progress_on_done(void *d, const tl_t *tl)
-{
-	struct tg_get_file_with_progress_t *t = d;
-	ON_LOG(t->tg, "%s", __func__);
-	
-	if (tl == NULL){
-		t->result = false;
-		return;
-	}
-
-	if (tl->_id != id_upload_file){
-		ON_ERR(t->tg, "%s: expected upload_file but got: %s", 
-				__func__, TL_NAME_FROM_ID(tl->_id));
-		t->result = false;
-		return;
-	}
-	
-	t->result = true;
-	memset(&t->file, 0, sizeof(tg_file_t));
-	tg_file_from_tl(&t->file, tl);
-}
-
 int tg_get_file_with_progress(
 		tg_t *tg, 
 		InputFileLocation *location,
@@ -67,7 +40,7 @@ int tg_get_file_with_progress(
 		int (*callback)(
 			void *userdata, const tg_file_t *file),
 		void *progressp,
-			int (*progress)(void *progressp, int size, int total))
+			void (*progress)(void *progressp, int size, int total))
 {
 	ON_LOG(tg, "%s", __func__);
 	/* If precise flag is not specified, then
@@ -94,7 +67,7 @@ int tg_get_file_with_progress(
 	char ip_address[128];
 	strcpy(ip_address, tg->ip);
 		
-	for (i = 0; size>0?offset<size:1; ++i) 
+	while (size>0?offset<size:1) 
 	{
 		printf("%s: download total: %d with offset: %d (%d%%)\n",
 				__func__, size, offset, offset/size);
@@ -113,32 +86,33 @@ int tg_get_file_with_progress(
 		buf_free(getFile);
 
 		if (tl == NULL)
-			return 0;
+			return offset;
 
-		//if (tl->_id == id_rpc_error){
-			//ON_LOG(tg, "%s: check FILE_MIGRATE", __func__);
-			//// check FILE MIGRATE
-			//tl_rpc_error_t *error =
-				//(tl_rpc_error_t *)tl;
+		if (tl->_id == id_rpc_error){
+			ON_LOG(tg, "%s: check FILE_MIGRATE", __func__);
+			// check FILE MIGRATE
+			tl_rpc_error_t *error =
+				(tl_rpc_error_t *)tl;
 
-			//char *str;
-			//str = strstr(
-				//(char *)error->error_message_.data, 
-				//"FILE_MIGRATE_");
-			//if (str){
-				//str += strlen("FILE_MIGRATE_");
-				//int dc = atoi(str);
-				//tl_free(tl);
-				//const char *ip = tg_ip_address_for_dc(tg, dc); 
-				//if (ip == NULL){
-					//return 0;
-				//}
-				//strcpy(ip_address, ip);
-				//// resend query
-				//offset = 0;
-				//continue;
-			//}
-		//}
+			char *str;
+			str = strstr(
+				(char *)error->error_message_.data, 
+				"FILE_MIGRATE_");
+			if (str){
+				str += strlen("FILE_MIGRATE_");
+				int dc = atoi(str);
+				tl_free(tl);
+				const char *ip = tg_ip_address_for_dc(tg, dc); 
+				if (ip == NULL){
+					return 0;
+				}
+				strcpy(ip_address, ip);
+				// resend query
+				offset = 0;
+				continue;
+			}
+			return offset;
+		}
 
 		if (tl->_id != id_upload_file){
 			tl_free(tl);
@@ -257,7 +231,7 @@ void tg_get_document(tg_t *tg,
 		int (*callback)(
 			void *userdata, const tg_file_t *file),	
 		void *progressp,
-			int (*progress)(void *progressp, int size, int total))
+			void (*progress)(void *progressp, int size, int total))
 {
 	ON_LOG(tg, "%s", __func__);
 	buf_t fr = buf_from_base64(file_reference);
@@ -323,51 +297,11 @@ void tg_file_free(tg_file_t *f){
 	#undef TG_FILE_BUF
 }
 
-struct tg_document_send_with_progress_progress_t {
-	tg_t *tg;
-	int total;
-	int current;
-	void *progressp;
-	int (*progress)(void *, int, int);
-};
-
-static int tg_document_send_with_progress_progress(
-		void *p, int size, int total)
-{
-	assert(p);
-	struct tg_document_send_with_progress_progress_t *t = 
-		(struct tg_document_send_with_progress_progress_t *)p;
-	ON_LOG(t->tg, "%s", __func__);
-	t->current += size;
-	if (t->progress)
-		return t->progress(t->progressp, t->current, t->total);
-	return 0;
-}
-
-struct tg_document_send_with_progress_progress_on_done_t {
-	tg_t *tg;
-	bool result;
-};
-
-static void tg_document_send_with_progress_progress_on_done
-	(void *userdata, const tl_t *tl)
-{
-	struct tg_document_send_with_progress_progress_on_done_t 
-		*ondone = userdata;
-	ON_LOG(ondone->tg, "%s", __func__);
-	if (tl == NULL || tl->_id != id_boolTrue){
-		ON_ERR(ondone->tg, "%s: expected tl_true but got: %s", 
-				__func__, TL_NAME_FROM_ID(tl->_id));
-		ondone->result = false;
-	} else
-		ondone->result = true;
-}
-
 int tg_document_send(
 		tg_t *tg, tg_peer_t *peer, 
 		tg_document_t *document,
 		const char *message,
-		void *progressp, int (*progress)(void *, int, int))
+		void *progressp, void (*progress)(void *, int, int))
 {
 	ON_LOG(tg, "%s", __func__);
 	assert(document && peer && document->filepath[0]);
@@ -440,15 +374,6 @@ int tg_document_send(
 		buf_t bytes = buf_new();
 		buf_realloc(&bytes, part_size);
 		
-		struct tg_document_send_with_progress_progress_t *t =
-			NEW(struct tg_document_send_with_progress_progress_t,
-				 	ON_ERR(tg, "%s: can't allocate memory", __func__));
-		t->tg = tg;
-		t->total = size;
-		t->current = 0;
-		t->progressp = progressp;
-		t->progress = progress;
-		
 		int len, current = 0, retry = 0;
 		for (len = fread(bytes.data, 1, part_size, fp);
 				 len > 0;
@@ -471,50 +396,35 @@ tg_document_send_with_progress_saveBigFilePart:;
 					file_part,
 					file_total_parts,	
 					&bytes);
+			buf_free(saveFilePart);
 
-			struct tg_document_send_with_progress_progress_on_done_t
-				*ondone = 
-				NEW(struct tg_document_send_with_progress_progress_on_done_t,
-						ON_ERR(tg, "%s: can't allocate memory", __func__); 
-						return 1;);
-			ondone->tg = tg;
-			
-			pthread_t p = tg_send_query_async_with_progress(
+			tl_t *tl = tg_send_query_with_progress(
 					tg, 
 					&saveFilePart, 
-					ondone,
-					tg_document_send_with_progress_progress_on_done,
-					t, 
-					tg_document_send_with_progress_progress);
-			buf_free(saveFilePart);
-			pthread_join(p, NULL);
-			bool result = ondone->result;
-			free(ondone);
-
-			if (!result){
+					progressp, 
+					progress);
+			
+			if (!tl || tl->_id != id_boolTrue){
+				ON_ERR(tg, "%s: expected tl_true but got: %s", 
+					__func__, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
+				if (tl)
+					tl_free(tl);
 				// retry
 				retry++;
 				goto tg_document_send_with_progress_saveBigFilePart;
 			}
+				
+			if (tl)
+				tl_free(tl);
 
 			file_part++;
 		}	
 		buf_free(bytes);
-		free(t);
 
 	} else {  // for files < 10Mb
 		// save file part
 		buf_t bytes = buf_new();
 		buf_realloc(&bytes, part_size);
-		
-		struct tg_document_send_with_progress_progress_t *t =
-			NEW(struct tg_document_send_with_progress_progress_t,
-				 	ON_ERR(tg, "%s: can't allocate memory", __func__));
-		t->tg = tg;
-		t->total = size;
-		t->current = 0;
-		t->progressp = progressp;
-		t->progress = progress;
 		
 		int len, current = 0, retry = 0;
 		for (len = fread(bytes.data, 1, part_size, fp);
@@ -538,35 +448,29 @@ tg_document_send_with_progress_saveFilePart:;
 					file_part, 
 					&bytes);
 
-			struct tg_document_send_with_progress_progress_on_done_t
-				*ondone = 
-				NEW(struct tg_document_send_with_progress_progress_on_done_t,
-						ON_ERR(tg, "%s: can't allocate memory", __func__); 
-						return 1;);
-			ondone->tg = tg;
-			
-			pthread_t p = tg_send_query_async_with_progress(
+			tl_t *tl = tg_send_query_with_progress(
 					tg, 
 					&saveFilePart, 
-					ondone,
-					tg_document_send_with_progress_progress_on_done,
-					t, 
-					tg_document_send_with_progress_progress);
+					progressp, 
+					progress);
 			buf_free(saveFilePart);
-			pthread_join(p, NULL);
-			bool result = ondone->result;
-			free(ondone);
-
-			if (!result){
+			
+			if (!tl || tl->_id != id_boolTrue){
+				ON_ERR(tg, "%s: expected tl_true but got: %s", 
+					__func__, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
+				if (tl)
+					tl_free(tl);
 				// retry
 				retry++;
 				goto tg_document_send_with_progress_saveFilePart;
 			}
 
+			if (tl)
+				tl_free(tl);
+
 			file_part++;
 		}	
 		buf_free(bytes);
-		free(t);
 	}
 
 	// While the parts are being uploaded, an MD5 hash of 
@@ -596,112 +500,134 @@ tg_document_send_with_progress_saveFilePart:;
 				document->filename);
 	
 	} else {
-		
 		inputFile = tl_inputFile(
 				file_id, 
 				file_part, 
 				document->filename, 
 				md5_checksum);
-
-		InputMedia media;
-		if (document->type == DOCUMENT_TYPE_PHOTO) {
-			media = tl_inputMediaUploadedPhoto(
-					document->spoiler, 
-					&inputFile, 
-					document->stickers, 
-					document->stickers_len, 
-					document->ttl_seconds);
-
-		} else { // not a photo
-			// set attributes
-			DocumentAttribute attrs[8];
-			memset(attrs, 0, sizeof(DocumentAttribute)*8);
-			int attrs_len = 0;
-			if (document->filename[0]){
-				attrs[attrs_len++] = tl_documentAttributeFilename(
-						document->filename);
-			}
-			if (document->has_stickers){
-				attrs[attrs_len++] = tl_documentAttributeHasStickers();
-			}
-			switch (document->type) {
-				case DOCUMENT_TYPE_IMAGE:
-					attrs[attrs_len++] = tl_documentAttributeImageSize(
-							document->image_w, document->image_h);
-					break;
-				case DOCUMENT_TYPE_VIDEO:
-					attrs[attrs_len++] = tl_documentAttributeVideo(
-							false, 
-							document->video_supports_streaming, 
-							document->video_no_sound, 
-							document->video_duration, 
-							document->video_w, 
-							document->video_h, 
-							document->video_preload_prefix_size, 
-							document->video_start_ts);
-					break;
-				case DOCUMENT_TYPE_AUDIO:
-					attrs[attrs_len++] = tl_documentAttributeAudio(
-							document->audio_voice, 
-							document->audio_duration, 
-							document->audio_title, 
-							document->audio_perfomer, 
-							document->audio_waveform);
-					break;
-				
-				default:
-					break;
-			}
-		
-			media = tl_inputMediaUploadedDocument(
-					document->no_sound_video, 
-					document->force_file, 
-					document->spoiler, 
-					&inputFile, 
-					NULL, 
-					document->mime_type, 
-					attrs, 
-					attrs_len, 
-					document->stickers, 
-					document->stickers_len, 
-					document->ttl_seconds);
-			// free attrs
-			for (i = 0; i < attrs_len; ++i) {
-				buf_free(attrs[i]);
-			}
-		} // end if photo
-		
-		buf_free(inputFile);
-
-		buf_t peer_ = tg_inputPeer(*peer);
-		buf_t random_id = buf_rand(8);
-
-		buf_t sendMedia = tl_messages_sendMedia(
-				false, 
-				false, 
-				false, 
-				false, 
-				false, 
-				false, 
-				&peer_, 
-				NULL, 
-				&media, 
-				message?message:"", 
-				buf_get_ui64(random_id), 
-				NULL, 
-				NULL, 
-				0, 
-				NULL, 
-				NULL, 
-				NULL, 
-				NULL);
-		buf_free(media);
-		buf_free(peer_);
-		buf_free(random_id);
-
-		tg_send_query_sync(tg, &sendMedia);
-		buf_free(sendMedia);
 	}
+
+	InputMedia media;
+	if (document->type == DOCUMENT_TYPE_PHOTO) {
+		media = tl_inputMediaUploadedPhoto(
+				document->spoiler, 
+				&inputFile, 
+				document->stickers, 
+				document->stickers_len, 
+				document->ttl_seconds);
+
+	} else { // not a photo
+		// set attributes
+		DocumentAttribute attrs[8];
+		memset(attrs, 0, sizeof(DocumentAttribute)*8);
+		int attrs_len = 0;
+		if (document->filename[0]){
+			attrs[attrs_len++] = tl_documentAttributeFilename(
+					document->filename);
+		}
+		if (document->has_stickers){
+			attrs[attrs_len++] = tl_documentAttributeHasStickers();
+		}
+		switch (document->type) {
+			case DOCUMENT_TYPE_IMAGE:
+				attrs[attrs_len++] = tl_documentAttributeImageSize(
+						document->image_w, document->image_h);
+				break;
+			case DOCUMENT_TYPE_VIDEO:
+				attrs[attrs_len++] = tl_documentAttributeVideo(
+						false, 
+						document->video_supports_streaming, 
+						document->video_no_sound, 
+						document->video_duration, 
+						document->video_w, 
+						document->video_h, 
+						document->video_preload_prefix_size, 
+						document->video_start_ts);
+				break;
+			case DOCUMENT_TYPE_AUDIO:
+				attrs[attrs_len++] = tl_documentAttributeAudio(
+						document->audio_voice, 
+						document->audio_duration, 
+						document->audio_title, 
+						document->audio_perfomer, 
+						document->audio_waveform);
+				break;
+			
+			default:
+				break;
+		}
+	
+		media = tl_inputMediaUploadedDocument(
+				document->no_sound_video, 
+				document->force_file, 
+				document->spoiler, 
+				&inputFile, 
+				NULL, 
+				document->mime_type, 
+				attrs, 
+				attrs_len, 
+				document->stickers, 
+				document->stickers_len, 
+				document->ttl_seconds);
+		// free attrs
+		for (i = 0; i < attrs_len; ++i) {
+			buf_free(attrs[i]);
+		}
+	} // end if photo
+	
+	buf_free(inputFile);
+
+	buf_t peer_ = tg_inputPeer(*peer);
+	buf_t random_id = buf_rand(8);
+
+	buf_t sendMedia = tl_messages_sendMedia(
+			false, 
+			false, 
+			false, 
+			false, 
+			false, 
+			false, 
+			&peer_, 
+			NULL, 
+			&media, 
+			message?message:"", 
+			buf_get_ui64(random_id), 
+			NULL, 
+			NULL, 
+			0, 
+			NULL, 
+			NULL, 
+			NULL, 
+			NULL);
+	buf_free(media);
+	buf_free(peer_);
+	buf_free(random_id);
+
+	tl_t *tl = tg_send_query_sync(tg, &sendMedia);
+	buf_free(sendMedia);
+
+	if (tl == NULL)
+	{
+		ON_ERR(tg, "%s: answer is NULL", __func__);
+		return 1;
+	}
+	if (tl->_id != id_updatesTooLong &&
+			tl->_id != id_updateShortMessage &&
+			tl->_id != id_updateShortChatMessage &&
+			tl->_id != id_updateShort &&
+			tl->_id != id_updatesCombined &&
+			tl->_id != id_updates &&
+			tl->_id != id_updateShortSentMessage)
+	{
+		ON_ERR(tg, "%s: expected Updates but got: %s", 
+				__func__, TL_NAME_FROM_ID(tl->_id));
+		tl_free(tl);
+		return 1;
+	}
+
+	// do updates
+	tg_do_updates(tg, tl);
+	tl_free(tl);
 
 	return 0;
 }	
