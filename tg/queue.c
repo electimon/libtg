@@ -111,7 +111,7 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				, msg_id, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
 		pthread_mutex_unlock(&tg->queuem);
 		// drop answer
-		tg_add_todrop(tg, msg_id);
+		//tg_add_todrop(tg, msg_id);
 		return;
 	}
 
@@ -657,7 +657,7 @@ tg_queue_t * tg_queue_new(
 pthread_t tg_send_query_async_with_progress(tg_t *tg, buf_t *query,
 		void *userdata, void (*callback)(void *userdata, const tl_t *tl),
 		void *progressp, 
-		int (*progress)(void *progressp, int size, int total))
+		void (*progress)(void *progressp, int size, int total))
 {
 	ON_LOG(tg, "%s: tg: %p, query: %p, userdata: %p, callback: %p"
 			       "progressp: %p, progress: %p",
@@ -686,6 +686,24 @@ static void tg_send_query_sync_cb(void *d, const tl_t *tl)
 	fprintf(stderr, "%s\n", __func__);
 	tl_t **tlp = d;
 	*tlp = tl_deserialize((buf_t *)(&tl->_buf));
+}
+
+tl_t *tg_send_query_sync_with_progress(tg_t *tg, buf_t *query,
+		void *progressp, 
+		void (*progress)(void *progressp, int size, int total))
+{
+	tl_t *tl = NULL;
+	pthread_t p = 
+		tg_send_query_async_with_progress(tg, query, 
+				&tl, tg_send_query_sync_cb, 
+				progressp, progress);
+	
+	pthread_join(p, NULL);
+
+	ON_LOG(tg, "%s got tl: %s"
+			, __func__, tl?TL_NAME_FROM_ID(tl->_id):"NULL");
+
+	return tl;
 }
 
 tl_t *tg_send_query_sync(tg_t *tg, buf_t *query)

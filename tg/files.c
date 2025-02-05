@@ -80,8 +80,8 @@ int tg_get_file_with_progress(
 				limit);
 			
 		// net send
-		tl_t *tl = tg_send_query_via_with_progress(
-				tg, &getFile, ip_address, tg->port,
+		tl_t *tl = tg_send_query_sync_with_progress(
+				tg, &getFile,
 				progressp, progress);
 		buf_free(getFile);
 
