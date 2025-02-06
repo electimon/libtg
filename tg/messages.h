@@ -68,6 +68,7 @@
 	TG_MESSAGE_SPA(double,   geo_lat, "INT", "geo_lat") \
 	TG_MESSAGE_SPA(uint64_t, geo_access_hash, "INT", "geo_access_hash") \
 	TG_MESSAGE_SPA(uint32_t, geo_accuracy_radius, "INT", "geo_accuracy_radius") \
+	TG_MESSAGE_SPS(char*,    video_sizes, "TEXT", "video_sizes") \
 	TG_MESSAGE_SPA(bool,     doc_isVideo, "INT", "doc_isVideo") \
 	TG_MESSAGE_SPA(bool,     doc_isRound, "INT", "doc_isRound") \
 	TG_MESSAGE_SPA(bool,     doc_isVoice, "INT", "doc_isVoice") \

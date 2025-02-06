@@ -80,6 +80,93 @@ void tg_message_reply(
 	#undef TG_MESSAGE_REPLY_HEADER_FWD
 }
 
+static void video_sizes(
+		tg_t *tg, tg_message_t *tgm, int argc, tl_t **argv)
+{
+	// get photo sizes
+	struct str video_sizes;
+	if (str_init(&video_sizes))
+		return;
+
+	int i;
+	for (i = 0; i < argc; ++i) {
+		if (!argv || !argv[i])
+			continue;
+		
+		switch (argv[i]->_id) {
+			case id_videoSize:
+				{
+					tl_videoSize_t *vs = 
+						(tl_videoSize_t *)argv[i];
+					str_appendf(&video_sizes, "%s=%dx%d=%d=%lf "
+							, vs->type_.data , vs->w_, vs->h_, vs->size_, vs->video_start_ts_);
+				}
+				break;
+
+			default:
+				break;
+		
+		}
+	}
+	tgm->video_sizes = video_sizes.str;
+}
+
+
+static void photo_sizes(
+		tg_t *tg, tg_message_t *tgm, int argc, tl_t **argv)
+{
+	// get photo sizes
+	struct str photo_sizes;
+	if (str_init(&photo_sizes))
+		return;
+
+	int i;
+	for (i = 0; i < argc; ++i) {
+		if (!argv || !argv[i])
+			continue;
+		
+		switch (argv[i]->_id) {
+			case id_photoSize:
+				{
+					tl_photoSize_t *ps = 
+						(tl_photoSize_t *)argv[i];
+					str_appendf(&photo_sizes, "%s=%dx%d "
+							, ps->type_.data , ps->w_, ps->h_);
+				}
+				break;
+			case id_photoCachedSize:
+				{
+					tl_photoCachedSize_t *ps = 
+						(tl_photoCachedSize_t *)argv[i];
+					
+					tgm->photo_cached_size = MALLOC(32, break;);
+					snprintf(tgm->photo_cached_size,
+							31, "%dx%d", ps->w_, ps->h_);
+				}
+				break;
+			case id_photoStrippedSize:
+				{
+					tl_photoStrippedSize_t *ps = 
+						(tl_photoStrippedSize_t *)argv[i];
+					tgm->photo_stripped = BUF2IMG(ps->bytes_);
+				}
+				break;
+			case id_photoPathSize:
+				{
+					tl_photoPathSize_t *ps = 
+						(tl_photoPathSize_t *)argv[i];
+					tgm->photo_svg = 
+						image_from_svg_path(ps->bytes_);
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
+	tgm->photo_sizes = photo_sizes.str;
+}
+
 void tg_message_from_tl(
 		tg_t *tg, tg_message_t *tgm, tl_message_t *tlm)
 {
@@ -133,55 +220,8 @@ void tg_message_from_tl(
 							buf_to_base64(photo->file_reference_);
 
 						// get photo sizes
-						struct str photo_sizes;
-						if (str_init(&photo_sizes))
-							break;
-
-						int i;
-						for (i = 0; i < photo->sizes_len; ++i) {
-							if (!photo->sizes_ || !photo->sizes_[i])
-								continue;
-							
-							switch (photo->sizes_[i]->_id) {
-								case id_photoSize:
-									{
-										tl_photoSize_t *ps = 
-											(tl_photoSize_t *)photo->sizes_[i];
-										str_appendf(&photo_sizes, "%s=%dx%d "
-												, ps->type_.data , ps->w_, ps->h_);
-									}
-									break;
-								case id_photoCachedSize:
-									{
-										tl_photoCachedSize_t *ps = 
-											(tl_photoCachedSize_t *)photo->sizes_[i];
-										
-										tgm->photo_cached_size = MALLOC(32, break;);
-										snprintf(tgm->photo_cached_size,
-											 	31, "%dx%d", ps->w_, ps->h_);
-									}
-									break;
-								case id_photoStrippedSize:
-									{
-										tl_photoStrippedSize_t *ps = 
-											(tl_photoStrippedSize_t *)photo->sizes_[i];
-										tgm->photo_stripped = BUF2IMG(ps->bytes_);
-									}
-									break;
-								case id_photoPathSize:
-									{
-										tl_photoPathSize_t *ps = 
-											(tl_photoPathSize_t *)photo->sizes_[i];
-										tgm->photo_svg = 
-											image_from_svg_path(ps->bytes_);
-									}
-									break;
-
-								default:
-									break;
-							}
-						}
-						tgm->photo_sizes = photo_sizes.str;
+						photo_sizes(
+								tg, tgm, photo->sizes_len, photo->sizes_);
 					}
 				}
 				break;
@@ -218,17 +258,15 @@ void tg_message_from_tl(
 						tgm->doc_size = doc->size_;
 						tgm->doc_dc_id = doc->dc_id_;
 
-						int i;
 						// todo get thumbs
-						for (i = 0; i < doc->thumbs_len; ++i) {
-									
-						}
+						photo_sizes(
+								tg, tgm, doc->thumbs_len, doc->thumbs_);
 						
-						for (i = 0; i < doc->video_thumbs_len; ++i) {
-							
-						}
+						video_sizes(
+								tg, tgm, doc->video_thumbs_len, doc->video_thumbs_);
 
 						// get attributes
+						int i;
 						for (i = 0; i < doc->attributes_len; ++i) {
 							tl_t *attr = doc->attributes_[i];
 							if (!attr)
