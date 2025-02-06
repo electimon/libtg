@@ -222,3 +222,74 @@ int tg_get_peer_profile_colors(tg_t *tg, uint32_t hash,
 	
 	return 0;
 }
+
+int tg_get_peer_colors(tg_t *tg, uint32_t hash, 
+		void *userdata,
+		int (*callback)(void *userdata, 
+			uint32_t color_id, tg_colors_t *colors, tg_colors_t *dark_colors))
+{
+	ON_LOG(tg, "%s: start", __func__);
+	buf_t query = tl_help_getPeerColors(0);
+	tl_t *tl = tg_send_query_sync(tg, &query);
+	buf_free(query);
+	if (tl == NULL) {
+		ON_ERR(tg, "%s: tl is NULL", __func__);
+		return 0;
+	}
+	if (tl->_id == id_help_peerColors)
+	{	
+		tl_help_peerColors_t *hpc =
+			(tl_help_peerColors_t *)tl;
+
+		if (hpc->colors_ == NULL)
+			return 0;
+
+		int i, c=0;
+		for (i = 0; i < hpc->colors_len; ++i) {
+			tl_help_peerColorOption_t *pco = 
+				(tl_help_peerColorOption_t *)hpc->colors_[i];
+			if (pco->_id != id_help_peerColorOption)
+				continue;
+			
+			tg_colors_t colors;
+			memset(&colors, 0, sizeof(colors));
+			tg_colors_t dark_colors;
+			memset(&dark_colors, 0, sizeof(dark_colors));
+
+			if (pco->colors_){
+				tg_peer_color_set_to_colors(
+						tg, 
+						&colors, 
+						pco->colors_);
+			}
+			
+			if (pco->dark_colors_){
+				tg_peer_color_set_to_colors(
+						tg, 
+						&dark_colors, 
+						pco->dark_colors_);
+			}
+
+			// run callback
+			if (callback){
+				if (callback(userdata, pco->color_id_, &colors, &dark_colors))
+				{
+					tl_free(tl);
+					return ++c;
+				}
+			}
+
+			c++;
+		}
+	
+		tl_free(tl);
+		return c;
+	}
+
+	ON_ERR(tg, "%s: tl is not help_peerColors: %s",
+			__func__, TL_NAME_FROM_ID(tl->_id));
+
+	tl_free(tl);
+	
+	return 0;
+}
