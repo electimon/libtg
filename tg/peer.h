@@ -27,6 +27,7 @@ typedef struct tg_colors_ {
 	uint32_t rgb2;
 } tg_colors_t;
 
+// return hash
 int tg_get_peer_colors(tg_t *tg, uint32_t hash, 
 		void *userdata,
 		int (*callback)(void *userdata, 

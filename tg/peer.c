@@ -212,7 +212,7 @@ int tg_get_peer_profile_colors(tg_t *tg, uint32_t hash,
 		}
 	
 		tl_free(tl);
-		return c;
+		return hpc->hash_;
 	}
 
 	ON_ERR(tg, "%s: tl is not help_peerColors: %s",
@@ -283,7 +283,7 @@ int tg_get_peer_colors(tg_t *tg, uint32_t hash,
 		}
 	
 		tl_free(tl);
-		return c;
+		return hpc->hash_;
 	}
 
 	ON_ERR(tg, "%s: tl is not help_peerColors: %s",
