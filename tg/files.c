@@ -13,6 +13,8 @@
 #include "tg.h"
 #include "updates.h"
 
+#define BUF2STR(_b) strndup((char*)_b.data, _b.size)
+
 static void tg_file_from_tl(tg_file_t *f, const tl_t *tl)
 {
 	fprintf(stderr, "%s\n", __func__);
@@ -789,3 +791,58 @@ int tg_send_geopoint(tg_t *tg, tg_peer_t *peer,
 	tl_free(tl);
 	return 0;
 }
+
+int tg_get_document_hashes(tg_t *tg, 
+		uint64_t id, 
+		uint64_t access_hash, 
+		const char * file_reference, 
+		void *data,
+		int (*callback)(
+			void *data, uint64_t offset, uint32_t limit, const char *hash))	
+{
+	ON_LOG(tg, "%s", __func__);
+	buf_t fr = buf_from_base64(file_reference);
+	InputFileLocation location =
+		tl_inputDocumentFileLocation(
+				id, 
+				access_hash, 
+				&fr, 
+				"");
+	buf_free(fr);
+	
+	// get file hashes
+	buf_t getFileHashes = 
+		tl_upload_getFileHashes(&location, 0);
+	buf_free(location);
+	
+	tl_t *tl = tg_send_query_sync(tg, &getFileHashes); 
+	buf_free(getFileHashes);
+	
+	if (tl == NULL)
+		return 0;
+
+	int i, n = 0, loop = 1;
+	if (tl->_id == id_vector){
+		tl_vector_t *vector = (tl_vector_t *)id;
+		for (i = 0; i < vector->len_ && loop; ++i) {
+			tl_t *tl = tl_deserialize(&vector->data_);
+			if (tl == NULL)
+				break;
+			if (tl->_id == id_fileHash){
+				tl_fileHash_t *fileHash = 
+					(tl_fileHash_t *)tl;
+				if (callback){
+					char *hash = BUF2STR(fileHash->hash_);
+					if (callback(data, fileHash->offset_, fileHash->limit_, hash))
+						loop = 0;
+					n++; // add counter
+					if (hash)
+						free(hash);
+				}
+			}
+		}
+	}
+
+	tl_free(tl);
+	return n;
+}	
