@@ -173,7 +173,7 @@ int tg_get_peer_profile_colors(tg_t *tg, uint32_t hash,
 		if (hpc->colors_ == NULL)
 			return 0;
 
-		int i, c=0;
+		int i;
 		for (i = 0; i < hpc->colors_len; ++i) {
 			tl_help_peerColorOption_t *pco = 
 				(tl_help_peerColorOption_t *)hpc->colors_[i];
@@ -204,11 +204,9 @@ int tg_get_peer_profile_colors(tg_t *tg, uint32_t hash,
 				if (callback(userdata, pco->color_id_, &colors, &dark_colors))
 				{
 					tl_free(tl);
-					return ++c;
+					return 0;
 				}
 			}
-
-			c++;
 		}
 	
 		tl_free(tl);
@@ -244,7 +242,7 @@ int tg_get_peer_colors(tg_t *tg, uint32_t hash,
 		if (hpc->colors_ == NULL)
 			return 0;
 
-		int i, c=0;
+		int i;
 		for (i = 0; i < hpc->colors_len; ++i) {
 			tl_help_peerColorOption_t *pco = 
 				(tl_help_peerColorOption_t *)hpc->colors_[i];
@@ -275,11 +273,9 @@ int tg_get_peer_colors(tg_t *tg, uint32_t hash,
 				if (callback(userdata, pco->color_id_, &colors, &dark_colors))
 				{
 					tl_free(tl);
-					return ++c;
+					return 0;
 				}
 			}
-
-			c++;
 		}
 	
 		tl_free(tl);
