@@ -396,11 +396,13 @@ static int parse_msgs(
 {
 	int i;
 	for (i = 0; i < argc; ++i) {
-		if (!argv[i] || argv[i]->_id != id_message)
+		//if (!argv[i] || argv[i]->_id != id_message)
+		if (!argv[i])
 			continue;
 				
 		tg_message_t m;
-		tg_message_from_tl(tg, &m, (tl_message_t *)argv[i]);
+		//tg_message_from_tl(tg, &m, (tl_message_t *)argv[i]);
+		tg_message_from_tl_unknown(tg, &m, argv[i]);
 		
 		// save message to database
 		if (tg_message_to_database(tg, &m) == 0){
