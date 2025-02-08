@@ -111,6 +111,10 @@
 	TG_MESSAGE_SPA(uint32_t, ttl_period_, "INT", "ttl_period") \
 	TG_MESSAGE_RPL(tg_message_reply_header_t, reply_to_) \
 	TG_MESSAGE_SPA(bool,     is_sticker, "INT", "is_sticker") \
+	TG_MESSAGE_SPA(bool,     phone_call_video, "INT", "iphone_call_video") \
+	TG_MESSAGE_SPA(uint64_t, phone_call_id, "INT", "phone_call_id") \
+	TG_MESSAGE_SPA(uint32_t, phone_call_duration, "INT", "phone_call_duration") \
+	TG_MESSAGE_SPA(uint32_t, phone_call_reason, "INT", "phone_call_reason") \
 
 typedef struct tg_message_FWD_header_ {
 	#define TG_MESSAGE_FWD_HEADER_ARG(t, arg, ...) t arg;

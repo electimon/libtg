@@ -594,7 +594,7 @@ static void * tg_run_queue(void * data)
 		if (res == RTL_EX || res == RTL_ER)
 			break;
 	}
-	if (queue->socket >= 0 && res != RTL_ER)
+	if (res != RTL_ER && queue->socket >= 0)
 		tg_net_close(queue->tg, queue->socket);
 
 	tg_t *tg = queue->tg;

@@ -1,4 +1,4 @@
-AC_INIT([libtg],[1.0],[https://github.com/igkuzm/libtg])
+AC_INIT([libtg],[1.1],[https://github.com/igkuzm/libtg])
 AM_INIT_AUTOMAKE
 
 AC_CONFIG_HEADERS([config.h])

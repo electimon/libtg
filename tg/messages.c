@@ -28,6 +28,8 @@
 #define BUF2IMG(_b) \
 	({buf_t i = image_from_photo_stripped(_b); \
 	 buf_to_base64(i);}) 
+#define STR(...) \
+	({char _s[BUFSIZ];snprintf(_s,BUFSIZ-1,__VA_ARGS__);_s[BUFSIZ-1]=0;_s;})
 
 void tg_message_fwd(
 		tg_t *tg, tg_message_fwd_header_t *tgh, tl_messageFwdHeader_t *tlh)
@@ -408,7 +410,162 @@ void tg_message_from_tl_service(
 	}
 	tgm->date_ = tlm->date_;
 
-	/* TODO: MESSAGE ACTION <01-01-25, yourname> */
+	// handle message action
+	switch (tlm->action_->_id) {
+		case id_messageActionEmpty:
+			{
+				tgm->message_ = strdup("empty");
+			}
+			break;
+		case id_messageActionChatCreate:
+			{
+				tl_messageActionChatCreate_t *p =
+					(tl_messageActionChatCreate_t *)tlm->action_;
+				tgm->message_ = 
+					strdup(STR("chat create: \"%s\"",p->title_.data));
+			}
+			break;
+		case id_messageActionChatEditTitle:
+			{
+				tl_messageActionChatEditTitle_t *p =
+					(tl_messageActionChatEditTitle_t *)tlm->action_;
+				tgm->message_ = 
+					strdup(STR("chat edit title: \"%s\"",p->title_.data));
+			}
+			break;
+		case id_messageActionChatEditPhoto:
+			{
+				tgm->message_ = strdup("chat edit photo");
+			}
+			break;
+		case id_messageActionChatDeletePhoto:
+			{
+				tgm->message_ = strdup("chat delete photo");
+			}
+			break;
+		case id_messageActionChatAddUser:
+			{
+				tl_messageActionChatAddUser_t *p =
+					(tl_messageActionChatAddUser_t *)tlm->action_;
+				struct str s;
+				if (str_init(&s))
+					break;
+				str_appendf(&s, "chat add users: ");
+				int i;
+				for (i = 0; i < p->users_len; ++i) {
+					if (!p->users_ || p->users_[i] != id_user)	
+						break;
+					str_appendf(&s, ""_LD_" ", p->users_[i]);
+				}
+				tgm->message_ = s.str; 
+			}
+			break;
+		case id_messageActionChatDeleteUser:
+			{
+				tl_messageActionChatDeleteUser_t *p =
+					(tl_messageActionChatDeleteUser_t *)tlm->action_;
+				tgm->message_ = 
+					strdup(STR("chat delete user: "_LD_"",
+								p->user_id_));
+			}
+			break;
+		case id_messageActionChatJoinedByLink:
+			{
+				tl_messageActionChatJoinedByLink_t *p =
+					(tl_messageActionChatJoinedByLink_t *)tlm->action_;
+				tgm->message_ = 
+					strdup(STR("chat joined by link: "_LD_"",
+								p->inviter_id_));
+			}
+			break;
+		case id_messageActionChannelCreate:
+			{
+				tl_messageActionChannelCreate_t *p =
+					(tl_messageActionChannelCreate_t *)tlm->action_;
+				tgm->message_ = 
+					strdup(STR("channel create: \"%s\"",p->title_.data));
+			}
+			break;
+		case id_messageActionChatMigrateTo:
+			{
+				tl_messageActionChatMigrateTo_t *p =
+					(tl_messageActionChatMigrateTo_t *)tlm->action_;
+				tgm->message_ = 
+					strdup(STR("chat migrate to: "_LD_"",
+								p->channel_id_));
+			}
+			break;
+		case id_messageActionChannelMigrateFrom:
+			{
+				tl_messageActionChannelMigrateFrom_t *p =
+					(tl_messageActionChannelMigrateFrom_t *)tlm->action_;
+				tgm->message_ = 
+					strdup(STR("chat migrate from: "_LD_"",
+								p->chat_id_));
+			}
+			break;
+		case id_messageActionPhoneCall:
+			{
+				tl_messageActionPhoneCall_t *p =
+					(tl_messageActionPhoneCall_t *)tlm->action_;
+				tgm->phone_call_video = p->video_;
+				tgm->phone_call_id = p->call_id_;
+				tgm->phone_call_duration = p->duration_;
+				tgm->phone_call_reason = p->reason_->_id;
+				
+				if (p->reason_){
+					switch (p->reason_->_id) {
+						case id_phoneCallDiscardReasonMissed:
+							if (p->video_)
+								tgm->message_ = strdup("missed video call");
+							else
+								tgm->message_ = strdup("missed phone call");
+							break;
+						case id_phoneCallDiscardReasonDisconnect:
+							if (p->video_)
+								tgm->message_ = strdup("video call disconnected");
+							else
+								tgm->message_ = strdup("phone call disconnected");
+							break;
+						case id_phoneCallDiscardReasonHangup:
+							if (p->video_)
+								tgm->message_ = strdup("video call hanged up");
+							else
+								tgm->message_ = strdup("phone call hanged up");
+							break;
+						case id_phoneCallDiscardReasonBusy:
+							if (p->video_)
+								tgm->message_ = strdup("video call busy");
+							else
+								tgm->message_ = strdup("phone call busy");
+							break;
+						
+						default:
+							break;		
+					}
+				} else {
+					if (p->video_)
+						tgm->message_ = 
+							strdup(STR("video call: %d sec", p->duration_));
+					else
+						tgm->message_ = 
+							strdup(STR("phone call: %d sec", p->duration_));
+				}
+			}
+			break;
+		case id_messageActionCustomAction:
+			{
+				tl_messageActionCustomAction_t *p =
+					(tl_messageActionCustomAction_t *)tlm->action_;
+				tgm->message_ = BUF2STR(p->message_); 
+			}
+			break;
+		
+		default:
+			tgm->message_ = 
+				strdup(TL_NAME_FROM_ID(tlm->action_->_id));
+			break;
+	}
 
 	tgm->ttl_period_ = tlm->ttl_period_;
 }
