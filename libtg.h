@@ -42,6 +42,7 @@ void tg_new_session(tg_t *tg);
 typedef struct tg_queue_ tg_queue_t;
 
 /* send TL query to server and return answer */
+tl_t *tg_send_query(tg_t *tg, buf_t *query);
 tl_t *tg_send_query_sync(tg_t *tg, buf_t *query);
 tl_t *tg_send_query_sync_with_progress(tg_t *tg, buf_t *query,
 		void *progressp, 

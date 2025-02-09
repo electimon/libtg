@@ -651,7 +651,7 @@ int tg_messages_get_history(
 				h);
 	buf_free(peer_);
 
-	tl_t * tl = tg_send_query_sync(tg, &getHistory);
+	tl_t * tl = tg_send_query(tg, &getHistory);
 	buf_free(getHistory);
 
 	if (tl == NULL){

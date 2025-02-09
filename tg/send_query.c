@@ -2,7 +2,7 @@
  * File              : send_query.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 03.02.2025
- * Last Modified Date: 05.02.2025
+ * Last Modified Date: 09.02.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -43,7 +43,7 @@ static uint64_t tg_send(tg_t *tg, buf_t *query, int *socket)
 	if (!tg->key.size){
 		ON_LOG(tg, "new auth key");
 		tg_net_close(tg, *socket);
-		api.app.open(tg->ip, tg->port);	
+		api.app.open(tg->ip, 80); // set port	
 		tg->key = 
 			buf_add(shared_rc.key.data, shared_rc.key.size);
 		tg->salt = 
@@ -190,7 +190,8 @@ tl_t *tg_send_query_via_with_progress(tg_t *tg, buf_t *query,
 	FD_ZERO(&fdset);
 	
 	// open socket
-	int socket = tg_net_open(tg, ip, port);
+	//int socket = tg_net_open(tg, ip, port);
+	int socket = tg_net_open(tg, ip, 80);
 	if (socket < 0)
 	{
 		ON_ERR(tg, "%s: can't open socket", __func__);
