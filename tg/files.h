@@ -56,7 +56,7 @@ char * tg_get_peer_photo_file(tg_t *tg,
 		bool big_photo,
 		uint64_t photo_id); 
 
-void tg_get_document(tg_t *tg, 
+int tg_get_document(tg_t *tg, 
 		uint64_t id, 
 		uint64_t size, 
 		uint64_t access_hash, 

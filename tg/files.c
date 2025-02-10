@@ -88,7 +88,7 @@ int tg_get_file_with_progress(
 		buf_free(getFile);
 
 		if (tl == NULL)
-			return offset;
+			return 1;
 
 		//if (tl->_id == id_rpc_error){
 			//ON_LOG(tg, "%s: check FILE_MIGRATE", __func__);
@@ -118,7 +118,7 @@ int tg_get_file_with_progress(
 
 		if (tl->_id != id_upload_file){
 			tl_free(tl);
-			return offset;
+			return 1;
 		}
 		
 		tg_file_t file;
@@ -137,8 +137,7 @@ int tg_get_file_with_progress(
 		tg_file_free(&file);
 	}
 	
-	/*return file;*/
-	return offset;
+	return 0;
 }
 
 int tg_get_file(
@@ -224,7 +223,7 @@ char * tg_get_peer_photo_file(tg_t *tg,
 	return photo;
 }
 
-void tg_get_document(tg_t *tg, 
+int tg_get_document(tg_t *tg, 
 		uint64_t id, 
 		uint64_t size, 
 		uint64_t access_hash, 
@@ -245,7 +244,7 @@ void tg_get_document(tg_t *tg,
 				"");
 	buf_free(fr);
 
-	tg_get_file_with_progress(
+	int ret = tg_get_file_with_progress(
 			tg, 
 			&location, 
 			size,
@@ -257,6 +256,7 @@ void tg_get_document(tg_t *tg,
 			progress);
 
 	buf_free(location);
+	return ret;
 }	
 
 char * tg_get_document_thumb(tg_t *tg, 
