@@ -80,6 +80,11 @@ void tg_parse_answer(tg_t *tg, tl_t *tl, uint64_t msg_id,
 				char *err = tg_strerr(tl);
 				ON_ERR(tg, "%s: %s", __func__, err);
 				free(err);
+				
+				// add time diff
+				pthread_mutex_lock(&tg->seqnm);
+				tg->timediff = ntp_time_diff();
+				pthread_mutex_unlock(&tg->seqnm);
 			}
 			break; // run on_done
 		

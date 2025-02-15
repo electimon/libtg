@@ -42,6 +42,7 @@ struct tg_ {
 	pthread_mutex_t msgidsm;
 	uint64_t *todrop; 
 	pthread_mutex_t todropm;
+	time_t timediff;
 };
 
 
@@ -136,5 +137,7 @@ void tg_add_todrop(tg_t *tg, uint64_t msgid);
 int tg_to_drop(tg_t *tg, buf_t *buf);
 
 tl_t *tg_tl_from_gzip(tg_t *tg, tl_t *tl);
+
+time_t ntp_time_diff();
 
 #endif /* ifndef TG_H_ */

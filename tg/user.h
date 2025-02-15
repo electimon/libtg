@@ -6,11 +6,11 @@
 #include "peer.h"
 
 typedef enum {
-	TG_USER_STATUS_EMPTY = id_userStatusEmpty,
-	TG_USER_STATUS_ONLINE = id_userStatusOnline,
-	TG_USER_STATUS_OFFLINE = id_userStatusOffline,
-	TG_USER_STATUS_RECENTLY = id_userStatusRecently,
-	TG_USER_STATUS_LASTWEEK = id_userStatusLastWeek,
+	TG_USER_STATUS_EMPTY     = id_userStatusEmpty,
+	TG_USER_STATUS_ONLINE    = id_userStatusOnline,
+	TG_USER_STATUS_OFFLINE   = id_userStatusOffline,
+	TG_USER_STATUS_RECENTLY  = id_userStatusRecently,
+	TG_USER_STATUS_LASTWEEK  = id_userStatusLastWeek,
 	TG_USER_STATUS_LASTMONTH = id_userStatusLastMonth,
 } TG_USER_STATUS;
 

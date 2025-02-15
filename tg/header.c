@@ -23,11 +23,13 @@ static double tg_get_utime(int clock_id)
   return res;
 }
 
-static long long tg_get_current_time()
+static long long tg_get_current_time(tg_t *tg)
 {
-	return 
+	long long ct = 
 		(long long)((1LL << 32) * 
 				tg_get_utime(CLOCK_REALTIME)) & -4;
+	ct += tg->timediff;
+	return ct;
 }
 
 buf_t tg_mtp_message(tg_t *tg, buf_t *payload, 
@@ -38,7 +40,7 @@ buf_t tg_mtp_message(tg_t *tg, buf_t *payload,
   buf_t msg = buf_new();
 	
 	// msg_id
-	uint64_t msg_id = tg_get_current_time();
+	uint64_t msg_id = tg_get_current_time(tg);
 	msg = buf_cat_ui64(msg, msg_id);	
 	if (msgid)
 		*msgid = msg_id;
@@ -155,7 +157,7 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 		s = buf_cat(s, tg->ssid);
 		
 		//message_id
-		uint64_t _msgid = tg_get_current_time();
+		uint64_t _msgid = tg_get_current_time(tg);
 		s = buf_cat_ui64(s, _msgid);
 		if (msgid && *msgid == 0) // set msgid if not container
 			*msgid = _msgid;
@@ -202,7 +204,7 @@ buf_t tg_header(tg_t *tg, buf_t b, bool enc,
 		s = buf_cat_ui64(s, 0);
 		
 		//message_id
-		s = buf_cat_ui64(s, tg_get_current_time());
+		s = buf_cat_ui64(s, tg_get_current_time(tg));
 		
 		//message_data_length
 		s = buf_cat_ui32(s, b.size);

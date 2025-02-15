@@ -119,8 +119,6 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 	ON_ERR(tg, "%s: GOT queue for msg_id: "_LD_"!"
 				, __func__, msg_id);
 
-
-
 	// lock queue
 	err = pthread_mutex_lock(&queue->m);
 	pthread_mutex_unlock(&tg->queuem); // unlock list
@@ -178,6 +176,10 @@ static void catched_tl(tg_t *tg, uint64_t msg_id, tl_t *tl)
 				ON_ERR(queue->tg, "%s", err);
 				free(err);
 				tl = NULL;
+				// add time diff
+				pthread_mutex_lock(&queue->tg->seqnm);
+				queue->tg->timediff = ntp_time_diff();
+				pthread_mutex_unlock(&queue->tg->seqnm);
 			}
 			break;
 		case id_rpc_error:
@@ -288,6 +290,10 @@ static void handle_tl(tg_queue_t *queue, tl_t *tl)
 				char *err = tg_strerr(tl);
 				ON_ERR(queue->tg, "%s", err);
 				free(err);
+				// add time diff
+				pthread_mutex_lock(&queue->tg->seqnm);
+				queue->tg->timediff = ntp_time_diff();
+				pthread_mutex_unlock(&queue->tg->seqnm);
 			}
 			break;
 		case id_rpc_error:
