@@ -26,6 +26,9 @@
 #include <string.h>
 
 time_t ntp_time_diff() {
+
+return 0;
+
 char *hostname="163.117.202.33";
 int portno=123;     //NTP is port 123
 int maxlen=1024;    //check our buffers
