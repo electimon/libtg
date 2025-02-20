@@ -229,4 +229,11 @@ int tg_get_messages(tg_t *, int nmsgids, uint32_t *msgids,
 		void *userdata, 
 		int (*callback)(void *userdata, const tg_message_t *message));
 
+/* get messages by id's */
+int tg_get_channel_messages(tg_t *, tg_peer_t *channel,
+		int nmsgids, uint32_t *msgids,
+		void *userdata, 
+		int (*callback)(void *userdata, const tg_message_t *message));
+
+
 #endif /* ifndef TG_MESSAGES_H */		

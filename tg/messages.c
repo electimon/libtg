@@ -855,6 +855,39 @@ int tg_get_messages(tg_t *tg, int nmsgids, uint32_t *msgids,
 	return c;
 }
 
+int tg_get_channel_messages(tg_t *tg, tg_peer_t *channel,
+		int nmsgids, uint32_t *msgids,
+		void *userdata, 
+		int (*callback)(void *userdata, const tg_message_t *message))
+{
+	int i, k, c = 0;
+
+	InputMessage im[nmsgids];
+	for (i = 0; i < nmsgids; ++i) 
+		im[i] = tl_inputMessageID(msgids[i]);
+
+	InputChannel ic = tl_inputChannel(
+			channel->id, channel->access_hash);
+
+	buf_t query = tl_channels_getMessages(
+			&ic, im, nmsgids);
+	buf_free(ic);
+	for (i = 0; i < nmsgids; ++i) 
+		buf_free(im[i]);
+
+	tl_t * tl = tg_send_query_sync(tg, &query);
+	buf_free(query);
+
+	c = parse_tl(
+			tg, channel->id, tl, userdata, callback);
+	
+	// free tl
+	if (tl)
+		tl_free(tl);
+
+	return c;
+}
+
 int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)
 {
 	ON_LOG(tg, "%s", __func__);
