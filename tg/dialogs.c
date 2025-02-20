@@ -2,7 +2,7 @@
  * File              : dialogs.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.11.2024
- * Last Modified Date: 09.02.2025
+ * Last Modified Date: 20.02.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "channel.h"
@@ -469,7 +469,7 @@ int tg_get_dialogs(
 				limit,
 				hash?*hash:0);
 
-	tl_t *tl = tg_send_query(tg, &getDialogs);
+	tl_t *tl = tg_send_query_sync(tg, &getDialogs);
 	buf_free(getDialogs);
 	if (tl == NULL){
 		ON_ERR(tg, "%s: tl is NULL", __func__);
