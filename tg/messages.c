@@ -600,13 +600,16 @@ static int parse_msgs(
 		tg_message_from_tl_unknown(tg, &m, argv[i]);
 		
 		// save message to database
-		if (tg_message_to_database(tg, &m) == 0){
+		/*
+		if (peer_id && tg_message_to_database(tg, &m) == 0)
+		{
 			// update hash
 			uint64_t hash = 
 				messages_hash_from_database(tg, peer_id);
 			update_hash(&hash, m.id_);
 			messages_hash_to_database(tg, peer_id, hash);
 		}
+		*/
 
 		// callback
 		if (callback)
@@ -618,6 +621,85 @@ static int parse_msgs(
 
 	return i;
 }	
+
+static int parse_tl(
+		tg_t *tg, uint64_t peer_id, const tl_t *tl, 
+		void *userdata,
+		int (*callback)(void *, const tg_message_t*))
+{
+	int c = 0;
+
+	if (tl == NULL){
+		ON_ERR(tg, "%s: tl is NULL", __func__);
+		return 0;
+	}
+
+	printf("GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
+
+	switch (tl->_id) {
+		case id_messages_channelMessages:
+			{
+				tl_messages_channelMessages_t *msgs = 
+					(tl_messages_channelMessages_t *)tl;
+				
+				// update users
+				tg_users_save(tg, msgs->users_len, msgs->users_);
+				// update chats
+				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
+
+				c = parse_msgs(
+						tg, peer_id, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						userdata, 
+						callback);
+			}
+			break;
+			
+		case id_messages_messages:
+			{
+				tl_messages_messages_t *msgs = 
+					(tl_messages_messages_t *)tl;
+				
+				// update users
+				tg_users_save(tg, msgs->users_len, msgs->users_);
+				// update chats
+				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
+				
+				c = parse_msgs(
+						tg, peer_id, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						userdata, 
+						callback);
+			}
+			break;
+			
+		case id_messages_messagesSlice:
+			{
+				tl_messages_messagesSlice_t *msgs = 
+					(tl_messages_messagesSlice_t *)tl;
+				
+				// update users
+				tg_users_save(tg, msgs->users_len, msgs->users_);
+				// update chats
+				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
+				
+				c = parse_msgs(
+						tg, peer_id, 
+						msgs->messages_len, 
+						msgs->messages_, 
+						userdata, 
+						callback);
+			}
+			break;
+			
+		default:
+			break;
+	}
+
+	return c;
+}
 
 int tg_messages_get_history(
 		tg_t *tg,
@@ -654,78 +736,13 @@ int tg_messages_get_history(
 	tl_t * tl = tg_send_query_sync(tg, &getHistory);
 	buf_free(getHistory);
 
-	if (tl == NULL){
-		ON_ERR(tg, "%s: tl is NULL", __func__);
-		return 0;
-	}
-
-	printf("GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
-
-	switch (tl->_id) {
-		case id_messages_channelMessages:
-			{
-				tl_messages_channelMessages_t *msgs = 
-					(tl_messages_channelMessages_t *)tl;
-				
-				// update users
-				tg_users_save(tg, msgs->users_len, msgs->users_);
-				// update chats
-				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
-
-				c = parse_msgs(
-						tg, peer.id, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						userdata, 
-						callback);
-			}
-			break;
-			
-		case id_messages_messages:
-			{
-				tl_messages_messages_t *msgs = 
-					(tl_messages_messages_t *)tl;
-				
-				// update users
-				tg_users_save(tg, msgs->users_len, msgs->users_);
-				// update chats
-				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
-				
-				c = parse_msgs(
-						tg, peer.id, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						userdata, 
-						callback);
-			}
-			break;
-			
-		case id_messages_messagesSlice:
-			{
-				tl_messages_messagesSlice_t *msgs = 
-					(tl_messages_messagesSlice_t *)tl;
-				
-				// update users
-				tg_users_save(tg, msgs->users_len, msgs->users_);
-				// update chats
-				tg_chats_save(tg, msgs->chats_len, msgs->chats_);
-				
-				c = parse_msgs(
-						tg, peer.id, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						userdata, 
-						callback);
-			}
-			break;
-			
-		default:
-			break;
-	}
-
-	// free tl
-	tl_free(tl);
+	c = parse_tl(
+			tg, peer.id, tl, userdata, callback);
 	
+	// free tl
+	if (tl)
+		tl_free(tl);
+
 	return c;
 }
 
@@ -749,71 +766,8 @@ void tg_messages_get_history_async_cb(void *d, const tl_t *tl)
 		return;
 	}
 
-	ON_LOG(t->tg, "GOT MESSAGES: %s\n", TL_NAME_FROM_ID(tl->_id));
-
-	switch (tl->_id) {
-		case id_messages_channelMessages:
-			{
-				tl_messages_channelMessages_t *msgs = 
-					(tl_messages_channelMessages_t *)tl;
-				
-				// update users
-				tg_users_save(t->tg, msgs->users_len, msgs->users_);
-				// update chats
-				tg_chats_save(t->tg, msgs->chats_len, msgs->chats_);
-
-				parse_msgs(
-						t->tg, t->peer.id, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						t->userdata, 
-						t->callback);
-
-			}
-			break;
-			
-		case id_messages_messages:
-			{
-				tl_messages_messages_t *msgs = 
-					(tl_messages_messages_t *)tl;
-				
-				// update users
-				tg_users_save(t->tg, msgs->users_len, msgs->users_);
-				// update chats
-				tg_chats_save(t->tg, msgs->chats_len, msgs->chats_);
-
-				parse_msgs(
-						t->tg, t->peer.id, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						t->userdata, 
-						t->callback);
-
-			}
-			break;
-			
-		case id_messages_messagesSlice:
-			{
-				tl_messages_messagesSlice_t *msgs = 
-					(tl_messages_messagesSlice_t *)tl;
-				
-				// update users
-				tg_users_save(t->tg, msgs->users_len, msgs->users_);
-				// update chats
-				tg_chats_save(t->tg, msgs->chats_len, msgs->chats_);
-
-				parse_msgs(
-						t->tg, t->peer.id, 
-						msgs->messages_len, 
-						msgs->messages_, 
-						t->userdata, 
-						t->callback);
-			}
-			break;
-			
-		default:
-			break;
-	}
+	parse_tl(t->tg, t->peer.id, tl, 
+			t->userdata,t->callback);
 
 	if (t->on_done)
 		t->on_done(t->userdata);
@@ -872,6 +826,33 @@ pthread_t tg_messages_get_history_async(
 			tg_messages_get_history_async_cb);
 	buf_free(getHistory);
 	return p;
+}
+
+int tg_get_messages(tg_t *tg, int nmsgids, uint32_t *msgids,
+		void *userdata, 
+		int (*callback)(void *userdata, const tg_message_t *message))
+{
+	int i, k, c = 0;
+
+	InputMessage im[nmsgids];
+	for (i = 0; i < nmsgids; ++i) 
+		im[i] = tl_inputMessageID(msgids[i]);
+
+	buf_t query = tl_messages_getMessages(im, nmsgids);
+	for (i = 0; i < nmsgids; ++i) 
+		buf_free(im[i]);
+
+	tl_t * tl = tg_send_query_sync(tg, &query);
+	buf_free(query);
+
+	c = parse_tl(
+			tg, 0, tl, userdata, callback);
+	
+	// free tl
+	if (tl)
+		tl_free(tl);
+
+	return c;
 }
 
 int tg_message_send(tg_t *tg, tg_peer_t peer_, const char *message)

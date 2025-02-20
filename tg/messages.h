@@ -224,4 +224,9 @@ int tg_messages_set_read(tg_t *tg, tg_peer_t peer, uint32_t max_id);
  * message is read */
 int tg_messages_get_read_date(tg_t*, tg_peer_t, uint32_t msg_id);
 
+/* get messages by id's */
+int tg_get_messages(tg_t *, int nmsgids, uint32_t *msgids,
+		void *userdata, 
+		int (*callback)(void *userdata, const tg_message_t *message));
+
 #endif /* ifndef TG_MESSAGES_H */		
