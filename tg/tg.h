@@ -7,6 +7,7 @@
 #include "../libtg.h"
 #include "../tl/str.h"
 #include "list.h"
+#include "strndup.h"
 
 #define SERVER_IP   "149.154.167.50"
 //#define SERVER_IP   "149.154.175.57"

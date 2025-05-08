@@ -25,6 +25,7 @@ libtg_la_SOURCES = tg.c \
 				   queue.c \
 				   ds.c \
 				   prepare_query.c \
+				   strndup.c \
            ../crypto/hsh.c \
            ../crypto/aes.c \
            ../crypto/cmn.c \
