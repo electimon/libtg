@@ -14,6 +14,7 @@
 #include "buf.h"
 #include "str.h"
 #include "base64.h"
+#include "../tg/strndup.h"
 
 char * tl_log_hex(unsigned char * a, uint32_t s)
 {
